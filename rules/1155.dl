@@ -10,12 +10,23 @@
 .decl rewrite(result: Expr, a: number, b: number)
 rewrite(
     $MethodInvocationExpression(
-        $MethodInvocationCalleeIdentifierList(ids, nil, "isEmpty"),
+        $MethodInvocationIdentifiers(ids, nil, "isEmpty"),
         nil
     ), A, B) :-
     expression(
         $EqualsExpression(
             $MethodInvocationExpression(
-                $MethodInvocationCalleeIdentifierList(ids, nil, "size"),
+                $MethodInvocationIdentifiers(ids, nil, "size"),
                 nil),
             $LiteralExpression($IntegerLiteral("0"))), A, B).
+
+/**
+ * Idea: implement simple evaluation, then we could write
+ *
+ *  expression(
+ *      $EqualsExpression(
+ *          $MethodInvocationExpression(
+ *              $MethodInvocationIdentifiers(ids, nil, "size"),
+ *              nil), val), A, B),
+ *  evaluates_to(val, 0).
+ */
