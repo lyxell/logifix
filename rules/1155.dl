@@ -1,0 +1,21 @@
+/**
+ * java.util.Set
+ * java.util.List
+ * java.util.Queue
+ * java.util.SortedSet
+ * java.util.Deque
+ * java.util.LinkedList
+ */
+
+.decl rewrite(result: Expr, a: number, b: number)
+rewrite(
+    $MethodInvocationExpression(
+        $MethodInvocationCalleeIdentifierList(ids, nil, "isEmpty"),
+        nil
+    ), A, B) :-
+    expression(
+        $EqualsExpression(
+            $MethodInvocationExpression(
+                $MethodInvocationCalleeIdentifierList(ids, nil, "size"),
+                nil),
+            $LiteralExpression($IntegerLiteral("0"))), A, B).
