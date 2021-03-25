@@ -1,7 +1,13 @@
-.PHONY: run
+.PHONY: run setup_cpp_benchmark
 
 run: build/rewrites.csv
 	@cat build/rewrites.csv
+
+setup_cpp_benchmark: build/rewriter build/scanner
+
+build/rewriter: repair.dl sjp/parser.dl
+	souffle --generate=output.cpp --fact-dir=build --output-dir=build repair.dl
+	$(CXX) -std=c++17 -O2 output.cpp -o build/rewriter
 
 build/rewrites.csv: repair.dl sjp/parser.dl build/token.facts rules/1155.dl
 	souffle --fact-dir=build --output-dir=build repair.dl
