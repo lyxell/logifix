@@ -10,3 +10,19 @@ includes disk I/O (2 file writes and 2 file reads).
 
 It uses my library [https://github.com/lyxell/sjp](https://github.com/lyxell/sjp)
 to build the ASTs.
+
+### Running the benchmark
+
+Dependencies:
+
+* [re2c](https://github.com/skvadrik/re2c) (lexer generator)
+* clang or gcc
+* [Soufflé](https://github.com/souffle-lang/souffle)
+* make
+
+Steps:
+
+* `make setup_benchmark`
+* `time build/scanner Example.java build/token.facts` (lexing)
+* `time build/rewriter` (parsing and find rewrite)
+* `cat build/rewrites.csv`
