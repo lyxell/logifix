@@ -7,3 +7,6 @@ to figure out that there is a possible rewrite, namely `x.size() == 0` -> `x.isE
 Lexing, parsing, and finding the rewrite for rule 1155 completes in 0.015
 s (15 milliseconds) on an Intel(R) Core(TM) i5-3320M CPU. This time
 includes disk I/O (2 file writes and 2 file reads).
+
+It uses my library [https://github.com/lyxell/sjp](https://github.com/lyxell/sjp)
+to build the ASTs.
