@@ -1,0 +1,7 @@
+#include "sjp/parser.dl"
+
+.decl rewrites(result: Expr, a: number, b: number)
+
+#include "rules/1155.dl"
+
+.output rewrites

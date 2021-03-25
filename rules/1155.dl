@@ -7,21 +7,21 @@
  * java.util.LinkedList
  */
 
-.decl rewrite(result: Expr, a: number, b: number)
-rewrite(
+rewrites(
     $MethodInvocationExpression(
         $MethodInvocationIdentifiers(ids, nil, "isEmpty"),
         nil
     ), A, B) :-
-    expression(
-        $EqualsExpression(
+    expression($EqualsExpression(
             $MethodInvocationExpression(
                 $MethodInvocationIdentifiers(ids, nil, "size"),
                 nil),
             $LiteralExpression($IntegerLiteral("0"))), A, B).
 
 /**
- * Idea: implement simple evaluation, then we could write
+ * Idea:
+ *
+ * implement simple evaluation? then we could write
  *
  *  expression(
  *      $EqualsExpression(
