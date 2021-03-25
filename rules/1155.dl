@@ -1,12 +1,19 @@
-/* https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155 */
+/**
+ * Collection.isEmpty() should be used to test for emptiness
+ *
+ * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155
+ */
 
 /**
+ * TODO: check that identifier has type in
+ *
  * java.util.Set
  * java.util.List
  * java.util.Queue
  * java.util.SortedSet
  * java.util.Deque
  * java.util.LinkedList
+ * ...
  */
 
 rewrites(
