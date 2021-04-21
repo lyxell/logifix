@@ -1,8 +1,7 @@
-.PHONY: sjp
 
-CXXFLAGS = -std=c++17 -O2
+CXXFLAGS = -std=c++17 -O2 -D__EMBEDDED_SOUFFLE__
 
-all: repair.o
+all: sjp repair.o program.o
 
 repair.cpp: repair.dl
 	souffle --no-warn \
@@ -11,5 +10,13 @@ repair.cpp: repair.dl
 			--output-dir=build \
 			repair.dl
 
+.PHONY: sjp
+
 sjp:
 	$(MAKE) -C sjp
+
+.PHONY: clean
+
+clean:
+	rm -rf repair.o program.o
+	$(MAKE) -C sjp clean
