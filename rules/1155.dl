@@ -4,18 +4,6 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155
  */
 
-/**
- * TODO: check that identifier has type in
- *
- * java.util.Set
- * java.util.List
- * java.util.Queue
- * java.util.SortedSet
- * java.util.Deque
- * java.util.LinkedList
- * ...
- */
-
 rewrites(
     $MethodInvocationExpression(
         $MethodInvocationIdentifiers(ids, nil, "isEmpty"),
@@ -27,15 +15,3 @@ rewrites(
                 nil),
             $LiteralExpression($IntegerLiteral("0"))), A, B).
 
-/**
- * Idea:
- *
- * implement simple evaluation? then we could write
- *
- *  expression(
- *      $EqualsExpression(
- *          $MethodInvocationExpression(
- *              $MethodInvocationIdentifiers(ids, nil, "size"),
- *              nil), val), A, B),
- *  evaluates_to(val, 0).
- */
