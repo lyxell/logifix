@@ -4,14 +4,8 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155
  */
 
-rewrites(
-    $MethodInvocationExpression(
-        $MethodInvocationIdentifiers(ids, nil, "isEmpty"),
-        nil
-    ), A, B) :-
-    expression($EqualsExpression(
-            $MethodInvocationExpression(
-                $MethodInvocationIdentifiers(ids, nil, "size"),
-                nil),
-            $LiteralExpression($IntegerLiteral("0"))), A, B).
+rewrite(id) :-
+    equals_expression(id, left, right, _, _),
+    method_invocation(left, _, _, _),
+    integer_literal(right, _, _).
 

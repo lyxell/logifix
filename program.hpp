@@ -17,6 +17,8 @@ namespace repair {
         get_ast(const char* filename);
         std::vector<std::tuple<std::string,int,int>>
         get_ast_nodes(const char* filename);
+        std::vector<std::tuple<std::string,int,int>>
+        get_repairable_nodes(const char* filename);
     };
 
 }

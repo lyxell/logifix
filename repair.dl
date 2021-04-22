@@ -1,2 +1,6 @@
 #include "sjp/parser.dl"
 
+.decl rewrite(id: id)
+.output rewrite
+
+#include "rules/1155.dl"
