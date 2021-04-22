@@ -8,6 +8,10 @@ repair::program::~program() {
 
 }
 
+std::shared_ptr<sjp::tree_node> repair::program::get_ast(const char* filename) {
+    return parser.get_ast(filename);
+}
+
 void repair::program::add_file(const char* filename) {
     parser.add_file(filename);
 }

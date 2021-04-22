@@ -13,6 +13,8 @@ namespace repair {
         void add_file(const char* filename);
         void add_string(const char* filename, const char* content);
         void run();
+        std::shared_ptr<sjp::tree_node>
+        get_ast(const char* filename);
         std::vector<std::tuple<std::string,int,int>>
         get_ast_nodes(const char* filename);
     };
