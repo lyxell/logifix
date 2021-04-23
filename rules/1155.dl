@@ -6,6 +6,6 @@
 
 rewrite(id, right) :-
     equals_expression(id, left, right, _, _),
-    method_invocation(left, _, _, _, _),
+    method_invocation(left, _, _, _, _, _),
     integer_literal(right, _, _, _).
 
