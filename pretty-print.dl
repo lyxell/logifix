@@ -9,6 +9,9 @@ pretty_print(id, cat(left_str, cat(" == ", right_str))) :-
 pretty_print(id, str) :-
     integer_literal(id, str, _, _).
 
+pretty_print(id, str) :-
+    string_literal(id, str, _, _).
+
 pretty_print(id, cat(name_str, cat(".", cat(method_str, "()")))) :-
     method_invocation(id, name, method, nil, A, B),
     pretty_print(name, name_str),
