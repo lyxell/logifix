@@ -1,6 +1,19 @@
 #include "sjp/parser.dl"
 
-.decl rewrite(id: id)
+.decl rewrite(from: id, to: id)
 .output rewrite
+
+.decl pretty_print(to: id, str: symbol)
+.output pretty_print
+
+pretty_print(id, cat(left_str, cat(" == ", right_str))) :-
+    equals_expression(id, left, right, _ ,_),
+    in_tree(id),
+    pretty_print(left, left_str),
+    pretty_print(right, right_str).
+
+pretty_print(id, str) :-
+    integer_literal(id, str, _, _),
+    in_tree(id).
 
 #include "rules/1155.dl"
