@@ -3,23 +3,19 @@
 
 pretty_print(id, cat(left_str, cat(" == ", right_str))) :-
     equals_expression(id, left, right, _ ,_),
-    in_tree(id),
     pretty_print(left, left_str),
     pretty_print(right, right_str).
 
 pretty_print(id, str) :-
-    integer_literal(id, str, _, _),
-    in_tree(id).
+    integer_literal(id, str, _, _).
 
 pretty_print(id, cat(name_str, cat(".", cat(method_str, "()")))) :-
     method_invocation(id, name, method, nil, A, B),
-    in_tree(id),
     pretty_print(name, name_str),
     pretty_print(method, method_str).
 
 pretty_print(id, str) :-
-    identifier(id, str, _, _),
-    in_tree(id).
+    identifier(id, str, _, _).
 
 pretty_print(id, cat(tail_str, cat(".", head_str))) :-
     expression_name(id, [head, tail], _, _),
