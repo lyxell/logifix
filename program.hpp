@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "sjp/sjp.hpp"
 
 namespace repair {
@@ -17,7 +18,8 @@ namespace repair {
         get_ast(const char* filename);
         std::vector<std::tuple<std::string,int,int>>
         get_ast_nodes(const char* filename);
-        std::vector<std::tuple<std::string,int,int>>
+        std::map<std::tuple<std::string,int,int>,
+                           std::tuple<std::string,int,int>>
         get_repairable_nodes(const char* filename);
         std::vector<std::tuple<std::string,int,int,std::string>>
         get_pretty_print(const char* filename);
