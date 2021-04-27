@@ -79,16 +79,6 @@ void repair::insert_parent_of(std::tuple<std::string, int, int> parent,
 void repair::run() {
     parser.run();
     for (auto name : filenames) {
-        // create token relation
-        /*
-        souffle::Relation* token_relation = program->getRelation("token");
-        assert(token_relation != NULL);
-        auto tokens = parser.get_tokens(name.c_str());
-        for (auto [str, a, b] : tokens) {
-            souffle::tuple tuple(token_relation);
-            tuple << str << a << b;
-            token_relation->insert(tuple);
-        }*/
         // create ast_node and parent_of relation
         auto ast = parser.get_ast(name.c_str());
         std::vector<std::shared_ptr<sjp::tree_node>> nodes {ast};
@@ -100,18 +90,16 @@ void repair::run() {
                                           parent->get_start_token(),
                                           parent->get_end_token());
             insert_ast_node(parent_data);
-            for (auto [sym, children] : parent->get_children()) {
-                for (auto child : children) {
-                    if (child) {
-                        auto child_data = std::tuple(child->get_name(),
-                                                      child->get_start_token(),
-                                                      child->get_end_token());
-                        insert_ast_node(child_data);
-                        insert_parent_of(parent_data, sym, child_data);
-                        nodes.push_back(child);
-                    } else {
-                        insert_parent_of(parent_data, sym, {});
-                    }
+            for (auto [sym, child] : parent->get_parent_of()) {
+                if (child) {
+                    auto child_data = std::tuple(child->get_name(),
+                                                  child->get_start_token(),
+                                                  child->get_end_token());
+                    insert_ast_node(child_data);
+                    insert_parent_of(parent_data, sym, child_data);
+                    nodes.push_back(child);
+                } else {
+                    insert_parent_of(parent_data, sym, {});
                 }
             }
         }
