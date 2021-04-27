@@ -132,6 +132,21 @@ repair::get_repairable_nodes(const char* filename) {
     return result;
 }
 
+std::map<std::tuple<std::string,int,int>,std::vector<std::string>>
+repair::get_reachable_declared_variables(const char* filename) {
+    std::map<std::tuple<std::string,int,int>, std::vector<std::string>> result;
+    souffle::Relation* relation = program->getRelation("reachable_declared_variable");
+    assert(relation != NULL);
+    for (auto &output : *relation) {
+        int id;
+        std::string out;
+        output >> id >> out;
+        if (id == 0) continue;
+        result[get_ast_node_from_id(filename, id)].push_back(out);
+    }
+    return result;
+}
+
 std::map<std::tuple<std::string,int,int>, std::string>
 repair::get_string_representation(const char* filename) {
     std::map<std::tuple<std::string,int,int>, std::string> result;

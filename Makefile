@@ -5,7 +5,7 @@ all: sjp/sjp.o sjp/parser.o repair.o program.o
 
 repair.o: sjp/sjp.hpp
 
-program.cpp: repair.dl rules/1155.dl ast.dl
+program.cpp: repair.dl rules/1155.dl
 	souffle --generate=$@ repair.dl
 
 .PHONY: sjp/sjp.o sjp/parser.o

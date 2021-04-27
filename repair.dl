@@ -1,17 +1,10 @@
-#include "ast.dl"
-#include "rules/1155.dl"
-
-.decl source_code(str: symbol)
-.input source_code
-
-.decl string_representation(to: id, str: symbol)
-.output string_representation
-string_representation([name, A, B], substr(sym, A, B - A)) :-
-    ast_node([name, A, B]),
-    source_code(sym).
+/* Types */
 
 .type id = [type: symbol, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
+.type symbol_list = [head: symbol, tail: symbol_list]
+
+/* AST nodes */
 
 .decl token(str: symbol, from: number, to: number)
 .input token
@@ -25,5 +18,78 @@ string_representation([name, A, B], substr(sym, A, B - A)) :-
 .decl parent_of_list(parent: id, name: symbol, children: id_list)
 .input parent_of_list
 
+.decl name_of(id: id, name: symbol)
+name_of([name, A, B], name) :- ast_node([name, A, B]).
+
+.decl starts_at(id: id, at: number)
+starts_at([name, A, B], A) :- ast_node([name, A, B]).
+
+.decl equals_expression(id: id, left: id, right: id)
+equals_expression(id, left, right) :-
+    name_of(id, "equals_expression"),
+    parent_of(id, "left", left),
+    parent_of(id, "right", right).
+
+.decl method_invocation(id: id, subject: id, method: id, arguments: id_list)
+method_invocation(id, subject, method, arguments) :-
+    name_of(id, "method_invocation"),
+    parent_of(id, "subject", subject),
+    parent_of(id, "method", method),
+    parent_of_list(id, "arguments", arguments).
+
+.decl variable_declarator(id: id, initializer: id, name: id)
+variable_declarator(id, initializer, name) :-
+    name_of(id, "variable_declarator"),
+    parent_of(id, "initializer", initializer),
+    parent_of(id, "name", name).
+
+.decl integer_literal(id: id)
+integer_literal(id) :- name_of(id, "integer_literal").
+
+.decl expression_name(id: id)
+expression_name(id) :- name_of(id, "expression_name").
+
+/* String representation */
+
+.decl source_code(str: symbol)
+.input source_code
+
+.decl string_representation(to: id, str: symbol)
+.output string_representation
+string_representation([name, A, B], substr(code, A, B - A)) :-
+    ast_node([name, A, B]),
+    source_code(code).
+
+/* Declared variables */
+
+.decl occurs_after(left: id, right: id)
+occurs_after(left, right) :-
+    ast_node(left),
+    ast_node(right),
+    starts_at(left, left_start),
+    starts_at(right, right_start),
+    left_start < right_start.
+
+.decl reachable_declared_variable(id: id, variable: symbol)
+.output reachable_declared_variable
+/**
+ * The scope of a local variable declaration in a block (§14.2) is the rest of
+ * the block in which the declaration appears, starting with its own
+ * initializer (§14.4) and including any further declarators to the right in
+ * the local variable declaration statement.
+ * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
+ */
+reachable_declared_variable(initializer, name_str) :-
+    variable_declarator(_, initializer, name),
+    string_representation(name, name_str).
+
+reachable_declared_variable(right, str) :-
+    occurs_after(left, right),
+    reachable_declared_variable(left, str).
+
+/* Rewrite rules */
+
 .decl rewrite(from: id, to: symbol)
 .output rewrite
+
+#include "rules/1155.dl"

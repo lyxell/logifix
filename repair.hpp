@@ -35,6 +35,8 @@ public:
         get_ast(const char* filename);
     std::map<std::tuple<std::string,int,int>,std::string>
         get_repairable_nodes(const char* filename);
+    std::map<std::tuple<std::string,int,int>,std::vector<std::string>>
+        get_reachable_declared_variables(const char* filename);
     std::map<std::tuple<std::string,int,int>,std::string>
         get_string_representation(const char* filename);
 };
