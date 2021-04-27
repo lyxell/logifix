@@ -4,10 +4,11 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155
  */
 
-/* TODO:
-    - Check that subject has Java collection type
-    - Check that there is no arguments in method call
-*/
+/**
+ * TODO:
+ * - Check that subject has Java collection type
+ * - Check that there are no arguments in method call
+ */
 rewrite(parent, cat(subject_str, ".isEmpty()")) :-
     equals_expression(parent, left, right),
     method_invocation(left, subject, method),
