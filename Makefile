@@ -1,15 +1,20 @@
 
-CXXFLAGS = -std=c++17 -O2 -D__EMBEDDED_SOUFFLE__
+CXXFLAGS = -std=c++17 -O0 -D__EMBEDDED_SOUFFLE__
 
-all: sjp repair.o program.o
+all: sjp/sjp.o sjp/parser.o repair.o program.o
 
-repair.cpp: repair.dl pretty-print.dl rules/1155.dl sjp/parser.dl
-	souffle --no-warn --generate=$@ repair.dl
+repair.o: sjp/sjp.hpp
 
-.PHONY: sjp
+program.cpp: repair.dl rules/1155.dl ast.dl
+	souffle --generate=$@ repair.dl
 
-sjp:
+.PHONY: sjp/sjp.o sjp/parser.o
+
+sjp/sjp.o:
 	$(MAKE) -C sjp sjp.o
+
+sjp/parser.o:
+	$(MAKE) -C sjp parser.o
 
 .PHONY: clean
 

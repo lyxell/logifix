@@ -1,7 +1,26 @@
-#include "sjp/parser.dl"
-#include "pretty-print.dl"
-
-.decl rewrite(from: id, to: id)
-.output rewrite
-
+#include "ast.dl"
 #include "rules/1155.dl"
+
+.decl source_code(str: symbol)
+.input source_code
+
+.decl string_representation(to: id, str: symbol)
+.output string_representation
+string_representation([name, A, B], substr(sym, A, B - A)) :-
+    ast_node([name, A, B]),
+    source_code(sym).
+
+.type id = [type: symbol, from: number, to: number]
+.type id_list = [head: id, tail: id_list]
+
+.decl token(str: symbol, from: number, to: number)
+.input token
+
+.decl ast_node(id: id)
+.input ast_node
+
+.decl parent_of(parent: id, name: symbol, child: id)
+.input parent_of
+
+.decl rewrite(from: id, to: symbol)
+.output rewrite
