@@ -4,11 +4,12 @@ equals_expression(["equals_expression", A, B], left, right) :-
     parent_of(["equals_expression", A, B], "left", left),
     parent_of(["equals_expression", A, B], "right", right).
 
-.decl method_invocation(self: id, subject: id, method: id)
-method_invocation(["method_invocation", A, B], subject, method) :-
+.decl method_invocation(self: id, subject: id, method: id, arguments: id_list)
+method_invocation(["method_invocation", A, B], subject, method, arguments) :-
     ast_node(["method_invocation", A, B]),
     parent_of(["method_invocation", A, B], "subject", subject),
-    parent_of(["method_invocation", A, B], "method", method).
+    parent_of(["method_invocation", A, B], "method", method),
+    parent_of_list(["method_invocation", A, B], "arguments", arguments).
 
 .decl integer_literal(self: id)
 integer_literal(["integer_literal", A, B]) :-

@@ -11,7 +11,7 @@
  */
 rewrite(parent, cat(subject_str, ".isEmpty()")) :-
     equals_expression(parent, left, right),
-    method_invocation(left, subject, method),
+    method_invocation(left, subject, method, nil),
     integer_literal(right),
     string_representation(subject, subject_str),
     string_representation(method, "size"),

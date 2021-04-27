@@ -22,5 +22,8 @@ string_representation([name, A, B], substr(sym, A, B - A)) :-
 .decl parent_of(parent: id, name: symbol, child: id)
 .input parent_of
 
+.decl parent_of_list(parent: id, name: symbol, children: id_list)
+.input parent_of_list
+
 .decl rewrite(from: id, to: symbol)
 .output rewrite

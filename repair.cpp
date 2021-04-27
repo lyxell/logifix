@@ -40,70 +40,78 @@ repair::get_ast_node_from_id(const char* filename, int id) {
             record[2]);
 }
 
-std::array<souffle::RamDomain, 3>
-repair::ast_node_to_ram_domain(std::tuple<std::string, int, int> tuple) {
-    return {
-        program->getSymbolTable().encode(std::get<0>(tuple)),
-        std::get<1>(tuple),
-        std::get<2>(tuple)
+int repair::ast_node_to_record(std::shared_ptr<sjp::tree_node> node) {
+    if (!node) return 0;
+    std::array<souffle::RamDomain, 3> data = {
+        program->getSymbolTable().encode(node->get_name()),
+        node->get_start_token(),
+        node->get_end_token()
     };
+    return program->getRecordTable().pack(data.data(), 3);
 }
 
-void repair::insert_ast_node(std::tuple<std::string, int, int> node) {
-    auto node_data = ast_node_to_ram_domain(node);
-    souffle::Relation* ast_node = program->getRelation("ast_node");
-    assert(ast_node != NULL);
-    souffle::tuple tuple(ast_node);
-    tuple << program->getRecordTable().pack(node_data.data(), 3);
-    ast_node->insert(tuple);
+int repair::vector_of_ast_nodes_to_record(
+        const std::vector<std::shared_ptr<sjp::tree_node>>& nodes,
+        int offset) {
+    if (offset == nodes.size()) return 0; 
+    std::array<souffle::RamDomain, 2> data = {
+        ast_node_to_record(nodes[offset]),
+        vector_of_ast_nodes_to_record(nodes, offset + 1)
+    };
+    return program->getRecordTable().pack(data.data(), 2);
 }
 
-void repair::insert_parent_of(std::tuple<std::string, int, int> parent,
+void repair::insert_ast_node(std::shared_ptr<sjp::tree_node> node) {
+    auto relation = program->getRelation("ast_node");
+    assert(relation != NULL);
+    souffle::tuple tuple(relation);
+    tuple << ast_node_to_record(node);
+    relation->insert(tuple);
+}
+
+void repair::insert_parent_of(std::shared_ptr<sjp::tree_node> parent,
                               std::string symbol,
-                              std::optional<std::tuple<std::string, int, int>> child) {
-    auto parent_data = ast_node_to_ram_domain(parent);
-    souffle::Relation* parent_of = program->getRelation("parent_of");
-    assert(parent_of != NULL);
-    souffle::tuple tuple(parent_of);
-    tuple << program->getRecordTable().pack(parent_data.data(), 3);
+                              std::shared_ptr<sjp::tree_node> child) {
+    auto relation = program->getRelation("parent_of");
+    assert(relation != NULL);
+    souffle::tuple tuple(relation);
+    tuple << ast_node_to_record(parent);
     tuple << symbol;
-    if (child) {
-        auto child_data = ast_node_to_ram_domain(*child);
-        tuple << program->getRecordTable().pack(child_data.data(), 3);
-    } else {
-        tuple << 0;
+    tuple << ast_node_to_record(child);
+    relation->insert(tuple);
+}
+
+void repair::insert_parent_of_list(std::shared_ptr<sjp::tree_node> parent,
+                              std::string symbol,
+                              std::vector<std::shared_ptr<sjp::tree_node>> children) {
+    auto relation = program->getRelation("parent_of_list");
+    assert(relation != NULL);
+    souffle::tuple tuple(relation);
+    tuple << ast_node_to_record(parent);
+    tuple << symbol;
+    tuple << vector_of_ast_nodes_to_record(children, 0);
+    relation->insert(tuple);
+}
+
+void repair::insert_node_data(std::shared_ptr<sjp::tree_node> node) {
+    if (node == nullptr) return;
+    insert_ast_node(node);
+    for (auto [symbol, child] : node->get_parent_of()) {
+        insert_parent_of(node, symbol, child);
+        insert_node_data(child);
     }
-    parent_of->insert(tuple);
+    for (auto [symbol, children] : node->get_parent_of_list()) {
+        insert_parent_of_list(node, symbol, children);
+        for (auto child : children) {
+            insert_node_data(child);
+        }
+    }
 }
 
 void repair::run() {
     parser.run();
     for (auto name : filenames) {
-        // create ast_node and parent_of relation
-        auto ast = parser.get_ast(name.c_str());
-        std::vector<std::shared_ptr<sjp::tree_node>> nodes {ast};
-        while (nodes.size()) {
-            auto parent = nodes.back();
-            nodes.pop_back();
-            if (parent == nullptr) continue;
-            auto parent_data = std::tuple(parent->get_name(),
-                                          parent->get_start_token(),
-                                          parent->get_end_token());
-            insert_ast_node(parent_data);
-            for (auto [sym, child] : parent->get_parent_of()) {
-                if (child) {
-                    auto child_data = std::tuple(child->get_name(),
-                                                  child->get_start_token(),
-                                                  child->get_end_token());
-                    insert_ast_node(child_data);
-                    insert_parent_of(parent_data, sym, child_data);
-                    nodes.push_back(child);
-                } else {
-                    insert_parent_of(parent_data, sym, {});
-                }
-            }
-        }
-
+        insert_node_data(parser.get_ast(name.c_str()));
     }
     program->run();
 }
