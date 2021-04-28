@@ -1,13 +1,9 @@
 #include "repair.hpp"
 #include <iostream>
 
-repair::repair() : parser() {
-    program = souffle::ProgramFactory::newInstance("program");
+repair::repair() : parser(),
+                   program(souffle::ProgramFactory::newInstance("program")) {
     assert(program != NULL);
-}
-
-repair::~repair() {
-    delete program;
 }
 
 std::shared_ptr<sjp::tree_node>

@@ -7,7 +7,7 @@
 
 class repair {
 private:
-    souffle::SouffleProgram *program;
+    std::unique_ptr<souffle::SouffleProgram> program;
     sjp::parser parser;
     std::vector<std::string> filenames;
     void insert_ast_node(std::shared_ptr<sjp::tree_node> node);
@@ -27,7 +27,6 @@ private:
     void insert_node_data(std::shared_ptr<sjp::tree_node> node);
 public:
     repair();
-    ~repair();
     void add_file(const char* filename);
     void add_string(const char* filename, const char* content);
     void run();
