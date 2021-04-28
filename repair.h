@@ -21,7 +21,7 @@ class repair {
     std::tuple<std::string, int, int> get_ast_node_from_id(const char* filename,
                                                            int id);
     void insert_parent_of_list(node_ptr parent, std::string symbol,
-                               std::vector<node_ptr> children);
+                               const std::vector<node_ptr>& children);
     void insert_node_data(node_ptr node);
     int string_to_id(const std::string& str);
 
