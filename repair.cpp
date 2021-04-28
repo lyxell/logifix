@@ -6,8 +6,7 @@ repair::repair() : parser(),
     assert(program != NULL);
 }
 
-std::shared_ptr<sjp::tree_node>
-repair::get_ast(const char* filename) {
+node_ptr repair::get_ast(const char* filename) {
     return parser.get_ast(filename);
 }
 
@@ -36,7 +35,7 @@ repair::get_ast_node_from_id(const char* filename, int id) {
             record[2]);
 }
 
-int repair::ast_node_to_record(std::shared_ptr<sjp::tree_node> node) {
+int repair::ast_node_to_record(node_ptr node) {
     if (!node) return 0;
     std::array<souffle::RamDomain, 3> data = {
         program->getSymbolTable().encode(node->get_name()),
@@ -46,8 +45,7 @@ int repair::ast_node_to_record(std::shared_ptr<sjp::tree_node> node) {
     return program->getRecordTable().pack(data.data(), 3);
 }
 
-int repair::vector_of_ast_nodes_to_record(
-        const std::vector<std::shared_ptr<sjp::tree_node>>& nodes,
+int repair::vector_of_ast_nodes_to_record(const std::vector<node_ptr>& nodes,
         int offset) {
     if (offset == nodes.size()) return 0; 
     std::array<souffle::RamDomain, 2> data = {
@@ -57,39 +55,35 @@ int repair::vector_of_ast_nodes_to_record(
     return program->getRecordTable().pack(data.data(), 2);
 }
 
-void repair::insert_ast_node(std::shared_ptr<sjp::tree_node> node) {
+void repair::insert_ast_node(node_ptr node) {
     auto relation = program->getRelation("ast_node");
     assert(relation != NULL);
-    souffle::tuple tuple(relation);
-    tuple << ast_node_to_record(node);
-    relation->insert(tuple);
+    relation->insert(souffle::tuple(relation, {ast_node_to_record(node)}));
 }
 
-void repair::insert_parent_of(std::shared_ptr<sjp::tree_node> parent,
-                              std::string symbol,
-                              std::shared_ptr<sjp::tree_node> child) {
+int repair::string_to_id(const std::string& str) {
+    return program->getSymbolTable().encode(str);
+}
+
+void repair::insert_parent_of(node_ptr parent, std::string s, node_ptr child) {
     auto relation = program->getRelation("parent_of");
     assert(relation != NULL);
-    souffle::tuple tuple(relation);
-    tuple << ast_node_to_record(parent);
-    tuple << symbol;
-    tuple << ast_node_to_record(child);
-    relation->insert(tuple);
+    relation->insert(souffle::tuple(relation, {ast_node_to_record(parent),
+                                               string_to_id(s),
+                                               ast_node_to_record(child)}));
 }
 
-void repair::insert_parent_of_list(std::shared_ptr<sjp::tree_node> parent,
-                              std::string symbol,
-                              std::vector<std::shared_ptr<sjp::tree_node>> children) {
+void repair::insert_parent_of_list(node_ptr parent, std::string s,
+                                   std::vector<node_ptr> children) {
     auto relation = program->getRelation("parent_of_list");
     assert(relation != NULL);
-    souffle::tuple tuple(relation);
-    tuple << ast_node_to_record(parent);
-    tuple << symbol;
-    tuple << vector_of_ast_nodes_to_record(children, 0);
-    relation->insert(tuple);
+    relation->insert(souffle::tuple(relation,
+                {ast_node_to_record(parent),
+                 string_to_id(s),
+                 vector_of_ast_nodes_to_record(children, 0)}));
 }
 
-void repair::insert_node_data(std::shared_ptr<sjp::tree_node> node) {
+void repair::insert_node_data(node_ptr node) {
     if (node == nullptr) return;
     insert_ast_node(node);
     for (auto [symbol, child] : node->get_parent_of()) {
@@ -115,10 +109,9 @@ void repair::run() {
 std::map<std::tuple<std::string,int,int>, std::string>
 repair::get_repairable_nodes(const char* filename) {
     std::map<std::tuple<std::string,int,int>, std::string> result;
-    auto string_rep = get_string_representation(filename);
     souffle::Relation* relation = program->getRelation("rewrite");
     assert(relation != NULL);
-    for (auto &output : *relation) {
+    for (souffle::tuple& output : *relation) {
         int id;
         std::string out;
         output >> id >> out;
@@ -131,7 +124,8 @@ repair::get_repairable_nodes(const char* filename) {
 std::map<std::tuple<std::string,int,int>,std::vector<std::string>>
 repair::get_reachable_declared_variables(const char* filename) {
     std::map<std::tuple<std::string,int,int>, std::vector<std::string>> result;
-    souffle::Relation* relation = program->getRelation("reachable_declared_variable");
+    souffle::Relation* relation =
+        program->getRelation("reachable_declared_variable");
     assert(relation != NULL);
     for (auto &output : *relation) {
         int id;
@@ -142,22 +136,4 @@ repair::get_reachable_declared_variables(const char* filename) {
     }
     return result;
 }
-
-std::map<std::tuple<std::string,int,int>, std::string>
-repair::get_string_representation(const char* filename) {
-    std::map<std::tuple<std::string,int,int>, std::string> result;
-    souffle::Relation* relation = program->getRelation("string_representation");
-    assert(relation != NULL);
-    for (auto &output : *relation) {
-        int id;
-        output >> id;
-        if (id == 0) continue;
-        std::string symbol;
-        output >> symbol;
-        result.emplace(get_ast_node_from_id(filename, id), symbol);
-    }
-    return result;
-}
-
-
 
