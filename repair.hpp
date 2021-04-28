@@ -32,8 +32,8 @@ public:
     void add_string(const char* filename, const char* content);
     void run();
     node_ptr get_ast(const char* filename);
-    std::map<std::tuple<std::string,int,int>,std::string>
-        get_repairable_nodes(const char* filename);
+    std::vector<std::tuple<int,int,std::string>>
+        get_possible_repairs(const char* filename);
     std::map<std::tuple<std::string,int,int>,std::vector<std::string>>
         get_reachable_declared_variables(const char* filename);
     std::map<std::tuple<std::string,int,int>,std::string>

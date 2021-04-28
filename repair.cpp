@@ -106,9 +106,9 @@ void repair::run() {
     program->run();
 }
 
-std::map<std::tuple<std::string,int,int>, std::string>
-repair::get_repairable_nodes(const char* filename) {
-    std::map<std::tuple<std::string,int,int>, std::string> result;
+std::vector<std::tuple<int,int,std::string>>
+repair::get_possible_repairs(const char* filename) {
+    std::vector<std::tuple<int,int,std::string>> result;
     souffle::Relation* relation = program->getRelation("rewrite");
     assert(relation != NULL);
     for (souffle::tuple& output : *relation) {
@@ -116,7 +116,8 @@ repair::get_repairable_nodes(const char* filename) {
         std::string out;
         output >> id >> out;
         if (id == 0) continue;
-        result.emplace(get_ast_node_from_id(filename, id), out);
+        auto [str, a, b] = get_ast_node_from_id(filename, id);
+        result.emplace_back(a, b, out);
     }
     return result;
 }
