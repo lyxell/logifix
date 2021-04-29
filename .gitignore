@@ -1,3 +1,4 @@
 build
 program.cpp
 *.o
+*.a
