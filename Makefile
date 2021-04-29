@@ -1,6 +1,6 @@
 TARGET=datalog-repair.a
 OBJS=sjp/sjp.o sjp/parser.o repair.o program.o
-CXXFLAGS = -std=c++17 -O0 -D__EMBEDDED_SOUFFLE__
+CXXFLAGS = -std=c++17 -g -O0 -D__EMBEDDED_SOUFFLE__
 
 all: $(TARGET)
 

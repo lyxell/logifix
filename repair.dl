@@ -1,15 +1,18 @@
-/* Types */
+/* Types
+ ********************************/
 
 .type id = [type: symbol, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
 .type symbol_list = [head: symbol, tail: symbol_list]
 
-/* Tokens */
+/* Tokens
+ ********************************/
 
 .decl token(str: symbol, from: number, to: number)
 .input token
 
-/* AST nodes */
+/* AST nodes
+ ********************************/
 
 .decl ast_node(id: id)
 .input ast_node
@@ -20,7 +23,8 @@ name_of([name, A, B], name) :- ast_node([name, A, B]).
 .decl starts_at(id: id, at: number)
 starts_at([name, A, B], A) :- ast_node([name, A, B]).
 
-/* AST node relations */
+/* AST node relations
+ ********************************/
 
 .decl parent_of(parent: id, name: symbol, child: id)
 .input parent_of
@@ -38,24 +42,40 @@ is_superlist_of(list, tail) :-
 in_list(head, superlist) :-
     is_superlist_of(superlist, [head, _]).
 
+/* ancestor_of is the transitive closure of parent_of and parent_of list */
+.decl ancestor_of(ancestor: id, child: id)
+ancestor_of(x, y) :-
+    parent_of(x, _, y).
+ancestor_of(x, z) :-
+    ancestor_of(x, y),
+    parent_of(y, _, z).
+ancestor_of(x, y) :-
+    parent_of_list(x, _, children),
+    in_list(y, children).
+ancestor_of(x, z) :-
+    ancestor_of(x, y),
+    parent_of_list(y, _, children),
+    in_list(z, children).
+
 .decl head_of(head: id, tail: id_list)
 head_of(head, tail) :-
     parent_of_list(_, _, [head, tail]).
 head_of(head, tail) :-
     head_of(_, [head, tail]).
 
-.decl predecessor_of(left: id, right: id)
-predecessor_of(left, right) :-
-    head_of(left, [right, _]).
+.decl predecessor_of(x: id, y: id)
+predecessor_of(x, y) :-
+    head_of(x, [y, _]).
 
-.decl precedes(left: id, right: id)
-precedes(left, right) :-
-    predecessor_of(left, right).
+.decl precedes(x: id, y: id)
+precedes(x, y) :-
+    predecessor_of(x, y).
 precedes(x, z) :-
     precedes(x, y),
     predecessor_of(y, z).
 
-/* AST node types */
+/* AST node types
+ ********************************/
 
 .decl equals_expression(id: id, left: id, right: id)
 equals_expression(id, left, right) :-
@@ -83,13 +103,26 @@ variable_declarator(id, initializer, name) :-
     parent_of(id, "initializer", initializer),
     parent_of(id, "name", name).
 
+.decl class_type(id: id, name: id, type_arguments: id_list, annotations: id_list)
+class_type(id, name, type_arguments, annotations) :-
+    name_of(id, "class_type"),
+    parent_of(id, "name", name),
+    parent_of_list(id, "type_arguments", type_arguments),
+    parent_of_list(id, "annotations", annotations).
+
 .decl integer_literal(id: id)
 integer_literal(id) :- name_of(id, "integer_literal").
 
-.decl expression_name(id: id)
-expression_name(id) :- name_of(id, "expression_name").
+.decl expression_name(id: id, identifiers: id_list)
+expression_name(id, identifiers) :-
+    name_of(id, "expression_name"),
+    parent_of_list(id, "identifiers", identifiers).
 
-/* String representation */
+.decl identifier(id: id)
+identifier(id) :- name_of(id, "identifier").
+
+/* String representation
+ ********************************/
 
 .decl source_code(str: symbol)
 .input source_code
@@ -100,18 +133,18 @@ string_representation([name, A, B], substr(code, A, B - A)) :-
     ast_node([name, A, B]),
     source_code(code).
 
-/* Declared variables */
+/* Declared variables
+ ********************************/
 
-.decl is_declared_at(variable: symbol, id: id)
+.decl is_declared_at(variable: symbol, id: id, type: id)
 .output is_declared_at(IO=stdout, delimiter=",")
-is_declared_at(name_str, parent) :-
-    local_variable_declaration(parent, _, declarations, _),
+is_declared_at(name_str, parent, type) :-
+    local_variable_declaration(parent, type, declarations, _),
     in_list(declarator, declarations),
     variable_declarator(declarator, _, name),
     string_representation(name, name_str).
 
-.decl is_in_scope(variable: symbol, id: id)
-.output is_in_scope(IO=stdout)
+.decl is_in_scope(variable: symbol, id: id, type: id)
 /**
  * The scope of a local variable declaration in a block (§14.2) is the rest of
  * the block in which the declaration appears, starting with its own
@@ -119,14 +152,46 @@ is_declared_at(name_str, parent) :-
  * the local variable declaration statement.
  * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
  */
-is_in_scope(name_str, initializer) :-
-    variable_declarator(_, initializer, name),
-    string_representation(name, name_str).
-is_in_scope(name_str, statement) :-
+//is_in_scope(name_str, initializer) :-
+//    variable_declarator(_, initializer, name),
+//    string_representation(name, name_str).
+is_in_scope(name_str, statement, type) :-
     precedes(declaration, statement),
-    is_declared_at(name_str, declaration).
+    is_declared_at(name_str, declaration, type).
+is_in_scope(name_str, descendant, type) :-
+    is_in_scope(name_str, ancestor, type),
+    ancestor_of(ancestor, descendant).
 
-/* Rewrite rules */
+/* Type checking
+ ********************************/
+
+.decl collection_name(str: symbol)
+collection_name("List").
+collection_name("Set").
+collection_name("ArrayList").
+collection_name("Vector").
+collection_name("LinkedList").
+collection_name("SortedSet").
+collection_name("Queue").
+
+// TODO: Should take imports into consideration
+.decl has_collection_type(id: id)
+.output has_collection_type(IO=stdout)
+has_collection_type(id) :-
+    identifier(id),
+    string_representation(id, id_str),
+    is_in_scope(id_str, id, type),
+    class_type(type, name, _, _),
+    string_representation(name, name_str),
+    collection_name(name_str).
+
+has_collection_type(id) :-
+    expression_name(id, [head, nil]),
+    has_collection_type(head).
+    
+
+/* Rewrite rules
+ ********************************/
 
 .decl rewrite(from: id, to: symbol)
 .output rewrite

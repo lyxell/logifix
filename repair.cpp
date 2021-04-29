@@ -124,21 +124,53 @@ repair::get_possible_repairs(const char* filename) {
     return result;
 }
 
-std::map<std::tuple<std::string, int, int>, std::vector<std::string>>
-repair::get_reachable_declared_variables(const char* filename) {
-    std::map<std::tuple<std::string, int, int>, std::vector<std::string>>
-        result;
-    souffle::Relation* relation =
-        program->getRelation("reachable_declared_variable");
+node_ptr
+repair::get_hovered_node(const char* filename, size_t buffer_position) {
+    node_ptr curr = get_ast(filename);
+    if (!curr) return curr;
+    while (true) {
+        node_ptr candidate = nullptr;
+        for (const auto& [symbol, child] : curr->get_parent_of()) {
+            if (!child) continue;
+            if (child->get_start_token() <= buffer_position &&
+                child->get_end_token()   >= buffer_position) {
+                candidate = child; 
+            }
+        }
+        for (const auto& [symbol, children] : curr->get_parent_of_list()) {
+            for (const auto& child : children) {
+                if (!child) continue;
+                if (child->get_start_token() <= buffer_position &&
+                    child->get_end_token()   >= buffer_position) {
+                    candidate = child; 
+                }
+            }
+        }
+        if (!candidate) break;
+        curr = candidate;
+    }
+    return curr;
+}
+
+std::vector<std::pair<std::string, std::tuple<std::string,int,int>>>
+repair::get_variables_in_scope(const char* filename, size_t buffer_position) {
+    auto hovered_node = get_hovered_node(filename, buffer_position);
+    std::vector<std::pair<std::string, std::tuple<std::string,int,int>>> result;
+    souffle::Relation* relation = program->getRelation("is_in_scope");
     assert(relation != nullptr);
     for (auto& output : *relation) {
+        std::string variable;
+        int type;
         int id;
-        std::string out;
-        output >> id >> out;
+        output >> variable >> id >> type;
         if (id == 0) {
             continue;
         }
-        result[get_ast_node_from_id(filename, id)].push_back(out);
+        auto [name, start, end] = get_ast_node_from_id(filename, id);
+        if (name == hovered_node->get_name()
+         && start == hovered_node->get_start_token()
+         && end == hovered_node->get_end_token())
+            result.emplace_back(variable, get_ast_node_from_id(filename, type));
     }
     return result;
 }

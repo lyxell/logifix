@@ -4,14 +4,12 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155
  */
 
-/**
- * TODO:
- * - Check that subject has Java collection type
- * - Check that there are no arguments in method call
- */
+
+/* Rewrite x.size() == 0 into x.isEmpty() */
 rewrite(parent, cat(subject_str, ".isEmpty()")) :-
     equals_expression(parent, left, right),
     method_invocation(left, subject, method, nil),
+    has_collection_type(subject),
     integer_literal(right),
     string_representation(subject, subject_str),
     string_representation(method, "size"),
