@@ -4,13 +4,23 @@
 .type id_list = [head: id, tail: id_list]
 .type symbol_list = [head: symbol, tail: symbol_list]
 
-/* AST nodes */
+/* Tokens */
 
 .decl token(str: symbol, from: number, to: number)
 .input token
 
+/* AST nodes */
+
 .decl ast_node(id: id)
 .input ast_node
+
+.decl name_of(id: id, name: symbol)
+name_of([name, A, B], name) :- ast_node([name, A, B]).
+
+.decl starts_at(id: id, at: number)
+starts_at([name, A, B], A) :- ast_node([name, A, B]).
+
+/* AST node relations */
 
 .decl parent_of(parent: id, name: symbol, child: id)
 .input parent_of
@@ -18,11 +28,34 @@
 .decl parent_of_list(parent: id, name: symbol, children: id_list)
 .input parent_of_list
 
-.decl name_of(id: id, name: symbol)
-name_of([name, A, B], name) :- ast_node([name, A, B]).
+.decl is_superlist_of(superlist: id_list, list: id_list)
+is_superlist_of(list, list) :-
+    parent_of_list(_, _, list).
+is_superlist_of(list, tail) :-
+    is_superlist_of(list, [_, tail]).
 
-.decl starts_at(id: id, at: number)
-starts_at([name, A, B], A) :- ast_node([name, A, B]).
+.decl in_list(id: id, list: id_list)
+in_list(head, superlist) :-
+    is_superlist_of(superlist, [head, _]).
+
+.decl head_of(head: id, tail: id_list)
+head_of(head, tail) :-
+    parent_of_list(_, _, [head, tail]).
+head_of(head, tail) :-
+    head_of(_, [head, tail]).
+
+.decl predecessor_of(left: id, right: id)
+predecessor_of(left, right) :-
+    head_of(left, [right, _]).
+
+.decl precedes(left: id, right: id)
+precedes(left, right) :-
+    predecessor_of(left, right).
+precedes(x, z) :-
+    precedes(x, y),
+    predecessor_of(y, z).
+
+/* AST node types */
 
 .decl equals_expression(id: id, left: id, right: id)
 equals_expression(id, left, right) :-
@@ -36,6 +69,13 @@ method_invocation(id, subject, method, arguments) :-
     parent_of(id, "subject", subject),
     parent_of(id, "method", method),
     parent_of_list(id, "arguments", arguments).
+
+.decl local_variable_declaration(id: id, type: id, declarations: id_list, modifiers: id_list)
+local_variable_declaration(id, type, declarations, modifiers) :-
+    name_of(id, "local_variable_declaration"),
+    parent_of(id, "type", type),
+    parent_of_list(id, "declarations", declarations),
+    parent_of_list(id, "modifiers", modifiers).
 
 .decl variable_declarator(id: id, initializer: id, name: id)
 variable_declarator(id, initializer, name) :-
@@ -62,16 +102,16 @@ string_representation([name, A, B], substr(code, A, B - A)) :-
 
 /* Declared variables */
 
-.decl occurs_after(left: id, right: id)
-occurs_after(left, right) :-
-    ast_node(left),
-    ast_node(right),
-    starts_at(left, left_start),
-    starts_at(right, right_start),
-    left_start < right_start.
+.decl is_declared_at(variable: symbol, id: id)
+.output is_declared_at(IO=stdout, delimiter=",")
+is_declared_at(name_str, parent) :-
+    local_variable_declaration(parent, _, declarations, _),
+    in_list(declarator, declarations),
+    variable_declarator(declarator, _, name),
+    string_representation(name, name_str).
 
-.decl reachable_declared_variable(id: id, variable: symbol)
-.output reachable_declared_variable
+.decl is_in_scope(variable: symbol, id: id)
+.output is_in_scope(IO=stdout)
 /**
  * The scope of a local variable declaration in a block (§14.2) is the rest of
  * the block in which the declaration appears, starting with its own
@@ -79,13 +119,12 @@ occurs_after(left, right) :-
  * the local variable declaration statement.
  * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
  */
-reachable_declared_variable(initializer, name_str) :-
+is_in_scope(name_str, initializer) :-
     variable_declarator(_, initializer, name),
     string_representation(name, name_str).
-
-reachable_declared_variable(right, str) :-
-    occurs_after(left, right),
-    reachable_declared_variable(left, str).
+is_in_scope(name_str, statement) :-
+    precedes(declaration, statement),
+    is_declared_at(name_str, declaration).
 
 /* Rewrite rules */
 

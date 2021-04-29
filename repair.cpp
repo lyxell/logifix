@@ -103,6 +103,7 @@ void repair::run() {
         insert_node_data(parser.get_ast(name.c_str()));
     }
     program->run();
+    program->printAll();
 }
 
 std::vector<std::tuple<int, int, std::string>>
