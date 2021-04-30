@@ -77,9 +77,21 @@ precedes(x, z) :-
 /* AST node types
  ********************************/
 
+.decl conditional_and_expression(id: id, left: id, right: id)
+conditional_and_expression(id, left, right) :-
+    name_of(id, "conditional_and_expression"),
+    parent_of(id, "left", left),
+    parent_of(id, "right", right).
+
 .decl equals_expression(id: id, left: id, right: id)
 equals_expression(id, left, right) :-
     name_of(id, "equals_expression"),
+    parent_of(id, "left", left),
+    parent_of(id, "right", right).
+
+.decl not_equals_expression(id: id, left: id, right: id)
+not_equals_expression(id, left, right) :-
+    name_of(id, "not_equals_expression"),
     parent_of(id, "left", left),
     parent_of(id, "right", right).
 

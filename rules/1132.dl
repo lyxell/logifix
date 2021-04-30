@@ -14,3 +14,19 @@ rewrite(invocation, cat(arg_str, cat(".equals(", cat(subject_str, ")")))) :-
     string_representation(arg, arg_str),
     string_representation(subject, subject_str).
 
+/* Rewrite foo != null && foo.equals("x") into "x".equals(foo) */
+rewrite(and, cat(arg_str, cat(".equals(", cat(subject_str, ")")))) :-
+    conditional_and_expression(and, _, _),
+    not_equals_expression(noteq, _, _),
+    parent_of(and, _, noteq),
+    parent_of(and, _, invocation),
+    parent_of(noteq, _, noteq_subject),
+    parent_of(noteq, _, null_expr),
+    method_invocation(invocation, subject, method, [arg, nil]),
+    string_literal(arg),
+    has_string_type(subject),
+    string_representation(method, "equals"),
+    string_representation(arg, arg_str),
+    string_representation(subject, subject_str),
+    string_representation(noteq_subject, subject_str),
+    string_representation(null_expr, "null").
