@@ -113,6 +113,9 @@ class_type(id, name, type_arguments, annotations) :-
 .decl integer_literal(id: id)
 integer_literal(id) :- name_of(id, "integer_literal").
 
+.decl string_literal(id: id)
+string_literal(id) :- name_of(id, "string_literal").
+
 .decl expression_name(id: id, identifiers: id_list)
 expression_name(id, identifiers) :-
     name_of(id, "expression_name"),
@@ -128,7 +131,7 @@ identifier(id) :- name_of(id, "identifier").
 .input source_code
 
 .decl string_representation(to: id, str: symbol)
-.output string_representation
+.output string_representation(IO=stdout)
 string_representation([name, A, B], substr(code, A, B - A)) :-
     ast_node([name, A, B]),
     source_code(code).
@@ -174,6 +177,17 @@ collection_name("LinkedList").
 collection_name("SortedSet").
 collection_name("Queue").
 
+.decl has_string_type(id: id)
+has_string_type(id) :-
+    identifier(id),
+    string_representation(id, id_str),
+    is_in_scope(id_str, id, type),
+    class_type(type, name, _, _),
+    string_representation(name, "String").
+has_string_type(id) :-
+    expression_name(id, [head, nil]),
+    has_string_type(head).
+
 // TODO: Should take imports into consideration
 .decl has_collection_type(id: id)
 .output has_collection_type(IO=stdout)
@@ -194,6 +208,7 @@ has_collection_type(id) :-
  ********************************/
 
 .decl rewrite(from: id, to: symbol)
-.output rewrite
+.output rewrite(IO=stdout)
 
 #include "rules/1155.dl"
+#include "rules/1132.dl"
