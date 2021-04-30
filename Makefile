@@ -3,12 +3,18 @@ OBJS=sjp/sjp.o sjp/parser.o repair.o program.o
 CXXFLAGS = -std=c++17 -fPIC -fno-gnu-unique -O0 -D__EMBEDDED_SOUFFLE__
 RULE_FILES := $(shell find rules/ -name '*.dl')
 
+SOUFFLE=souffle
+ifdef SOUFFLE_PATH
+	SOUFFLE=$(SOUFFLE_PATH:%/=%)/src/souffle
+	CXXFLAGS+=-I$(SOUFFLE_PATH:%/=%)/src/include
+endif
+
 all: $(TARGET)
 
 repair.o: sjp/sjp.h
 
 program.cpp: repair.dl $(RULE_FILES)
-	souffle --generate=$@ repair.dl
+	$(SOUFFLE) --generate=$@ repair.dl
 
 $(TARGET): $(OBJS)
 	$(AR) -rc $(TARGET) $^
