@@ -1,12 +1,13 @@
 TARGET=datalog-repair.a
 OBJS=sjp/sjp.o sjp/parser.o repair.o program.o
-CXXFLAGS = -std=c++17 -g -O0 -D__EMBEDDED_SOUFFLE__
+CXXFLAGS = -std=c++17 -fPIC -fno-gnu-unique -O0 -D__EMBEDDED_SOUFFLE__
+RULE_FILES := $(shell find rules/ -name '*.dl')
 
 all: $(TARGET)
 
 repair.o: sjp/sjp.h
 
-program.cpp: repair.dl rules/1155.dl
+program.cpp: repair.dl $(RULE_FILES)
 	souffle --generate=$@ repair.dl
 
 $(TARGET): $(OBJS)
