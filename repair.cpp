@@ -37,8 +37,8 @@ int repair::ast_node_to_record(node_ptr node) {
         return 0;
     }
     std::array<souffle::RamDomain, 3> data = {
-        program->getSymbolTable().encode(node->get_name()),
-        node->get_start_token(), node->get_end_token()};
+        program->getSymbolTable().encode(node->name),
+        node->start_token, node->end_token};
     return program->getRecordTable().pack(data.data(), 3);
 }
 
@@ -85,11 +85,11 @@ void repair::insert_node_data(node_ptr node) {
         return;
     }
     insert_ast_node(node);
-    for (const auto& [symbol, child] : node->get_parent_of()) {
+    for (const auto& [symbol, child] : node->parent_of) {
         insert_parent_of(node, symbol, child);
         insert_node_data(child);
     }
-    for (const auto& [symbol, children] : node->get_parent_of_list()) {
+    for (const auto& [symbol, children] : node->parent_of_list) {
         insert_parent_of_list(node, symbol, children);
         for (const auto& child : children) {
             insert_node_data(child);
@@ -130,18 +130,18 @@ repair::get_hovered_node(const char* filename, size_t buffer_position) {
     if (!curr) return curr;
     while (true) {
         node_ptr candidate = nullptr;
-        for (const auto& [symbol, child] : curr->get_parent_of()) {
+        for (const auto& [symbol, child] : curr->parent_of) {
             if (!child) continue;
-            if (child->get_start_token() <= buffer_position &&
-                child->get_end_token()   >= buffer_position) {
+            if (child->start_token <= buffer_position &&
+                child->end_token   >= buffer_position) {
                 candidate = child; 
             }
         }
-        for (const auto& [symbol, children] : curr->get_parent_of_list()) {
+        for (const auto& [symbol, children] : curr->parent_of_list) {
             for (const auto& child : children) {
                 if (!child) continue;
-                if (child->get_start_token() <= buffer_position &&
-                    child->get_end_token()   >= buffer_position) {
+                if (child->start_token <= buffer_position &&
+                    child->end_token   >= buffer_position) {
                     candidate = child; 
                 }
             }
@@ -167,9 +167,9 @@ repair::get_variables_in_scope(const char* filename, size_t buffer_position) {
             continue;
         }
         auto [name, start, end] = get_ast_node_from_id(filename, id);
-        if (name == hovered_node->get_name()
-         && start == hovered_node->get_start_token()
-         && end == hovered_node->get_end_token())
+        if (name == hovered_node->name
+         && start == hovered_node->start_token
+         && end == hovered_node->end_token)
             result.emplace_back(variable, get_ast_node_from_id(filename, type));
     }
     return result;
