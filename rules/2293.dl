@@ -1,0 +1,5 @@
+/**
+ * The diamond operator ("<>") should be used
+ *
+ * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-2293
+ */

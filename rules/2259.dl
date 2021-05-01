@@ -1,0 +1,5 @@
+/**
+ * Null pointers should not be dereferenced
+ *
+ * https://rules.sonarsource.com/java/RSPEC-2259
+ */

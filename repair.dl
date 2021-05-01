@@ -83,9 +83,27 @@ conditional_and_expression(id, left, right) :-
     parent_of(id, "left", left),
     parent_of(id, "right", right).
 
+.decl conditional_or_expression(id: id, left: id, right: id)
+conditional_or_expression(id, left, right) :-
+    name_of(id, "conditional_or_expression"),
+    parent_of(id, "left", left),
+    parent_of(id, "right", right).
+
 .decl equals_expression(id: id, left: id, right: id)
 equals_expression(id, left, right) :-
     name_of(id, "equals_expression"),
+    parent_of(id, "left", left),
+    parent_of(id, "right", right).
+
+.decl addition_expression(id: id, left: id, right: id)
+addition_expression(id, left, right) :-
+    name_of(id, "addition_expression"),
+    parent_of(id, "left", left),
+    parent_of(id, "right", right).
+
+.decl subtraction_expression(id: id, left: id, right: id)
+subtraction_expression(id, left, right) :-
+    name_of(id, "subtraction_expression"),
     parent_of(id, "left", left),
     parent_of(id, "right", right).
 
@@ -135,6 +153,46 @@ expression_name(id, identifiers) :-
 
 .decl identifier(id: id)
 identifier(id) :- name_of(id, "identifier").
+
+/* Common AST patterns
+ ********************************/
+
+.decl not_equals_null_expression(id: id, subject: id)
+not_equals_null_expression(id, subject) :-
+    not_equals_expression(id, _, _),
+    parent_of(id, _, subject),
+    parent_of(id, _, null),
+    string_representation(null, "null").
+
+/* Constant evaluation
+ ********************************/
+
+.decl evaluates_to_integer_value(id: id, value: number)
+evaluates_to_integer_value(id, to_number(repr)) :-
+    integer_literal(id),
+    string_representation(id, repr).
+evaluates_to_integer_value(id, left_value + right_value) :-
+    addition_expression(id, left, right),
+    evaluates_to_integer_value(left, left_value),
+    evaluates_to_integer_value(right, right_value).
+evaluates_to_integer_value(id, left_value - right_value) :-
+    subtraction_expression(id, left, right),
+    evaluates_to_integer_value(left, left_value),
+    evaluates_to_integer_value(right, right_value).
+
+.decl evaluates_to_boolean_value(id: id, value: number)
+evaluates_to_boolean_value(id, 0) :-
+    string_representation(id, "false").
+evaluates_to_boolean_value(id, 1) :-
+    string_representation(id, "true").
+evaluates_to_boolean_value(id, left_value land right_value) :-
+    conditional_and_expression(id, left, right),
+    evaluates_to_boolean_value(left, left_value),
+    evaluates_to_boolean_value(right, right_value).
+evaluates_to_boolean_value(id, left_value lor right_value) :-
+    conditional_or_expression(id, left, right),
+    evaluates_to_boolean_value(left, left_value),
+    evaluates_to_boolean_value(right, right_value).
 
 /* String representation
  ********************************/
@@ -224,3 +282,5 @@ has_collection_type(id) :-
 
 #include "rules/1155.dl"
 #include "rules/1132.dl"
+#include "rules/1596.dl"
+#include "rules/1125.dl"

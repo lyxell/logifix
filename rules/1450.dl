@@ -1,0 +1,7 @@
+/**
+ * Private fields only used as local variables in methods should become local
+ * variables
+ *
+ * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1450
+ */
+

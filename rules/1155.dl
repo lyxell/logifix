@@ -4,14 +4,14 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155
  */
 
-
 /* Rewrite x.size() == 0 into x.isEmpty() */
 rewrite(parent, cat(subject_str, ".isEmpty()")) :-
-    equals_expression(parent, left, right),
-    method_invocation(left, subject, method, nil),
+    equals_expression(parent, _, _),
+    parent_of(parent, _, invocation),
+    parent_of(parent, _, integer),
+    method_invocation(invocation, subject, method, nil),
     has_collection_type(subject),
-    integer_literal(right),
+    evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str),
-    string_representation(method, "size"),
-    string_representation(right, "0").
+    string_representation(method, "size").
 

@@ -1,0 +1,5 @@
+/**
+ * Use Java 12 "switch" expression
+ *
+ * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-5194
+ */

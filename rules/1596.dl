@@ -1,0 +1,12 @@
+/**
+ * "Collections.EMPTY_LIST", "EMPTY_MAP", and "EMPTY_SET" should not be used
+ *
+ * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1596
+ */
+
+rewrite(id, "Collections.emptyList()") :-
+    string_representation(id, "Collections.EMPTY_LIST").
+rewrite(id, "Collections.emptyMap()") :-
+    string_representation(id, "Collections.EMPTY_MAP").
+rewrite(id, "Collections.emptySet()") :-
+    string_representation(id, "Collections.EMPTY_SET").
