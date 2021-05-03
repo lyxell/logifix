@@ -107,6 +107,12 @@ subtraction_expression(id, left, right) :-
     parent_of(id, "left", left),
     parent_of(id, "right", right).
 
+.decl multiplication_expression(id: id, left: id, right: id)
+multiplication_expression(id, left, right) :-
+    name_of(id, "multiplication_expression"),
+    parent_of(id, "left", left),
+    parent_of(id, "right", right).
+
 .decl not_equals_expression(id: id, left: id, right: id)
 not_equals_expression(id, left, right) :-
     name_of(id, "not_equals_expression"),
@@ -133,6 +139,14 @@ variable_declarator(id, initializer, name) :-
     parent_of(id, "initializer", initializer),
     parent_of(id, "name", name).
 
+.decl class_instance_creation_expression(id: id, type_arguments: id_list, type: id, arguments: id_list, body: id_list)
+class_instance_creation_expression(id, type_arguments, type, arguments, body) :-
+    name_of(id, "class_instance_creation_expression"),
+    parent_of_list(id, "type_arguments", type_arguments),
+    parent_of(id, "type", type),
+    parent_of_list(id, "arguments", arguments),
+    parent_of_list(id, "body", body).
+
 .decl class_type(id: id, name: id, type_arguments: id_list, annotations: id_list)
 class_type(id, name, type_arguments, annotations) :-
     name_of(id, "class_type"),
@@ -142,6 +156,9 @@ class_type(id, name, type_arguments, annotations) :-
 
 .decl integer_literal(id: id)
 integer_literal(id) :- name_of(id, "integer_literal").
+
+.decl floating_point_literal(id: id)
+floating_point_literal(id) :- name_of(id, "floating_point_literal").
 
 .decl string_literal(id: id)
 string_literal(id) :- name_of(id, "string_literal").
@@ -175,6 +192,10 @@ evaluates_to_integer_value(id, left_value + right_value) :-
     addition_expression(id, left, right),
     evaluates_to_integer_value(left, left_value),
     evaluates_to_integer_value(right, right_value).
+evaluates_to_integer_value(id, left_value * right_value) :-
+    multiplication_expression(id, left, right),
+    evaluates_to_integer_value(left, left_value),
+    evaluates_to_integer_value(right, right_value).
 evaluates_to_integer_value(id, left_value - right_value) :-
     subtraction_expression(id, left, right),
     evaluates_to_integer_value(left, left_value),
@@ -193,6 +214,15 @@ evaluates_to_boolean_value(id, left_value lor right_value) :-
     conditional_or_expression(id, left, right),
     evaluates_to_boolean_value(left, left_value),
     evaluates_to_boolean_value(right, right_value).
+evaluates_to_boolean_value(id, 1) :-
+    equals_expression(id, left, right),
+    evaluates_to_integer_value(left, x),
+    evaluates_to_integer_value(right, x).
+evaluates_to_boolean_value(id, 0) :-
+    equals_expression(id, left, right),
+    evaluates_to_integer_value(left, x),
+    evaluates_to_integer_value(right, y),
+    x != y.
 
 /* String representation
  ********************************/
@@ -201,16 +231,16 @@ evaluates_to_boolean_value(id, left_value lor right_value) :-
 .input source_code
 
 .decl string_representation(to: id, str: symbol)
-.output string_representation(IO=stdout)
 string_representation([name, A, B], substr(code, A, B - A)) :-
     ast_node([name, A, B]),
     source_code(code).
+string_representation(x, str) :-
+    rewrite(x, str).
 
 /* Declared variables
  ********************************/
 
 .decl is_declared_at(variable: symbol, id: id, type: id)
-.output is_declared_at(IO=stdout, delimiter=",")
 is_declared_at(name_str, parent, type) :-
     local_variable_declaration(parent, type, declarations, _),
     in_list(declarator, declarations),
@@ -247,6 +277,24 @@ collection_name("LinkedList").
 collection_name("SortedSet").
 collection_name("Queue").
 
+.decl has_floating_point_type(id: id)
+.output has_floating_point_type(IO=stdout)
+has_floating_point_type(id) :-
+    floating_point_literal(id).
+has_floating_point_type(id) :-
+    identifier(id),
+    string_representation(id, id_str),
+    is_in_scope(id_str, id, type),
+    string_representation(type, "double").
+has_floating_point_type(id) :-
+    identifier(id),
+    string_representation(id, id_str),
+    is_in_scope(id_str, id, type),
+    string_representation(type, "float").
+has_floating_point_type(id) :-
+    expression_name(id, [head, nil]),
+    has_floating_point_type(head).
+
 .decl has_string_type(id: id)
 has_string_type(id) :-
     identifier(id),
@@ -260,7 +308,6 @@ has_string_type(id) :-
 
 // TODO: Should take imports into consideration
 .decl has_collection_type(id: id)
-.output has_collection_type(IO=stdout)
 has_collection_type(id) :-
     identifier(id),
     string_representation(id, id_str),
@@ -280,7 +327,8 @@ has_collection_type(id) :-
 .decl rewrite(from: id, to: symbol)
 .output rewrite(IO=stdout)
 
-#include "rules/1155.dl"
-#include "rules/1132.dl"
-#include "rules/1596.dl"
 #include "rules/1125.dl"
+#include "rules/1132.dl"
+#include "rules/1155.dl"
+#include "rules/1596.dl"
+#include "rules/2111.dl"

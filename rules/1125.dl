@@ -1,7 +1,7 @@
 /**
  * Boolean literals should not be redundant
  *
- * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1125
+ * https://rules.sonarsource.com/java/RSPEC-1125
  */
 
 // TODO: Ternaries, Conditional or, Conditional and
