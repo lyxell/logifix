@@ -3,3 +3,30 @@
  *
  * https://rules.sonarsource.com/java/RSPEC-4973
  */
+
+// Currently we separate between three cases, it should probably suffice with 2
+
+rewrite(eq, cat(x_str, cat(".equals(", cat(y_str, ")")))) :-
+    equals_expression(eq, x, y),
+    has_string_type(x),
+    has_string_type(y),
+    ! string_literal(y),
+    string_representation(x, x_str),
+    string_representation(y, y_str).
+rewrite(eq, cat(x_str, cat(".equals(", cat(y_str, ")")))) :-
+    equals_expression(eq, x, y),
+    has_string_type(x),
+    has_string_type(y),
+    string_literal(x),
+    string_literal(y),
+    string_representation(x, x_str),
+    string_representation(y, y_str).
+
+rewrite(eq, cat(y_str, cat(".equals(", cat(x_str, ")")))) :-
+    equals_expression(eq, x, y),
+    has_string_type(x),
+    has_string_type(y),
+    ! string_literal(x),
+    string_literal(y),
+    string_representation(x, x_str),
+    string_representation(y, y_str).

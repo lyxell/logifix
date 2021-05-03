@@ -3,3 +3,14 @@
  *
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-2293
  */
+
+rewrite(instance_type, cat(name_str, "<>")) :-
+    local_variable_declaration(_, declaration_type, declarators, nil),
+    class_type(declaration_type, _, [x, nil], _),
+    in_list(declarator, declarators),
+    variable_declarator(declarator, _, creator),
+    class_instance_creation_expression(creator, nil, instance_type, nil, nil),
+    class_type(instance_type, name, [y, nil], _),
+    string_representation(x, str),
+    string_representation(y, str),
+    string_representation(name, name_str).

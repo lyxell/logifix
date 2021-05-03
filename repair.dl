@@ -126,18 +126,18 @@ method_invocation(id, subject, method, arguments) :-
     parent_of(id, "method", method),
     parent_of_list(id, "arguments", arguments).
 
-.decl local_variable_declaration(id: id, type: id, declarations: id_list, modifiers: id_list)
-local_variable_declaration(id, type, declarations, modifiers) :-
+.decl local_variable_declaration(id: id, type: id, declarators: id_list, modifiers: id_list)
+local_variable_declaration(id, type, declarators, modifiers) :-
     name_of(id, "local_variable_declaration"),
     parent_of(id, "type", type),
-    parent_of_list(id, "declarations", declarations),
+    parent_of_list(id, "declarators", declarators),
     parent_of_list(id, "modifiers", modifiers).
 
-.decl variable_declarator(id: id, initializer: id, name: id)
-variable_declarator(id, initializer, name) :-
+.decl variable_declarator(id: id, name: id, initializer: id)
+variable_declarator(id, name, initializer) :-
     name_of(id, "variable_declarator"),
-    parent_of(id, "initializer", initializer),
-    parent_of(id, "name", name).
+    parent_of(id, "name", name),
+    parent_of(id, "initializer", initializer).
 
 .decl class_instance_creation_expression(id: id, type_arguments: id_list, type: id, arguments: id_list, body: id_list)
 class_instance_creation_expression(id, type_arguments, type, arguments, body) :-
@@ -242,9 +242,9 @@ string_representation(x, str) :-
 
 .decl is_declared_at(variable: symbol, id: id, type: id)
 is_declared_at(name_str, parent, type) :-
-    local_variable_declaration(parent, type, declarations, _),
-    in_list(declarator, declarations),
-    variable_declarator(declarator, _, name),
+    local_variable_declaration(parent, type, declarators, _),
+    in_list(declarator, declarators),
+    variable_declarator(declarator, name, _),
     string_representation(name, name_str).
 
 .decl is_in_scope(variable: symbol, id: id, type: id)
@@ -256,7 +256,7 @@ is_declared_at(name_str, parent, type) :-
  * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
  */
 //is_in_scope(name_str, initializer) :-
-//    variable_declarator(_, initializer, name),
+//    variable_declarator(_, name, initializer),
 //    string_representation(name, name_str).
 is_in_scope(name_str, statement, type) :-
     precedes(declaration, statement),
@@ -297,6 +297,8 @@ has_floating_point_type(id) :-
 
 .decl has_string_type(id: id)
 has_string_type(id) :-
+    string_literal(id).
+has_string_type(id) :-
     identifier(id),
     string_representation(id, id_str),
     is_in_scope(id_str, id, type),
@@ -332,3 +334,5 @@ has_collection_type(id) :-
 #include "rules/1155.dl"
 #include "rules/1596.dl"
 #include "rules/2111.dl"
+#include "rules/2293.dl"
+#include "rules/4973.dl"
