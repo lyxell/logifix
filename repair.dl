@@ -278,7 +278,6 @@ collection_name("SortedSet").
 collection_name("Queue").
 
 .decl has_floating_point_type(id: id)
-.output has_floating_point_type(IO=stdout)
 has_floating_point_type(id) :-
     floating_point_literal(id).
 has_floating_point_type(id) :-
@@ -327,7 +326,7 @@ has_collection_type(id) :-
  ********************************/
 
 .decl rewrite(from: id, to: symbol)
-.output rewrite(IO=stdout)
+.output rewrite
 
 #include "rules/1125.dl"
 #include "rules/1132.dl"
