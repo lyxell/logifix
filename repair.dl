@@ -23,6 +23,9 @@ name_of([name, A, B], name) :- ast_node([name, A, B]).
 .decl starts_at(id: id, at: number)
 starts_at([name, A, B], A) :- ast_node([name, A, B]).
 
+.decl ends_at(id: id, at: number)
+ends_at([name, A, B], B) :- ast_node([name, A, B]).
+
 /* AST node relations
  ********************************/
 
@@ -264,6 +267,14 @@ is_in_scope(name_str, statement, type) :-
 is_in_scope(name_str, descendant, type) :-
     is_in_scope(name_str, ancestor, type),
     ancestor_of(ancestor, descendant).
+
+.decl is_in_scope_output(variable: symbol, type: symbol, start: number, end: number)
+.output is_in_scope_output
+is_in_scope_output(var, type_str, start, end) :-
+    is_in_scope(var, id, type),
+    ends_at(id, end),
+    starts_at(id, start),
+    string_representation(type, type_str).
 
 /* Type checking
  ********************************/

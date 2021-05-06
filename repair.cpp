@@ -152,25 +152,18 @@ repair::get_hovered_node(const char* filename, size_t buffer_position) {
     return curr;
 }
 
-std::vector<std::pair<std::string, std::tuple<std::string,int,int>>>
-repair::get_variables_in_scope(const char* filename, size_t buffer_position) {
-    auto hovered_node = get_hovered_node(filename, buffer_position);
-    std::vector<std::pair<std::string, std::tuple<std::string,int,int>>> result;
-    souffle::Relation* relation = program->getRelation("is_in_scope");
+std::vector<std::tuple<std::string,std::string,int,int>>
+repair::get_variables_in_scope(const char* filename) {
+    std::vector<std::tuple<std::string,std::string,int,int>> result;
+    souffle::Relation* relation = program->getRelation("is_in_scope_output");
     assert(relation != nullptr);
     for (auto& output : *relation) {
         std::string variable;
-        int type;
-        int id;
-        output >> variable >> id >> type;
-        if (id == 0) {
-            continue;
-        }
-        auto [name, start, end] = get_ast_node_from_id(filename, id);
-        if (name == hovered_node->name
-         && start == hovered_node->start_token
-         && end == hovered_node->end_token)
-            result.emplace_back(variable, get_ast_node_from_id(filename, type));
+        std::string type;
+        int starts_at;
+        int ends_at;
+        output >> variable >> type >> starts_at >> ends_at;
+        result.emplace_back(variable, type, starts_at, ends_at);
     }
     return result;
 }

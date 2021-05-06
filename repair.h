@@ -33,8 +33,8 @@ class repair {
     node_ptr get_ast(const char* filename);
     std::vector<std::tuple<int, int, std::string>>
     get_possible_repairs(const char* filename);
-    std::vector<std::pair<std::string, std::tuple<std::string,int,int>>>
-    get_variables_in_scope(const char* filename, size_t buffer_pos);
+    std::vector<std::tuple<std::string,std::string,int,int>>
+    get_variables_in_scope(const char* filename);
     std::map<std::tuple<std::string, int, int>, std::string>
     get_string_representation(const char* filename);
     node_ptr
