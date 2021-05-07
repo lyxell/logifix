@@ -336,6 +336,17 @@ is_in_scope_output(var, type_str, start, end) :-
 /* Type checking
  ********************************/
 
+.decl has_type(id: id, type: id)
+has_type(id, type) :-
+    identifier(id),
+    string_representation(id, id_str),
+    is_in_scope(id_str, id, type).
+has_type(id, type) :-
+    expression_name(id, [head, nil]),
+    identifier(head),
+    string_representation(head, head_str),
+    is_in_scope(head_str, id, type).
+
 .decl collection_name(str: symbol)
 collection_name("List").
 collection_name("Set").
@@ -401,5 +412,6 @@ has_collection_type(id) :-
 #include "rules/1155.dl"
 #include "rules/1596.dl"
 #include "rules/2111.dl"
+#include "rules/2204.dl"
 #include "rules/2293.dl"
 #include "rules/4973.dl"

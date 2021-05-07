@@ -1,0 +1,24 @@
+/**
+ * ".equals()" should not be used to test the values of "Atomic" classes
+ *
+ * https://rules.sonarsource.com/java/RSPEC-2204
+ */
+
+.decl atomic_class_type(str: symbol)
+atomic_class_type("AtomicInteger").
+atomic_class_type("AtomicBoolean").
+atomic_class_type("AtomicLong").
+
+.decl has_atomic_class_type(id: id)
+has_atomic_class_type(id) :-
+    has_type(id, type),
+    string_representation(type, type_str),
+    atomic_class_type(type_str).
+
+rewrite(id, cat(left_str, cat(" == ", right_str))) :-
+    method_invocation(id, left, method, [right, nil]),
+    has_atomic_class_type(left),
+    has_atomic_class_type(right),
+    string_representation(method, "equals"),
+    string_representation(left, left_str),
+    string_representation(right, right_str).
