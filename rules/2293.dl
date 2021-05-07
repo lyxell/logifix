@@ -15,3 +15,5 @@ rewrite(instance_type, cat(name_str, "<>")) :-
     string_representation(x, str),
     string_representation(y, str),
     string_representation(name, name_str).
+
+// TODO: returns

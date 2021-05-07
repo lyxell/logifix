@@ -1,0 +1,5 @@
+/**
+ * Unused assignments should be removed
+ *
+ * https://rules.sonarsource.com/java/RSPEC-1854
+ */

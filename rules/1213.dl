@@ -1,0 +1,6 @@
+/**
+ * The members of an interface or class declaration should appear in a
+ * pre-defined order
+ *
+ * https://rules.sonarsource.com/java/RSPEC-1213
+ */
