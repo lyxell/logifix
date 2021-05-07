@@ -359,6 +359,11 @@ collection_type_name("Queue").
 floating_point_type_name("float").
 floating_point_type_name("double").
 
+.decl atomic_class_type_name(str: symbol)
+atomic_class_type_name("AtomicInteger").
+atomic_class_type_name("AtomicBoolean").
+atomic_class_type_name("AtomicLong").
+
 /* Is type */
 
 .decl is_collection_type(id: id)
@@ -385,6 +390,12 @@ is_floating_point_type(id) :-
     string_representation(name, name_str),
     floating_point_type_name(name_str).
 
+.decl is_atomic_class_type(id: id)
+is_atomic_class_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, name_str),
+    atomic_class_type_name(name_str).
+
 /* Has type */
 
 .decl has_type(id: id, type: id)
@@ -408,6 +419,9 @@ has_string_type(id) :- has_type(id, type), is_string_type(type).
 
 .decl has_collection_type(id: id)
 has_collection_type(id) :- has_type(id, type), is_collection_type(type).
+
+.decl has_atomic_class_type(id: id)
+has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 
 /* Rewrite rules
  ********************************/

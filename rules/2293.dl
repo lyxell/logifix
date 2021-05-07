@@ -4,7 +4,7 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-2293
  */
 
-/* Rewrite Type<X> var = new Type<X>() into Type<X> var = new Type<>() */
+/* Rewrite Type<X> x = new Type<X>() into Type<X> x = new Type<>() */
 rewrite(instance_type, cat(name_str, "<>")) :-
     local_variable_declaration(_, declaration_type, declarators, nil),
     class_type(declaration_type, _, [x, nil], _),
