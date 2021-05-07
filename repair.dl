@@ -5,12 +5,6 @@
 .type id_list = [head: id, tail: id_list]
 .type symbol_list = [head: symbol, tail: symbol_list]
 
-/* Functors
- ********************************/
-
- 
-.functor format2(symbol, symbol, symbol) : symbol
-
 /* Tokens
  ********************************/
 

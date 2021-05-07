@@ -8,7 +8,7 @@
 
 // TODO: change has_string_type to has_string_or_boxed_type
 
-rewrite(eq, @format2("{}.equals({})", x_str, y_str)) :-
+rewrite(eq, cat(x_str, ".equals(", y_str, ")")) :-
     equals_expression(eq, x, y),
     has_string_type(x),
     has_string_type(y),
@@ -16,7 +16,7 @@ rewrite(eq, @format2("{}.equals({})", x_str, y_str)) :-
     string_representation(x, x_str),
     string_representation(y, y_str).
 
-rewrite(eq, @format2("{}.equals({})", x_str, y_str)) :-
+rewrite(eq, cat(x_str, ".equals(", y_str, ")")) :-
     equals_expression(eq, x, y),
     has_string_type(x),
     has_string_type(y),
@@ -25,7 +25,7 @@ rewrite(eq, @format2("{}.equals({})", x_str, y_str)) :-
     string_representation(x, x_str),
     string_representation(y, y_str).
 
-rewrite(eq, @format2("{}.equals({})", y_str, x_str)) :-
+rewrite(eq, cat(y_str, ".equals(", x_str, ")")) :-
     equals_expression(eq, x, y),
     has_string_type(x),
     has_string_type(y),

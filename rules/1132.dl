@@ -6,7 +6,7 @@
  */
 
 /* Rewrite foo.equals("x") into "x".equals(foo) */
-rewrite(invocation, @format2("{}.equals({})", arg_str, subject_str)) :-
+rewrite(invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
     method_invocation(invocation, subject, method, [arg, nil]),
     string_literal(arg),
     has_string_type(subject),
@@ -15,7 +15,7 @@ rewrite(invocation, @format2("{}.equals({})", arg_str, subject_str)) :-
     string_representation(subject, subject_str).
 
 /* Rewrite foo != null && foo.equals("x") into "x".equals(foo) */
-rewrite(invocation, @format2("{}.equals({})", arg_str, subject_str)) :-
+rewrite(invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
     conditional_and_expression(and, _, _),
     not_equals_null_expression(noteqnull, noteqnull_subject),
     parent_of(and, _, noteqnull),

@@ -4,7 +4,7 @@
  * https://rules.sonarsource.com/java/RSPEC-2204
  */
 
-rewrite(id, cat(left_str, cat(" == ", right_str))) :-
+rewrite(id, cat(left_str, " == ", right_str)) :-
     method_invocation(id, left, method, [right, nil]),
     has_atomic_class_type(left),
     has_atomic_class_type(right),
