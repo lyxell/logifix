@@ -85,6 +85,11 @@ throw_statement(id, expr) :-
     name_of(id, "throw_statement"),
     parent_of(id, "expression", expr).
 
+.decl expression_statement(id: id, expr: id)
+expression_statement(id, expr) :-
+    name_of(id, "expression_statement"),
+    parent_of(id, "expression", expr).
+
 .decl conditional_and_expression(id: id, left: id, right: id)
 conditional_and_expression(id, left, right) :-
     name_of(id, "conditional_and_expression"),
@@ -277,16 +282,10 @@ evaluates_to_boolean_value(id, 0) :-
 .decl source_code(str: symbol)
 .input source_code
 
-.decl source_code_representation(id: id, str: symbol)
-source_code_representation([name, A, B], substr(code, A, B - A)) :-
+.decl string_representation(id: id, str: symbol)
+string_representation([name, A, B], substr(code, A, B - A)) :-
     ast_node([name, A, B]),
     source_code(code).
-
-.decl string_representation(id: id, str: symbol)
-string_representation(id, str) :-
-    source_code_representation(id, str).
-string_representation(id, str) :-
-    rewrite(id, str).
 
 /* Declared variables
  ********************************/
@@ -347,6 +346,47 @@ is_in_scope_output(var, type_str, start, end) :-
 /* Type checking
  ********************************/
 
+.decl collection_type_name(str: symbol)
+collection_type_name("List").
+collection_type_name("Set").
+collection_type_name("ArrayList").
+collection_type_name("Vector").
+collection_type_name("LinkedList").
+collection_type_name("SortedSet").
+collection_type_name("Queue").
+
+.decl floating_point_type_name(str: symbol)
+floating_point_type_name("float").
+floating_point_type_name("double").
+
+/* Is type */
+
+.decl is_collection_type(id: id)
+is_collection_type(id) :-
+    // TODO: Should take imports into consideration?
+    class_type(id, name, _, _),
+    string_representation(name, name_str),
+    collection_type_name(name_str).
+
+.decl is_exception_type(id: id)
+is_exception_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, name_str),
+    match(".*Exception", name_str).
+
+.decl is_string_type(id: id)
+is_string_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, "String").
+
+.decl is_floating_point_type(id: id)
+is_floating_point_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, name_str),
+    floating_point_type_name(name_str).
+
+/* Has type */
+
 .decl has_type(id: id, type: id)
 has_type(id, type) :-
     identifier(id),
@@ -358,35 +398,16 @@ has_type(id, type) :-
     string_representation(head, head_str),
     is_in_scope(head_str, id, type).
 
-.decl collection_name(str: symbol)
-collection_name("List").
-collection_name("Set").
-collection_name("ArrayList").
-collection_name("Vector").
-collection_name("LinkedList").
-collection_name("SortedSet").
-collection_name("Queue").
-
 .decl has_floating_point_type(id: id)
 has_floating_point_type(id) :- floating_point_literal(id).
-has_floating_point_type(id) :-
-    has_type(id, type),
-    string_representation(type, "double").
+has_floating_point_type(id) :- has_type(id, type), is_floating_point_type(type).
 
 .decl has_string_type(id: id)
 has_string_type(id) :- string_literal(id).
-has_string_type(id) :-
-    has_type(id, type),
-    string_representation(type, "String").
+has_string_type(id) :- has_type(id, type), is_string_type(type).
 
-// TODO: Should take imports into consideration
 .decl has_collection_type(id: id)
-has_collection_type(id) :-
-    has_type(id, type),
-    class_type(type, name, _, _),
-    string_representation(name, name_str),
-    collection_name(name_str).
-
+has_collection_type(id) :- has_type(id, type), is_collection_type(type).
 
 /* Rewrite rules
  ********************************/
@@ -402,4 +423,5 @@ has_collection_type(id) :-
 #include "rules/2204.dl"
 #include "rules/2272.dl"
 #include "rules/2293.dl"
+#include "rules/3984.dl"
 #include "rules/4973.dl"

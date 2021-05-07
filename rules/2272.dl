@@ -10,7 +10,7 @@ throws_no_such_element_exception(method) :-
     ancestor_of(method_body, throw),
     throw_statement(throw, expr),
     class_instance_creation_expression(expr, _, type, _, _),
-    source_code_representation(type, "NoSuchElementException").
+    string_representation(type, "NoSuchElementException").
     
 rewrite(id, "nil") :-
     class_declaration(id, _, _, _, superinterfaces, class_body),
