@@ -41,8 +41,8 @@ is_superlist_of(list, list) :-
 is_superlist_of(list, tail) :-
     is_superlist_of(list, [_, tail]).
 
-.decl in_list(id: id, list: id_list)
-in_list(head, superlist) :-
+.decl list_contains(list: id_list, id: id)
+list_contains(superlist, head) :-
     is_superlist_of(superlist, [head, _]).
 
 /* ancestor_of is the transitive closure of parent_of and parent_of list */
@@ -54,11 +54,11 @@ ancestor_of(x, z) :-
     parent_of(y, _, z).
 ancestor_of(x, y) :-
     parent_of_list(x, _, children),
-    in_list(y, children).
+    list_contains(children, y).
 ancestor_of(x, z) :-
     ancestor_of(x, y),
     parent_of_list(y, _, children),
-    in_list(z, children).
+    list_contains(children, z).
 
 .decl head_of(head: id, tail: id_list)
 head_of(head, tail) :-
@@ -79,6 +79,11 @@ precedes(x, z) :-
 
 /* AST node types
  ********************************/
+
+.decl throw_statement(id: id, expr: id)
+throw_statement(id, expr) :-
+    name_of(id, "throw_statement"),
+    parent_of(id, "expression", expr).
 
 .decl conditional_and_expression(id: id, left: id, right: id)
 conditional_and_expression(id, left, right) :-
@@ -122,12 +127,13 @@ not_equals_expression(id, left, right) :-
     parent_of(id, "left", left),
     parent_of(id, "right", right).
 
-.decl class_declaration(id: id, modifiers: id_list, type: id, superclass: id, body: id_list)
-class_declaration(id, mods, type, superclass, body) :-
+.decl class_declaration(id: id, modifiers: id_list, type: id, superclass: id, superinterfaces: id_list, body: id_list)
+class_declaration(id, mods, type, superclass, superinterfaces, body) :-
     name_of(id, "class_declaration"),
     parent_of_list(id, "modifiers", mods),
     parent_of(id, "type", type),
     parent_of(id, "superclass", superclass),
+    parent_of_list(id, "superinterfaces", superinterfaces),
     parent_of_list(id, "body", body).
 
 .decl field_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
@@ -219,7 +225,8 @@ not_equals_null_expression(id, subject) :-
     not_equals_expression(id, _, _),
     parent_of(id, _, subject),
     parent_of(id, _, null),
-    string_representation(null, "null").
+    string_representation(null, "null"),
+    subject != null.
 
 /* Constant evaluation
  ********************************/
@@ -270,17 +277,21 @@ evaluates_to_boolean_value(id, 0) :-
 .decl source_code(str: symbol)
 .input source_code
 
-.decl string_representation(to: id, str: symbol)
-string_representation([name, A, B], substr(code, A, B - A)) :-
+.decl source_code_representation(id: id, str: symbol)
+source_code_representation([name, A, B], substr(code, A, B - A)) :-
     ast_node([name, A, B]),
     source_code(code).
-string_representation(x, str) :-
-    rewrite(x, str).
+
+.decl string_representation(id: id, str: symbol)
+string_representation(id, str) :-
+    source_code_representation(id, str).
+string_representation(id, str) :-
+    rewrite(id, str).
 
 /* Declared variables
  ********************************/
 
-.decl is_in_scope(variable: symbol, at: id, type: id)
+.decl is_in_scope(identifier: symbol, at: id, type: id)
 
 /**
  * The scope of a local variable declaration in a block (§14.2) is the rest of
@@ -292,12 +303,12 @@ string_representation(x, str) :-
 
 /* Make field declarations accessible in the methods of a class. */
 is_in_scope(name_str, method_body, type) :-
-    class_declaration(_, _, _, _, class_body),
-    in_list(field, class_body),
-    in_list(method, class_body),
+    class_declaration(_, _, _, _, _, class_body),
+    list_contains(class_body, field),
+    list_contains(class_body, method),
     field_declaration(field, _, type, declarators),
     method_declaration(method, _, _, method_body),
-    in_list(declarator, declarators),
+    list_contains(declarators, declarator),
     variable_declarator(declarator, name, _),
     string_representation(name, name_str).
 
@@ -306,7 +317,7 @@ is_in_scope(name_str, body, type) :-
     method_declaration(_, _, header, body),
     method_header(header, _, declarator, _),
     parent_of_list(declarator, "params", params),
-    in_list(param, params),
+    list_contains(params, param),
     formal_parameter(param, _, type, name),
     string_representation(name, name_str).
 
@@ -315,7 +326,7 @@ is_in_scope(name_str, body, type) :-
 is_in_scope(name_str, statement, type) :-
     local_variable_declaration(declaration, type, declarators, _),
     precedes(declaration, statement),
-    in_list(declarator, declarators),
+    list_contains(declarators, declarator),
     variable_declarator(declarator, name, _),
     string_representation(name, name_str).
 
@@ -357,49 +368,25 @@ collection_name("SortedSet").
 collection_name("Queue").
 
 .decl has_floating_point_type(id: id)
+has_floating_point_type(id) :- floating_point_literal(id).
 has_floating_point_type(id) :-
-    floating_point_literal(id).
-has_floating_point_type(id) :-
-    identifier(id),
-    string_representation(id, id_str),
-    is_in_scope(id_str, id, type),
+    has_type(id, type),
     string_representation(type, "double").
-has_floating_point_type(id) :-
-    identifier(id),
-    string_representation(id, id_str),
-    is_in_scope(id_str, id, type),
-    string_representation(type, "float").
-has_floating_point_type(id) :-
-    expression_name(id, [head, nil]),
-    has_floating_point_type(head).
 
 .decl has_string_type(id: id)
+has_string_type(id) :- string_literal(id).
 has_string_type(id) :-
-    string_literal(id).
-has_string_type(id) :-
-    identifier(id),
-    string_representation(id, id_str),
-    is_in_scope(id_str, id, type),
-    class_type(type, name, _, _),
-    string_representation(name, "String").
-has_string_type(id) :-
-    expression_name(id, [head, nil]),
-    has_string_type(head).
+    has_type(id, type),
+    string_representation(type, "String").
 
 // TODO: Should take imports into consideration
 .decl has_collection_type(id: id)
 has_collection_type(id) :-
-    identifier(id),
-    string_representation(id, id_str),
-    is_in_scope(id_str, id, type),
+    has_type(id, type),
     class_type(type, name, _, _),
     string_representation(name, name_str),
     collection_name(name_str).
 
-has_collection_type(id) :-
-    expression_name(id, [head, nil]),
-    has_collection_type(head).
-    
 
 /* Rewrite rules
  ********************************/
@@ -413,5 +400,6 @@ has_collection_type(id) :-
 #include "rules/1596.dl"
 #include "rules/2111.dl"
 #include "rules/2204.dl"
+#include "rules/2272.dl"
 #include "rules/2293.dl"
 #include "rules/4973.dl"

@@ -1,0 +1,21 @@
+/**
+ * "Iterator.next()" methods should throw "NoSuchElementException"
+ *
+ * https://rules.sonarsource.com/java/RSPEC-2272
+ */
+
+.decl throws_no_such_element_exception(method: id)
+throws_no_such_element_exception(method) :-
+    method_declaration(method, _, _, method_body),
+    ancestor_of(method_body, throw),
+    throw_statement(throw, expr),
+    class_instance_creation_expression(expr, _, type, _, _),
+    source_code_representation(type, "NoSuchElementException").
+    
+rewrite(id, "nil") :-
+    class_declaration(id, _, _, _, superinterfaces, class_body),
+    list_contains(superinterfaces, interface),
+    string_representation(interface, "Iterator"),
+    list_contains(class_body, method),
+    method_declaration(method, _, _, _),
+    ! throws_no_such_element_exception(method).

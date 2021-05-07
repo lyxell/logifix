@@ -8,7 +8,7 @@
 rewrite(instance_type, cat(name_str, "<>")) :-
     local_variable_declaration(_, declaration_type, declarators, nil),
     class_type(declaration_type, _, [x, nil], _),
-    in_list(declarator, declarators),
+    list_contains(declarators, declarator),
     variable_declarator(declarator, _, creator),
     class_instance_creation_expression(creator, nil, instance_type, nil, nil),
     class_type(instance_type, name, [y, nil], _),
