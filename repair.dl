@@ -122,12 +122,34 @@ not_equals_expression(id, left, right) :-
     parent_of(id, "left", left),
     parent_of(id, "right", right).
 
+.decl method_declaration(id: id, modifiers: id_list, header: id, body: id)
+method_declaration(id, mods, header, body) :-
+    name_of(id, "method_declaration"),
+    parent_of(id, "header", header),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "body", body).
+
+.decl method_header(id: id, result: id, declarator: id, throws: id)
+method_header(id, result, declarator, throws) :-
+    name_of(id, "method_header"),
+    parent_of(id, "result", result),
+    parent_of(id, "declarator", declarator),
+    parent_of(id, "throws", throws).
+
+
 .decl method_invocation(id: id, subject: id, method: id, arguments: id_list)
 method_invocation(id, subject, method, arguments) :-
     name_of(id, "method_invocation"),
     parent_of(id, "subject", subject),
     parent_of(id, "method", method),
     parent_of_list(id, "arguments", arguments).
+
+.decl formal_parameter(id: id, modifiers: id_list, type: id, name: id)
+formal_parameter(id, modifiers, type, name) :-
+    name_of(id, "formal_parameter"),
+    parent_of_list(id, "modifiers", modifiers),
+    parent_of(id, "type", type),
+    parent_of(id, "name", name).
 
 .decl local_variable_declaration(id: id, type: id, declarators: id_list, modifiers: id_list)
 local_variable_declaration(id, type, declarators, modifiers) :-
@@ -250,7 +272,14 @@ is_declared_at(name_str, parent, type) :-
     variable_declarator(declarator, name, _),
     string_representation(name, name_str).
 
-.decl is_in_scope(variable: symbol, id: id, type: id)
+.decl is_in_scope(variable: symbol, at: id, type: id)
+is_in_scope(name_str, body, type) :-
+    method_declaration(_, _, header, body),
+    method_header(header, _, declarator, _),
+    parent_of_list(declarator, "params", params),
+    in_list(param, params),
+    formal_parameter(param, _, type, name),
+    string_representation(name, name_str).
 /**
  * The scope of a local variable declaration in a block (§14.2) is the rest of
  * the block in which the declaration appears, starting with its own
@@ -258,12 +287,10 @@ is_declared_at(name_str, parent, type) :-
  * the local variable declaration statement.
  * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
  */
-//is_in_scope(name_str, initializer) :-
-//    variable_declarator(_, name, initializer),
-//    string_representation(name, name_str).
 is_in_scope(name_str, statement, type) :-
     precedes(declaration, statement),
-    is_declared_at(name_str, declaration, type).
+    is_declared_at(name_str, declaration, type),
+    local_variable_declaration(declaration, type, _, _).
 is_in_scope(name_str, descendant, type) :-
     is_in_scope(name_str, ancestor, type),
     ancestor_of(ancestor, descendant).
