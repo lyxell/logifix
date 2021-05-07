@@ -15,7 +15,8 @@ throws_no_such_element_exception(method) :-
 rewrite(id, "nil") :-
     class_declaration(id, _, _, _, superinterfaces, class_body),
     list_contains(superinterfaces, interface),
-    string_representation(interface, "Iterator"),
+    class_type(interface, interface_name, _, _),
+    string_representation(interface_name, "Iterator"),
     list_contains(class_body, method),
     method_declaration(method, _, _, _),
     ! throws_no_such_element_exception(method).
