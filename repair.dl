@@ -122,6 +122,21 @@ not_equals_expression(id, left, right) :-
     parent_of(id, "left", left),
     parent_of(id, "right", right).
 
+.decl class_declaration(id: id, modifiers: id_list, type: id, superclass: id, body: id_list)
+class_declaration(id, mods, type, superclass, body) :-
+    name_of(id, "class_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "type", type),
+    parent_of(id, "superclass", superclass),
+    parent_of_list(id, "body", body).
+
+.decl field_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
+field_declaration(id, mods, type, declarators) :-
+    name_of(id, "field_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "type", type),
+    parent_of_list(id, "declarators", declarators).
+
 .decl method_declaration(id: id, modifiers: id_list, header: id, body: id)
 method_declaration(id, mods, header, body) :-
     name_of(id, "method_declaration"),
@@ -265,21 +280,8 @@ string_representation(x, str) :-
 /* Declared variables
  ********************************/
 
-.decl is_declared_at(variable: symbol, id: id, type: id)
-is_declared_at(name_str, parent, type) :-
-    local_variable_declaration(parent, type, declarators, _),
-    in_list(declarator, declarators),
-    variable_declarator(declarator, name, _),
-    string_representation(name, name_str).
-
 .decl is_in_scope(variable: symbol, at: id, type: id)
-is_in_scope(name_str, body, type) :-
-    method_declaration(_, _, header, body),
-    method_header(header, _, declarator, _),
-    parent_of_list(declarator, "params", params),
-    in_list(param, params),
-    formal_parameter(param, _, type, name),
-    string_representation(name, name_str).
+
 /**
  * The scope of a local variable declaration in a block (§14.2) is the rest of
  * the block in which the declaration appears, starting with its own
@@ -287,14 +289,42 @@ is_in_scope(name_str, body, type) :-
  * the local variable declaration statement.
  * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
  */
+
+/* Make field declarations accessible in the methods of a class. */
+is_in_scope(name_str, method_body, type) :-
+    class_declaration(_, _, _, _, class_body),
+    in_list(field, class_body),
+    in_list(method, class_body),
+    field_declaration(field, _, type, declarators),
+    method_declaration(method, _, _, method_body),
+    in_list(declarator, declarators),
+    variable_declarator(declarator, name, _),
+    string_representation(name, name_str).
+
+/* Make formal parameters accessible in the body of a method. */
+is_in_scope(name_str, body, type) :-
+    method_declaration(_, _, header, body),
+    method_header(header, _, declarator, _),
+    parent_of_list(declarator, "params", params),
+    in_list(param, params),
+    formal_parameter(param, _, type, name),
+    string_representation(name, name_str).
+
+/* Make local variable declarations accessible in the succeeding
+   statements */
 is_in_scope(name_str, statement, type) :-
+    local_variable_declaration(declaration, type, declarators, _),
     precedes(declaration, statement),
-    is_declared_at(name_str, declaration, type),
-    local_variable_declaration(declaration, type, _, _).
+    in_list(declarator, declarators),
+    variable_declarator(declarator, name, _),
+    string_representation(name, name_str).
+
+/* Propagate scope of variables in the AST */
 is_in_scope(name_str, descendant, type) :-
     is_in_scope(name_str, ancestor, type),
     ancestor_of(ancestor, descendant).
 
+/* Output for user interface */
 .decl is_in_scope_output(variable: symbol, type: symbol, start: number, end: number)
 .output is_in_scope_output
 is_in_scope_output(var, type_str, start, end) :-
