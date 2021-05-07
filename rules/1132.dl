@@ -6,8 +6,6 @@
  */
 
 /* Rewrite foo.equals("x") into "x".equals(foo) */
-
-//rewrite(invocation, cat(arg_str, cat(".equals(", cat(subject_str, ")")))) :-
 rewrite(invocation, @format2("{}.equals({})", arg_str, subject_str)) :-
     method_invocation(invocation, subject, method, [arg, nil]),
     string_literal(arg),
