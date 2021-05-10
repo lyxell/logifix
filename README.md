@@ -1,4 +1,4 @@
-# squarelog
+# SquareLog
 
 SquareLog automatically repairs SonarQube static analysis
 violations for Java. SquareLog is implemented in a high-performance
