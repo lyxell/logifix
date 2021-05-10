@@ -8,6 +8,10 @@ code.
 SquareLog is built to be easily integrated into IDEs, CLI tools,
 CI pipelines and bots.
 
+See [the demo](https://github.com/lyxell/squarelog-demo), for an
+example of an IDE-like user interface with a SquareLog
+integration.
+
 ## Implemented rules
 
 SquareLog can currently fix violations for the following
@@ -23,10 +27,3 @@ SonarQube rules:
 * [S2293 - The diamond operator ("<>") should be used](https://github.com/lyxell/squarelog/blob/master/rules/2293.dl)
 * [S3984 - Exceptions should not be created without being thrown](https://github.com/lyxell/squarelog/blob/master/rules/3984.dl)
 * [S4973 - Strings and Boxed types should be compared using equals()](https://github.com/lyxell/squarelog/blob/master/rules/4973.dl)
-
-## Demo
-
-See
-[lyxell/squarelog-demo](https://github.com/lyxell/squarelog-demo),
-for an example of an IDE-like user interface with a SquareLog
-integration.
