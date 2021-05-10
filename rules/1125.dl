@@ -6,8 +6,10 @@
 
 // TODO: Ternaries, Conditional or, Conditional and
 
+#define MESSAGE "Remove this unnecessary boolean literal."
+
 /* Rewrite x == y into x if y evaluates to false */
-rewrite(eq_expr, other_expr_str) :-
+rewrite(MESSAGE, eq_expr, other_expr_str) :-
     equals_expression(eq_expr, _, _),
     parent_of(eq_expr, _, true_expr),
     parent_of(eq_expr, _, other_expr),
@@ -17,7 +19,7 @@ rewrite(eq_expr, other_expr_str) :-
 
 /* Rewrite x == y into !x if y evaluates to true */
 // TODO, add parens when necessary
-rewrite(eq_expr, cat("!", other_expr_str)) :-
+rewrite(MESSAGE,eq_expr, cat("!", other_expr_str)) :-
     equals_expression(eq_expr, _, _),
     parent_of(eq_expr, _, false_expr),
     parent_of(eq_expr, _, other_expr),

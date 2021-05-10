@@ -31,7 +31,7 @@ class repair {
     void add_string(const char* filename, const char* content);
     void run();
     node_ptr get_ast(const char* filename);
-    std::vector<std::tuple<int, int, std::string>>
+    std::vector<std::tuple<int, int, std::string, std::string>>
     get_possible_repairs(const char* filename);
     std::vector<std::tuple<std::string,std::string,int,int>>
     get_variables_in_scope(const char* filename);

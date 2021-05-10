@@ -426,7 +426,7 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 /* Rewrite rules
  ********************************/
 
-.decl rewrite(from: id, to: symbol)
+.decl rewrite(message: symbol, from: id, to: symbol)
 .output rewrite
 
 #include "rules/1125.dl"

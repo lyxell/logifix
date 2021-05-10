@@ -8,7 +8,9 @@
 
 // TODO: change has_string_type to has_string_or_boxed_type
 
-rewrite(eq, cat(x_str, ".equals(", y_str, ")")) :-
+#define MESSAGE "Use the \"equals\" method if value comparison was intended."
+
+rewrite(MESSAGE, eq, cat(x_str, ".equals(", y_str, ")")) :-
     equals_expression(eq, x, y),
     has_string_type(x),
     has_string_type(y),
@@ -16,7 +18,7 @@ rewrite(eq, cat(x_str, ".equals(", y_str, ")")) :-
     string_representation(x, x_str),
     string_representation(y, y_str).
 
-rewrite(eq, cat(x_str, ".equals(", y_str, ")")) :-
+rewrite(MESSAGE, eq, cat(x_str, ".equals(", y_str, ")")) :-
     equals_expression(eq, x, y),
     has_string_type(x),
     has_string_type(y),
@@ -25,7 +27,7 @@ rewrite(eq, cat(x_str, ".equals(", y_str, ")")) :-
     string_representation(x, x_str),
     string_representation(y, y_str).
 
-rewrite(eq, cat(y_str, ".equals(", x_str, ")")) :-
+rewrite(MESSAGE, eq, cat(y_str, ".equals(", x_str, ")")) :-
     equals_expression(eq, x, y),
     has_string_type(x),
     has_string_type(y),

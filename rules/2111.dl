@@ -4,7 +4,9 @@
  * https://rules.sonarsource.com/java/RSPEC-2111
  */
 
-rewrite(id, cat("BigDecimal.valueOf(", arg_str, ")")) :-
+#define MESSAGE "Use \"BigDecimal.valueOf\" instead."
+
+rewrite(MESSAGE, id, cat("BigDecimal.valueOf(", arg_str, ")")) :-
     class_instance_creation_expression(id, nil, type, args, nil),
     args = [arg, nil],
     has_floating_point_type(arg),

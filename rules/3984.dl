@@ -4,7 +4,9 @@
  * https://rules.sonarsource.com/java/RSPEC-3984
  */
 
-rewrite(stmt, cat("throw ", stmt_str)) :-
+#define MESSAGE "Throw this exception or remove this useless statement"
+
+rewrite(MESSAGE, stmt, cat("throw ", stmt_str)) :-
     expression_statement(stmt, class_instance_creation),
     string_representation(stmt, stmt_str),
     class_instance_creation_expression(class_instance_creation, _, type, _, _),

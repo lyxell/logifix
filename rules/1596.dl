@@ -4,9 +4,13 @@
  * https://rules.sonarsource.com/java/RSPEC-1596
  */
 
-rewrite(id, "Collections.emptyList()") :-
+// TODO Fix message
+
+#define MESSAGE "Replace Collections.EMPTY_LIST by Collections.emptyList()."
+
+rewrite(MESSAGE, id, "Collections.emptyList()") :-
     string_representation(id, "Collections.EMPTY_LIST").
-rewrite(id, "Collections.emptyMap()") :-
+rewrite(MESSAGE, id, "Collections.emptyMap()") :-
     string_representation(id, "Collections.EMPTY_MAP").
-rewrite(id, "Collections.emptySet()") :-
+rewrite(MESSAGE, id, "Collections.emptySet()") :-
     string_representation(id, "Collections.EMPTY_SET").
