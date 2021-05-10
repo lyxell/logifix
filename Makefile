@@ -1,5 +1,5 @@
-TARGET=datalog-repair.a
-OBJS=sjp/sjp.o sjp/parser.o repair.o program.o functors.o
+TARGET=squarelog.a
+OBJS=sjp/sjp.o sjp/parser.o repair.o program.o
 CXXFLAGS = -std=c++17 -O2 -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
 RULE_FILES := $(shell find rules/ -name '*.dl')
 
