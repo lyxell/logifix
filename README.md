@@ -8,7 +8,7 @@ code.
 SquareLog is built to be easily integrated into IDEs, CLI tools,
 CI pipelines and bots.
 
-See [the demo](https://github.com/lyxell/squarelog-demo), for an
+[See the demo](https://github.com/lyxell/squarelog-demo) for an
 example of an IDE-like user interface with a SquareLog
 integration.
 
