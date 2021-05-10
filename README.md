@@ -9,7 +9,7 @@ CI pipelines and bots.
 
 ## Implemented rules
 
-SquareLog can currently repair violations for the following
+SquareLog can currently fix violations for the following
 SonarQube rules:
 
 * [S1125 - Boolean literals should not be redundant](https://github.com/lyxell/squarelog/blob/master/rules/1125.dl)
