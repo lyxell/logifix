@@ -2,7 +2,7 @@
 
 SquareLog automatically repairs SonarQube static analysis
 violations for Java. SquareLog is implemented in a high-performance
-Datalog dialect and is transpiled to fast multi-threaded C++
+Datalog dialect that is synthesized into fast multi-threaded C++
 code.
 
 SquareLog is built to be easily integrated into IDEs, CLI tools,
