@@ -4,7 +4,7 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-2293
  */
 
-#define MESSAGE "Replace the type specification in this constructor call with the diamond operator (<>)."
+#define MESSAGE "Replace the type specification in this constructor call with the diamond operator (<>)"
 
 /* Rewrite Type<X> x = new Type<X>() into Type<X> x = new Type<>() */
 rewrite(MESSAGE, instance_type, cat(name_str, "<>")) :-

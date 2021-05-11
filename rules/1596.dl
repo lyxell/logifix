@@ -6,7 +6,7 @@
 
 // TODO Fix message
 
-#define MESSAGE "Replace Collections.EMPTY_LIST by Collections.emptyList()."
+#define MESSAGE "Replace Collections.EMPTY_LIST by Collections.emptyList()"
 
 rewrite(MESSAGE, id, "Collections.emptyList()") :-
     string_representation(id, "Collections.EMPTY_LIST").
