@@ -1,5 +1,7 @@
-#include "repair.h"
+#include "squarelog.h"
 #include <iostream>
+
+namespace squarelog {
 
 repair::repair() : program(souffle::ProgramFactory::newInstance("program")) {
     assert(program != nullptr);
@@ -167,4 +169,6 @@ repair::get_variables_in_scope(const char* filename) {
         result.emplace_back(variable, type, starts_at, ends_at);
     }
     return result;
+}
+
 }

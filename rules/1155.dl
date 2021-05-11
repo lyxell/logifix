@@ -4,7 +4,7 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1155
  */
 
-#define MESSAGE "Use isEmpty() to check whether the collection is empty or not."
+#define MESSAGE "Use isEmpty() to check whether the collection is empty or not"
 
 /* Rewrite x.size() == 0 into x.isEmpty() */
 rewrite(MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-

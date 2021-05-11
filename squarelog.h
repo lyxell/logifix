@@ -4,6 +4,8 @@
 #include <map>
 #include <optional>
 
+namespace squarelog {
+
 using node_ptr = std::shared_ptr<sjp::tree_node>;
 
 class repair {
@@ -41,3 +43,5 @@ class repair {
     get_hovered_node(const char* filename, size_t buffer_position);
 
 };
+
+}

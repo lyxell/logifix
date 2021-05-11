@@ -4,6 +4,8 @@
  * https://rules.sonarsource.com/java/RSPEC-2272
  */
 
+#define MESSAGE "Add a NoSuchElementException for iteration beyond the end of the collection"
+
 .decl throws_no_such_element_exception(method: id)
 throws_no_such_element_exception(method) :-
     method_declaration(method, _, _, method_body),
@@ -12,7 +14,7 @@ throws_no_such_element_exception(method) :-
     class_instance_creation_expression(expr, _, type, _, _),
     string_representation(type, "NoSuchElementException").
     
-rewrite("", id, "nil") :-
+rewrite(MESSAGE, id, "nil") :-
     class_declaration(id, _, _, _, superinterfaces, class_body),
     list_contains(superinterfaces, interface),
     class_type(interface, interface_name, _, _),

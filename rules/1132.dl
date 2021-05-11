@@ -5,7 +5,7 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1132
  */
 
-#define MESSAGE "Place the string literal on the left hand side to avoid a null pointer exception."
+#define MESSAGE "Place the string literal on the left hand side to avoid a null pointer exception"
 
 /* Rewrite foo.equals("x") into "x".equals(foo) */
 rewrite(MESSAGE, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-

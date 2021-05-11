@@ -6,7 +6,7 @@
 
 // TODO: Ternaries, Conditional or, Conditional and
 
-#define MESSAGE "Remove this unnecessary boolean literal."
+#define MESSAGE "Remove this unnecessary boolean literal"
 
 /* Rewrite x == y into x if y evaluates to false */
 rewrite(MESSAGE, eq_expr, other_expr_str) :-

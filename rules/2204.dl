@@ -4,7 +4,7 @@
  * https://rules.sonarsource.com/java/RSPEC-2204
  */
 
-#define MESSAGE "Use .get() to retrieve the value and compare it instead."
+#define MESSAGE "Use .get() to retrieve the value and compare it instead"
 
 rewrite(MESSAGE, id, cat(left_str, ".get() == ", right_str, ".get()")) :-
     method_invocation(id, left, method, [right, nil]),

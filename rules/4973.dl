@@ -8,7 +8,7 @@
 
 // TODO: change has_string_type to has_string_or_boxed_type
 
-#define MESSAGE "Use the equals method if value comparison was intended."
+#define MESSAGE "Use the equals method if value comparison was intended"
 
 rewrite(MESSAGE, eq, cat(x_str, ".equals(", y_str, ")")) :-
     equals_expression(eq, x, y),
