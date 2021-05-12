@@ -1,5 +1,5 @@
-TARGET=squarelog.a
-OBJS=sjp/sjp.o sjp/parser.o squarelog.o program.o
+TARGET=logifix.a
+OBJS=sjp/sjp.o sjp/parser.o logifix.o program.o
 CXXFLAGS = -std=c++17 -O2 -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
 RULE_FILES := $(shell find rules/ -name '*.dl')
 
@@ -11,7 +11,7 @@ endif
 
 all: $(TARGET)
 
-squarelog.o: sjp/sjp.h
+logifix.o: sjp/sjp.h
 
 program.cpp: repair.dl $(RULE_FILES)
 	$(SOUFFLE) --generate=$@ repair.dl

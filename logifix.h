@@ -4,7 +4,7 @@
 #include <map>
 #include <optional>
 
-namespace squarelog {
+namespace logifix {
 
 using node_ptr = std::shared_ptr<sjp::tree_node>;
 

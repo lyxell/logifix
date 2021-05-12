@@ -1,7 +1,7 @@
-#include "squarelog.h"
+#include "logifix.h"
 #include <iostream>
 
-namespace squarelog {
+namespace logifix {
 
 repair::repair() : program(souffle::ProgramFactory::newInstance("program")) {
     assert(program != nullptr);
