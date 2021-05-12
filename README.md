@@ -10,6 +10,12 @@ CI pipelines and bots.
 
 ## Demo
 
+### Collection.isEmpty() should be used to test for emptiness
+
+![](https://i.imgur.com/LQSJ2mG.gif)
+
+* [SonarJava rule S1155](https://rules.sonarsource.com/java/RSPEC-1155)
+
 ### Strings and Boxed types should be compared using equals()
 
 ![](https://i.imgur.com/OT5nvEp.gif)
