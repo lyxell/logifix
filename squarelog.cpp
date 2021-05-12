@@ -127,34 +127,6 @@ repair::get_possible_repairs(const char* filename) {
     return result;
 }
 
-node_ptr
-repair::get_hovered_node(const char* filename, size_t buffer_position) {
-    node_ptr curr = get_ast(filename);
-    if (!curr) return curr;
-    while (true) {
-        node_ptr candidate = nullptr;
-        for (const auto& [symbol, child] : curr->parent_of) {
-            if (!child) continue;
-            if (child->start_token <= buffer_position &&
-                child->end_token   >= buffer_position) {
-                candidate = child; 
-            }
-        }
-        for (const auto& [symbol, children] : curr->parent_of_list) {
-            for (const auto& child : children) {
-                if (!child) continue;
-                if (child->start_token <= buffer_position &&
-                    child->end_token   >= buffer_position) {
-                    candidate = child; 
-                }
-            }
-        }
-        if (!candidate) break;
-        curr = candidate;
-    }
-    return curr;
-}
-
 std::vector<std::tuple<std::string,std::string,int,int>>
 repair::get_variables_in_scope(const char* filename) {
     std::vector<std::tuple<std::string,std::string,int,int>> result;
