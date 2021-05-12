@@ -1,4 +1,6 @@
-# SquareLog
+<h1 align="center">
+  <img src="https://i.imgur.com/Ss9j3IE.png alt="Logifix">
+</h1>
 
 SquareLog automatically repairs SonarQube static analysis
 violations for Java. SquareLog is implemented in a high-performance
