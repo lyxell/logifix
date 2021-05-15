@@ -1,109 +1,104 @@
 #include "logifix.h"
 #include <iostream>
 
+static const char* PROGRAM_NAME = "logifix";
+
 namespace logifix {
 
-repair::repair() : program(souffle::ProgramFactory::newInstance("program")) {
+repair::repair() : program(souffle::ProgramFactory::newInstance(PROGRAM_NAME)) {
     assert(program != nullptr);
 }
 
-node_ptr repair::get_ast(const char* filename) {
-    return parser.get_ast(filename);
+sjp::ast repair::get_ast(const char* filename) {
+    return asts[filename];
 }
 
 void repair::add_file(const char* filename) {
-    filenames.emplace_back(filename);
-    parser.add_file(filename);
+    std::ifstream t(filename);
+    auto content = std::string((std::istreambuf_iterator<char>(t)),
+                           std::istreambuf_iterator<char>());
+    source_code[filename] = content;
+    asts[filename] = sjp::parse_string(content.c_str());
 }
 
 void repair::add_string(const char* filename, const char* content) {
-    souffle::Relation* source_code = program->getRelation("source_code");
-    assert(source_code != nullptr);
-    souffle::tuple tuple(source_code);
-    tuple << std::string(content);
-    source_code->insert(tuple);
-    filenames.emplace_back(filename);
-    parser.add_string(filename, content);
+    asts[filename] = sjp::parse_string(content);
 }
 
 std::tuple<std::string, int, int>
-repair::get_ast_node_from_id(const char* filename, int id) {
+repair::get_ast_node_from_id(int id) {
     const auto* record = program->getRecordTable().unpack(id, 3);
     assert(record != nullptr);
     return std::tuple(program->getSymbolTable().decode(record[0]), record[1],
                       record[2]);
 }
 
-int repair::ast_node_to_record(node_ptr node) {
+int repair::ast_node_to_record(sjp::ast& ast, sjp::ast_node node) {
     if (!node) {
         return 0;
     }
-    std::array<souffle::RamDomain, 3> data = {
-        program->getSymbolTable().encode(node->name),
-        node->start_token, node->end_token};
-    return program->getRecordTable().pack(data.data(), 3);
+    std::array<souffle::RamDomain, 3> arr = {
+        program->getSymbolTable().encode(ast.name[node]),
+        int32_t(ast.starts_at[node]), int32_t(ast.ends_at[node])};
+    return program->getRecordTable().pack(arr.data(), 3);
 }
 
-int repair::vector_of_ast_nodes_to_record(const std::vector<node_ptr>& nodes,
-                                          int offset) {
+int repair::vector_of_ast_nodes_to_record(sjp::ast& ast, const std::vector<sjp::ast_node>& nodes,
+                                          size_t offset) {
     if (offset == nodes.size()) {
         return 0;
     }
     std::array<souffle::RamDomain, 2> data = {
-        ast_node_to_record(nodes[offset]),
-        vector_of_ast_nodes_to_record(nodes, offset + 1)};
+        ast_node_to_record(ast, nodes[offset]),
+        vector_of_ast_nodes_to_record(ast, nodes, offset + 1)};
     return program->getRecordTable().pack(data.data(), 2);
 }
 
-void repair::insert_ast_node(node_ptr node) {
+void repair::insert_ast_node(sjp::ast& ast, sjp::ast_node node) {
     auto* relation = program->getRelation("ast_node");
     assert(relation != nullptr);
-    relation->insert(souffle::tuple(relation, {ast_node_to_record(node)}));
+    relation->insert(souffle::tuple(relation, {ast_node_to_record(ast, node)}));
 }
 
 int repair::string_to_id(const std::string& str) {
     return program->getSymbolTable().encode(str);
 }
 
-void repair::insert_parent_of(node_ptr parent, std::string s, node_ptr child) {
+void repair::insert_parent_of(sjp::ast& ast, sjp::ast_node parent, const std::string& s, sjp::ast_node child) {
     auto* relation = program->getRelation("parent_of");
     assert(relation != nullptr);
     relation->insert(
-        souffle::tuple(relation, {ast_node_to_record(parent), string_to_id(s),
-                                  ast_node_to_record(child)}));
+        souffle::tuple(relation, {ast_node_to_record(ast, parent), string_to_id(s),
+                                  ast_node_to_record(ast, child)}));
 }
 
-void repair::insert_parent_of_list(node_ptr parent, std::string s,
-                                   const std::vector<node_ptr>& children) {
+void repair::insert_parent_of_list(sjp::ast& ast, sjp::ast_node parent, std::string s,
+                                   const std::vector<sjp::ast_node>& children) {
     auto* relation = program->getRelation("parent_of_list");
     assert(relation != nullptr);
     relation->insert(
-        souffle::tuple(relation, {ast_node_to_record(parent), string_to_id(s),
-                                  vector_of_ast_nodes_to_record(children, 0)}));
+        souffle::tuple(relation, {ast_node_to_record(ast, parent), string_to_id(s),
+                                  vector_of_ast_nodes_to_record(ast, children, 0)}));
 }
 
-void repair::insert_node_data(node_ptr node) {
-    if (node == nullptr) {
+void repair::insert_node_data(sjp::ast& ast, sjp::ast_node node) {
+    if (node == 0) {
         return;
     }
-    insert_ast_node(node);
-    for (const auto& [symbol, child] : node->parent_of) {
-        insert_parent_of(node, symbol, child);
-        insert_node_data(child);
+    insert_ast_node(ast, node);
+    for (const auto& [symbol, child] : ast.parent_of[node]) {
+        insert_parent_of(ast, node, symbol, child);
+        insert_node_data(ast, child);
     }
-    for (const auto& [symbol, children] : node->parent_of_list) {
-        insert_parent_of_list(node, symbol, children);
+    for (const auto& [symbol, children] : ast.parent_of_list[node]) {
+        insert_parent_of_list(ast, node, symbol, children);
         for (const auto& child : children) {
-            insert_node_data(child);
+            insert_node_data(ast, child);
         }
     }
 }
 
 void repair::run() {
-    parser.run();
-    for (const auto& name : filenames) {
-        insert_node_data(parser.get_ast(name.c_str()));
-    }
     program->run();
     program->printAll();
 }
@@ -121,7 +116,7 @@ repair::get_possible_repairs(const char* filename) {
         if (id == 0) {
             continue;
         }
-        auto [str, a, b] = get_ast_node_from_id(filename, id);
+        auto [str, a, b] = get_ast_node_from_id(id);
         result.emplace_back(a, b, replacement, message);
     }
     return result;

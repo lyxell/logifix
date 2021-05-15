@@ -1,6 +1,6 @@
 TARGET=logifix.a
-OBJS=sjp/sjp.o sjp/parser.o logifix.o program.o
-CXXFLAGS = -std=c++17 -O2 -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
+OBJS=sjp/parser.o sjp/lexer.o sjp/program.o program.o repair.o
+CXXFLAGS = -std=c++17 -O2 -g -Wfatal-errors -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
 RULE_FILES := $(shell find rules/ -name '*.dl')
 
 SOUFFLE=souffle
@@ -13,18 +13,24 @@ all: $(TARGET)
 
 logifix.o: sjp/sjp.h
 
-program.cpp: repair.dl $(RULE_FILES)
-	$(SOUFFLE) --generate=$@ repair.dl
+program.o: program.dl $(RULE_FILES)
+	$(SOUFFLE) --generate=logifix $<
+	$(CXX) $(CXXFLAGS) logifix.cpp -c -o $@
+	rm logifix.cpp
 
 $(TARGET): $(OBJS)
 	$(AR) -rc $(TARGET) $^
 
-.PHONY: sjp/sjp.o sjp/parser.o clean
-sjp/sjp.o:
-	$(MAKE) -C sjp sjp.o
+.PHONY: sjp/program.o sjp/parser.o sjp/lexer.o clean
 
 sjp/parser.o:
 	$(MAKE) -C sjp parser.o
+
+sjp/lexer.o:
+	$(MAKE) -C sjp lexer.o
+
+sjp/program.o:
+	$(MAKE) -C sjp program.o
 
 clean:
 	rm -rf $(OBJS) $(TARGET)
