@@ -1,5 +1,5 @@
 TARGET=logifix.a
-OBJS=sjp/parser.o sjp/lexer.o sjp/program.o program.o repair.o
+OBJS=sjp/sjp.a program.o repair.o
 CXXFLAGS = -std=c++17 -O2 -g -Wfatal-errors -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
 RULE_FILES := $(shell find rules/ -name '*.dl')
 
@@ -19,18 +19,13 @@ program.o: program.dl $(RULE_FILES)
 	rm logifix.cpp
 
 $(TARGET): $(OBJS)
-	$(AR) -rc $(TARGET) $^
+	$(RM) -f $@
+	$(AR) rcT $(TARGET) $^
 
-.PHONY: sjp/program.o sjp/parser.o sjp/lexer.o clean
+.PHONY: sjp/sjp.a clean
 
-sjp/parser.o:
-	$(MAKE) -C sjp parser.o
-
-sjp/lexer.o:
-	$(MAKE) -C sjp lexer.o
-
-sjp/program.o:
-	$(MAKE) -C sjp program.o
+sjp/sjp.a:
+	$(MAKE) -C sjp
 
 clean:
 	rm -rf $(OBJS) $(TARGET)

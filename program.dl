@@ -31,9 +31,11 @@ ends_at([name, A, B], B) :- ast_node([name, A, B]).
 
 .decl parent_of(parent: id, name: symbol, child: id)
 .input parent_of
+.output parent_of(IO=stdout)
 
 .decl parent_of_list(parent: id, name: symbol, children: id_list)
 .input parent_of_list
+.output parent_of_list(IO=stdout)
 
 .decl is_superlist_of(superlist: id_list, list: id_list)
 is_superlist_of(list, list) :-
@@ -427,7 +429,7 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
  ********************************/
 
 .decl rewrite(message: symbol, from: id, to: symbol)
-.output rewrite
+.output rewrite(IO=stdout)
 
 #include "rules/1125.dl"
 #include "rules/1132.dl"
