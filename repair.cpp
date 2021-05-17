@@ -24,7 +24,7 @@ void repair::add_string(const char* filename, const char* content) {
 
 void repair::run() {
     program->run();
-    program->printAll();
+    //program->printAll();
 }
 
 std::vector<std::tuple<int, int, std::string, std::string>>
