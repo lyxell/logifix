@@ -24,7 +24,7 @@ void repair::add_string(const char* filename, const char* content) {
 
 void repair::run() {
     program->run();
-    //program->printAll();
+    program->printAll();
 }
 
 std::vector<std::tuple<int, int, std::string, std::string>>
@@ -68,4 +68,60 @@ repair::get_variables_in_scope(const char* filename) {
     return result;
 }
 
+std::tuple<std::string, int, int>
+repair::get_node_properties(int id) {
+    if (id == 0) return {};
+    const auto* record = program->getRecordTable().unpack(id, 3);
+    assert(record != nullptr);
+    return std::tuple(program->getSymbolTable().decode(record[0]),
+                      record[1],
+                      record[2]);
 }
+
+int repair::get_root() {
+    souffle::Relation* relation = program->getRelation("root");
+    for (auto& output : *relation) {
+        int id;
+        output >> id;
+        return id;
+    }
+    return 0;
+}
+
+std::vector<std::pair<std::string,int>> repair::get_children(int node) {
+    souffle::Relation* relation = program->getRelation("parent_of");
+    std::vector<std::pair<std::string,int>> result;
+    for (auto& output : *relation) {
+        int parent;
+        std::string symbol;
+        int child;
+        output >> parent >> symbol >> child;
+        if (parent == node) {
+            result.emplace_back(std::move(symbol), child);
+        }
+    }
+    return result;
+}
+
+std::vector<std::pair<std::string,std::vector<int>>> repair::get_child_lists(int node) {
+    souffle::Relation* relation = program->getRelation("parent_of_list");
+    std::vector<std::pair<std::string,std::vector<int>>> result;
+    for (auto& output : *relation) {
+        int parent;
+        std::string symbol;
+        int list;
+        output >> parent >> symbol >> list;
+        if (parent != node) continue;
+        std::vector<int> children;
+        while (list) {
+            const auto* record = program->getRecordTable().unpack(list, 2);
+            children.emplace_back(record[0]);
+            list = record[1];
+        }
+        result.emplace_back(std::move(symbol), std::move(children));
+    }
+    return result;
+}
+
+}
+

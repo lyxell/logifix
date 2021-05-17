@@ -14,7 +14,13 @@
 /* AST nodes
  ********************************/
 
+.decl root(id: id)
+.input root
+.output root(IO=stdout)
+
 .decl ast_node(id: id)
+ast_node(id) :- root(id).
+ast_node(child) :- ast_node(ancestor), ancestor_of(ancestor, child).
 .input ast_node
 
 .decl name_of(id: id, name: symbol)
@@ -31,11 +37,9 @@ ends_at([name, A, B], B) :- ast_node([name, A, B]).
 
 .decl parent_of(parent: id, name: symbol, child: id)
 .input parent_of
-.output parent_of(IO=stdout)
 
 .decl parent_of_list(parent: id, name: symbol, children: id_list)
 .input parent_of_list
-.output parent_of_list(IO=stdout)
 
 .decl is_superlist_of(superlist: id_list, list: id_list)
 is_superlist_of(list, list) :-
