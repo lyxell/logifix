@@ -18,6 +18,8 @@ void repair::add_file(const char* filename) {
 }
 
 void repair::add_string(const char* filename, const char* content) {
+    souffle::Relation* relation = program->getRelation("source_code");
+    relation->insert(souffle::tuple(relation, {program->getSymbolTable().encode(content)}));
     source_code[filename] = content;
     sjp::parse(program.get(), content);
 }

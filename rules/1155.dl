@@ -17,3 +17,22 @@ rewrite(MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-
     string_representation(subject, subject_str),
     string_representation(method, "size").
 
+/* Rewrite x.size() != 0 into x.isEmpty() */
+rewrite(MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+    not_equals_expression(parent, _, _),
+    parent_of(parent, _, invocation),
+    parent_of(parent, _, integer),
+    method_invocation(invocation, subject, method, nil),
+    has_collection_type(subject),
+    evaluates_to_integer_value(integer, 0),
+    string_representation(subject, subject_str),
+    string_representation(method, "size").
+
+/* Rewrite x.size() > 0 into !x.isEmpty() */
+rewrite(MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+    greater_than_expression(parent, invocation, integer),
+    method_invocation(invocation, subject, method, nil),
+    has_collection_type(subject),
+    evaluates_to_integer_value(integer, 0),
+    string_representation(subject, subject_str),
+    string_representation(method, "size").

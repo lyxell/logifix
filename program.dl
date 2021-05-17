@@ -96,53 +96,27 @@ expression_statement(id, expr) :-
     name_of(id, "expression_statement"),
     parent_of(id, "expression", expr).
 
-.decl conditional_and_expression(id: id, left: id, right: id)
-conditional_and_expression(id, left, right) :-
-    name_of(id, "conditional_and_expression"),
-    parent_of(id, "left", left),
-    parent_of(id, "right", right).
+#define INFIX(name) \
+    .decl name(id: id, left: id, right: id) \
+    name(id, left, right) :- \
+        name_of(id, #name), \
+        parent_of(id, "left", left), \
+        parent_of(id, "right", right).
 
-.decl conditional_or_expression(id: id, left: id, right: id)
-conditional_or_expression(id, left, right) :-
-    name_of(id, "conditional_or_expression"),
-    parent_of(id, "left", left),
-    parent_of(id, "right", right).
+INFIX(not_equals_expression)
+INFIX(equals_expression)
+INFIX(conditional_and_expression)
+INFIX(conditional_or_expression)
+INFIX(greater_than_expression)
+INFIX(addition_expression)
+INFIX(subtraction_expression)
+INFIX(multiplication_expression)
 
-.decl equals_expression(id: id, left: id, right: id)
-equals_expression(id, left, right) :-
-    name_of(id, "equals_expression"),
-    parent_of(id, "left", left),
-    parent_of(id, "right", right).
-
-.decl addition_expression(id: id, left: id, right: id)
-addition_expression(id, left, right) :-
-    name_of(id, "addition_expression"),
-    parent_of(id, "left", left),
-    parent_of(id, "right", right).
-
-.decl subtraction_expression(id: id, left: id, right: id)
-subtraction_expression(id, left, right) :-
-    name_of(id, "subtraction_expression"),
-    parent_of(id, "left", left),
-    parent_of(id, "right", right).
-
-.decl multiplication_expression(id: id, left: id, right: id)
-multiplication_expression(id, left, right) :-
-    name_of(id, "multiplication_expression"),
-    parent_of(id, "left", left),
-    parent_of(id, "right", right).
-
-.decl not_equals_expression(id: id, left: id, right: id)
-not_equals_expression(id, left, right) :-
-    name_of(id, "not_equals_expression"),
-    parent_of(id, "left", left),
-    parent_of(id, "right", right).
-
-.decl class_declaration(id: id, modifiers: id_list, type: id, superclass: id, superinterfaces: id_list, body: id_list)
-class_declaration(id, mods, type, superclass, superinterfaces, body) :-
+.decl class_declaration(id: id, modifiers: id_list, name: id, superclass: id, superinterfaces: id_list, body: id_list)
+class_declaration(id, mods, name, superclass, superinterfaces, body) :-
     name_of(id, "class_declaration"),
     parent_of_list(id, "modifiers", mods),
-    parent_of(id, "type", type),
+    parent_of(id, "name", name),
     parent_of(id, "superclass", superclass),
     parent_of_list(id, "superinterfaces", superinterfaces),
     parent_of_list(id, "body", body).
@@ -183,7 +157,14 @@ formal_parameter(id, modifiers, type, name) :-
     parent_of(id, "type", type),
     parent_of(id, "name", name).
 
+.decl local_variable_declaration_statement(id: id, declaration: id)
+.output local_variable_declaration_statement(IO=stdout)
+local_variable_declaration_statement(id, declaration) :-
+    name_of(id, "local_variable_declaration_statement"),
+    parent_of(id, "declaration", declaration).
+
 .decl local_variable_declaration(id: id, type: id, declarators: id_list, modifiers: id_list)
+.output local_variable_declaration(IO=stdout)
 local_variable_declaration(id, type, declarators, modifiers) :-
     name_of(id, "local_variable_declaration"),
     parent_of(id, "type", type),
@@ -191,6 +172,7 @@ local_variable_declaration(id, type, declarators, modifiers) :-
     parent_of_list(id, "modifiers", modifiers).
 
 .decl variable_declarator(id: id, name: id, initializer: id)
+.output variable_declarator(IO=stdout)
 variable_declarator(id, name, initializer) :-
     name_of(id, "variable_declarator"),
     parent_of(id, "name", name),
@@ -205,6 +187,7 @@ class_instance_creation_expression(id, type_arguments, type, arguments, body) :-
     parent_of_list(id, "body", body).
 
 .decl class_type(id: id, name: id, type_arguments: id_list, annotations: id_list)
+.output class_type(IO=stdout)
 class_type(id, name, type_arguments, annotations) :-
     name_of(id, "class_type"),
     parent_of(id, "name", name),
@@ -243,6 +226,7 @@ not_equals_null_expression(id, subject) :-
  ********************************/
 
 .decl evaluates_to_integer_value(id: id, value: number)
+.output evaluates_to_integer_value(IO=stdout)
 evaluates_to_integer_value(id, to_number(repr)) :-
     integer_literal(id),
     string_representation(id, repr).
@@ -297,6 +281,7 @@ string_representation([name, A, B], substr(code, A, B - A)) :-
  ********************************/
 
 .decl is_in_scope(identifier: symbol, at: id, type: id)
+.output is_in_scope(IO=stdout)
 
 /**
  * The scope of a local variable declaration in a block (§14.2) is the rest of
@@ -309,13 +294,15 @@ string_representation([name, A, B], substr(code, A, B - A)) :-
 /* Make field declarations accessible in the methods of a class. */
 is_in_scope(name_str, method_body, type) :-
     class_declaration(_, _, _, _, _, class_body),
+    /* declared_at */
     list_contains(class_body, field),
-    list_contains(class_body, method),
     field_declaration(field, _, type, declarators),
-    method_declaration(method, _, _, method_body),
     list_contains(declarators, declarator),
     variable_declarator(declarator, name, _),
-    string_representation(name, name_str).
+    string_representation(name, name_str),
+    /* available at */
+    list_contains(class_body, method),
+    method_declaration(method, _, _, method_body).
 
 /* Make formal parameters accessible in the body of a method. */
 is_in_scope(name_str, body, type) :-
@@ -328,9 +315,10 @@ is_in_scope(name_str, body, type) :-
 
 /* Make local variable declarations accessible in the succeeding
    statements */
-is_in_scope(name_str, statement, type) :-
+is_in_scope(name_str, succeeding_statement, type) :-
+    local_variable_declaration_statement(declaration_statement, declaration),
     local_variable_declaration(declaration, type, declarators, _),
-    precedes(declaration, statement),
+    precedes(declaration_statement, succeeding_statement),
     list_contains(declarators, declarator),
     variable_declarator(declarator, name, _),
     string_representation(name, name_str).
@@ -353,13 +341,15 @@ is_in_scope_output(var, type_str, start, end) :-
  ********************************/
 
 .decl collection_type_name(str: symbol)
-collection_type_name("List").
-collection_type_name("Set").
 collection_type_name("ArrayList").
-collection_type_name("Vector").
+collection_type_name("Collection").
 collection_type_name("LinkedList").
-collection_type_name("SortedSet").
+collection_type_name("List").
 collection_type_name("Queue").
+collection_type_name("Set").
+collection_type_name("SortedSet").
+collection_type_name("Stack").
+collection_type_name("Vector").
 
 .decl floating_point_type_name(str: symbol)
 floating_point_type_name("float").
@@ -405,15 +395,15 @@ is_atomic_class_type(id) :-
 /* Has type */
 
 .decl has_type(id: id, type: id)
+.output has_type(IO=stdout)
 has_type(id, type) :-
     identifier(id),
     string_representation(id, id_str),
     is_in_scope(id_str, id, type).
-has_type(id, type) :-
-    expression_name(id, [head, nil]),
-    identifier(head),
-    string_representation(head, head_str),
-    is_in_scope(head_str, id, type).
+has_type(expr_name, type) :-
+    expression_name(expr_name, _),
+    string_representation(expr_name, expr_name_str),
+    is_in_scope(expr_name_str, expr_name, type).
 
 .decl has_floating_point_type(id: id)
 has_floating_point_type(id) :- floating_point_literal(id).
