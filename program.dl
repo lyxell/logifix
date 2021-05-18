@@ -21,7 +21,6 @@
 .decl ast_node(id: id)
 ast_node(id) :- root(id).
 ast_node(child) :- ast_node(ancestor), ancestor_of(ancestor, child).
-.input ast_node
 
 .decl name_of(id: id, name: symbol)
 name_of([name, A, B], name) :- ast_node([name, A, B]).
@@ -360,6 +359,16 @@ atomic_class_type_name("AtomicInteger").
 atomic_class_type_name("AtomicBoolean").
 atomic_class_type_name("AtomicLong").
 
+.decl boxed_type_name(str: symbol)
+boxed_type_name("Boolean").
+boxed_type_name("Byte").
+boxed_type_name("Character").
+boxed_type_name("Float").
+boxed_type_name("Integer").
+boxed_type_name("Long").
+boxed_type_name("Short").
+boxed_type_name("Double").
+
 /* Is type */
 
 .decl is_collection_type(id: id)
@@ -379,6 +388,12 @@ is_exception_type(id) :-
 is_string_type(id) :-
     class_type(id, name, _, _),
     string_representation(name, "String").
+
+.decl is_boxed_type(id: id)
+is_boxed_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, name_str),
+    boxed_type_name(name_str).
 
 .decl is_floating_point_type(id: id)
 is_floating_point_type(id) :-
@@ -413,6 +428,10 @@ has_floating_point_type(id) :- has_type(id, type), is_floating_point_type(type).
 has_string_type(id) :- string_literal(id).
 has_string_type(id) :- has_type(id, type), is_string_type(type).
 
+.decl has_string_or_boxed_type(id: id)
+has_string_or_boxed_type(id) :- has_type(id, type), is_boxed_type(type).
+has_string_or_boxed_type(id) :- has_string_type(id).
+
 .decl has_collection_type(id: id)
 has_collection_type(id) :- has_type(id, type), is_collection_type(type).
 
@@ -434,4 +453,4 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 #include "rules/2272.dl"
 #include "rules/2293.dl"
 #include "rules/3984.dl"
-#include "rules/4973.dl"
+#include "rules/4973_use_equals_method.dl"
