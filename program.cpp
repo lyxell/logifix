@@ -16,13 +16,12 @@ void program::add_file(const char* filename) {
         exit(1);
     }
     std::ifstream t(filename);
-    auto content = std::string((std::istreambuf_iterator<char>(t)),
-                               std::istreambuf_iterator<char>());
-    source_code[filename] = content;
-    sjp::parse(prog.get(), content.c_str());
+    add_string(filename, std::string((std::istreambuf_iterator<char>(t)),
+                               std::istreambuf_iterator<char>()).c_str());
 }
 
 void program::add_string(const char* filename, const char* content) {
+    source_code[filename] = content;
     souffle::Relation* relation = prog->getRelation("source_code");
     relation->insert(
         souffle::tuple(relation, {prog->getSymbolTable().encode(content)}));
@@ -30,31 +29,40 @@ void program::add_string(const char* filename, const char* content) {
     sjp::parse(prog.get(), content);
 }
 
+std::string program::get_source_code(const char* filename) {
+    return source_code[filename];
+}
+
 void program::run() {
     prog->run();
 }
 
-std::vector<std::tuple<int, int, std::string, std::string>>
-program::get_possible_repairs(const char* filename) {
+void program::print() {
+    prog->printAll();
+}
+
+std::vector<std::tuple<int, int, int, std::string, std::string>>
+program::get_possible_rewrites(const char* filename) {
     auto get_ast_node_from_id = [this](int id) {
         const auto* record = prog->getRecordTable().unpack(id, 3);
         assert(record != nullptr);
         return std::tuple(prog->getSymbolTable().decode(record[0]), record[1],
                           record[2]);
     };
-    std::vector<std::tuple<int, int, std::string, std::string>> result;
+    std::vector<std::tuple<int, int, int, std::string, std::string>> result;
     souffle::Relation* relation = prog->getRelation("rewrite");
     assert(relation != nullptr);
     for (souffle::tuple& output : *relation) {
+        int rule_number;
         int id;
         std::string replacement;
         std::string message;
-        output >> message >> id >> replacement;
+        output >> rule_number >> message >> id >> replacement;
         if (id == 0) {
             continue;
         }
         auto [str, a, b] = get_ast_node_from_id(id);
-        result.emplace_back(a, b, replacement, message);
+        result.emplace_back(rule_number, a, b, replacement, message);
     }
     return result;
 }

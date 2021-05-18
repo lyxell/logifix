@@ -6,14 +6,14 @@
 
 #define MESSAGE "Use the equals method if value comparison was intended"
 
-rewrite(MESSAGE, eq, cat(x_str, ".equals(", y_str, ")")) :-
+rewrite(4973, MESSAGE, eq, cat(x_str, ".equals(", y_str, ")")) :-
     equals_expression(eq, x, y),
     has_string_or_boxed_type(x),
     has_string_or_boxed_type(y),
     string_representation(x, x_str),
     string_representation(y, y_str).
 
-rewrite(MESSAGE, eq, cat("!", x_str, ".equals(", y_str, ")")) :-
+rewrite(4973, MESSAGE, eq, cat("!", x_str, ".equals(", y_str, ")")) :-
     not_equals_expression(eq, x, y),
     has_string_or_boxed_type(x),
     has_string_or_boxed_type(y),

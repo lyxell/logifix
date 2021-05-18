@@ -4,3 +4,4 @@ build
 logifix.cpp
 *.class
 cli/logifix
+tests

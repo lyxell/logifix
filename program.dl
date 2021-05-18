@@ -95,6 +95,11 @@ expression_statement(id, expr) :-
     name_of(id, "expression_statement"),
     parent_of(id, "expression", expr).
 
+.decl return_statement(id: id, expr: id)
+return_statement(id, expr) :-
+    name_of(id, "return_statement"),
+    parent_of(id, "expression", expr).
+
 #define INFIX(name) \
     .decl name(id: id, left: id, right: id) \
     name(id, left, right) :- \
@@ -102,6 +107,7 @@ expression_statement(id, expr) :-
         parent_of(id, "left", left), \
         parent_of(id, "right", right).
 
+INFIX(assignment_expression)
 INFIX(not_equals_expression)
 INFIX(equals_expression)
 INFIX(conditional_and_expression)
@@ -110,6 +116,13 @@ INFIX(greater_than_expression)
 INFIX(addition_expression)
 INFIX(subtraction_expression)
 INFIX(multiplication_expression)
+
+.decl ternary_conditional_expression(id: id, cond: id, then: id, else: id)
+ternary_conditional_expression(id, cond, then, else) :-
+    name_of(id, "ternary_conditional_expression"),
+    parent_of(id, "condition", cond),
+    parent_of(id, "then", then),
+    parent_of(id, "else", else).
 
 .decl class_declaration(id: id, modifiers: id_list, name: id, superclass: id, superinterfaces: id_list, body: id_list)
 class_declaration(id, mods, name, superclass, superinterfaces, body) :-
@@ -126,6 +139,14 @@ field_declaration(id, mods, type, declarators) :-
     parent_of_list(id, "modifiers", mods),
     parent_of(id, "type", type),
     parent_of_list(id, "declarators", declarators).
+
+.decl constructor_declaration(id: id, modifiers: id_list, declarator: id, throws: id_list, body: id)
+constructor_declaration(id, mods, declarator, throws, body) :-
+    name_of(id, "constructor_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "declarator", declarator),
+    parent_of_list(id, "throws", throws),
+    parent_of(id, "body", body).
 
 .decl method_declaration(id: id, modifiers: id_list, header: id, body: id)
 method_declaration(id, mods, header, body) :-
@@ -157,13 +178,11 @@ formal_parameter(id, modifiers, type, name) :-
     parent_of(id, "name", name).
 
 .decl local_variable_declaration_statement(id: id, declaration: id)
-.output local_variable_declaration_statement(IO=stdout)
 local_variable_declaration_statement(id, declaration) :-
     name_of(id, "local_variable_declaration_statement"),
     parent_of(id, "declaration", declaration).
 
 .decl local_variable_declaration(id: id, type: id, declarators: id_list, modifiers: id_list)
-.output local_variable_declaration(IO=stdout)
 local_variable_declaration(id, type, declarators, modifiers) :-
     name_of(id, "local_variable_declaration"),
     parent_of(id, "type", type),
@@ -171,26 +190,31 @@ local_variable_declaration(id, type, declarators, modifiers) :-
     parent_of_list(id, "modifiers", modifiers).
 
 .decl variable_declarator(id: id, name: id, initializer: id)
-.output variable_declarator(IO=stdout)
 variable_declarator(id, name, initializer) :-
     name_of(id, "variable_declarator"),
     parent_of(id, "name", name),
     parent_of(id, "initializer", initializer).
 
-.decl class_instance_creation_expression(id: id, type_arguments: id_list, type: id, arguments: id_list, body: id_list)
-class_instance_creation_expression(id, type_arguments, type, arguments, body) :-
+.decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id_list, type: id, arguments: id_list, body: id_list)
+class_instance_creation_expression(id, qualifier, type_arguments, type, arguments, body) :-
     name_of(id, "class_instance_creation_expression"),
+    parent_of(id, "qualifier", qualifier),
     parent_of_list(id, "type_arguments", type_arguments),
     parent_of(id, "type", type),
     parent_of_list(id, "arguments", arguments),
     parent_of_list(id, "body", body).
 
 .decl class_type(id: id, name: id, type_arguments: id_list, annotations: id_list)
-.output class_type(IO=stdout)
 class_type(id, name, type_arguments, annotations) :-
     name_of(id, "class_type"),
     parent_of(id, "name", name),
     parent_of_list(id, "type_arguments", type_arguments),
+    parent_of_list(id, "annotations", annotations).
+
+.decl primitive_type(id: id, annotations: id_list, name: id)
+primitive_type(id, annotations, name) :-
+    name_of(id, "primitive_type"),
+    parent_of(id, "name", name),
     parent_of_list(id, "annotations", annotations).
 
 .decl integer_literal(id: id)
@@ -225,10 +249,14 @@ not_equals_null_expression(id, subject) :-
  ********************************/
 
 .decl evaluates_to_integer_value(id: id, value: number)
-.output evaluates_to_integer_value(IO=stdout)
+evaluates_to_integer_value(id, 0) :-
+    integer_literal(id),
+    string_representation(id, "0").
+/* TODO
 evaluates_to_integer_value(id, to_number(repr)) :-
     integer_literal(id),
     string_representation(id, repr).
+*/
 evaluates_to_integer_value(id, left_value + right_value) :-
     addition_expression(id, left, right),
     evaluates_to_integer_value(left, left_value),
@@ -280,7 +308,6 @@ string_representation([name, A, B], substr(code, A, B - A)) :-
  ********************************/
 
 .decl is_in_scope(identifier: symbol, at: id, type: id)
-.output is_in_scope(IO=stdout)
 
 /**
  * The scope of a local variable declaration in a block (§14.2) is the rest of
@@ -290,7 +317,7 @@ string_representation([name, A, B], substr(code, A, B - A)) :-
  * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
  */
 
-/* Make field declarations accessible in the methods of a class. */
+/* Make field declarations accessible in the methods and constructors of a class. */
 is_in_scope(name_str, method_body, type) :-
     class_declaration(_, _, _, _, _, class_body),
     /* declared_at */
@@ -302,6 +329,17 @@ is_in_scope(name_str, method_body, type) :-
     /* available at */
     list_contains(class_body, method),
     method_declaration(method, _, _, method_body).
+is_in_scope(name_str, constructor_body, type) :-
+    class_declaration(_, _, _, _, _, class_body),
+    /* declared_at */
+    list_contains(class_body, field),
+    field_declaration(field, _, type, declarators),
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, name, _),
+    string_representation(name, name_str),
+    /* available at */
+    list_contains(class_body, constructor),
+    constructor_declaration(constructor, _, _, _, constructor_body).
 
 /* Make formal parameters accessible in the body of a method. */
 is_in_scope(name_str, body, type) :-
@@ -397,7 +435,7 @@ is_boxed_type(id) :-
 
 .decl is_floating_point_type(id: id)
 is_floating_point_type(id) :-
-    class_type(id, name, _, _),
+    primitive_type(id, _, name),
     string_representation(name, name_str),
     floating_point_type_name(name_str).
 
@@ -407,10 +445,32 @@ is_atomic_class_type(id) :-
     string_representation(name, name_str),
     atomic_class_type_name(name_str).
 
+/* Variable references */
+
+.decl references_list(id: id, references: id_list)
+
+.decl references(id: id, reference: id)
+.output references(IO=stdout)
+
+references(id, id) :-
+    expression_name(id, _).
+
+references_list(id, arguments),
+references(id, subject) :-
+    method_invocation(id, subject, _, arguments).
+
+// TODO this is overapproximating, it uses any reference and does
+// not limit itself to those in scope
+.decl used_declaration(id: id)
+used_declaration(id) :-
+    variable_declarator(id, name, _),
+    string_representation(name, name_str),
+    references(_, repr),
+    string_representation(repr, name_str).
+
 /* Has type */
 
 .decl has_type(id: id, type: id)
-.output has_type(IO=stdout)
 has_type(id, type) :-
     identifier(id),
     string_representation(id, id_str),
@@ -423,6 +483,7 @@ has_type(expr_name, type) :-
 .decl has_floating_point_type(id: id)
 has_floating_point_type(id) :- floating_point_literal(id).
 has_floating_point_type(id) :- has_type(id, type), is_floating_point_type(type).
+has_floating_point_type(id) :- multiplication_expression(id, left, right), has_floating_point_type(left), has_floating_point_type(right).
 
 .decl has_string_type(id: id)
 has_string_type(id) :- string_literal(id).
@@ -441,16 +502,19 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 /* Rewrite rules
  ********************************/
 
-.decl rewrite(message: symbol, from: id, to: symbol)
+.decl rewrite(rule: number, message: symbol, from: id, to: symbol)
 .output rewrite(IO=stdout)
 
-#include "rules/1125.dl"
-#include "rules/1132.dl"
-#include "rules/1155.dl"
-#include "rules/1596.dl"
-#include "rules/2111.dl"
-#include "rules/2204.dl"
-#include "rules/2272.dl"
-#include "rules/2293.dl"
-#include "rules/3984.dl"
+//#include "rules/1132.dl"
+//#include "rules/1596.dl"
+//#include "rules/2204.dl"
+//#include "rules/2272.dl"
+
+#include "rules/1125_redundant_boolean.dl"
+#include "rules/1155_use_isempty.dl"
+#include "rules/1481_unused_local_variables.dl"
+#include "rules/2095_close_resources.dl"
+#include "rules/2111_bigdecimal_double.dl"
+#include "rules/2293_diamond_operator.dl"
+#include "rules/3984_throw_exceptions.dl"
 #include "rules/4973_use_equals_method.dl"

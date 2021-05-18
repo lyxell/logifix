@@ -1,6 +1,0 @@
-/**
- * Unused local variables should be removed
- *
- * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1481
- */
-

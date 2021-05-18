@@ -11,7 +11,7 @@ throws_no_such_element_exception(method) :-
     method_declaration(method, _, _, method_body),
     ancestor_of(method_body, throw),
     throw_statement(throw, expr),
-    class_instance_creation_expression(expr, _, type, _, _),
+    class_instance_creation_expression(expr, _, _, type, _, _),
     string_representation(type, "NoSuchElementException").
     
 rewrite(MESSAGE, id, "nil") :-

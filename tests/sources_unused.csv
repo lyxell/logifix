@@ -1,0 +1,3 @@
+rule,commit
+2095_close_resources,https://github.com/Konloch/bytecode-viewer/blob/db959d4704dfea3ad22c502997e1e2360dedec9e/src/main/java/the/bytecode/club/bytecodeviewer/decompilers/bytecode/InstructionPrinter.java
+1481_unused_local_variables,https://github.com/vanniktech/RxJava/blob/4addc150d44521fd327c17243d5e2620c86e8198/src/main/java/io/reactivex/internal/operators/single/SingleFlatMapCompletable.java

@@ -1,0 +1,12 @@
+/**
+ * Unused local variables should be removed
+ *
+ * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1481
+ */
+
+rewrite(1481, "Unused variable declaration", id, "") :-
+    local_variable_declaration_statement(id, declaration),
+    local_variable_declaration(declaration, _, [declarator, nil], _),
+    variable_declarator(declarator, _, _),
+    ! used_declaration(declarator).
+

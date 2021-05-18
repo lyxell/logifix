@@ -16,8 +16,10 @@ class program {
     void add_file(const char* filename);
     void add_string(const char* filename, const char* content);
     void run();
-    std::vector<std::tuple<int, int, std::string, std::string>>
-    get_possible_repairs(const char* filename);
+    void print();
+    std::string get_source_code(const char* filename);
+    std::vector<std::tuple<int, int, int, std::string, std::string>>
+    get_possible_rewrites(const char* filename);
     std::vector<std::tuple<std::string, std::string, int, int>>
     get_variables_in_scope(const char* filename);
     int get_root();
