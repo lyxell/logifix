@@ -2,3 +2,4 @@ build
 *.o
 *.a
 logifix.cpp
+*.class
