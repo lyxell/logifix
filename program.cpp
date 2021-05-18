@@ -1,5 +1,6 @@
 #include "logifix.h"
 #include <iostream>
+#include <filesystem>
 
 static const char* PROGRAM_NAME = "logifix";
 
@@ -10,6 +11,10 @@ program::program() : prog(souffle::ProgramFactory::newInstance(PROGRAM_NAME)) {
 }
 
 void program::add_file(const char* filename) {
+    if (!std::filesystem::exists(filename)) {
+        std::cerr << "File " << filename << " does not exist" << std::endl;
+        exit(1);
+    }
     std::ifstream t(filename);
     auto content = std::string((std::istreambuf_iterator<char>(t)),
                                std::istreambuf_iterator<char>());
@@ -27,7 +32,6 @@ void program::add_string(const char* filename, const char* content) {
 
 void program::run() {
     prog->run();
-    prog->printAll();
 }
 
 std::vector<std::tuple<int, int, std::string, std::string>>

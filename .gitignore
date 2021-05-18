@@ -3,3 +3,4 @@ build
 *.a
 logifix.cpp
 *.class
+cli/logifix
