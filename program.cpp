@@ -5,40 +5,40 @@ static const char* PROGRAM_NAME = "logifix";
 
 namespace logifix {
 
-repair::repair() : program(souffle::ProgramFactory::newInstance(PROGRAM_NAME)) {
-    assert(program != nullptr);
+program::program() : prog(souffle::ProgramFactory::newInstance(PROGRAM_NAME)) {
+    assert(prog != nullptr);
 }
 
-void repair::add_file(const char* filename) {
+void program::add_file(const char* filename) {
     std::ifstream t(filename);
     auto content = std::string((std::istreambuf_iterator<char>(t)),
                            std::istreambuf_iterator<char>());
     source_code[filename] = content;
-    sjp::parse(program.get(), content.c_str());
+    sjp::parse(prog.get(), content.c_str());
 }
 
-void repair::add_string(const char* filename, const char* content) {
-    souffle::Relation* relation = program->getRelation("source_code");
-    relation->insert(souffle::tuple(relation, {program->getSymbolTable().encode(content)}));
+void program::add_string(const char* filename, const char* content) {
+    souffle::Relation* relation = prog->getRelation("source_code");
+    relation->insert(souffle::tuple(relation, {prog->getSymbolTable().encode(content)}));
     source_code[filename] = content;
-    sjp::parse(program.get(), content);
+    sjp::parse(prog.get(), content);
 }
 
-void repair::run() {
-    program->run();
-    program->printAll();
+void program::run() {
+    prog->run();
+    prog->printAll();
 }
 
 std::vector<std::tuple<int, int, std::string, std::string>>
-repair::get_possible_repairs(const char* filename) {
+program::get_possible_repairs(const char* filename) {
     auto get_ast_node_from_id = [this](int id) {
-        const auto* record = program->getRecordTable().unpack(id, 3);
+        const auto* record = prog->getRecordTable().unpack(id, 3);
         assert(record != nullptr);
-        return std::tuple(program->getSymbolTable().decode(record[0]), record[1],
+        return std::tuple(prog->getSymbolTable().decode(record[0]), record[1],
                           record[2]);
     };
     std::vector<std::tuple<int, int, std::string, std::string>> result;
-    souffle::Relation* relation = program->getRelation("rewrite");
+    souffle::Relation* relation = prog->getRelation("rewrite");
     assert(relation != nullptr);
     for (souffle::tuple& output : *relation) {
         int id;
@@ -55,9 +55,9 @@ repair::get_possible_repairs(const char* filename) {
 }
 
 std::vector<std::tuple<std::string,std::string,int,int>>
-repair::get_variables_in_scope(const char* filename) {
+program::get_variables_in_scope(const char* filename) {
     std::vector<std::tuple<std::string,std::string,int,int>> result;
-    souffle::Relation* relation = program->getRelation("is_in_scope_output");
+    souffle::Relation* relation = prog->getRelation("is_in_scope_output");
     assert(relation != nullptr);
     for (auto& output : *relation) {
         std::string variable;
@@ -71,17 +71,17 @@ repair::get_variables_in_scope(const char* filename) {
 }
 
 std::tuple<std::string, int, int>
-repair::get_node_properties(int id) {
+program::get_node_properties(int id) {
     if (id == 0) return {};
-    const auto* record = program->getRecordTable().unpack(id, 3);
+    const auto* record = prog->getRecordTable().unpack(id, 3);
     assert(record != nullptr);
-    return std::tuple(program->getSymbolTable().decode(record[0]),
+    return std::tuple(prog->getSymbolTable().decode(record[0]),
                       record[1],
                       record[2]);
 }
 
-int repair::get_root() {
-    souffle::Relation* relation = program->getRelation("root");
+int program::get_root() {
+    souffle::Relation* relation = prog->getRelation("root");
     for (auto& output : *relation) {
         int id;
         output >> id;
@@ -90,8 +90,8 @@ int repair::get_root() {
     return 0;
 }
 
-std::vector<std::pair<std::string,int>> repair::get_children(int node) {
-    souffle::Relation* relation = program->getRelation("parent_of");
+std::vector<std::pair<std::string,int>> program::get_children(int node) {
+    souffle::Relation* relation = prog->getRelation("parent_of");
     std::vector<std::pair<std::string,int>> result;
     for (auto& output : *relation) {
         int parent;
@@ -105,8 +105,8 @@ std::vector<std::pair<std::string,int>> repair::get_children(int node) {
     return result;
 }
 
-std::vector<std::pair<std::string,std::vector<int>>> repair::get_child_lists(int node) {
-    souffle::Relation* relation = program->getRelation("parent_of_list");
+std::vector<std::pair<std::string,std::vector<int>>> program::get_child_lists(int node) {
+    souffle::Relation* relation = prog->getRelation("parent_of_list");
     std::vector<std::pair<std::string,std::vector<int>>> result;
     for (auto& output : *relation) {
         int parent;
@@ -116,7 +116,7 @@ std::vector<std::pair<std::string,std::vector<int>>> repair::get_child_lists(int
         if (parent != node) continue;
         std::vector<int> children;
         while (list) {
-            const auto* record = program->getRecordTable().unpack(list, 2);
+            const auto* record = prog->getRecordTable().unpack(list, 2);
             children.emplace_back(record[0]);
             list = record[1];
         }

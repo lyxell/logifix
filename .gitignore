@@ -1,4 +1,4 @@
 build
-program.cpp
 *.o
 *.a
+logifix.cpp

@@ -1,5 +1,5 @@
 TARGET=logifix.a
-OBJS=sjp/sjp.a program.o repair.o
+OBJS=sjp/sjp.a logifix.o program.o
 CXXFLAGS = -std=c++17 -O2 -g -Wfatal-errors -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
 RULE_FILES := $(shell find rules/ -name '*.dl')
 
@@ -11,12 +11,8 @@ endif
 
 all: $(TARGET)
 
-logifix.o: sjp/sjp.h
-
-program.o: program.dl $(RULE_FILES)
+logifix.cpp: program.dl $(RULE_FILES)
 	$(SOUFFLE) --generate=logifix $<
-	$(CXX) $(CXXFLAGS) logifix.cpp -c -o $@
-	rm logifix.cpp
 
 $(TARGET): $(OBJS)
 	$(RM) -f $@

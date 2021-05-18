@@ -6,13 +6,13 @@
 
 namespace logifix {
 
-class repair {
+class program {
   private:
     std::unordered_map<std::string, std::string> source_code;
-    std::unique_ptr<souffle::SouffleProgram> program;
+    std::unique_ptr<souffle::SouffleProgram> prog;
 
   public:
-    repair();
+    program();
     void add_file(const char* filename);
     void add_string(const char* filename, const char* content);
     void run();
