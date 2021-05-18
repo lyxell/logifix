@@ -1,1 +1,1 @@
-tests -linguist-detectable
+*.java -linguist-detectable
