@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://i.imgur.com/7o8qjPX.png" alt="Logifix">
+  <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logo.svg" alt="Logifix">
 </h1>
 
 Logifix automatically repairs SonarQube static analysis
