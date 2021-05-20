@@ -29,7 +29,7 @@ sjp/sjp.a:
 	$(MAKE) -C sjp
 
 test: cli/logifix
-	cd tests && ./download_sources.sh
+	cd tests && ./download_tests.sh
 	./tests/run_tests.sh cli/logifix
 
 clean:
