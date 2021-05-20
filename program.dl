@@ -514,13 +514,13 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 .output rewrite(IO=stdout)
 
 //#include "rules/1132.dl"
-//#include "rules/1596.dl"
 //#include "rules/2204.dl"
 //#include "rules/2272.dl"
 
 #include "rules/1125_redundant_boolean.dl"
 #include "rules/1155_use_isempty.dl"
 #include "rules/1481_unused_local_variables.dl"
+#include "rules/1596_fix_old_empty_collection.dl"
 #include "rules/2095_close_resources.dl"
 #include "rules/2111_bigdecimal_double.dl"
 #include "rules/2293_diamond_operator.dl"

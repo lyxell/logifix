@@ -18,9 +18,17 @@ rule,commit
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/dexlib2/src/main/java/org/jf/dexlib2/builder/MutableMethodImplementation.java
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/util/src/main/java/org/jf/util/ImmutableConverter.java
 1481_unused_local_variables,https://github.com/Netflix/astyanax/blob/8daa973723a42d08196ae666bebeacdefe4ace19/astyanax-entity-mapper/src/main/java/com/netflix/astyanax/entitystore/CompositeEntityMapper.java
+1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/processing/src/test/java/org/apache/druid/query/groupby/GroupByQueryRunnerTest.java
+1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/processing/src/test/java/org/apache/druid/query/groupby/orderby/TopNSequenceTest.java
+1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/main/java/org/apache/druid/server/emitter/ComposingEmitterModule.java
+1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/query/lookup/LookupSnapshotTakerTest.java
+1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/lookup/cache/LookupCoordinatorManagerTest.java
+1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/shard/NumberedShardSpecTest.java
+1596_fix_old_empty_collection,https://github.com/ronak-manglani/memoir/blob/825df2461004006b9d8139e9bbe702dcf5252d1e/RTEditor/src/main/java/com/onegravity/rteditor/utils/validator/UrlValidator.java
 2111_bigdecimal_double,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java
 2111_bigdecimal_double,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java
 2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Matrices.java
+2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Vectors.java
 2293_diamond_operator,https://github.com/DP-3T/dp3t-sdk-backend/blob/417f7eddf272f311c5f532bcfa826c42c759b130/dpppt-backend-sdk/dpppt-backend-sdk-ws/src/main/java/org/dpppt/backend/sdk/ws/controller/DPPPTController.java
 2293_diamond_operator,https://github.com/ReactiveX/RxJava/blob/480889c58d3b762b073ef80229bf27f9d9429dd7/src/main/java/io/reactivex/rxjava3/disposables/CompositeDisposable.java
 2293_diamond_operator,https://github.com/ReactiveX/RxJava/blob/480889c58d3b762b073ef80229bf27f9d9429dd7/src/main/java/io/reactivex/rxjava3/processors/SerializedProcessor.java
@@ -40,6 +48,7 @@ rule,commit
 2293_diamond_operator,https://github.com/zaproxy/zap-extensions/blob/dbe86dfb1b9404821dc65dcbfb73ba3c3bd22065/addOns/accessControl/src/main/java/org/zaproxy/zap/extension/accessControl/AccessControlScannerThread.java
 2293_diamond_operator,https://github.com/zaproxy/zap-extensions/blob/dbe86dfb1b9404821dc65dcbfb73ba3c3bd22065/addOns/alertFilters/src/main/java/org/zaproxy/zap/extension/alertFilters/DialogAddAlertFilter.java
 2293_diamond_operator,https://github.com/zaproxy/zap-extensions/blob/dbe86dfb1b9404821dc65dcbfb73ba3c3bd22065/addOns/alertFilters/src/main/java/org/zaproxy/zap/extension/alertFilters/ExtensionAlertFilters.java
-4973_use_equals_method,https://github.com/HarisAdzemovic/jspwiki/blob/e369a880fade9a958e079773595cc250125ae4f9/jspwiki-main/src/main/java/org/apache/wiki/WikiSession.java
 4973_use_equals_method,https://github.com/Projeto-Partiu/RxJava/blob/10fd2c3e2fd8875800ff324607215f61698907a8/src/main/java/io/reactivex/internal/operators/flowable/FlowableGroupJoin.java
+4973_use_equals_method,https://github.com/apache/jspwiki/blob/ca88c2635936af3f057af80f5e79547a07c37b97/jspwiki-main/src/main/java/org/apache/wiki/WikiSession.java
+4973_use_equals_method,https://github.com/apache/jspwiki/blob/ca88c2635936af3f057af80f5e79547a07c37b97/jspwiki-main/src/main/java/org/apache/wiki/plugin/InsertPage.java
 4973_use_equals_method,https://github.com/apache/sling-org-apache-sling-discovery-impl/blob/5fe781459a8ffe6afc14280e3860da49cfa6eea0/src/main/java/org/apache/sling/discovery/impl/cluster/voting/VotingView.java
