@@ -2,7 +2,7 @@
 set -e
 regex=".*/([0-9]{4})[a-z0-9_]+/.*"
 for f in $(find . -type f -iname "*.java"); do
-    echo $f
+    echo "$f"
     if [[ "$f" =~ $regex ]]
     then
         rule_number="${BASH_REMATCH[1]}"
