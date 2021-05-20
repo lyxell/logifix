@@ -1,9 +1,7 @@
 #!/bin/bash
 files=$(cat sources.csv | tail +2)
 regex="([a-z0-9_]+),https://github.com/([A-Za-z0-9-]+)/([\.A-Za-z0-9-]+)/blob/([a-z0-9-]+)/(.*)"
-
 set -e
-
 for f in $files
 do
     if [[ $f =~ $regex ]]
