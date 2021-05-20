@@ -18,7 +18,9 @@ rule,commit
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/dexlib2/src/main/java/org/jf/dexlib2/builder/MutableMethodImplementation.java
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/util/src/main/java/org/jf/util/ImmutableConverter.java
 1481_unused_local_variables,https://github.com/Netflix/astyanax/blob/8daa973723a42d08196ae666bebeacdefe4ace19/astyanax-entity-mapper/src/main/java/com/netflix/astyanax/entitystore/CompositeEntityMapper.java
+2111_bigdecimal_double,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java
 2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Matrices.java
+2111_bigdecimal_double,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java
 2293_diamond_operator,https://github.com/DP-3T/dp3t-sdk-backend/blob/417f7eddf272f311c5f532bcfa826c42c759b130/dpppt-backend-sdk/dpppt-backend-sdk-ws/src/main/java/org/dpppt/backend/sdk/ws/controller/DPPPTController.java
 2293_diamond_operator,https://github.com/ReactiveX/RxJava/blob/480889c58d3b762b073ef80229bf27f9d9429dd7/src/main/java/io/reactivex/rxjava3/disposables/CompositeDisposable.java
 2293_diamond_operator,https://github.com/ReactiveX/RxJava/blob/480889c58d3b762b073ef80229bf27f9d9429dd7/src/main/java/io/reactivex/rxjava3/processors/SerializedProcessor.java
