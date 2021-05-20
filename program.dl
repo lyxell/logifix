@@ -350,6 +350,14 @@ is_in_scope(name_str, body, type) :-
     formal_parameter(param, _, type, name),
     string_representation(name, name_str).
 
+/* Make formal parameters accessible in the body of a constructor. */
+is_in_scope(name_str, body, type) :-
+    constructor_declaration(_, _, declarator, _, body),
+    parent_of_list(declarator, "params", params),
+    list_contains(params, param),
+    formal_parameter(param, _, type, name),
+    string_representation(name, name_str).
+
 /* Make local variable declarations accessible in the succeeding
    statements */
 is_in_scope(name_str, succeeding_statement, type) :-

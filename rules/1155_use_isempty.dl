@@ -6,6 +6,8 @@
 
 #define MESSAGE "Use isEmpty to check whether the collection is empty or not"
 
+/* Collections */
+
 /* Rewrite x.size() == 0 into x.isEmpty() */
 rewrite(1155, MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-
     equals_expression(parent, _, _),
@@ -36,3 +38,36 @@ rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str),
     string_representation(method, "size").
+
+/* Strings */
+
+/* Rewrite x.length() == 0 into x.isEmpty() */
+rewrite(1155, MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-
+    equals_expression(parent, _, _),
+    parent_of(parent, _, invocation),
+    parent_of(parent, _, integer),
+    method_invocation(invocation, subject, method, nil),
+    has_string_type(subject),
+    evaluates_to_integer_value(integer, 0),
+    string_representation(subject, subject_str),
+    string_representation(method, "size").
+
+/* Rewrite x.length() != 0 into x.isEmpty() */
+rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+    not_equals_expression(parent, _, _),
+    parent_of(parent, _, invocation),
+    parent_of(parent, _, integer),
+    method_invocation(invocation, subject, method, nil),
+    has_string_type(subject),
+    evaluates_to_integer_value(integer, 0),
+    string_representation(subject, subject_str),
+    string_representation(method, "length").
+
+/* Rewrite x.length() > 0 into !x.isEmpty() */
+rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+    greater_than_expression(parent, invocation, integer),
+    method_invocation(invocation, subject, method, nil),
+    has_string_type(subject),
+    evaluates_to_integer_value(integer, 0),
+    string_representation(subject, subject_str),
+    string_representation(method, "length").

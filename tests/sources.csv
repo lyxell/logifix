@@ -8,7 +8,7 @@ rule,commit
 1155_use_isempty,https://github.com/codice/ddf/blob/975a9bfe58962ee48f843f2aa932a4fde13e9b2a/catalog/core/catalog-core-impl/filter-proxy/src/main/java/ddf/catalog/filter/proxy/adapter/GeotoolsFilterAdapterImpl.java
 1155_use_isempty,https://github.com/codice/ddf/blob/975a9bfe58962ee48f843f2aa932a4fde13e9b2a/catalog/core/catalog-core-validator/src/main/java/ddf/catalog/validation/impl/ReportingMetacardValidatorImpl.java
 1155_use_isempty,https://github.com/codice/ddf/blob/975a9bfe58962ee48f843f2aa932a4fde13e9b2a/catalog/core/catalog-core-validator/src/main/java/ddf/catalog/validation/impl/validator/RequiredAttributesMetacardValidator.java
-1155_use_isempty,https://github.com/codice/ddf/blob/975a9bfe58962ee48f843f2aa932a4fde13e9b2a/platform/security/expansion/security-expansion-impl/src/main/java/ddf/security/expansion/impl/AbstractExpansion.java
+1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/9588188800fd4d2f1f1dd15989e4e9bc999a6633/spring-boot-project/spring-boot-tools/spring-boot-buildpack-platform/src/main/java/org/springframework/boot/buildpack/platform/docker/TotalProgressBar.java
 1155_use_isempty,https://github.com/sutra/okcoin-client/blob/8055019b168693fd7d29ecce80cf708e0f0f22ec/okcoin-client-xchange/src/main/java/org/oxerr/okcoin/xchange/service/fix/OKCoinXChangeApplication.java
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/baksmali/src/main/java/org/jf/baksmali/Adaptors/ClassDefinition.java
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/baksmali/src/main/java/org/jf/baksmali/Adaptors/MethodDefinition.java
