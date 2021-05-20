@@ -14,10 +14,10 @@ do
         if [[ ! -f "$dir/$filename" ]]; then
             mkdir -p "$dir"
             pushd "$dir"
-            raw="https://raw.githubusercontent.com/${user}/${repo}/${hash}/${path}"
-            diff="https://github.com/${user}/${repo}/commit/${hash}.diff"
+            raw="https://raw.githubusercontent.com/$user/$repo/$hash/$path"
+            diff="https://github.com/$user/$repo/commit/$hash.diff"
             curl "$raw" > "$filename"
-            curl "$diff" | filterdiff --include="${path}" --clean --strip-match=1 | tail +3 > "$filename.diff"
+            curl "$diff" | filterdiff --include="$path" --clean --strip-match=1 | tail +3 > "$filename.diff"
             patch --reverse < "$filename.diff"
             popd
         fi
