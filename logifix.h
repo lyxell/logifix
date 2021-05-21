@@ -20,13 +20,14 @@ class program {
     std::string get_source_code(const char* filename);
     std::vector<std::tuple<int, int, int, std::string, std::string>>
     get_possible_rewrites(const char* filename);
-    std::vector<std::tuple<std::string, std::string, int, int>>
-    get_variables_in_scope(const char* filename);
+    std::vector<std::string>
+    get_variables_in_scope(int id);
     int get_root();
     std::tuple<std::string, int, int> get_node_properties(int id);
     std::vector<std::pair<std::string, int>> get_children(int node);
     std::vector<std::pair<std::string, std::vector<int>>>
     get_child_lists(int node);
+    int get_point_of_declaration(int id);
 };
 
 } // namespace logifix

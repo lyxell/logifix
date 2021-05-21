@@ -6,7 +6,6 @@
 
 rewrite(1481, "Unused variable declaration", id, "") :-
     local_variable_declaration_statement(id, declaration),
-    local_variable_declaration(declaration, _, [declarator, nil], _),
-    variable_declarator(declarator, _, _),
-    ! used_declaration(declarator).
+    local_variable_declaration(declaration, _, _, _),
+    ! point_of_declaration(_, declaration).
 

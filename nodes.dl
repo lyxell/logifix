@@ -1,0 +1,151 @@
+#define INFIX(name) \
+    .decl name(id: id, left: id, right: id) \
+    name(id, left, right) :- \
+        name_of(id, #name), \
+        parent_of(id, "left", left), \
+        parent_of(id, "right", right).
+
+/* AST node types
+ ********************************/
+
+.decl throw_statement(id: id, expr: id)
+throw_statement(id, expr) :-
+    name_of(id, "throw_statement"),
+    parent_of(id, "expression", expr).
+
+.decl expression_statement(id: id, expr: id)
+expression_statement(id, expr) :-
+    name_of(id, "expression_statement"),
+    parent_of(id, "expression", expr).
+
+.decl return_statement(id: id, expr: id)
+return_statement(id, expr) :-
+    name_of(id, "return_statement"),
+    parent_of(id, "expression", expr).
+
+INFIX(assignment_expression)
+INFIX(not_equals_expression)
+INFIX(equals_expression)
+INFIX(conditional_and_expression)
+INFIX(conditional_or_expression)
+INFIX(greater_than_expression)
+INFIX(addition_expression)
+INFIX(subtraction_expression)
+INFIX(multiplication_expression)
+
+.decl ternary_conditional_expression(id: id, cond: id, then: id, else: id)
+ternary_conditional_expression(id, cond, then, else) :-
+    name_of(id, "ternary_conditional_expression"),
+    parent_of(id, "condition", cond),
+    parent_of(id, "then", then),
+    parent_of(id, "else", else).
+
+.decl class_declaration(id: id, modifiers: id_list, name: id, superclass: id, superinterfaces: id_list, body: id_list)
+class_declaration(id, mods, name, superclass, superinterfaces, body) :-
+    name_of(id, "class_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "name", name),
+    parent_of(id, "superclass", superclass),
+    parent_of_list(id, "superinterfaces", superinterfaces),
+    parent_of_list(id, "body", body).
+
+.decl field_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
+field_declaration(id, mods, type, declarators) :-
+    name_of(id, "field_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "type", type),
+    parent_of_list(id, "declarators", declarators).
+
+.decl constructor_declaration(id: id, modifiers: id_list, declarator: id, throws: id_list, body: id)
+constructor_declaration(id, mods, declarator, throws, body) :-
+    name_of(id, "constructor_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "declarator", declarator),
+    parent_of_list(id, "throws", throws),
+    parent_of(id, "body", body).
+
+.decl method_declaration(id: id, modifiers: id_list, header: id, body: id)
+method_declaration(id, mods, header, body) :-
+    name_of(id, "method_declaration"),
+    parent_of(id, "header", header),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "body", body).
+
+.decl method_header(id: id, result: id, declarator: id, throws: id)
+method_header(id, result, declarator, throws) :-
+    name_of(id, "method_header"),
+    parent_of(id, "result", result),
+    parent_of(id, "declarator", declarator),
+    parent_of(id, "throws", throws).
+
+
+.decl method_invocation(id: id, subject: id, method: id, arguments: id_list)
+method_invocation(id, subject, method, arguments) :-
+    name_of(id, "method_invocation"),
+    parent_of(id, "subject", subject),
+    parent_of(id, "method", method),
+    parent_of_list(id, "arguments", arguments).
+
+.decl formal_parameter(id: id, modifiers: id_list, type: id, name: id)
+formal_parameter(id, modifiers, type, name) :-
+    name_of(id, "formal_parameter"),
+    parent_of_list(id, "modifiers", modifiers),
+    parent_of(id, "type", type),
+    parent_of(id, "name", name).
+
+.decl local_variable_declaration_statement(id: id, declaration: id)
+local_variable_declaration_statement(id, declaration) :-
+    name_of(id, "local_variable_declaration_statement"),
+    parent_of(id, "declaration", declaration).
+
+.decl local_variable_declaration(id: id, type: id, declarators: id_list, modifiers: id_list)
+local_variable_declaration(id, type, declarators, modifiers) :-
+    name_of(id, "local_variable_declaration"),
+    parent_of(id, "type", type),
+    parent_of_list(id, "declarators", declarators),
+    parent_of_list(id, "modifiers", modifiers).
+
+.decl variable_declarator(id: id, name: id, initializer: id)
+variable_declarator(id, name, initializer) :-
+    name_of(id, "variable_declarator"),
+    parent_of(id, "name", name),
+    parent_of(id, "initializer", initializer).
+
+.decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id_list, type: id, arguments: id_list, body: id_list)
+class_instance_creation_expression(id, qualifier, type_arguments, type, arguments, body) :-
+    name_of(id, "class_instance_creation_expression"),
+    parent_of(id, "qualifier", qualifier),
+    parent_of_list(id, "type_arguments", type_arguments),
+    parent_of(id, "type", type),
+    parent_of_list(id, "arguments", arguments),
+    parent_of_list(id, "body", body).
+
+.decl class_type(id: id, name: id, type_arguments: id_list, annotations: id_list)
+class_type(id, name, type_arguments, annotations) :-
+    name_of(id, "class_type"),
+    parent_of(id, "name", name),
+    parent_of_list(id, "type_arguments", type_arguments),
+    parent_of_list(id, "annotations", annotations).
+
+.decl primitive_type(id: id, annotations: id_list, name: id)
+primitive_type(id, annotations, name) :-
+    name_of(id, "primitive_type"),
+    parent_of(id, "name", name),
+    parent_of_list(id, "annotations", annotations).
+
+.decl integer_literal(id: id)
+integer_literal(id) :- name_of(id, "integer_literal").
+
+.decl floating_point_literal(id: id)
+floating_point_literal(id) :- name_of(id, "floating_point_literal").
+
+.decl string_literal(id: id)
+string_literal(id) :- name_of(id, "string_literal").
+
+.decl expression_name(id: id, identifiers: id_list)
+expression_name(id, identifiers) :-
+    name_of(id, "expression_name"),
+    parent_of_list(id, "identifiers", identifiers).
+
+.decl identifier(id: id)
+identifier(id) :- name_of(id, "identifier").

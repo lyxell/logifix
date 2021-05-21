@@ -34,7 +34,16 @@ std::string program::get_source_code(const char* filename) {
 }
 
 void program::run() {
+    typedef std::chrono::high_resolution_clock hclock;
+    auto t1 = hclock::now();
     prog->run();
+    auto t2 = hclock::now();
+#ifdef DEBUG
+    std::cerr << "+"
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+                     .count()
+              << " ms (analysis)" << std::endl;
+#endif
 }
 
 void program::print() {
@@ -67,20 +76,32 @@ program::get_possible_rewrites(const char* filename) {
     return result;
 }
 
-std::vector<std::tuple<std::string, std::string, int, int>>
-program::get_variables_in_scope(const char* filename) {
-    std::vector<std::tuple<std::string, std::string, int, int>> result;
-    souffle::Relation* relation = prog->getRelation("is_in_scope_output");
+std::vector<std::string>
+program::get_variables_in_scope(int id) {
+    std::vector<std::string> result;
+    souffle::Relation* relation = prog->getRelation("in_scope");
     assert(relation != nullptr);
     for (auto& output : *relation) {
-        std::string variable;
-        std::string type;
-        int starts_at;
-        int ends_at;
-        output >> variable >> type >> starts_at >> ends_at;
-        result.emplace_back(variable, type, starts_at, ends_at);
+        int rel_id;
+        std::string identifier;
+        int type;
+        output >> rel_id >> identifier >> type;
+        if (rel_id != id) continue;
+        result.emplace_back(std::move(identifier));
     }
     return result;
+}
+
+int program::get_point_of_declaration(int id) {
+    souffle::Relation* relation = prog->getRelation("point_of_declaration");
+    assert(relation != nullptr);
+    for (auto& output : *relation) {
+        int rel_id;
+        int declaration;
+        output >> rel_id >> declaration;
+        if (rel_id == id) return declaration;
+    }
+    return 0;
 }
 
 std::tuple<std::string, int, int> program::get_node_properties(int id) {
