@@ -11,3 +11,4 @@ rule,commit,reason
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/math/src/main/java/smile/stat/distribution/DiscreteMixture.java,uses scientific notation on int literal
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/nlp/src/main/java/smile/nlp/pos/HMMPOSTagger.java,uses scientific notation on int literal
 1155_use_isempty,https://github.com/jaltekruse/OpenNotebook/blob/2e3e7e38d3bc54c8aa279b15678740a7961a85bb/src/main/java/expression/NodeParser.java,also removes trailing whitespace
+1155_use_isempty,https://github.com/javaparser/javaparser/blob/e709c28d4c7d8aa5f4ae1a76c2ca746c244e496f/java-symbol-solver-core/src/main/java/me/tomassetti/symbolsolver/resolution/MethodResolutionLogic.java,need better type checking
