@@ -18,6 +18,7 @@ rule,commit
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/dexlib2/src/main/java/org/jf/dexlib2/builder/MutableMethodImplementation.java
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/util/src/main/java/org/jf/util/ImmutableConverter.java
 1481_unused_local_variables,https://github.com/Netflix/astyanax/blob/8daa973723a42d08196ae666bebeacdefe4ace19/astyanax-entity-mapper/src/main/java/com/netflix/astyanax/entitystore/CompositeEntityMapper.java
+1481_unused_local_variables,https://github.com/informatici/openhospital-api/blob/9cf75d34db764fc17352d2f3b7a0c54debc95732/src/test/java/org/isf/admission/rest/AdmissionControllerTest.java
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/processing/src/test/java/org/apache/druid/query/groupby/GroupByQueryRunnerTest.java
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/processing/src/test/java/org/apache/druid/query/groupby/orderby/TopNSequenceTest.java
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/main/java/org/apache/druid/server/emitter/ComposingEmitterModule.java
