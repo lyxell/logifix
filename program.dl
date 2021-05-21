@@ -102,6 +102,9 @@ not_equals_null_expression(id, subject) :-
 evaluates_to_integer_value(id, 0) :-
     integer_literal(id),
     string_representation(id, "0").
+evaluates_to_integer_value(id, 1) :-
+    integer_literal(id),
+    string_representation(id, "1").
 /* TODO
 evaluates_to_integer_value(id, to_number(repr)) :-
     integer_literal(id),
@@ -263,6 +266,7 @@ has_type(exprname, type) :-
 .decl collection_type_name(str: symbol)
 collection_type_name("ArrayList").
 collection_type_name("Collection").
+collection_type_name("Deque").
 collection_type_name("LinkedList").
 collection_type_name("List").
 collection_type_name("Queue").
