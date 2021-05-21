@@ -4,3 +4,6 @@ rule,commit,reason
 1155_use_isempty,https://github.com/codice/ddf/blob/975a9bfe58962ee48f843f2aa932a4fde13e9b2a/platform/security/expansion/security-expansion-impl/src/main/java/ddf/security/expansion/impl/AbstractExpansion.java,string fix for isEmpty is not in diff
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/786aacf2e9079a99ba3bd12a4dc55e320abd840b/spring-boot-cli/src/main/java/org/springframework/boot/cli/command/core/HintCommand.java,parentheses removed in diff
 1155_use_isemtpy,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/SAMRecord.java,need better typechecking
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/util/SamRecordTrackingBuffer.java,need to make this.x refer to field x
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/tribble/index/interval/IntervalIndexCreator.java,also fixes whitespace
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/variant/variantcontext/writer/BCF2Encoder.java,also fixes whitespace

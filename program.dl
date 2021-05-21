@@ -173,6 +173,14 @@ in_scope(descendant, identifier, type) :-
     in_scope(ancestor, identifier, type),
     ancestor_of(ancestor, descendant).
 
+/* Make parameter in enhanced for statement accessible in its body */
+in_scope(body, identifier_str, stmt) :-
+    ast_node(stmt),
+    name_of(stmt, "enhanced_for_statement"),
+    parent_of(stmt, "name", identifier),
+    string_representation(identifier, identifier_str),
+    parent_of(stmt, "statement", body).
+
 /* Make field declarations in scope in the method bodies of their class */
 in_scope(method_body, identifier_str, field) :-
     class_declaration(_, _, _, _, _, class_body),
