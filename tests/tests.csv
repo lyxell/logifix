@@ -50,6 +50,10 @@ rule,commit
 1155_use_isempty,https://github.com/javaparser/javaparser/blob/e709c28d4c7d8aa5f4ae1a76c2ca746c244e496f/java-symbol-solver-core/src/main/java/me/tomassetti/symbolsolver/javaparsermodel/declarations/JavaParserEnumDeclaration.java
 1155_use_isempty,https://github.com/javaparser/javaparser/blob/e709c28d4c7d8aa5f4ae1a76c2ca746c244e496f/java-symbol-solver-core/src/main/java/me/tomassetti/symbolsolver/javaparsermodel/declarations/JavaParserMethodDeclaration.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/786aacf2e9079a99ba3bd12a4dc55e320abd840b/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/autoconfigure/HealthIndicatorAutoConfigurationProperties.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/app/src/main/java/com/frodo/app/android/core/database/AndroidDatabaseSystem.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/sql/WhereBuilder.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/table/Foreign.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/sql/SqlInfoBuilder.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/786aacf2e9079a99ba3bd12a4dc55e320abd840b/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/OrderedHealthAggregator.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/786aacf2e9079a99ba3bd12a4dc55e320abd840b/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/condition/OnResourceCondition.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/9588188800fd4d2f1f1dd15989e4e9bc999a6633/spring-boot-project/spring-boot-tools/spring-boot-buildpack-platform/src/main/java/org/springframework/boot/buildpack/platform/docker/TotalProgressBar.java
