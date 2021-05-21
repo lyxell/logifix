@@ -1,6 +1,9 @@
 rule,commit
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/AssertElement.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/ElementWait.java
+1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/PsSelector.java
+1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/Tb.java
+1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/formdesigner/FormDesigner.java
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/HighAccuracyDownsamplingIterator.java
 1155_use_isempty,https://github.com/cflint/CFLint/blob/257cc0f1822ac2613d7e6a06fedb3518ac39ceec/src/main/java/com/cflint/CFLint.java
 1155_use_isempty,https://github.com/codice/ddf/blob/975a9bfe58962ee48f843f2aa932a4fde13e9b2a/catalog/core/catalog-core-api-impl/src/main/java/ddf/catalog/validation/impl/report/AttributeValidationReportImpl.java
