@@ -177,10 +177,11 @@ in_scope(descendant, identifier, type) :-
     ancestor_of(ancestor, descendant).
 
 /* Make parameter in enhanced for statement accessible in its body */
-in_scope(body, identifier_str, stmt) :-
+in_scope(body, identifier_str, param) :-
     ast_node(stmt),
     name_of(stmt, "enhanced_for_statement"),
-    parent_of(stmt, "name", identifier),
+    parent_of(stmt, "param", param),
+    formal_parameter(param, _, _, identifier),
     string_representation(identifier, identifier_str),
     parent_of(stmt, "statement", body).
 
@@ -239,12 +240,47 @@ in_scope(succeeding_statement, identifier_str, declaration) :-
 /* Point of declaration
  ********************************/
 
+.decl has_formal_parameter_or_local_var_decl_in_scope(id: id)
+has_formal_parameter_or_local_var_decl_in_scope(id) :-
+    expression_name(id, [head, _]),
+    in_scope(id, identifier, decl),
+    local_variable_declaration(decl, _, _, _),
+    string_representation(head, identifier).
+has_formal_parameter_or_local_var_decl_in_scope(id) :-
+    expression_name(id, [head, _]),
+    in_scope(id, identifier, decl),
+    formal_parameter(decl, _, _, _),
+    string_representation(head, identifier).
+
 .decl point_of_declaration(id: id, declaration: id)
 .output point_of_declaration(IO=stdout)
-point_of_declaration(head, type) :-
+// if there is a local variable declaration or a formal parameter in scope,
+// the identifier definitely refers to it (these can't be shadowed)
+point_of_declaration(head, decl) :-
     expression_name(id, [head, _]),
-    in_scope(id, identifier, type),
+    in_scope(id, identifier, decl),
+    local_variable_declaration(decl, _, _, _),
     string_representation(head, identifier).
+point_of_declaration(head, decl) :-
+    expression_name(id, [head, _]),
+    in_scope(id, identifier, decl),
+    formal_parameter(decl, _, _, _),
+    string_representation(head, identifier).
+// if there is no local variable declarations of formal parameters in scope
+// the identifier refers to the field
+point_of_declaration(head, decl) :-
+    expression_name(id, [head, _]),
+    in_scope(id, identifier, decl),
+    string_representation(head, identifier),
+    field_declaration(decl, _, _, _),
+    ! has_formal_parameter_or_local_var_decl_in_scope(id).
+
+// We can always refer to the field of the class using "this"
+point_of_declaration(id, type) :-
+    field_access(id, this, field),
+    name_of(this, "this_expression"),
+    in_scope(id, identifier, type),
+    string_representation(field, identifier).
 
 /* Types of variable references
  ********************************/

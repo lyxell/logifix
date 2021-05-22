@@ -79,6 +79,11 @@ method_header(id, result, declarator, throws) :-
     parent_of(id, "declarator", declarator),
     parent_of(id, "throws", throws).
 
+.decl field_access(id: id, subject: id, field: id)
+field_access(id, subject, field) :-
+    name_of(id, "field_access"),
+    parent_of(id, "subject", subject),
+    parent_of(id, "field", field).
 
 .decl method_invocation(id: id, subject: id, method: id, arguments: id_list)
 method_invocation(id, subject, method, arguments) :-
