@@ -12,3 +12,8 @@ rule,commit,reason
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/nlp/src/main/java/smile/nlp/pos/HMMPOSTagger.java,uses scientific notation on int literal
 1155_use_isempty,https://github.com/jaltekruse/OpenNotebook/blob/2e3e7e38d3bc54c8aa279b15678740a7961a85bb/src/main/java/expression/NodeParser.java,also removes trailing whitespace
 1155_use_isempty,https://github.com/javaparser/javaparser/blob/e709c28d4c7d8aa5f4ae1a76c2ca746c244e496f/java-symbol-solver-core/src/main/java/me/tomassetti/symbolsolver/resolution/MethodResolutionLogic.java,need better type checking
+1125_redundant_boolean,https://github.com/apache/rocketmq/blob/f37dc187f244cca1609ae01f81e63343040656aa/acl/src/main/java/org/apache/rocketmq/acl/plain/RemoteAddressStrategyFactory.java,ternary if todo
+1125_redundant_boolean,https://github.com/apache/rocketmq/blob/f37dc187f244cca1609ae01f81e63343040656aa/broker/src/test/java/org/apache/rocketmq/broker/BrokerOuterAPITest.java,ternary if todo
+1125_redundant_boolean,https://github.com/locationtech/jts/blob/3ace5a666985fabd78510d8b880e3851ded8fd13/modules/core/src/main/java/org/locationtech/jts/operation/overlayng/Edge.java,ternary if todo
+1481_unused_local_variables,https://github.com/slarse/sorald/blob/519ce67f017074fc41c7b846c32f0b22588dcd4e/src/main/java/sorald/GitPatchGenerator.java,removes an extra empty line
+1481_unused_local_variables,https://github.com/slarse/verificatum-vmn/blob/acb279ca568e5078f724b81a715d52d2b0afe2bf/src/java/com/verificatum/protocol/mixnet/MixNetElGamalTool.java,removes an extra empty line

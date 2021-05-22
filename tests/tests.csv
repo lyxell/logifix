@@ -1,5 +1,8 @@
 rule,commit
+1125_redundant_boolean,https://github.com/IBM/API4JSON/blob/619790a15dae6dc907aba432bbd2fd02a2b499ea/com.api.json.api4json/src/main/java/com/api/json/JSONArray.java
+1125_redundant_boolean,https://github.com/IBM/API4JSON/blob/619790a15dae6dc907aba432bbd2fd02a2b499ea/com.api.json.api4json/src/main/java/com/api/json/JSONObject.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/AssertElement.java
+1125_redundant_boolean,https://github.com/locationtech/jts/blob/3ace5a666985fabd78510d8b880e3851ded8fd13/modules/core/src/main/java/org/locationtech/jts/operation/predicate/RectangleIntersects.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/ElementWait.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/PsSelector.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/Tb.java
