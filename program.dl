@@ -339,6 +339,7 @@ boxed_type_name("Double").
 .decl resource_type_name(str: symbol)
 resource_type_name("BufferedReader").
 resource_type_name("BufferedWriter").
+resource_type_name("JarOutputStream").
 resource_type_name("ZipFile").
 
 /* Is type */

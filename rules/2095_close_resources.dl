@@ -11,6 +11,24 @@
     java.io.StringWriter
  */
 
+
+/**
+ * Rewrite
+ *
+ * try {
+ *     Resource resource = new Resource();
+ *     ... first fragment ...
+ *     resource.close();
+ *     ... second fragment ...
+ *
+ * into
+ *
+ * try (Resource resource = new Resource()) {
+ *     ... first fragment ...
+ *     ... second fragment ...
+ *
+ */
+
 rewrite(2095, "", id, cat("try (", declaration_str, ") {", first_frag, second_frag)) :-
 
     /* we are inside a try statement */
@@ -44,3 +62,25 @@ rewrite(2095, "", id, cat("try (", declaration_str, ") {", first_frag, second_fr
     ends_at(expr_statement, second_frag_start),
     ends_at(id, second_frag_end),
     second_frag = substr(code, second_frag_start, second_frag_end - second_frag_start).
+
+/**
+ * Rewrite
+ * 
+ * ... method_name() {
+ *     ... first fragment ...
+ *     Resource resource = new Resource();
+ *     ... second fragment ...
+ *     resource.close();
+ *     ... third fragment ...
+ * }
+ * 
+ * into
+ *
+ * ... method_name() {
+ *     ... first fragment ...
+ *     try (Resource resource = new Resource()) {
+ *         ... second fragment ...
+ *     }
+ *     ... third fragment ...
+ * }
+ *
