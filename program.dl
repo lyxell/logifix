@@ -312,6 +312,8 @@ collection_type_name("LinkedList").
 collection_type_name("List").
 collection_type_name("Queue").
 collection_type_name("Set").
+collection_type_name("Map"). // TODO not technically true
+collection_type_name("LinkedHashMap"). // TODO not technically true
 collection_type_name("SortedSet").
 collection_type_name("Stack").
 collection_type_name("Vector").

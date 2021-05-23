@@ -14,6 +14,7 @@ rule,commit,extra_diff_flags
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/cram/lossy/QualityScorePreservation.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/fastq/FastqRecord.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/util/BufferedLineReader.java,
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/util/DiskBackedQueue.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/util/FormatUtil.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/util/SamRecordTrackingBuffer.java,--ignore-space-change
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/util/SequenceUtil.java,
@@ -23,9 +24,13 @@ rule,commit,extra_diff_flags
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/tribble/index/linear/LinearIndexCreator.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/tribble/readers/TabixReader.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/variant/bcf2/BCF2Codec.java,
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/variantcontext/CommonInfo.java,--ignore-all-space
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/variant/bcf2/BCF2Utils.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/variant/variantcontext/VariantContextComparator.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/variant/variantcontext/writer/BCF2Encoder.java,--ignore-all-space
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/vcf/AbstractVCFCodec.java,--ignore-all-space
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/vcf/VCF3Codec.java,--ignore-all-space
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/vcf/VCFCodec.java,--ignore-all-space
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/variant/vcf/VCFHeaderLine.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/HighAccuracyDownsamplingIterator.java,
 1155_use_isempty,https://github.com/cflint/CFLint/blob/257cc0f1822ac2613d7e6a06fedb3518ac39ceec/src/main/java/com/cflint/CFLint.java,
@@ -36,6 +41,9 @@ rule,commit,extra_diff_flags
 1155_use_isempty,https://github.com/codice/ddf/blob/975a9bfe58962ee48f843f2aa932a4fde13e9b2a/catalog/core/catalog-core-validator/src/main/java/ddf/catalog/validation/impl/validator/RequiredAttributesMetacardValidator.java,
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/core/src/main/java/smile/neighbor/CoverTree.java,
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/core/src/test/java/smile/neighbor/LSHTest.java,
+1155_use_isempty,https://github.com/spring-projects/spring-data-mongodb/blob/1d1c80db7be9052e4488592924c1dd377c91048c/spring-data-mongodb-log4j/src/main/java/org/springframework/data/mongodb/log4j/MongoLog4jAppender.java,
+1155_use_isempty,https://github.com/spring-projects/spring-data-mongodb/blob/1d1c80db7be9052e4488592924c1dd377c91048c/spring-data-mongodb/src/main/java/org/springframework/data/mongodb/core/aggregation/Aggregation.java,
+1155_use_isempty,https://github.com/spring-projects/spring-data-mongodb/blob/1d1c80db7be9052e4488592924c1dd377c91048c/spring-data-mongodb/src/main/java/org/springframework/data/mongodb/core/query/Criteria.java,
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/core/src/test/java/smile/neighbor/SNLSHTest.java,
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/graph/src/main/java/smile/graph/AdjacencyList.java,
 1155_use_isempty,https://github.com/conanlm426/test/blob/d47efc23c0124daaba3fc0e2c5e62c925568a732/graph/src/main/java/smile/graph/AdjacencyMatrix.java,

@@ -1,4 +1,14 @@
 rule,commit,reason
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/BAMFileReader.java,need recursive type checking
+1155_use_isemtpy,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/SAMLineParser.java,need recursive type checking
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/SAMRecord.java,need recursive typechecking
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/metrics/MetricsFile.java,need typechecking for arrays
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/reference/AbstractFastaSequenceFile.java,need recursive typechecking
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/util/CigarUtil.java,need recursive typechecking
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/variantcontext/VariantContext.java,need typechecking for methods
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/variantcontext/VariantContextUtils.java,need recursive typechecking
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/util/IntervalList.java,need recursive typechecking
+1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/tribble/bed/BEDCodec.java,need recursive typechecking
 1125_redundant_boolean,https://github.com/apache/rocketmq/blob/f37dc187f244cca1609ae01f81e63343040656aa/acl/src/main/java/org/apache/rocketmq/acl/plain/RemoteAddressStrategyFactory.java,ternary if todo
 1125_redundant_boolean,https://github.com/apache/rocketmq/blob/f37dc187f244cca1609ae01f81e63343040656aa/broker/src/test/java/org/apache/rocketmq/broker/BrokerOuterAPITest.java,ternary if todo
 1125_redundant_boolean,https://github.com/locationtech/jts/blob/3ace5a666985fabd78510d8b880e3851ded8fd13/modules/core/src/main/java/org/locationtech/jts/operation/overlayng/Edge.java,ternary if todo
