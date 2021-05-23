@@ -282,6 +282,12 @@ point_of_declaration(id, type) :-
     in_scope(id, identifier, type),
     string_representation(field, identifier).
 
+// if an expression name contains only one identifier then the whole
+// expression refers to its identifier
+point_of_declaration(id, decl) :-
+    expression_name(id, [head, nil]),
+    point_of_declaration(head, decl).
+
 /* Types of variable references
  ********************************/
 
@@ -332,6 +338,7 @@ boxed_type_name("Double").
 
 .decl resource_type_name(str: symbol)
 resource_type_name("BufferedReader").
+resource_type_name("BufferedWriter").
 resource_type_name("ZipFile").
 
 /* Is type */

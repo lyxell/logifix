@@ -75,7 +75,7 @@ rule,commit
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/lookup/cache/LookupCoordinatorManagerTest.java
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/shard/NumberedShardSpecTest.java
 1596_fix_old_empty_collection,https://github.com/ronak-manglani/memoir/blob/825df2461004006b9d8139e9bbe702dcf5252d1e/RTEditor/src/main/java/com/onegravity/rteditor/utils/validator/UrlValidator.java
-2095_close_resources,https://github.com/AndroidVTS/android-vts/blob/40839ad62b23399ef3fdf98b4dd82ae45cee4d3f/app/src/main/java/fuzion24/device/vulnerability/vulnerabilities/framework/zip/ZipBug8219321.java
+2095_close_resources,https://github.com/Konloch/bytecode-viewer/blob/db959d4704dfea3ad22c502997e1e2360dedec9e/src/main/java/the/bytecode/club/bytecodeviewer/decompilers/bytecode/InstructionPrinter.java
 2111_bigdecimal_double,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java
 2111_bigdecimal_double,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java
 2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Matrices.java
