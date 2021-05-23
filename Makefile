@@ -30,7 +30,7 @@ sjp/sjp.a:
 
 test: cli/logifix
 	cd tests && ./download_tests.sh
-	./tests/run_tests.sh cli/logifix
+	cd tests && ./run_tests.sh ../cli/logifix
 
 clean:
 	rm -rf $(OBJS) $(ARCHIVE) $(TOOL)

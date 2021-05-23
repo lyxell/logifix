@@ -293,7 +293,6 @@ point_of_declaration(id, decl) :-
 
 .decl has_type(id: id, type: id)
 has_type(id, type) :-
-    identifier(id),
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", type).
 /* If an expression_name only has one identifier, then the expression_name has the same

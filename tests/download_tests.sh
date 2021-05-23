@@ -1,6 +1,6 @@
 #!/bin/bash
 files=$(tail +2 < tests.csv)
-regex="([a-z0-9_]+),https://github.com/([A-Za-z0-9_-]+)/([\.A-Za-z0-9_-]+)/blob/([a-z0-9-]+)/(.*)"
+regex="([a-z0-9_]+),https://github.com/([A-Za-z0-9_-]+)/([\.A-Za-z0-9_-]+)/blob/([a-z0-9-]+)/(.*),"
 set -e
 set -o pipefail
 
