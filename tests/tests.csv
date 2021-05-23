@@ -2,11 +2,11 @@ rule,commit
 1125_redundant_boolean,https://github.com/IBM/API4JSON/blob/619790a15dae6dc907aba432bbd2fd02a2b499ea/com.api.json.api4json/src/main/java/com/api/json/JSONArray.java
 1125_redundant_boolean,https://github.com/IBM/API4JSON/blob/619790a15dae6dc907aba432bbd2fd02a2b499ea/com.api.json.api4json/src/main/java/com/api/json/JSONObject.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/AssertElement.java
-1125_redundant_boolean,https://github.com/locationtech/jts/blob/3ace5a666985fabd78510d8b880e3851ded8fd13/modules/core/src/main/java/org/locationtech/jts/operation/predicate/RectangleIntersects.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/ElementWait.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/PsSelector.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/Tb.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/formdesigner/FormDesigner.java
+1125_redundant_boolean,https://github.com/locationtech/jts/blob/3ace5a666985fabd78510d8b880e3851ded8fd13/modules/core/src/main/java/org/locationtech/jts/operation/predicate/RectangleIntersects.java
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/BAMIndexMetaData.java
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/SAMUtils.java
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/SamFileHeaderMerger.java
@@ -42,6 +42,10 @@ rule,commit
 1155_use_isempty,https://github.com/danangkimhoa/espresso_ZulipAndroid/blob/4cfc4d3a78ad40b950640bd427d9e7632bd83a09/app/src/main/java/com/zulip/android/activities/LoginActivity.java
 1155_use_isempty,https://github.com/danangkimhoa/espresso_ZulipAndroid/blob/4cfc4d3a78ad40b950640bd427d9e7632bd83a09/app/src/main/java/com/zulip/android/models/MessageRange.java
 1155_use_isempty,https://github.com/danangkimhoa/espresso_ZulipAndroid/blob/4cfc4d3a78ad40b950640bd427d9e7632bd83a09/app/src/main/java/com/zulip/android/networking/AsyncGetOldMessages.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/app/src/main/java/com/frodo/app/android/core/database/AndroidDatabaseSystem.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/sql/SqlInfoBuilder.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/sql/WhereBuilder.java
+1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/table/Foreign.java
 1155_use_isempty,https://github.com/jaltekruse/OpenNotebook/blob/2e3e7e38d3bc54c8aa279b15678740a7961a85bb/src/main/java/doc_gui/DocMouseListener.java
 1155_use_isempty,https://github.com/jaltekruse/OpenNotebook/blob/2e3e7e38d3bc54c8aa279b15678740a7961a85bb/src/main/java/doc_gui/NotebookPanel.java
 1155_use_isempty,https://github.com/jaltekruse/OpenNotebook/blob/2e3e7e38d3bc54c8aa279b15678740a7961a85bb/src/main/java/doc_gui/graph/BarGraph.java
@@ -53,10 +57,6 @@ rule,commit
 1155_use_isempty,https://github.com/javaparser/javaparser/blob/e709c28d4c7d8aa5f4ae1a76c2ca746c244e496f/java-symbol-solver-core/src/main/java/me/tomassetti/symbolsolver/javaparsermodel/declarations/JavaParserEnumDeclaration.java
 1155_use_isempty,https://github.com/javaparser/javaparser/blob/e709c28d4c7d8aa5f4ae1a76c2ca746c244e496f/java-symbol-solver-core/src/main/java/me/tomassetti/symbolsolver/javaparsermodel/declarations/JavaParserMethodDeclaration.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/786aacf2e9079a99ba3bd12a4dc55e320abd840b/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/autoconfigure/HealthIndicatorAutoConfigurationProperties.java
-1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/app/src/main/java/com/frodo/app/android/core/database/AndroidDatabaseSystem.java
-1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/sql/WhereBuilder.java
-1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/table/Foreign.java
-1155_use_isempty,https://github.com/frodoking/App-Architecture/blob/d3f774ea0dd249f2f2635ef66445ef0623f8efa1/framework/src/main/java/com/frodo/app/framework/orm/sql/SqlInfoBuilder.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/786aacf2e9079a99ba3bd12a4dc55e320abd840b/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/OrderedHealthAggregator.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/786aacf2e9079a99ba3bd12a4dc55e320abd840b/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/condition/OnResourceCondition.java
 1155_use_isempty,https://github.com/spring-projects/spring-boot/blob/9588188800fd4d2f1f1dd15989e4e9bc999a6633/spring-boot-project/spring-boot-tools/spring-boot-buildpack-platform/src/main/java/org/springframework/boot/buildpack/platform/docker/TotalProgressBar.java
@@ -75,6 +75,7 @@ rule,commit
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/lookup/cache/LookupCoordinatorManagerTest.java
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/shard/NumberedShardSpecTest.java
 1596_fix_old_empty_collection,https://github.com/ronak-manglani/memoir/blob/825df2461004006b9d8139e9bbe702dcf5252d1e/RTEditor/src/main/java/com/onegravity/rteditor/utils/validator/UrlValidator.java
+2095_close_resources,https://github.com/AndroidVTS/android-vts/blob/40839ad62b23399ef3fdf98b4dd82ae45cee4d3f/app/src/main/java/fuzion24/device/vulnerability/vulnerabilities/framework/zip/ZipBug8219321.java
 2111_bigdecimal_double,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java
 2111_bigdecimal_double,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java
 2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Matrices.java

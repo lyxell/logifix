@@ -231,7 +231,7 @@ in_scope(body, identifier_str, param) :-
 /* Make local variable declarations accessible in the succeeding statements */
 in_scope(succeeding_statement, identifier_str, declaration) :-
     local_variable_declaration_statement(declaration_statement, declaration),
-    local_variable_declaration(declaration, _, declarators, _),
+    local_variable_declaration(declaration, _, _, declarators),
     precedes(declaration_statement, succeeding_statement),
     list_contains(declarators, declarator),
     variable_declarator(declarator, identifier, _),
@@ -330,6 +330,10 @@ boxed_type_name("Long").
 boxed_type_name("Short").
 boxed_type_name("Double").
 
+.decl resource_type_name(str: symbol)
+resource_type_name("BufferedReader").
+resource_type_name("ZipFile").
+
 /* Is type */
 
 .decl is_collection_type(id: id)
@@ -356,6 +360,12 @@ is_boxed_type(id) :-
     string_representation(name, name_str),
     boxed_type_name(name_str).
 
+.decl is_resource_type(id: id)
+is_resource_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, name_str),
+    resource_type_name(name_str).
+
 .decl is_floating_point_type(id: id)
 is_floating_point_type(id) :-
     primitive_type(id, _, name),
@@ -375,6 +385,9 @@ has_floating_point_type(id) :-
     multiplication_expression(id, left, right),
     has_floating_point_type(left),
     has_floating_point_type(right).
+
+.decl has_resource_type(id: id)
+has_resource_type(id) :- has_type(id, type), is_resource_type(type).
 
 .decl has_string_type(id: id)
 has_string_type(id) :- string_literal(id).

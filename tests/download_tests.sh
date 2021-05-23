@@ -2,8 +2,14 @@
 files=$(tail +2 < tests.csv)
 regex="([a-z0-9_]+),https://github.com/([A-Za-z0-9_-]+)/([\.A-Za-z0-9_-]+)/blob/([a-z0-9-]+)/(.*)"
 set -e
-for f in $files
-do
+set -o pipefail
+
+if ! [ -x "$(command -v filterdiff)" ]; then
+    echo "run sudo apt install -y patchutils"
+    exit 1
+fi
+
+for f in $files; do
     if [[ $f =~ $regex ]]; then
         dir="${BASH_REMATCH[1]}"
         user="${BASH_REMATCH[2]}"

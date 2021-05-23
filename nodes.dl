@@ -23,6 +23,13 @@ return_statement(id, expr) :-
     name_of(id, "return_statement"),
     parent_of(id, "expression", expr).
 
+.decl try_statement(id: id, body: id, catches: id_list, finally: id)
+try_statement(id, body, catches, finally) :-
+    name_of(id, "try_statement"),
+    parent_of(id, "body", body),
+    parent_of_list(id, "catches", catches),
+    parent_of(id, "finally", finally).
+
 INFIX(assignment_expression)
 INFIX(not_equals_expression)
 INFIX(equals_expression)
@@ -104,12 +111,12 @@ local_variable_declaration_statement(id, declaration) :-
     name_of(id, "local_variable_declaration_statement"),
     parent_of(id, "declaration", declaration).
 
-.decl local_variable_declaration(id: id, type: id, declarators: id_list, modifiers: id_list)
-local_variable_declaration(id, type, declarators, modifiers) :-
+.decl local_variable_declaration(id: id, modiifers: id_list, type: id, declarators: id_list)
+local_variable_declaration(id, modifiers, type, declarators) :-
     name_of(id, "local_variable_declaration"),
+    parent_of_list(id, "modifiers", modifiers),
     parent_of(id, "type", type),
-    parent_of_list(id, "declarators", declarators),
-    parent_of_list(id, "modifiers", modifiers).
+    parent_of_list(id, "declarators", declarators).
 
 .decl variable_declarator(id: id, name: id, initializer: id)
 variable_declarator(id, name, initializer) :-
@@ -138,6 +145,11 @@ primitive_type(id, annotations, name) :-
     name_of(id, "primitive_type"),
     parent_of(id, "name", name),
     parent_of_list(id, "annotations", annotations).
+
+.decl block(id: id, statements: id_list)
+block(id, statements) :-
+    name_of(id, "block"),
+    parent_of_list(id, "statements", statements).
 
 .decl integer_literal(id: id)
 integer_literal(id) :- name_of(id, "integer_literal").

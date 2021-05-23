@@ -11,29 +11,13 @@
     java.io.StringWriter
  */
 
-
-/**
-
-  try {
-    Resource x = new Resource(...);
-    ...
-    x.close();
-    ...
-  } catch (...) {
-  }
-
-**/
-
-/*
-rewrite(2095, "", id, "") :-
-    // find a local variable declaration statement
-    local_variable_declaration_statement(id, declaration),
-    local_variable_declaration(declaration, type, declarators, _),
-    // TODO: is_a_resource(type)
-    // extract the only declarator
-    declarators = [declarator, nil],
-    // extract the name and the initializer
-    variable_declarator(declarator, name, initializer),
-    // assert that the initializer is actually a class instance creation expression
-    class_instance_creation_expression(initializer, _, _, _, _, _).
-*/
+rewrite(2095, "", id, cat("try (", decl_str, ") {", substr(code, from, to - from))) :-
+    try_statement(id, body, _, _),
+    block(body, [declaration_statement, _]),
+    local_variable_declaration_statement(declaration_statement, decl),
+    local_variable_declaration(decl, _, type, _),
+    is_resource_type(type),
+    string_representation(decl, decl_str),
+    ends_at(declaration_statement, from),
+    ends_at(id, to),
+    source_code(code).
