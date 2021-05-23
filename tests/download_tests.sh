@@ -15,16 +15,21 @@ for f in $files; do
         user="${BASH_REMATCH[2]}"
         repo="${BASH_REMATCH[3]}"
         hash="${BASH_REMATCH[4]}"
-        path="${BASH_REMATCH[5]}"
-        filename=$(basename "$path")
-        if [[ ! -f "$dir/$filename" ]]; then
-            mkdir -p "$dir"
-            pushd "$dir"
-            raw="https://raw.githubusercontent.com/$user/$repo/$hash/$path"
+        location="${BASH_REMATCH[5]}"
+        path=$(dirname "$location")
+        filename=$(basename "$location")
+        if [[ ! -f "$dir/$path/$filename" ]]; then
+            mkdir -p "$dir/$path"
+            pushd "$dir/$path"
+            raw="https://raw.githubusercontent.com/$user/$repo/$hash/$location"
             diff="https://github.com/$user/$repo/commit/$hash.diff"
             curl "$raw" > "$filename"
-            curl "$diff" | filterdiff --include="$path" --clean --strip-match=1 | tail +3 > "$filename.diff"
+            curl "$diff" | filterdiff --include="$location" --addprefix="$dir/" --clean --strip-match=1 --strip=1 | tail +3 > "$filename.diff"
             patch --reverse < "$filename.diff"
+            # assert that the diff is not empty
+            if ! [ -s "$filename.diff" ];then
+                exit 1
+            fi
             popd
         fi
     else

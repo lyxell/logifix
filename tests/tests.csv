@@ -6,7 +6,7 @@ rule,commit
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/PsSelector.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/Tb.java
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/formdesigner/FormDesigner.java
-1125_redundant_boolean,https://github.com/locationtech/jts/blob/3ace5a666985fabd78510d8b880e3851ded8fd13/modules/core/src/main/java/org/locationtech/jts/operation/predicate/RectangleIntersects.java
+1125_redundant_boolean,https://github.com/locationtech/jts/blob/bf8a0cb2a5f93f2671b59a089fe67d146846a57b/modules/core/src/main/java/org/locationtech/jts/operation/predicate/RectangleIntersects.java
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/BAMIndexMetaData.java
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/SAMUtils.java
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/SamFileHeaderMerger.java
@@ -89,11 +89,11 @@ rule,commit
 2293_diamond_operator,https://github.com/eclipse/eclipse.platform.ui/blob/36f15568e41c56c11ce1d608b3ac5485248c09a0/bundles/org.eclipse.e4.ui.css.swt.theme/src/org/eclipse/e4/ui/css/swt/internal/theme/ThemeEngine.java
 2293_diamond_operator,https://github.com/fyhertz/libstreaming/blob/2d9a17f962551ac57b5f2871a2e762cd75d8c28a/src/net/majorkernelpanic/streaming/hw/CodecManager.java
 2293_diamond_operator,https://github.com/hantsy/spring4-sandbox/blob/14e6c8a421ad064bf3aa44b48e2d5f351ff0faf6/mvc-rest/src/main/java/com/hantsylabs/example/spring/web/TaskController.java
-2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/64dbdbc4f59cbd9160cbf47a8fc0049ec0171438/core/src/main/java/org/jenkins/ui/icon/Icon.java
-2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/64dbdbc4f59cbd9160cbf47a8fc0049ec0171438/core/src/main/java/org/jenkins/ui/icon/IconSet.java
-2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/64dbdbc4f59cbd9160cbf47a8fc0049ec0171438/test/src/test/java/hudson/bugs/DateConversionTest.java
-2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/64dbdbc4f59cbd9160cbf47a8fc0049ec0171438/test/src/test/java/hudson/slaves/NodeProvisionerTest.java
-2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/64dbdbc4f59cbd9160cbf47a8fc0049ec0171438/test/src/test/java/hudson/triggers/TriggerStartTest.java
+2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/ee24685ca39a7936180a413bfa73914daa5ee994/core/src/main/java/org/jenkins/ui/icon/Icon.java
+2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/ee24685ca39a7936180a413bfa73914daa5ee994/core/src/main/java/org/jenkins/ui/icon/IconSet.java
+2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/ee24685ca39a7936180a413bfa73914daa5ee994/test/src/test/java/hudson/bugs/DateConversionTest.java
+2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/ee24685ca39a7936180a413bfa73914daa5ee994/test/src/test/java/hudson/slaves/NodeProvisionerTest.java
+2293_diamond_operator,https://github.com/jenkinsci/jenkins/blob/ee24685ca39a7936180a413bfa73914daa5ee994/test/src/test/java/hudson/triggers/TriggerStartTest.java
 2293_diamond_operator,https://github.com/testwhat/SmaliEx/blob/6aa46c53a2f13cd84cb5db54e73050c4f89f2c74/baksmali/src/main/java/org/jf/baksmali/Adaptors/ClassDefinition.java
 2293_diamond_operator,https://github.com/zaproxy/zap-extensions/blob/dbe86dfb1b9404821dc65dcbfb73ba3c3bd22065/addOns/accessControl/src/main/java/org/zaproxy/zap/extension/accessControl/AccessControlAPI.java
 2293_diamond_operator,https://github.com/zaproxy/zap-extensions/blob/dbe86dfb1b9404821dc65dcbfb73ba3c3bd22065/addOns/accessControl/src/main/java/org/zaproxy/zap/extension/accessControl/AccessControlScannerThread.java
