@@ -1,5 +1,6 @@
 #include <git2.h>
 #include <iostream>
+#include <regex>
 #include "../logifix.h"
 
 std::string apply_rewrites(const std::string& input, std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites) {
@@ -38,21 +39,41 @@ std::string apply_rewrites(const std::string& input, std::vector<std::tuple<int,
 
 int main(int argc, char** argv) {
     git_libgit2_init();
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " Filename.java rule_number" << std::endl;
+    int rule_number = -1;
+    std::vector<std::string> files;
+    for (int i = 1; i < argc; i++) {
+        std::string s(argv[i]);
+        std::smatch match;
+        if (std::regex_search(s.cbegin(), s.cend(), match, std::regex("--rules=([0-9]+)"))) {
+            rule_number = std::stoi(match[1]);
+        } else {
+            files.emplace_back(std::move(s));
+        }
+    }
+
+    if (rule_number == -1) {
+        std::cerr << "No rule specified" << std::endl;
         return 1;
     }
-    int rule_number = std::stoi(argv[2]);
+
+    if (files.empty()) {
+        std::cerr << "No files specified" << std::endl;
+        return 1;
+    }
+
+    /* perform analysis */
     logifix::program program;
-    program.add_file(argv[1]);
+    program.add_file(files[0].c_str());
     program.run();
-    auto source_code = program.get_source_code(argv[1]);
+
+    /* filter rewrites by their id */
     std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites;
-    // filter rewrites by their id
-    for (auto r : program.get_possible_rewrites(argv[1])) {
+    for (auto r : program.get_possible_rewrites(files[0].c_str())) {
         if (std::get<0>(r) == rule_number) rewrites.emplace_back(std::move(r));
     }
-    std::cout << apply_rewrites(source_code, std::move(rewrites));
+
+    std::cout << apply_rewrites(program.get_source_code(files[0].c_str()), std::move(rewrites));
+
     return 0;
 
 }

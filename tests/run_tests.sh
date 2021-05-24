@@ -14,7 +14,7 @@ tail +2 < tests.csv | while IFS= read -r f; do
         t2=$(mktemp)
         echo "$rule_number"
         # run the logifix tool and place the result in t1
-        "$1" "$input" "$rule_number" > "$t1"
+        "$1" --rules="$rule_number" "$input" > "$t1"
         # run the patch tool and place the result in t2
         patch -p0 --input="$input.diff" --output="$t2"
         # compare the diffs
