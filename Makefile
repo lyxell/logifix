@@ -13,7 +13,7 @@ endif
 all: $(TOOL) $(ARCHIVE)
 
 cli/logifix: logifix.o program.o sjp/sjp.a cli/main.cpp
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -lgit2 -o $@
 
 
 logifix.cpp: program.dl $(RULE_FILES)

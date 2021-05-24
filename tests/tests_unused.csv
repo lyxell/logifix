@@ -1,4 +1,6 @@
 rule,commit,reason
+1155_use_isempty,https://github.com/pac4j/pac4j/blob/84c5f44752803c95c224c0876e195fc129d0bc78/pac4j-core/src/main/java/org/pac4j/core/authorization/authorizer/AbstractRequireAllAuthorizer.java,need typechecking from parent class
+1155_use_isempty,https://github.com/pac4j/pac4j/blob/84c5f44752803c95c224c0876e195fc129d0bc78/pac4j-saml/src/main/java/org/pac4j/saml/sso/impl/SAML2DefaultResponseValidator.java,need recursive type checking
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/BAMFileReader.java,need recursive type checking
 1155_use_isemtpy,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/SAMLineParser.java,need recursive type checking
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/SAMRecord.java,need recursive typechecking
