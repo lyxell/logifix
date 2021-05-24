@@ -1,7 +1,69 @@
 #include <git2.h>
 #include <iostream>
-#include <regex>
 #include "../logifix.h"
+
+static const char *colors[] = {
+	"\033[m", /* reset */
+	"\033[1m", /* bold */
+	"\033[31m", /* red */
+	"\033[32m", /* green */
+	"\033[36m" /* cyan */
+};
+
+int diff_output(
+	const git_diff_delta *d,
+	const git_diff_hunk *h,
+	const git_diff_line *l,
+	void *p)
+{
+	FILE *fp = (FILE*)p;
+
+	(void)d; (void)h;
+
+	if (!fp)
+		fp = stdout;
+
+	if (l->origin == GIT_DIFF_LINE_CONTEXT ||
+		l->origin == GIT_DIFF_LINE_ADDITION ||
+		l->origin == GIT_DIFF_LINE_DELETION)
+		fputc(l->origin, fp);
+
+	fwrite(l->content, 1, l->content_len, fp);
+
+	return 0;
+}
+
+static int color_printer(
+	const git_diff_delta *delta,
+	const git_diff_hunk *hunk,
+	const git_diff_line *line,
+	void *data)
+{
+	int *last_color = (int*) data, color = 0;
+
+	(void)delta; (void)hunk;
+
+	if (*last_color >= 0) {
+		switch (line->origin) {
+		case GIT_DIFF_LINE_ADDITION:  color = 3; break;
+		case GIT_DIFF_LINE_DELETION:  color = 2; break;
+		case GIT_DIFF_LINE_ADD_EOFNL: color = 3; break;
+		case GIT_DIFF_LINE_DEL_EOFNL: color = 2; break;
+		case GIT_DIFF_LINE_FILE_HDR:  color = 1; break;
+		case GIT_DIFF_LINE_HUNK_HDR:  color = 4; break;
+		default: break;
+		}
+
+		if (color != *last_color) {
+			if (*last_color == 1 || color == 1)
+				fputs(colors[0], stdout);
+			fputs(colors[color], stdout);
+			*last_color = color;
+		}
+	}
+
+	return diff_output(delta, hunk, line, stdout);
+}
 
 std::string apply_rewrites(const std::string& input, std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites) {
     /* expand rewrites that only does deletion to also remove whitespace at the beginning of the line */
@@ -38,14 +100,15 @@ std::string apply_rewrites(const std::string& input, std::vector<std::tuple<int,
 }
 
 int main(int argc, char** argv) {
-    git_libgit2_init();
     int rule_number = -1;
+    bool in_place = false;
     std::vector<std::string> files;
     for (int i = 1; i < argc; i++) {
         std::string s(argv[i]);
-        std::smatch match;
-        if (std::regex_search(s.cbegin(), s.cend(), match, std::regex("--rules=([0-9]+)"))) {
-            rule_number = std::stoi(match[1]);
+        if (s == "--in-place") {
+            in_place = true;
+        } else if (s.substr(0, 8) == "--rules=") {
+            rule_number = std::stoi(s.substr(8));
         } else {
             files.emplace_back(std::move(s));
         }
@@ -72,7 +135,17 @@ int main(int argc, char** argv) {
         if (std::get<0>(r) == rule_number) rewrites.emplace_back(std::move(r));
     }
 
-    std::cout << apply_rewrites(program.get_source_code(files[0].c_str()), std::move(rewrites));
+    std::cerr << files[0] << std::endl;
+
+    if (in_place) {
+        std::cout << apply_rewrites(program.get_source_code(files[0].c_str()), std::move(rewrites));
+    } else {
+        git_libgit2_init();
+        int color = 0;
+        auto input = program.get_source_code(files[0].c_str());
+        auto output = apply_rewrites(input, std::move(rewrites));
+        git_diff_buffers(input.c_str(), input.size(), "input", output.c_str(), output.size(), "output", NULL, NULL, NULL, NULL, color_printer, &color);
+    }
 
     return 0;
 

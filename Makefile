@@ -1,7 +1,7 @@
 TOOL=cli/logifix
 ARCHIVE=logifix.a
 OBJS=sjp/sjp.a logifix.o program.o
-CXXFLAGS = -std=c++17 -O2 -Wfatal-errors -DDEBUG -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
+CXXFLAGS = -std=c++17 -O2 -Wfatal-errors -fPIC -fno-gnu-unique -D__EMBEDDED_SOUFFLE__
 RULE_FILES := $(shell find rules/ -name '*.dl')
 
 SOUFFLE=souffle
