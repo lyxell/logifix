@@ -3,8 +3,13 @@
 #include <filesystem>
 #include <unistd.h>
 #include <future>
+#include <cmath>
 #include <mutex>
 #include "../logifix.h"
+
+namespace fs = std::filesystem;
+
+std::string output;
 
 static const char *colors[] = {
 	"\033[m", /* reset */
@@ -20,19 +25,15 @@ int diff_output(
 	const git_diff_line *l,
 	void *p)
 {
-	FILE *fp = (FILE*)p;
 
 	(void)d; (void)h;
-
-	if (!fp)
-		fp = stdout;
 
 	if (l->origin == GIT_DIFF_LINE_CONTEXT ||
 		l->origin == GIT_DIFF_LINE_ADDITION ||
 		l->origin == GIT_DIFF_LINE_DELETION)
-		fputc(l->origin, fp);
+        output += l->origin;
 
-	fwrite(l->content, 1, l->content_len, fp);
+    output += l->content;
 
 	return 0;
 }
@@ -60,16 +61,16 @@ static int color_printer(
 
 		if (color != *last_color) {
 			if (*last_color == 1 || color == 1)
-				fputs(colors[0], stdout);
-			fputs(colors[color], stdout);
+                output += colors[0];
+			output += colors[color];
 			*last_color = color;
 		}
 	}
 
-	return diff_output(delta, hunk, line, stdout);
+	return diff_output(delta, hunk, line, nullptr);
 }
 
-std::string apply_rewrites(const std::string& input, std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites) {
+std::string perform_rewrites(const std::string& input, std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites) {
     /* expand rewrites that only does deletion to also remove whitespace at the beginning of the line */
     for (auto& [rule_number, start, end, replacement, mess] : rewrites) {
         if (replacement.empty()) {
@@ -103,56 +104,76 @@ std::string apply_rewrites(const std::string& input, std::vector<std::tuple<int,
     return result;
 }
 
+struct options {
+    bool apply;
+    int rule_number;
+    std::set<std::string> files;
+};
+
 int main(int argc, char** argv) {
-    int rule_number = -1;
-    bool in_place = false;
-    std::vector<std::string> files;
+    options opt = {
+        .apply = false,
+        .rule_number = -1,
+        .files = {}
+    };
     for (int i = 1; i < argc; i++) {
         std::string s(argv[i]);
-        if (s == "--in-place") {
-            in_place = true;
+        if (s == "--apply") {
+            opt.apply = true;
         } else if (s.substr(0, 8) == "--rules=") {
-            rule_number = std::stoi(s.substr(8));
+            opt.rule_number = std::stoi(s.substr(8));
         } else {
-            files.emplace_back(std::filesystem::path(std::move(s)).lexically_normal());
+            if (fs::is_directory(s)) {
+                for (const auto & entry : fs::recursive_directory_iterator(s)) {
+                    if (entry.path().extension() == ".java") {
+                        opt.files.emplace(entry.path().lexically_normal());
+                    }
+                }
+            } else {
+                opt.files.emplace(fs::path(std::move(s)).lexically_normal());
+            }
         }
     }
 
-    if (rule_number == -1) {
+    if (opt.rule_number == -1) {
         std::cerr << "No rule specified" << std::endl;
         return 1;
     }
 
-    if (files.empty()) {
+    if (opt.files.empty()) {
         std::cerr << "No files specified" << std::endl;
         return 1;
     }
     
     git_libgit2_init();
 
+    std::cerr << "\033[?25l" << std::flush;
+
     /* perform analysis */
+    int count = 0;
     std::mutex print_mutex;
     std::vector<std::future<void>> futures;
-    for (const auto& file : files) {
-        futures.emplace_back(std::async(std::launch::async, [&file,rule_number,in_place,&print_mutex] {
+    for (const auto& file : opt.files) {
+        futures.emplace_back(std::async(std::launch::async, [&opt,&count,&file,&print_mutex] {
             logifix::program program;
             program.add_file(file.c_str());
             program.run();
 
             /* filter rewrites by their id */
-
             std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites;
             for (auto r : program.get_possible_rewrites(file.c_str())) {
-                if (std::get<0>(r) == rule_number) rewrites.emplace_back(std::move(r));
+                if (std::get<0>(r) == opt.rule_number) rewrites.emplace_back(std::move(r));
             }
 
-            if (in_place) {
-                std::cout << apply_rewrites(program.get_source_code(file.c_str()), std::move(rewrites));
-            } else {
-                auto input = program.get_source_code(file.c_str());
-                auto output = apply_rewrites(input, std::move(rewrites));
+            auto input = program.get_source_code(file.c_str());
+            auto output = perform_rewrites(input, std::move(rewrites));
 
-                // create diff
+            if (opt.apply) {
+                std::ofstream f(file);
+                f << output;
+                f.close();
+            } else {
+                /* create diff */
                 git_diff *diff;
                 git_buf buf = {0};
                 git_patch *patch = NULL;
@@ -161,17 +182,37 @@ int main(int argc, char** argv) {
                 git_diff_from_buffer(&diff, buf.ptr, buf.size);
                 git_patch_free(patch);
                 git_buf_dispose(&buf);
+                std::lock_guard<std::mutex> lock(print_mutex);
                 if (git_diff_num_deltas(diff) > 0) {
-                    std::lock_guard<std::mutex> lock(print_mutex);
                     int color = isatty(fileno(stdout)) ? 0 : -1;
                     git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, color_printer, &color);
                 }
                 git_diff_free(diff);
             }
+            {
+                count++;
+                std::lock_guard<std::mutex> lock(print_mutex);
+                size_t num_slots = 60;
+                size_t progress = std::floor(double(count) / double(opt.files.size()) * num_slots);
+                std::cerr << "[";
+                for (size_t i = 0; i < progress; i++) {
+                    std::cerr << "#";
+                }
+                for (size_t i = 0; i < num_slots - progress; i++) {
+                    std::cerr << ".";
+                }
+                std::cerr << "] " << count << "/" << opt.files.size() << " files analyzed\r" << std::flush;
+            }
         }));
     }
 
     for (auto& f : futures) f.wait();
+
+    std::cerr << "\033[?25h" << std::endl;
+
+    if (!opt.apply) {
+        std::cout << output << std::endl;
+    }
 
     return 0;
 
