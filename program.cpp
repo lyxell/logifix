@@ -53,10 +53,10 @@ void program::print() {
 std::vector<std::tuple<int, int, int, std::string, std::string>>
 program::get_possible_rewrites(const char* filename) {
     auto get_ast_node_from_id = [this](int id) {
-        const auto* record = prog->getRecordTable().unpack(id, 3);
+        const auto* record = prog->getRecordTable().unpack(id, 4);
         assert(record != nullptr);
-        return std::tuple(prog->getSymbolTable().decode(record[0]), record[1],
-                          record[2]);
+        return std::tuple(prog->getSymbolTable().decode(record[0]), record[2],
+                          record[3]);
     };
     std::vector<std::tuple<int, int, int, std::string, std::string>> result;
     souffle::Relation* relation = prog->getRelation("rewrite");
@@ -107,10 +107,10 @@ int program::get_point_of_declaration(int id) {
 std::tuple<std::string, int, int> program::get_node_properties(int id) {
     if (id == 0)
         return {};
-    const auto* record = prog->getRecordTable().unpack(id, 3);
+    const auto* record = prog->getRecordTable().unpack(id, 4);
     assert(record != nullptr);
-    return std::tuple(prog->getSymbolTable().decode(record[0]), record[1],
-                      record[2]);
+    return std::tuple(prog->getSymbolTable().decode(record[0]), record[2],
+                      record[3]);
 }
 
 int program::get_root() {

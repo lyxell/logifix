@@ -3,7 +3,7 @@
 /* Types
  ********************************/
 
-.type id = [type: symbol, from: number, to: number]
+.type id = [type: symbol, filename: symbol, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
 .type symbol_list = [head: symbol, tail: symbol_list]
 
@@ -25,13 +25,13 @@ ast_node(id) :- root(id).
 ast_node(child) :- ast_node(ancestor), ancestor_of(ancestor, child).
 
 .decl name_of(id: id, name: symbol)
-name_of([name, A, B], name) :- ast_node([name, A, B]).
+name_of([name, fn, A, B], name) :- ast_node([name, fn, A, B]).
 
 .decl starts_at(id: id, at: number)
-starts_at([name, A, B], A) :- ast_node([name, A, B]).
+starts_at([name, fn, A, B], A) :- ast_node([name, fn, A, B]).
 
 .decl ends_at(id: id, at: number)
-ends_at([name, A, B], B) :- ast_node([name, A, B]).
+ends_at([name, fn, A, B], B) :- ast_node([name, fn, A, B]).
 
 /* AST node relations
  ********************************/
@@ -153,8 +153,8 @@ evaluates_to_boolean_value(id, 0) :-
 .input source_code
 
 .decl string_representation(id: id, str: symbol)
-string_representation([name, A, B], substr(code, A, B - A)) :-
-    ast_node([name, A, B]),
+string_representation([name, filename, A, B], substr(code, A, B - A)) :-
+    ast_node([name, filename, A, B]),
     source_code(code).
 
 /* Variable scope
