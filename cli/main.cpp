@@ -1,6 +1,7 @@
 #include <git2.h>
 #include <iostream>
 #include <filesystem>
+#include <unistd.h>
 #include "../logifix.h"
 
 static const char *colors[] = {
@@ -156,7 +157,7 @@ int main(int argc, char** argv) {
         git_patch_free(patch);
         git_buf_dispose(&buf);
         if (git_diff_num_deltas(diff) > 0) {
-            int color = 0;
+            int color = isatty(fileno(stdout)) ? 0 : -1;
 			git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, color_printer, &color);
         }
         git_diff_free(diff);

@@ -26,7 +26,7 @@ void program::add_string(const char* filename, const char* content) {
     relation->insert(
         souffle::tuple(relation, {prog->getSymbolTable().encode(content)}));
     source_code[filename] = content;
-    sjp::parse(prog.get(), content);
+    sjp::parse(prog.get(), filename, content);
 }
 
 std::string program::get_source_code(const char* filename) {
