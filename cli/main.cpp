@@ -1,5 +1,6 @@
 #include <git2.h>
 #include <iostream>
+#include <filesystem>
 #include "../logifix.h"
 
 static const char *colors[] = {
@@ -110,7 +111,7 @@ int main(int argc, char** argv) {
         } else if (s.substr(0, 8) == "--rules=") {
             rule_number = std::stoi(s.substr(8));
         } else {
-            files.emplace_back(std::move(s));
+            files.emplace_back(std::filesystem::path(std::move(s)).lexically_normal());
         }
     }
 
@@ -135,7 +136,7 @@ int main(int argc, char** argv) {
         if (std::get<0>(r) == rule_number) rewrites.emplace_back(std::move(r));
     }
 
-    std::cerr << files[0] << std::endl;
+    //std::cerr << files[0] << std::endl;
 
     if (in_place) {
         std::cout << apply_rewrites(program.get_source_code(files[0].c_str()), std::move(rewrites));
@@ -144,7 +145,21 @@ int main(int argc, char** argv) {
         int color = 0;
         auto input = program.get_source_code(files[0].c_str());
         auto output = apply_rewrites(input, std::move(rewrites));
-        git_diff_buffers(input.c_str(), input.size(), "input", output.c_str(), output.size(), "output", NULL, NULL, NULL, NULL, color_printer, &color);
+
+        // create diff
+        git_diff *diff;
+        git_buf buf = {0};
+	    git_patch *patch = NULL;
+        git_patch_from_buffers(&patch, input.c_str(), input.size(), files[0].c_str(), output.c_str(), output.size(), files[0].c_str(), NULL),
+		git_patch_to_buf(&buf, patch);
+        git_diff_from_buffer(&diff, buf.ptr, buf.size);
+        git_patch_free(patch);
+        git_buf_dispose(&buf);
+        if (git_diff_num_deltas(diff) > 0) {
+            int color = 0;
+			git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, color_printer, &color);
+        }
+        git_diff_free(diff);
     }
 
     return 0;
