@@ -10,7 +10,7 @@ code.
 Logifix is built to be easy to integrate into IDEs, CLI tools,
 CI pipelines and bots.
 
-https://user-images.githubusercontent.com/4975941/119531414-2c35fb00-bd84-11eb-8e48-2bb54164369a.mp4
+https://user-images.githubusercontent.com/4975941/119532472-33a9d400-bd85-11eb-97c5-d341ddc400ea.mp4
 
 ## Targeted rules
 
