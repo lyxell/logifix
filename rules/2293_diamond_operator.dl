@@ -20,7 +20,8 @@ is_in_context_where_type_is_inferred(else) :-
     ternary_conditional_expression(id, _, then, else),
     is_in_context_where_type_is_inferred(id).
 
-rewrite(2293, MESSAGE, class_type, cat(name_str, "<>")) :-
+rewrite(2293, MESSAGE, filename, class_type, cat(name_str, "<>")) :-
+    filename_of(class_type, filename),
     class_instance_creation_expression(id, nil, nil, class_type, _, _),
     is_in_context_where_type_is_inferred(id),
     parent_of_list(class_type, "name", [name, nil]),

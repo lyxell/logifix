@@ -2,6 +2,8 @@
 #include <iostream>
 #include <filesystem>
 #include <unistd.h>
+#include <future>
+#include <mutex>
 #include "../logifix.h"
 
 static const char *colors[] = {
@@ -125,43 +127,52 @@ int main(int argc, char** argv) {
         std::cerr << "No files specified" << std::endl;
         return 1;
     }
+    
+    git_libgit2_init();
 
     /* perform analysis */
-    logifix::program program;
-    program.add_file(files[0].c_str());
-    program.run();
+    std::mutex print_mutex;
+    std::vector<std::future<void>> futures;
+    for (const auto& file : files) {
+        futures.emplace_back(std::async(std::launch::async, [&file,rule_number,in_place,&print_mutex] {
+            logifix::program program;
+            program.add_file(file.c_str());
+            program.run();
 
-    /* filter rewrites by their id */
-    std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites;
-    for (auto r : program.get_possible_rewrites(files[0].c_str())) {
-        if (std::get<0>(r) == rule_number) rewrites.emplace_back(std::move(r));
+            /* filter rewrites by their id */
+
+            std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites;
+            for (auto r : program.get_possible_rewrites(file.c_str())) {
+                if (std::get<0>(r) == rule_number) rewrites.emplace_back(std::move(r));
+            }
+
+            if (in_place) {
+                std::cout << apply_rewrites(program.get_source_code(file.c_str()), std::move(rewrites));
+            } else {
+                int color = 0;
+                auto input = program.get_source_code(file.c_str());
+                auto output = apply_rewrites(input, std::move(rewrites));
+
+                // create diff
+                git_diff *diff;
+                git_buf buf = {0};
+                git_patch *patch = NULL;
+                git_patch_from_buffers(&patch, input.c_str(), input.size(), file.c_str(), output.c_str(), output.size(), file.c_str(), NULL),
+                git_patch_to_buf(&buf, patch);
+                git_diff_from_buffer(&diff, buf.ptr, buf.size);
+                git_patch_free(patch);
+                git_buf_dispose(&buf);
+                if (git_diff_num_deltas(diff) > 0) {
+                    std::lock_guard<std::mutex> lock(print_mutex);
+                    int color = isatty(fileno(stdout)) ? 0 : -1;
+                    git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, color_printer, &color);
+                }
+                git_diff_free(diff);
+            }
+        }));
     }
 
-    //std::cerr << files[0] << std::endl;
-
-    if (in_place) {
-        std::cout << apply_rewrites(program.get_source_code(files[0].c_str()), std::move(rewrites));
-    } else {
-        git_libgit2_init();
-        int color = 0;
-        auto input = program.get_source_code(files[0].c_str());
-        auto output = apply_rewrites(input, std::move(rewrites));
-
-        // create diff
-        git_diff *diff;
-        git_buf buf = {0};
-	    git_patch *patch = NULL;
-        git_patch_from_buffers(&patch, input.c_str(), input.size(), files[0].c_str(), output.c_str(), output.size(), files[0].c_str(), NULL),
-		git_patch_to_buf(&buf, patch);
-        git_diff_from_buffer(&diff, buf.ptr, buf.size);
-        git_patch_free(patch);
-        git_buf_dispose(&buf);
-        if (git_diff_num_deltas(diff) > 0) {
-            int color = isatty(fileno(stdout)) ? 0 : -1;
-			git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, color_printer, &color);
-        }
-        git_diff_free(diff);
-    }
+    for (auto& f : futures) f.wait();
 
     return 0;
 

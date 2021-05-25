@@ -16,21 +16,23 @@ void program::add_file(const char* filename) {
         exit(1);
     }
     std::ifstream t(filename);
-    add_string(filename, std::string((std::istreambuf_iterator<char>(t)),
-                               std::istreambuf_iterator<char>()).c_str());
+    auto string = std::string((std::istreambuf_iterator<char>(t)),
+                               std::istreambuf_iterator<char>());
+    if (string.size() == 0) return;
+    add_string(filename, string.c_str());
 }
 
 void program::add_string(const char* filename, const char* content) {
-    source_code[filename] = content;
+    sjp::parse(prog.get(), filename, content);
+    assert(content != nullptr);
+    source_code["x"] = content;
     souffle::Relation* relation = prog->getRelation("source_code");
     relation->insert(
-        souffle::tuple(relation, {prog->getSymbolTable().encode(content)}));
-    source_code[filename] = content;
-    sjp::parse(prog.get(), filename, content);
+        souffle::tuple(relation, {prog->getSymbolTable().encode(filename), prog->getSymbolTable().encode(content)}));
 }
 
 std::string program::get_source_code(const char* filename) {
-    return source_code[filename];
+    return source_code["x"];
 }
 
 void program::run() {
@@ -65,11 +67,13 @@ program::get_possible_rewrites(const char* filename) {
         int rule_number;
         int id;
         std::string replacement;
+        std::string tuple_filename;
         std::string message;
-        output >> rule_number >> message >> id >> replacement;
+        output >> rule_number >> message >> tuple_filename >> id >> replacement;
         if (id == 0) {
             continue;
         }
+        //if (tuple_filename != filename) continue;
         auto [str, a, b] = get_ast_node_from_id(id);
         result.emplace_back(rule_number, a, b, replacement, message);
     }

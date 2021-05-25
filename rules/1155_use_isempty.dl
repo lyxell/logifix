@@ -9,7 +9,8 @@
 /* Collections */
 
 /* Rewrite x.size() == 0 into x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat(subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     equals_expression(parent, _, _),
     parent_of(parent, _, invocation),
     parent_of(parent, _, integer),
@@ -20,7 +21,8 @@ rewrite(1155, MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-
     string_representation(method, "size").
 
 /* Rewrite x.size() != 0 into x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     not_equals_expression(parent, _, _),
     parent_of(parent, _, invocation),
     parent_of(parent, _, integer),
@@ -31,7 +33,8 @@ rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
     string_representation(method, "size").
 
 /* Rewrite x.size() > 0 into !x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     greater_than_expression(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_collection_type(subject),
@@ -40,7 +43,8 @@ rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
     string_representation(method, "size").
 
 /* Rewrite x.size() >= 1 into !x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     greater_than_or_equals_expression(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_collection_type(subject),
@@ -51,7 +55,8 @@ rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
 /* Strings */
 
 /* Rewrite x.length() == 0 into x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat(subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     equals_expression(parent, _, _),
     parent_of(parent, _, invocation),
     parent_of(parent, _, integer),
@@ -62,7 +67,8 @@ rewrite(1155, MESSAGE, parent, cat(subject_str, ".isEmpty()")) :-
     string_representation(method, "length").
 
 /* Rewrite x.length() != 0 into x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     not_equals_expression(parent, _, _),
     parent_of(parent, _, invocation),
     parent_of(parent, _, integer),
@@ -73,7 +79,8 @@ rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
     string_representation(method, "length").
 
 /* Rewrite x.length() > 0 into !x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     greater_than_expression(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_string_type(subject),
@@ -82,7 +89,8 @@ rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
     string_representation(method, "length").
 
 /* Rewrite x.length() >= 1 into !x.isEmpty() */
-rewrite(1155, MESSAGE, parent, cat("!", subject_str, ".isEmpty()")) :-
+rewrite(1155, MESSAGE, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
+    filename_of(parent, filename),
     greater_than_or_equals_expression(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_string_type(subject),

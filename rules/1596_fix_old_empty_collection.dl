@@ -8,9 +8,12 @@
 
 #define MESSAGE "Replace Collections.EMPTY_LIST by Collections.emptyList()"
 
-rewrite(1596, MESSAGE, id, "Collections.emptyList()") :-
+rewrite(1596, MESSAGE, filename, id, "Collections.emptyList()") :-
+    filename_of(id, filename),
     string_representation(id, "Collections.EMPTY_LIST").
-rewrite(1596, MESSAGE, id, "Collections.emptyMap()") :-
+rewrite(1596, MESSAGE, filename, id, "Collections.emptyMap()") :-
+    filename_of(id, filename),
     string_representation(id, "Collections.EMPTY_MAP").
-rewrite(1596, MESSAGE, id, "Collections.emptySet()") :-
+rewrite(1596, MESSAGE, filename, id, "Collections.emptySet()") :-
+    filename_of(id, filename),
     string_representation(id, "Collections.EMPTY_SET").

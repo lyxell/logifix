@@ -24,6 +24,9 @@
 ast_node(id) :- root(id).
 ast_node(child) :- ast_node(ancestor), ancestor_of(ancestor, child).
 
+.decl filename_of(id: id, filename: symbol)
+filename_of([name, fn, A, B], fn) :- ast_node([name, fn, A, B]).
+
 .decl name_of(id: id, name: symbol)
 name_of([name, fn, A, B], name) :- ast_node([name, fn, A, B]).
 
@@ -149,13 +152,13 @@ evaluates_to_boolean_value(id, 0) :-
 /* String representation
  ********************************/
 
-.decl source_code(str: symbol)
+.decl source_code(filename: symbol, str: symbol)
 .input source_code
 
 .decl string_representation(id: id, str: symbol)
 string_representation([name, filename, A, B], substr(code, A, B - A)) :-
     ast_node([name, filename, A, B]),
-    source_code(code).
+    source_code(filename, code).
 
 /* Variable scope
  ********************************/
@@ -415,7 +418,7 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 /* Rewrite rules
  ********************************/
 
-.decl rewrite(rule: number, message: symbol, from: id, to: symbol)
+.decl rewrite(rule: number, message: symbol, filename: symbol, from: id, to: symbol)
 .output rewrite(IO=stdout)
 
 //#include "rules/1132.dl"
@@ -424,10 +427,10 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 
 #include "rules/1125_redundant_boolean.dl"
 #include "rules/1155_use_isempty.dl"
-#include "rules/1481_unused_local_variables.dl"
-#include "rules/1596_fix_old_empty_collection.dl"
-#include "rules/2095_close_resources.dl"
-#include "rules/2111_bigdecimal_double.dl"
-#include "rules/2293_diamond_operator.dl"
-#include "rules/3984_throw_exceptions.dl"
-#include "rules/4973_use_equals_method.dl"
+//#include "rules/1481_unused_local_variables.dl"
+//#include "rules/1596_fix_old_empty_collection.dl"
+//#include "rules/2095_close_resources.dl"
+//#include "rules/2111_bigdecimal_double.dl"
+//#include "rules/2293_diamond_operator.dl"
+//#include "rules/3984_throw_exceptions.dl"
+//#include "rules/4973_use_equals_method.dl"
