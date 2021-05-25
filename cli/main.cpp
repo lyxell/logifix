@@ -149,7 +149,6 @@ int main(int argc, char** argv) {
             if (in_place) {
                 std::cout << apply_rewrites(program.get_source_code(file.c_str()), std::move(rewrites));
             } else {
-                int color = 0;
                 auto input = program.get_source_code(file.c_str());
                 auto output = apply_rewrites(input, std::move(rewrites));
 
