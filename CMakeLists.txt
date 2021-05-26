@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -O2")
-
 project(logifix)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -O2")
+
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_CLAR OFF)
 set(USE_BUNDLED_ZLIB ON)
@@ -14,6 +14,11 @@ set(USE_SSH OFF)
 set(USE_NTLMCLIENT OFF)
 set(REGEX_BACKEND "builtin" CACHE STRING "")
 add_subdirectory(vendor/libgit2)
+
+add_subdirectory(vendor/souffle)
+set_target_properties(souffleprof PROPERTIES EXCLUDE_FROM_ALL 1)
+
+include_directories(vendor/souffle/src/include)
 
 add_subdirectory(sjp)
 
