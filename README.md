@@ -12,6 +12,16 @@ CI pipelines and bots.
 
 https://user-images.githubusercontent.com/4975941/119532472-33a9d400-bd85-11eb-97c5-d341ddc400ea.mp4
 
+## Building
+
+To build from source you will need [CMake](https://cmake.org/) and [GNU Bison](https://www.gnu.org/software/bison/).
+
+To proceed, perform the following steps:
+
+* `git clone https://github.com/lyxell/logifix`
+* `git submodule update --init`
+* `mkdir build && cd build && cmake .. && cmake --build .`
+
 ## Targeted rules
 
 * [S1125 - Boolean literals should not be redundant](https://github.com/lyxell/logifix/blob/master/rules/1125.dl)

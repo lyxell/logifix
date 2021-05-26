@@ -17,5 +17,4 @@ add_subdirectory(sjp)
 
 add_executable(logifix cli/main.cpp program.cpp)
 
-target_link_libraries(logifix git2)
-target_link_libraries(logifix sjp)
+target_link_libraries(logifix git2 sjp)
