@@ -15,6 +15,17 @@ add_subdirectory(vendor/libgit2)
 
 add_subdirectory(sjp)
 
-add_executable(logifix cli/main.cpp program.cpp)
+file(GLOB RULES rules/*.dl)
+
+add_custom_command(
+  OUTPUT logifix.cpp
+  COMMAND souffle --generate=logifix ${CMAKE_CURRENT_SOURCE_DIR}/program.dl
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/program.dl
+  DEPENDS ${RULES}
+  VERBATIM)
+
+set_source_files_properties(logifix.cpp PROPERTIES COMPILE_FLAGS -D__EMBEDDED_SOUFFLE__)
+
+add_executable(logifix cli/main.cpp program.cpp logifix.cpp)
 
 target_link_libraries(logifix git2 sjp)
