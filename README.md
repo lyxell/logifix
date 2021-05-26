@@ -16,7 +16,7 @@ https://user-images.githubusercontent.com/4975941/119532472-33a9d400-bd85-11eb-9
 
 To build from source you will need [CMake](https://cmake.org/) and [GNU Bison](https://www.gnu.org/software/bison/).
 
-To proceed, perform the following steps:
+To download and build the project, perform the following steps:
 
 * `git clone https://github.com/lyxell/logifix`
 * `git submodule update --init`
