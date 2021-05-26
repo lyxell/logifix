@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -O2")
+
 project(logifix)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
