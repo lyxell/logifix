@@ -14,7 +14,7 @@ https://user-images.githubusercontent.com/4975941/119532472-33a9d400-bd85-11eb-9
 
 ## Building
 
-To build from source you will need [CMake](https://cmake.org/) and [GNU Bison](https://www.gnu.org/software/bison/).
+To build from source you will need [CMake](https://cmake.org/), [GNU Bison](https://www.gnu.org/software/bison/) and [re2c](https://re2c.org/).
 
 To download and build the project, perform the following steps:
 
