@@ -20,7 +20,7 @@ set_target_properties(souffleprof PROPERTIES EXCLUDE_FROM_ALL 1)
 
 include_directories(vendor/souffle/src/include)
 
-add_subdirectory(sjp)
+add_subdirectory(vendor/sjp)
 
 file(GLOB RULES rules/*.dl)
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sjp/sjp.h"
+#include "sjp.h"
 #include <map>
 #include <optional>
 
