@@ -1,6 +1,6 @@
 #include "logifix.h"
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
 static const char* PROGRAM_NAME = "logifix";
 
@@ -17,8 +17,9 @@ void program::add_file(const char* filename) {
     }
     std::ifstream t(filename);
     auto string = std::string((std::istreambuf_iterator<char>(t)),
-                               std::istreambuf_iterator<char>());
-    if (string.size() == 0) return;
+                              std::istreambuf_iterator<char>());
+    if (string.size() == 0)
+        return;
     add_string(filename, string.c_str());
 }
 
@@ -28,30 +29,28 @@ void program::add_string(const char* filename, const char* content) {
     source_code["x"] = content;
     souffle::Relation* relation = prog->getRelation("source_code");
     relation->insert(
-        souffle::tuple(relation, {prog->getSymbolTable().encode(filename), prog->getSymbolTable().encode(content)}));
+        souffle::tuple(relation, {prog->getSymbolTable().encode(filename),
+                                  prog->getSymbolTable().encode(content)}));
 }
 
 std::string program::get_source_code(const char* filename) {
     return source_code["x"];
 }
 
-void program::run() {
-    prog->run();
-}
+void program::run() { prog->run(); }
 
-void program::print() {
-    prog->printAll();
-}
+void program::print() { prog->printAll(); }
 
 std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
 program::get_possible_rewrites(const char* filename) {
     auto get_ast_node_from_id = [this](int id) {
         const auto* record = prog->getRecordTable().unpack(id, 4);
         assert(record != nullptr);
-        return std::tuple(prog->getSymbolTable().decode(record[0]), size_t(record[2]),
-                          size_t(record[3]));
+        return std::tuple(prog->getSymbolTable().decode(record[0]),
+                          size_t(record[2]), size_t(record[3]));
     };
-    std::vector<std::tuple<int, size_t, size_t, std::string, std::string>> result;
+    std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
+        result;
     souffle::Relation* relation = prog->getRelation("rewrite");
     assert(relation != nullptr);
     for (souffle::tuple& output : *relation) {
@@ -64,15 +63,14 @@ program::get_possible_rewrites(const char* filename) {
         if (id == 0) {
             continue;
         }
-        //if (tuple_filename != filename) continue;
+        // if (tuple_filename != filename) continue;
         auto [str, a, b] = get_ast_node_from_id(id);
         result.emplace_back(rule_number, a, b, replacement, message);
     }
     return result;
 }
 
-std::vector<std::string>
-program::get_variables_in_scope(int id) {
+std::vector<std::string> program::get_variables_in_scope(int id) {
     std::vector<std::string> result;
     souffle::Relation* relation = prog->getRelation("in_scope");
     assert(relation != nullptr);
@@ -81,7 +79,8 @@ program::get_variables_in_scope(int id) {
         std::string identifier;
         int type;
         output >> rel_id >> identifier >> type;
-        if (rel_id != id) continue;
+        if (rel_id != id)
+            continue;
         result.emplace_back(std::move(identifier));
     }
     return result;
@@ -94,7 +93,8 @@ int program::get_point_of_declaration(int id) {
         int rel_id;
         int declaration;
         output >> rel_id >> declaration;
-        if (rel_id == id) return declaration;
+        if (rel_id == id)
+            return declaration;
     }
     return 0;
 }
