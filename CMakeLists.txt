@@ -36,7 +36,7 @@ set_source_files_properties(logifix.cpp PROPERTIES COMPILE_FLAGS -D__EMBEDDED_SO
 option(LOGIFIX_BUILD_LIBRARY "Build logifix as a library" OFF)
 
 IF (LOGIFIX_BUILD_LIBRARY)
-    add_library(logifix STATIC src/program.cpp logifix.cpp)
+    add_library(logifix OBJECT src/program.cpp logifix.cpp)
 ELSE ()
     add_executable(logifix src/cli.cpp src/program.cpp logifix.cpp)
 ENDIF ()
