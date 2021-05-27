@@ -40,7 +40,7 @@ rewrite(2095, "", filename, id, cat("try (", declaration_str, ") {", first_frag,
     statements = [declaration_statement, _],
     local_variable_declaration_statement(declaration_statement, declaration),
     local_variable_declaration(declaration, _, type, [_, nil]),
-    is_resource_type(type),
+    is_autocloseable_type(type),
 
     /* the try body also contains a method invocation, closing the resource */
     list_contains(statements, expr_statement),
