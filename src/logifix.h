@@ -8,16 +8,13 @@ namespace logifix {
 
 class program {
   private:
-    std::unordered_map<std::string, std::string> source_code;
     std::unique_ptr<souffle::SouffleProgram> prog;
 
   public:
     program();
-    void add_file(const char* filename);
     void add_string(const char* filename, const char* content);
     void run();
     void print();
-    std::string get_source_code(const char* filename);
     std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
     get_possible_rewrites(const char* filename);
     std::vector<std::string>

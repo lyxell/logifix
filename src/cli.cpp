@@ -72,6 +72,20 @@ struct options {
     std::set<std::string> files;
 };
 
+std::string read_file(std::string_view path) {
+    constexpr auto read_size = std::size_t{4096};
+    auto stream = std::ifstream {path.data()};
+    stream.exceptions(std::ios_base::badbit);
+
+    auto out = std::string{};
+    auto buf = std::string(read_size, '\0');
+    while (stream.read(& buf[0], read_size)) {
+        out.append(buf, 0, stream.gcount());
+    }
+    out.append(buf, 0, stream.gcount());
+    return out;
+}
+
 int main(int argc, char** argv) {
 
     options opt = {.apply = false, .rule_number = -1, .files = {}};
@@ -118,10 +132,9 @@ int main(int argc, char** argv) {
             std::async(std::launch::async, [&opt, &count, &file, &io_mutex,
                                             &found_first_rewrite] {
                 logifix::program program;
-                program.add_file(file.c_str());
+                std::string input = read_file(file);
+                program.add_string(file.c_str(), input.c_str());
                 program.run();
-
-                auto input = program.get_source_code(file.c_str());
 
                 /* Filter rewrites by their id */
                 std::vector<

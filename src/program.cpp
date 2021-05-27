@@ -10,31 +10,13 @@ program::program() : prog(souffle::ProgramFactory::newInstance(PROGRAM_NAME)) {
     assert(prog != nullptr);
 }
 
-void program::add_file(const char* filename) {
-    if (!std::filesystem::exists(filename)) {
-        std::cerr << "File " << filename << " does not exist" << std::endl;
-        exit(1);
-    }
-    std::ifstream t(filename);
-    auto string = std::string((std::istreambuf_iterator<char>(t)),
-                              std::istreambuf_iterator<char>());
-    if (string.size() == 0)
-        return;
-    add_string(filename, string.c_str());
-}
-
 void program::add_string(const char* filename, const char* content) {
     sjp::parse(prog.get(), filename, content);
     assert(content != nullptr);
-    source_code["x"] = content;
     souffle::Relation* relation = prog->getRelation("source_code");
     relation->insert(
         souffle::tuple(relation, {prog->getSymbolTable().encode(filename),
                                   prog->getSymbolTable().encode(content)}));
-}
-
-std::string program::get_source_code(const char* filename) {
-    return source_code["x"];
 }
 
 void program::run() { prog->run(); }
