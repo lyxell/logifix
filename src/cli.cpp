@@ -5,7 +5,7 @@
 #include <future>
 #include <cmath>
 #include <mutex>
-#include "../logifix.h"
+#include "logifix.h"
 
 namespace fs = std::filesystem;
 
