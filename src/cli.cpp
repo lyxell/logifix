@@ -1,11 +1,9 @@
 #include "logifix.h"
-#include <cmath>
 #include <filesystem>
 #include <future>
 #include <git2.h>
 #include <iostream>
 #include <mutex>
-#include <unistd.h>
 
 namespace fs = std::filesystem;
 
