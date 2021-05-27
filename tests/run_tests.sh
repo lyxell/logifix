@@ -6,7 +6,7 @@ set -o pipefail
 csv="$1"
 logifix_cli="$2"
 
-tail +2 < "$1" | while IFS= read -r f; do
+tail +2 < "$csv" | while IFS= read -r f; do
     if [[ $f =~ $regex ]]; then
         rule_number="${BASH_REMATCH[1]}"
         suffix="${BASH_REMATCH[2]}"

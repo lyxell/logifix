@@ -1,6 +1,5 @@
 #!/bin/bash
 csv="$1"
-files=$(tail +2 < "$csv")
 regex="([a-z0-9_]+),https://github.com/([A-Za-z0-9_-]+)/([\.A-Za-z0-9_-]+)/blob/([a-z0-9-]+)/(.*),"
 set -e
 set -o pipefail
@@ -10,7 +9,7 @@ if ! [ -x "$(command -v filterdiff)" ]; then
     exit 1
 fi
 
-for f in $files; do
+tail +2 < "$csv" | while IFS= read -r f; do
     if [[ $f =~ $regex ]]; then
         dir="${BASH_REMATCH[1]}"
         user="${BASH_REMATCH[2]}"
@@ -35,5 +34,6 @@ for f in $files; do
         fi
     else
         echo "$f doesn't match" >&2
+        exit 1
     fi
 done
