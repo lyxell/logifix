@@ -9,7 +9,8 @@
 
 namespace fs = std::filesystem;
 
-std::string output;
+static const char* TTY_HIDE_CURSOR = "\033[?25l";
+static const char* TTY_SHOW_CURSOR = "\033[?25h";
 
 static const char* colors[] = {
     "\033[m",   /* reset */
@@ -19,106 +20,50 @@ static const char* colors[] = {
     "\033[36m"  /* cyan */
 };
 
-int diff_output(const git_diff_delta* d, const git_diff_hunk* h,
-                const git_diff_line* l, void* p) {
-
-    (void)d;
-    (void)h;
-
-    if (l->origin == GIT_DIFF_LINE_CONTEXT ||
-        l->origin == GIT_DIFF_LINE_ADDITION ||
-        l->origin == GIT_DIFF_LINE_DELETION)
-        output += l->origin;
-
-    output += l->content;
-
-    return 0;
-}
+enum { COLOR_RESET, COLOR_BOLD, COLOR_RED, COLOR_GREEN, COLOR_CYAN };
 
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
                          const git_diff_line* line, void* data) {
-    int *last_color = (int*)data, color = 0;
 
+    (void)data;
     (void)delta;
     (void)hunk;
 
-    if (*last_color >= 0) {
-        switch (line->origin) {
-        case GIT_DIFF_LINE_ADDITION:
-            color = 3;
-            break;
-        case GIT_DIFF_LINE_DELETION:
-            color = 2;
-            break;
+    switch (line->origin) {
         case GIT_DIFF_LINE_ADD_EOFNL:
-            color = 3;
+        case GIT_DIFF_LINE_ADDITION:
+            std::cout << colors[COLOR_GREEN];
             break;
         case GIT_DIFF_LINE_DEL_EOFNL:
-            color = 2;
+        case GIT_DIFF_LINE_DELETION:
+            std::cout << colors[COLOR_RED];
             break;
         case GIT_DIFF_LINE_FILE_HDR:
-            color = 1;
+            std::cout << colors[COLOR_BOLD];
             break;
         case GIT_DIFF_LINE_HUNK_HDR:
-            color = 4;
+            std::cout << colors[COLOR_CYAN];
             break;
         default:
             break;
-        }
-
-        if (color != *last_color) {
-            if (*last_color == 1 || color == 1)
-                output += colors[0];
-            output += colors[color];
-            *last_color = color;
-        }
     }
 
-    return diff_output(delta, hunk, line, nullptr);
-}
+    if (line->origin == GIT_DIFF_LINE_CONTEXT ||
+        line->origin == GIT_DIFF_LINE_ADDITION ||
+        line->origin == GIT_DIFF_LINE_DELETION) {
+        std::cout << line->origin;
+    }
 
-std::string perform_rewrites(
-    const std::string& input,
-    std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
-        rewrites) {
-    /* expand rewrites that only does deletion to also remove whitespace at the
-     * beginning of the line */
-    for (auto& [rule_number, start, end, replacement, mess] : rewrites) {
-        if (replacement.empty()) {
-            while (start > 1 &&
-                   (input[start - 1] == ' ' || input[start - 1] == '\t')) {
-                start--;
-            }
-            if (start > 2 && input[start - 2] == '\r' &&
-                input[start - 1] == '\n')
-                start -= 2;
-            else if (start > 1 && input[start - 1])
-                start--;
-        }
+    size_t i = 0;
+
+    while (true) {
+        if (line->content[i] == '\0' || line->content[i] == '\n' || line->content[i] == '\r') break;
+        std::cout << line->content[i++];
     }
-    /* sort rewrites */
-    std::sort(rewrites.begin(), rewrites.end(), [](auto x, auto y) {
-        if (std::get<1>(x) == std::get<1>(y))
-            return std::get<2>(x) < std::get<2>(y);
-        return std::get<1>(x) > std::get<1>(y);
-    });
-    size_t curr = 0;
-    std::string result;
-    while (curr < input.size()) {
-        /* discard rewrites that happened before curr */
-        while (rewrites.size() && std::get<1>(rewrites.back()) < curr)
-            rewrites.pop_back();
-        if (!rewrites.size()) {
-            result += input.substr(curr);
-            break;
-        }
-        auto [rule_number, start, end, replacement, mess] = rewrites.back();
-        rewrites.pop_back();
-        result += input.substr(curr, start - curr);
-        result += replacement;
-        curr = end;
-    }
-    return result;
+
+    std::cout << colors[COLOR_RESET] << std::endl;
+
+    return 0;
 }
 
 struct options {
@@ -128,7 +73,9 @@ struct options {
 };
 
 int main(int argc, char** argv) {
+
     options opt = {.apply = false, .rule_number = -1, .files = {}};
+
     for (int i = 1; i < argc; i++) {
         std::string s(argv[i]);
         if (s == "--apply") {
@@ -160,20 +107,23 @@ int main(int argc, char** argv) {
 
     git_libgit2_init();
 
-    std::cerr << "\033[?25l" << std::flush;
-
-    /* perform analysis */
+    /* Perform analysis */
     int count = 0;
-    std::mutex print_mutex;
+    bool found_first_rewrite = false;
+    std::mutex io_mutex;
     std::vector<std::future<void>> futures;
+
     for (const auto& file : opt.files) {
         futures.emplace_back(
-            std::async(std::launch::async, [&opt, &count, &file, &print_mutex] {
+            std::async(std::launch::async, [&opt, &count, &file, &io_mutex,
+                                            &found_first_rewrite] {
                 logifix::program program;
                 program.add_file(file.c_str());
                 program.run();
 
-                /* filter rewrites by their id */
+                auto input = program.get_source_code(file.c_str());
+
+                /* Filter rewrites by their id */
                 std::vector<
                     std::tuple<int, size_t, size_t, std::string, std::string>>
                     rewrites;
@@ -182,60 +132,108 @@ int main(int argc, char** argv) {
                         rewrites.emplace_back(std::move(r));
                 }
 
-                auto input = program.get_source_code(file.c_str());
-                auto output = perform_rewrites(input, std::move(rewrites));
+                /**
+                 * Expand rewrites that only does deletion to also remove
+                 * whitespace at the beginning of the line as well as the
+                 * trailing newline on the previous line
+                 */
+                for (auto& [rule_number, start, end, replacement, mess] :
+                     rewrites) {
+                    if (replacement.empty()) {
+                        /* expand start to include whitespace */
+                        while (start > 1 && input[start - 1] != '\n' &&
+                               std::isspace(input[start - 1])) {
+                            start--;
+                        }
+                        /* expand start to include trailing newline */
+                        if (start > 2 && input.substr(start - 2, 2) == "\r\n") {
+                            start -= 2;
+                        } else if (start > 1 &&
+                                   input.substr(start - 1, 1) == "\n") {
+                            start--;
+                        }
+                    }
+                }
 
-                if (opt.apply) {
-                    std::ofstream f(file);
-                    f << output;
-                    f.close();
-                } else {
-                    /* create diff */
-                    git_diff* diff;
-                    git_buf buf = {};
+                /* Sort rewrites */
+                std::sort(rewrites.begin(), rewrites.end(), [](auto x, auto y) {
+                    if (std::get<1>(x) == std::get<1>(y))
+                        return std::get<2>(x) < std::get<2>(y);
+                    return std::get<1>(x) > std::get<1>(y);
+                });
+
+                /* The resulting file */
+                size_t curr_pos = 0;
+                std::string result;
+
+                while (curr_pos < input.size()) {
+
+                    /* discard rewrites that we can't apply because of conflicts */
+                    while (rewrites.size() && std::get<1>(rewrites.back()) < curr_pos) {
+                        rewrites.pop_back();
+                    }
+
+                    if (!rewrites.size()) {
+                        result += input.substr(curr_pos);
+                        break;
+                    }
+
+                    auto [_, start, end, replacement, __] = rewrites.back();
+
+                    if (opt.apply) {
+                        result += input.substr(curr_pos, start - curr_pos);
+                        result += replacement;
+                        curr_pos = end;
+                        continue;
+                    }
+
+                    std::string output = input.substr(0, start) + replacement + input.substr(end);
                     git_patch* patch = NULL;
                     git_patch_from_buffers(&patch, input.c_str(), input.size(),
                                            file.c_str(), output.c_str(),
-                                           output.size(), file.c_str(), NULL),
-                        git_patch_to_buf(&buf, patch);
-                    git_diff_from_buffer(&diff, buf.ptr, buf.size);
+                                           output.size(), file.c_str(), NULL);
+
+                    /* Show patch to user and prompt for feedback */
+                    std::lock_guard<std::mutex> lock(io_mutex);
+                    git_patch_print(patch, color_printer, NULL);
                     git_patch_free(patch);
-                    git_buf_dispose(&buf);
-                    std::lock_guard<std::mutex> lock(print_mutex);
-                    if (git_diff_num_deltas(diff) > 0) {
-                        int color = isatty(fileno(stdout)) ? 0 : -1;
-                        git_diff_print(diff, GIT_DIFF_FORMAT_PATCH,
-                                       color_printer, &color);
+                    found_first_rewrite = true;
+                    std::cout << colors[COLOR_CYAN] << "Apply these changes? [y,N]"
+                              << colors[COLOR_RESET] << std::endl;
+                    std::string line;
+                    std::getline(std::cin, line);
+
+                    /* User said yes */
+                    if (line[0] == 'y' || line[0] == 'Y') {
+                        result += input.substr(curr_pos, start - curr_pos);
+                        result += replacement;
+                        curr_pos = end;
                     }
-                    git_diff_free(diff);
+
+                    rewrites.pop_back();
+
                 }
-                {
+
+                if (result != input) {
+                    /* no mutex needed since filenames are unique */
+                    std::ofstream f(file);
+                    f << result;
+                    f.close();
+                }
+
+                if (!found_first_rewrite) {
                     count++;
-                    std::lock_guard<std::mutex> lock(print_mutex);
-                    size_t num_slots = 60;
-                    size_t progress = std::floor(
-                        double(count) / double(opt.files.size()) * num_slots);
-                    std::cerr << "[";
-                    for (size_t i = 0; i < progress; i++) {
-                        std::cerr << "#";
-                    }
-                    for (size_t i = 0; i < num_slots - progress; i++) {
-                        std::cerr << ".";
-                    }
-                    std::cerr << "] " << count << "/" << opt.files.size()
-                              << " files analyzed\r" << std::flush;
+                    std::lock_guard<std::mutex> lock(io_mutex);
+                    std::cerr << "analyzing " << file << "\r" << std::flush;
                 }
             }));
     }
 
-    for (auto& f : futures)
+    for (auto& f : futures) {
         f.wait();
-
-    std::cerr << "\033[?25h" << std::endl;
-
-    if (!opt.apply) {
-        std::cout << output << std::endl;
     }
+
+    std::cerr << std::endl;
 
     return 0;
 }

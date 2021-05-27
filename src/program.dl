@@ -9,6 +9,7 @@
 #include "rules/4973_use_equals_method.dl"
 #include "nodes.dl"
 
+
 /* Types
  ********************************/
 
