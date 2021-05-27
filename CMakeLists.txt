@@ -33,7 +33,13 @@ add_custom_command(
 
 set_source_files_properties(logifix.cpp PROPERTIES COMPILE_FLAGS -D__EMBEDDED_SOUFFLE__)
 
-add_executable(logifix src/cli.cpp src/program.cpp logifix.cpp)
+option(LOGIFIX_BUILD_LIBRARY "Build logifix as a library" OFF)
+
+IF (LOGIFIX_BUILD_LIBRARY)
+    add_library(logifix STATIC src/program.cpp logifix.cpp)
+ELSE ()
+    add_executable(logifix src/cli.cpp src/program.cpp logifix.cpp)
+ENDIF ()
 
 target_link_libraries(logifix git2 sjp)
 
@@ -41,6 +47,5 @@ target_link_libraries(logifix git2 sjp)
 
 add_custom_target(test
      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/download_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv
-     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv ${CMAKE_CURRENT_BINARY_DIR}/logifix
-)
+     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv ${CMAKE_CURRENT_BINARY_DIR}/logifix)
 add_dependencies(test logifix)
