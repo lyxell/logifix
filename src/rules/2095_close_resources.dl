@@ -53,13 +53,15 @@ rewrite(2095, "", filename, id, cat("try (", declaration_str, ") {", first_frag,
     source_code(filename, code),
     string_representation(declaration, declaration_str),
 
-    /* first fragment starts at the end of the declaration statement and ends at the end of the statement preceding the method invocation */
+    /* first fragment starts at the end of the declaration statement and ends
+     * at the end of the statement preceding the method invocation */
     predecessor_of(predecessor, expr_statement),
     ends_at(declaration_statement, first_frag_start),
     ends_at(predecessor, first_frag_end),
     first_frag = substr(code, first_frag_start, first_frag_end - first_frag_start),
 
-    /* second fragment starts at the end of the statement of the method invocation and spans the rest of the original try-with-resources */
+    /* second fragment starts at the end of the statement of the method
+     * invocation and spans the rest of the original try-catch */
     ends_at(expr_statement, second_frag_start),
     ends_at(id, second_frag_end),
     second_frag = substr(code, second_frag_start, second_frag_end - second_frag_start).
@@ -67,7 +69,7 @@ rewrite(2095, "", filename, id, cat("try (", declaration_str, ") {", first_frag,
 /**
  * Rewrite
  * 
- * ... method_name() {
+ * {
  *     ... first fragment ...
  *     Resource resource = new Resource();
  *     ... second fragment ...
@@ -77,11 +79,11 @@ rewrite(2095, "", filename, id, cat("try (", declaration_str, ") {", first_frag,
  * 
  * into
  *
- * ... method_name() {
+ * {
  *     ... first fragment ...
  *     try (Resource resource = new Resource()) {
  *         ... second fragment ...
  *     }
  *     ... third fragment ...
  * }
- *
+ */
