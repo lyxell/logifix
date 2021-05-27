@@ -4,7 +4,7 @@ project(logifix)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -O2")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unknown-pragmas -O2")
 
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_CLAR OFF)
@@ -36,3 +36,11 @@ set_source_files_properties(logifix.cpp PROPERTIES COMPILE_FLAGS -D__EMBEDDED_SO
 add_executable(logifix cli/main.cpp program.cpp logifix.cpp)
 
 target_link_libraries(logifix git2 sjp)
+
+## TESTS
+
+add_custom_target(test
+     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/download_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv
+     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv ${CMAKE_CURRENT_BINARY_DIR}/logifix
+)
+add_dependencies(test logifix)

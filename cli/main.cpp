@@ -70,7 +70,7 @@ static int color_printer(
 	return diff_output(delta, hunk, line, nullptr);
 }
 
-std::string perform_rewrites(const std::string& input, std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites) {
+std::string perform_rewrites(const std::string& input, std::vector<std::tuple<int,size_t,size_t,std::string,std::string>> rewrites) {
     /* expand rewrites that only does deletion to also remove whitespace at the beginning of the line */
     for (auto& [rule_number, start, end, replacement, mess] : rewrites) {
         if (replacement.empty()) {
@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
             program.run();
 
             /* filter rewrites by their id */
-            std::vector<std::tuple<int,int,int,std::string,std::string>> rewrites;
+            std::vector<std::tuple<int,size_t,size_t,std::string,std::string>> rewrites;
             for (auto r : program.get_possible_rewrites(file.c_str())) {
                 if (std::get<0>(r) == opt.rule_number) rewrites.emplace_back(std::move(r));
             }
@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
             } else {
                 /* create diff */
                 git_diff *diff;
-                git_buf buf = {0};
+                git_buf buf = {};
                 git_patch *patch = NULL;
                 git_patch_from_buffers(&patch, input.c_str(), input.size(), file.c_str(), output.c_str(), output.size(), file.c_str(), NULL),
                 git_patch_to_buf(&buf, patch);

@@ -36,31 +36,22 @@ std::string program::get_source_code(const char* filename) {
 }
 
 void program::run() {
-    typedef std::chrono::high_resolution_clock hclock;
-    auto t1 = hclock::now();
     prog->run();
-    auto t2 = hclock::now();
-#ifdef DEBUG
-    std::cerr << "+"
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-                     .count()
-              << " ms (analysis)" << std::endl;
-#endif
 }
 
 void program::print() {
     prog->printAll();
 }
 
-std::vector<std::tuple<int, int, int, std::string, std::string>>
+std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
 program::get_possible_rewrites(const char* filename) {
     auto get_ast_node_from_id = [this](int id) {
         const auto* record = prog->getRecordTable().unpack(id, 4);
         assert(record != nullptr);
-        return std::tuple(prog->getSymbolTable().decode(record[0]), record[2],
-                          record[3]);
+        return std::tuple(prog->getSymbolTable().decode(record[0]), size_t(record[2]),
+                          size_t(record[3]));
     };
-    std::vector<std::tuple<int, int, int, std::string, std::string>> result;
+    std::vector<std::tuple<int, size_t, size_t, std::string, std::string>> result;
     souffle::Relation* relation = prog->getRelation("rewrite");
     assert(relation != nullptr);
     for (souffle::tuple& output : *relation) {

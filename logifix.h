@@ -18,7 +18,7 @@ class program {
     void run();
     void print();
     std::string get_source_code(const char* filename);
-    std::vector<std::tuple<int, int, int, std::string, std::string>>
+    std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
     get_possible_rewrites(const char* filename);
     std::vector<std::string>
     get_variables_in_scope(int id);
