@@ -207,10 +207,10 @@ int main(int argc, char** argv) {
                                            output.size(), file.c_str(), NULL);
 
                     /* Show patch to user and prompt for feedback */
+                    found_first_rewrite = true;
                     std::lock_guard<std::mutex> lock(io_mutex);
                     git_patch_print(patch, color_printer, NULL);
                     git_patch_free(patch);
-                    found_first_rewrite = true;
                     std::cout << colors[COLOR_CYAN] << "Apply these changes? [y,N]"
                               << colors[COLOR_RESET] << std::endl;
                     std::string line;
@@ -235,9 +235,13 @@ int main(int argc, char** argv) {
                 }
 
                 if (!found_first_rewrite) {
-                    count++;
                     std::lock_guard<std::mutex> lock(io_mutex);
-                    std::cerr << "analyzing " << file << "\r" << std::flush;
+                    count++;
+                    if (file.size() > 50) {
+                        std::cerr << "analyzing " << file.substr(0, 50) << " ...\r" << std::flush;
+                    } else {
+                        std::cerr << "analyzing " << file << "\r" << std::flush;
+                    }
                 }
             }));
     }
