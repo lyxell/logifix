@@ -2,6 +2,7 @@
 #include "rules/1155_use_isempty.dl"
 #include "rules/1481_unused_local_variables.dl"
 #include "rules/1596_fix_old_empty_collection.dl"
+#include "rules/1602_lambda_single_statement.dl"
 #include "rules/2095_close_resources.dl"
 #include "rules/2272_throw_nosuchelementexception.dl"
 #include "rules/2111_bigdecimal_double.dl"
