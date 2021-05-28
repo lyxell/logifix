@@ -31,23 +31,39 @@ try_statement(id, body, catches, finally) :-
     parent_of(id, "finally", finally).
 
 INFIX(assignment_expression)
-INFIX(instanceof_expression)
-INFIX(not_equals_expression)
-INFIX(equals_expression)
-INFIX(conditional_and_expression)
 INFIX(conditional_or_expression)
+INFIX(conditional_and_expression)
+INFIX(inclusive_or_expression)
+INFIX(exclusive_or_expression)
+INFIX(and_expression)
+INFIX(equals_expression)
+INFIX(not_equals_expression)
+INFIX(less_than_expression)
 INFIX(greater_than_expression)
+INFIX(less_than_or_equals_expression)
 INFIX(greater_than_or_equals_expression)
+INFIX(instanceof_expression)
+INFIX(signed_left_shift_expression)
+INFIX(signed_right_shift_expression)
+INFIX(unsigned_right_shift_expression)
 INFIX(addition_expression)
 INFIX(subtraction_expression)
 INFIX(multiplication_expression)
+INFIX(division_expression)
+INFIX(remainder_expression)
 
-.decl ternary_conditional_expression(id: id, cond: id, then: id, else: id)
-ternary_conditional_expression(id, cond, then, else) :-
-    name_of(id, "ternary_conditional_expression"),
+.decl conditional_expression(id: id, cond: id, then: id, else: id)
+conditional_expression(id, cond, then, else) :-
+    name_of(id, "conditional_expression"),
     parent_of(id, "condition", cond),
     parent_of(id, "then", then),
     parent_of(id, "else", else).
+
+.decl lambda_expression(id: id, parameters: id, body: id)
+lambda_expression(id, parameters, body) :-
+    name_of(id, "lambda_expression"),
+    parent_of(id, "parameters", parameters),
+    parent_of(id, "body", body).
 
 .decl class_declaration(id: id, modifiers: id_list, name: id, superclass: id, superinterfaces: id_list, body: id_list)
 class_declaration(id, mods, name, superclass, superinterfaces, body) :-

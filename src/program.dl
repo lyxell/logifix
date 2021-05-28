@@ -3,6 +3,7 @@
 #include "rules/1481_unused_local_variables.dl"
 #include "rules/1596_fix_old_empty_collection.dl"
 #include "rules/2095_close_resources.dl"
+#include "rules/2272_throw_nosuchelementexception.dl"
 #include "rules/2111_bigdecimal_double.dl"
 #include "rules/3984_throw_exceptions.dl"
 #include "rules/4973_use_equals_method.dl"
@@ -530,6 +531,36 @@ has_collection_type(id) :- has_type(id, type), is_collection_type(type).
 
 .decl has_atomic_class_type(id: id)
 has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
+
+/* Syntax
+ ********************************/
+
+/**
+ * True for all nodes where parenthesization could change the meaning of a compound expression.
+ */
+.decl has_semantic_parenthesization(id: id)
+has_semantic_parenthesization(id) :- lambda_expression(id, _, _).
+has_semantic_parenthesization(id) :- conditional_expression(id, _, _, _).
+has_semantic_parenthesization(id) :- conditional_or_expression(id, _, _).
+has_semantic_parenthesization(id) :- conditional_and_expression(id, _, _).
+has_semantic_parenthesization(id) :- inclusive_or_expression(id, _, _).
+has_semantic_parenthesization(id) :- exclusive_or_expression(id, _, _).
+has_semantic_parenthesization(id) :- and_expression(id, _, _).
+has_semantic_parenthesization(id) :- equals_expression(id, _, _).
+has_semantic_parenthesization(id) :- not_equals_expression(id, _, _).
+has_semantic_parenthesization(id) :- less_than_expression(id, _, _).
+has_semantic_parenthesization(id) :- greater_than_expression(id, _, _).
+has_semantic_parenthesization(id) :- less_than_or_equals_expression(id, _, _).
+has_semantic_parenthesization(id) :- greater_than_or_equals_expression(id, _, _).
+has_semantic_parenthesization(id) :- instanceof_expression(id, _, _).
+has_semantic_parenthesization(id) :- signed_left_shift_expression(id, _, _).
+has_semantic_parenthesization(id) :- signed_right_shift_expression(id, _, _).
+has_semantic_parenthesization(id) :- unsigned_right_shift_expression(id, _, _).
+has_semantic_parenthesization(id) :- addition_expression(id, _, _).
+has_semantic_parenthesization(id) :- subtraction_expression(id, _, _).
+has_semantic_parenthesization(id) :- multiplication_expression(id, _, _).
+has_semantic_parenthesization(id) :- division_expression(id, _, _).
+has_semantic_parenthesization(id) :- remainder_expression(id, _, _).
 
 /* Rewrite rules
  ********************************/

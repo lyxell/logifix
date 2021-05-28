@@ -16,10 +16,6 @@ rewrite(1125, filename, eq_expr, other_expr_str) :-
     evaluates_to_boolean_value(true_expr, 1),
     string_representation(other_expr, other_expr_str).
 
-.decl need_parens_when_negated_1125(id: id)
-need_parens_when_negated_1125(id) :-
-    instanceof_expression(id, _, _).
-
 /* Rewrite x == y into !x if y evaluates to true */
 rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
     filename_of(eq_expr, filename),
@@ -27,7 +23,7 @@ rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
     parent_of(eq_expr, _, false_expr),
     parent_of(eq_expr, _, other_expr),
     false_expr != other_expr,
-    ! need_parens_when_negated_1125(other_expr),
+    ! has_semantic_parenthesization(other_expr),
     evaluates_to_boolean_value(false_expr, 0),
     string_representation(other_expr, other_expr_str).
 rewrite(1125, filename, eq_expr, cat("!(", other_expr_str, ")")) :-
@@ -36,6 +32,6 @@ rewrite(1125, filename, eq_expr, cat("!(", other_expr_str, ")")) :-
     parent_of(eq_expr, _, false_expr),
     parent_of(eq_expr, _, other_expr),
     false_expr != other_expr,
-    need_parens_when_negated_1125(other_expr),
+    has_semantic_parenthesization(other_expr),
     evaluates_to_boolean_value(false_expr, 0),
     string_representation(other_expr, other_expr_str).
