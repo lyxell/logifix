@@ -5,11 +5,10 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1132
  */
 
-#define MESSAGE "Place the string literal on the left hand side to avoid a null pointer exception"
-
 /* Rewrite foo.equals("x") into "x".equals(foo) */
-rewrite(MESSAGE, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
+rewrite(1132, filename, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
     method_invocation(invocation, subject, method, [arg, nil]),
+    filename_of(invocation, filename),
     string_literal(arg),
     has_string_type(subject),
     string_representation(method, "equals"),
@@ -17,8 +16,9 @@ rewrite(MESSAGE, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
     string_representation(subject, subject_str).
 
 /* Rewrite foo != null && foo.equals("x") into "x".equals(foo) */
-rewrite(MESSAGE, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
+rewrite(1132, filename, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
     conditional_and_expression(and, _, _),
+    filename_of(and, filename),
     not_equals_null_expression(noteqnull, noteqnull_subject),
     parent_of(and, _, noteqnull),
     parent_of(and, _, invocation),
