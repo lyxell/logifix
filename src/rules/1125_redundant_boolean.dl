@@ -4,8 +4,6 @@
  * https://rules.sonarsource.com/java/RSPEC-1125
  */
 
-// TODO: Ternaries, Conditional or, Conditional and
-
 /* Rewrite x == true into x */
 rewrite(1125, filename, eq_expr, other_expr_str) :-
     filename_of(eq_expr, filename),
@@ -13,18 +11,8 @@ rewrite(1125, filename, eq_expr, other_expr_str) :-
     parent_of(eq_expr, _, true_expr),
     parent_of(eq_expr, _, other_expr),
     true_expr != other_expr,
-    ! has_semantic_parenthesization(other_expr),
     evaluates_to_boolean_value(true_expr, 1),
-    string_representation(other_expr, other_expr_str).
-rewrite(1125, filename, eq_expr, cat("(", other_expr_str, ")")) :-
-    filename_of(eq_expr, filename),
-    equals_expression(eq_expr, _, _),
-    parent_of(eq_expr, _, true_expr),
-    parent_of(eq_expr, _, other_expr),
-    true_expr != other_expr,
-    has_semantic_parenthesization(other_expr),
-    evaluates_to_boolean_value(true_expr, 1),
-    string_representation(other_expr, other_expr_str).
+    string_representation_with_parentheses(other_expr, other_expr_str).
 
 /* Rewrite x == false into !x */
 rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
@@ -33,15 +21,15 @@ rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
     parent_of(eq_expr, _, false_expr),
     parent_of(eq_expr, _, other_expr),
     false_expr != other_expr,
-    ! has_semantic_parenthesization(other_expr),
     evaluates_to_boolean_value(false_expr, 0),
-    string_representation(other_expr, other_expr_str).
-rewrite(1125, filename, eq_expr, cat("!(", other_expr_str, ")")) :-
-    filename_of(eq_expr, filename),
-    equals_expression(eq_expr, _, _),
-    parent_of(eq_expr, _, false_expr),
-    parent_of(eq_expr, _, other_expr),
-    false_expr != other_expr,
-    has_semantic_parenthesization(other_expr),
+    string_representation_with_parentheses(other_expr, other_expr_str).
+
+/* Rewrite x == y ? false : z into x != y && z */
+rewrite(1125, filename, cond_expr, cat(left_str, " != ", right_str, " && ", other_expr_str)) :-
+    filename_of(cond_expr, filename),
+    conditional_expression(cond_expr, cond, false_expr, other_expr),
     evaluates_to_boolean_value(false_expr, 0),
-    string_representation(other_expr, other_expr_str).
+    equals_expression(cond, left, right),
+    string_representation_with_parentheses(left, left_str),
+    string_representation_with_parentheses(right, right_str),
+    string_representation_with_parentheses(other_expr, other_expr_str).

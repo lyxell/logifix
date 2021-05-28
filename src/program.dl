@@ -562,6 +562,15 @@ has_semantic_parenthesization(id) :- multiplication_expression(id, _, _).
 has_semantic_parenthesization(id) :- division_expression(id, _, _).
 has_semantic_parenthesization(id) :- remainder_expression(id, _, _).
 
+.decl string_representation_with_parentheses(id: id, str: symbol)
+string_representation_with_parentheses(id, id_str) :-
+    ! has_semantic_parenthesization(id),
+    string_representation(id, id_str).
+string_representation_with_parentheses(id, cat("(", id_str, ")")) :-
+    has_semantic_parenthesization(id),
+    string_representation(id, id_str).
+
+
 /* Rewrite rules
  ********************************/
 
