@@ -4,9 +4,7 @@
  * https://rules.sonarsource.com/java/RSPEC-4973
  */
 
-#define MESSAGE "Use the equals method if value comparison was intended"
-
-rewrite(4973, MESSAGE, filename, eq, cat(x_str, ".equals(", y_str, ")")) :-
+rewrite(4973, filename, eq, cat(x_str, ".equals(", y_str, ")")) :-
     filename_of(eq, filename),
     equals_expression(eq, x, y),
     has_string_or_boxed_type(x),
@@ -14,7 +12,7 @@ rewrite(4973, MESSAGE, filename, eq, cat(x_str, ".equals(", y_str, ")")) :-
     string_representation(x, x_str),
     string_representation(y, y_str).
 
-rewrite(4973, MESSAGE, filename, eq, cat("!", x_str, ".equals(", y_str, ")")) :-
+rewrite(4973, filename, eq, cat("!", x_str, ".equals(", y_str, ")")) :-
     filename_of(eq, filename),
     not_equals_expression(eq, x, y),
     has_string_or_boxed_type(x),

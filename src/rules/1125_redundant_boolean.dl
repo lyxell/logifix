@@ -6,10 +6,8 @@
 
 // TODO: Ternaries, Conditional or, Conditional and
 
-#define MESSAGE "Remove this unnecessary boolean literal"
-
 /* Rewrite x == y into x if y evaluates to false */
-rewrite(1125, MESSAGE, filename, eq_expr, other_expr_str) :-
+rewrite(1125, filename, eq_expr, other_expr_str) :-
     filename_of(eq_expr, filename),
     equals_expression(eq_expr, _, _),
     parent_of(eq_expr, _, true_expr),
@@ -18,13 +16,26 @@ rewrite(1125, MESSAGE, filename, eq_expr, other_expr_str) :-
     evaluates_to_boolean_value(true_expr, 1),
     string_representation(other_expr, other_expr_str).
 
+.decl need_parens_when_negated_1125(id: id)
+need_parens_when_negated_1125(id) :-
+    instanceof_expression(id, _, _).
+
 /* Rewrite x == y into !x if y evaluates to true */
-// TODO, add parens when necessary
-rewrite(1125, MESSAGE, filename, eq_expr, cat("!", other_expr_str)) :-
+rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
     filename_of(eq_expr, filename),
     equals_expression(eq_expr, _, _),
     parent_of(eq_expr, _, false_expr),
     parent_of(eq_expr, _, other_expr),
     false_expr != other_expr,
+    ! need_parens_when_negated_1125(other_expr),
+    evaluates_to_boolean_value(false_expr, 0),
+    string_representation(other_expr, other_expr_str).
+rewrite(1125, filename, eq_expr, cat("!(", other_expr_str, ")")) :-
+    filename_of(eq_expr, filename),
+    equals_expression(eq_expr, _, _),
+    parent_of(eq_expr, _, false_expr),
+    parent_of(eq_expr, _, other_expr),
+    false_expr != other_expr,
+    need_parens_when_negated_1125(other_expr),
     evaluates_to_boolean_value(false_expr, 0),
     string_representation(other_expr, other_expr_str).

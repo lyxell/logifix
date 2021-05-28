@@ -31,6 +31,7 @@ try_statement(id, body, catches, finally) :-
     parent_of(id, "finally", finally).
 
 INFIX(assignment_expression)
+INFIX(instanceof_expression)
 INFIX(not_equals_expression)
 INFIX(equals_expression)
 INFIX(conditional_and_expression)

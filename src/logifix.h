@@ -15,7 +15,7 @@ class program {
     void add_string(const char* filename, const char* content);
     void run();
     void print();
-    std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
+    std::vector<std::tuple<int, size_t, size_t, std::string>>
     get_possible_rewrites(const char* filename);
     std::vector<std::string>
     get_variables_in_scope(int id);

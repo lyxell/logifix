@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
 
                 /* Filter rewrites by their id */
                 std::vector<
-                    std::tuple<int, size_t, size_t, std::string, std::string>>
+                    std::tuple<int, size_t, size_t, std::string>>
                     rewrites;
                 for (auto r : program.get_possible_rewrites(file.c_str())) {
                     if (std::get<0>(r) == opt.rule_number)
@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
                  * whitespace at the beginning of the line as well as the
                  * trailing newline on the previous line
                  */
-                for (auto& [rule_number, start, end, replacement, mess] :
+                for (auto& [rule_number, start, end, replacement] :
                      rewrites) {
                     if (replacement.empty()) {
                         /* expand start to include whitespace */
@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
                         break;
                     }
 
-                    auto [_, start, end, replacement, __] = rewrites.back();
+                    auto [_, start, end, replacement] = rewrites.back();
 
                     if (opt.apply) {
                         result += input.substr(curr_pos, start - curr_pos);

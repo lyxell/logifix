@@ -14,7 +14,7 @@
 /**
  * Rewrite a try-catch statement into a try-with-resources statement.
  */
-rewrite(2095, "", filename, id, cat("try (", declaration_str, ") {", first_frag, second_frag)) :-
+rewrite(2095, filename, id, cat("try (", declaration_str, ") {", first_frag, second_frag)) :-
 
     /**
      * We are inside a try statement

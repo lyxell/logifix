@@ -31,6 +31,5 @@ To download and build the project, perform the following steps:
 * [S2111 - BigDecimal(double) should not be used](https://github.com/lyxell/logifix/blob/master/rules/2111.dl)
 * [S2204 - .equals() should not be used to test the values of Atomic classes](https://github.com/lyxell/logifix/blob/master/rules/2204.dl)
 * [S2272 - Iterator.next() methods should throw NoSuchElementException](https://github.com/lyxell/logifix/blob/master/rules/2272.dl)
-* [S2293 - The diamond operator ("<>") should be used](https://github.com/lyxell/logifix/blob/master/rules/2293.dl)
 * [S3984 - Exceptions should not be created without being thrown](https://github.com/lyxell/logifix/blob/master/rules/3984.dl)
 * [S4973 - Strings and Boxed types should be compared using equals()](https://github.com/lyxell/logifix/blob/master/rules/4973.dl)

@@ -23,7 +23,7 @@ void program::run() { prog->run(); }
 
 void program::print() { prog->printAll(); }
 
-std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
+std::vector<std::tuple<int, size_t, size_t, std::string>>
 program::get_possible_rewrites(const char* filename) {
     auto get_ast_node_from_id = [this](int id) {
         const auto* record = prog->getRecordTable().unpack(id, 4);
@@ -31,7 +31,7 @@ program::get_possible_rewrites(const char* filename) {
         return std::tuple(prog->getSymbolTable().decode(record[0]),
                           size_t(record[2]), size_t(record[3]));
     };
-    std::vector<std::tuple<int, size_t, size_t, std::string, std::string>>
+    std::vector<std::tuple<int, size_t, size_t, std::string>>
         result;
     souffle::Relation* relation = prog->getRelation("rewrite");
     assert(relation != nullptr);
@@ -40,14 +40,13 @@ program::get_possible_rewrites(const char* filename) {
         int id;
         std::string replacement;
         std::string tuple_filename;
-        std::string message;
-        output >> rule_number >> message >> tuple_filename >> id >> replacement;
+        output >> rule_number >> tuple_filename >> id >> replacement;
         if (id == 0) {
             continue;
         }
         // if (tuple_filename != filename) continue;
         auto [str, a, b] = get_ast_node_from_id(id);
-        result.emplace_back(rule_number, a, b, replacement, message);
+        result.emplace_back(rule_number, a, b, replacement);
     }
     return result;
 }

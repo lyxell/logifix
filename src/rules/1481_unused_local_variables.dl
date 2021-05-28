@@ -4,7 +4,7 @@
  * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1481
  */
 
-rewrite(1481, "Unused variable declaration", filename, id, "") :-
+rewrite(1481, filename, id, "") :-
     filename_of(id, filename),
     local_variable_declaration_statement(id, declaration),
     local_variable_declaration(declaration, _, _, _),
