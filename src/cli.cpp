@@ -95,33 +95,47 @@ bool ask_user_about_rewrite(const std::string& input, const std::string& replace
 }
 
 struct options {
+    bool recurse;
     bool apply;
     int rule_number;
     std::set<std::string> files;
 };
 
 struct stats {
-    size_t num_files;
-    size_t num_files_changed;
-    size_t num_rewrites_applied;
+    std::map<std::string,size_t> files_changed;
 };
 
 int main(int argc, char** argv) {
 
-    options opt = {.apply = false, .rule_number = -1, .files = {}};
+    options opt = {
+        .recurse = true,
+        .apply = false,
+        .rule_number = -1,
+        .files = {}
+    };
     stats s = {};
 
     for (int i = 1; i < argc; i++) {
         std::string s(argv[i]);
-        if (s == "--apply") {
+        if (s == "--no-recurse") {
+            opt.recurse = false;
+        } else if (s == "--apply") {
             opt.apply = true;
         } else if (s.substr(0, 8) == "--rules=") {
             opt.rule_number = std::stoi(s.substr(8));
         } else {
             if (fs::is_directory(s)) {
-                for (const auto& entry : fs::recursive_directory_iterator(s)) {
-                    if (entry.path().extension() == ".java") {
-                        opt.files.emplace(entry.path().lexically_normal());
+                if (opt.recurse) {
+                    for (const auto& entry : fs::recursive_directory_iterator(s)) {
+                        if (entry.path().extension() == ".java") {
+                            opt.files.emplace(entry.path().lexically_normal());
+                        }
+                    }
+                } else {
+                    for (const auto& entry : fs::directory_iterator(s)) {
+                        if (entry.path().extension() == ".java") {
+                            opt.files.emplace(entry.path().lexically_normal());
+                        }
                     }
                 }
             } else {
@@ -129,8 +143,6 @@ int main(int argc, char** argv) {
             }
         }
     }
-
-    s.num_files = opt.files.size();
 
     if (opt.rule_number == -1) {
         std::cerr << "No rule specified" << std::endl;
@@ -238,8 +250,7 @@ int main(int argc, char** argv) {
                 std::lock_guard<std::mutex> lock(io_mutex);
 
                 if (num_changes > 0) {
-                    s.num_files_changed++;
-                    s.num_rewrites_applied += num_changes;
+                    s.files_changed.emplace(file, num_changes);
                 }
 
                 if (!found_first_rewrite) {
@@ -257,9 +268,17 @@ int main(int argc, char** argv) {
         f.wait();
     }
 
-    std::cerr << s.num_files << " files analyzed" << std::endl;
-    std::cerr << s.num_rewrites_applied << " rewrites applied across ";
-    std::cerr << s.num_files_changed << " files" << std::endl;
+    size_t sum_rewrites = 0;
+    for (const auto& [file, changes] : s.files_changed) {
+        sum_rewrites += changes;
+    }
+
+    std::cerr << opt.files.size() << " files analyzed" << std::endl;
+    std::cerr << sum_rewrites << " rewrites applied across ";
+    std::cerr << s.files_changed.size() << " files" << std::endl;
+    for (const auto& [file, changes] : s.files_changed) {
+        std::cerr << '\t' << changes << " changes in " << file << std::endl;
+    }
     std::cerr << std::endl;
 
     return 0;
