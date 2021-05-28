@@ -1,7 +1,7 @@
 /* https://rules.sonarsource.com/java/RSPEC-2095 */
 
 /*
-    Instances of the following classes are ignored by this rule because close has no effect:
+    TODO: Instances of the following classes should be ignored by this rule because close has no effect:
 
     java.io.ByteArrayOutputStream
     java.io.ByteArrayInputStream
@@ -11,57 +11,62 @@
     java.io.StringWriter
  */
 
-
 /**
- * Rewrite
- *
- * try {
- *     Resource resource = new Resource();
- *     ... first fragment ...
- *     resource.close();
- *     ... second fragment ...
- *
- * into
- *
- * try (Resource resource = new Resource()) {
- *     ... first fragment ...
- *     ... second fragment ...
- *
+ * Rewrite a try-catch statement into a try-with-resources statement.
  */
-
 rewrite(2095, "", filename, id, cat("try (", declaration_str, ") {", first_frag, second_frag)) :-
 
-    /* we are inside a try statement */
+    /**
+     * We are inside a try statement
+     *
+     * try {
+     */
     try_statement(id, body, _, _),
     filename_of(id, filename),
     block(body, statements),
 
-    /* the first statement of the try body is a local variable declaration that declares exactly one resource */
+    /**
+     * The first statement of the try body is a local variable declaration that
+     * declares exactly one resource
+     *
+     * BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+     */
     statements = [declaration_statement, _],
     local_variable_declaration_statement(declaration_statement, declaration),
     local_variable_declaration(declaration, _, type, [_, nil]),
     is_autocloseable_type(type),
 
-    /* the try body also contains a method invocation, closing the resource */
+    /**
+     * The try body also contains a method invocation, closing the resource
+     *
+     * bw.close();
+     */
     list_contains(statements, expr_statement),
     expression_statement(expr_statement, expr),
     method_invocation(expr, subject, method, nil),
     point_of_declaration(subject, declaration),
     string_representation(method, "close"),
 
-    /* output */
+    /**
+     * Output
+     */
     source_code(filename, code),
     string_representation(declaration, declaration_str),
 
-    /* first fragment starts at the end of the declaration statement and ends
-     * at the end of the statement preceding the method invocation */
-    predecessor_of(predecessor, expr_statement),
+    /**
+     * The first source code fragment starts at the end of the declaration
+     * statement and ends at the end of the statement preceding the method
+     * invocation
+     */
     ends_at(declaration_statement, first_frag_start),
+    predecessor_of(predecessor, expr_statement),
     ends_at(predecessor, first_frag_end),
     first_frag = substr(code, first_frag_start, first_frag_end - first_frag_start),
 
-    /* second fragment starts at the end of the statement of the method
-     * invocation and spans the rest of the original try-catch */
+    /**
+     * The second source code fragment starts at the end of the method invoation
+       and ends at the end of the try-catch statement
+     */
     ends_at(expr_statement, second_frag_start),
     ends_at(id, second_frag_end),
     second_frag = substr(code, second_frag_start, second_frag_end - second_frag_start).
