@@ -64,12 +64,6 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
     return 0;
 }
 
-struct options {
-    bool apply;
-    int rule_number;
-    std::set<std::string> files;
-};
-
 std::string read_file(std::string_view path) {
     constexpr auto read_size = std::size_t{4096};
     auto stream = std::ifstream {path.data()};
@@ -84,9 +78,38 @@ std::string read_file(std::string_view path) {
     return out;
 }
 
+bool ask_user_about_rewrite(const std::string& input, const std::string& replacement, size_t start, size_t end, const std::string& file, std::mutex& io_mutex) {
+    std::string output = input.substr(0, start) + replacement + input.substr(end);
+    git_patch* patch = NULL;
+    git_patch_from_buffers(&patch, input.c_str(), input.size(),
+                           file.c_str(), output.c_str(),
+                           output.size(), file.c_str(), NULL);
+    std::lock_guard<std::mutex> lock(io_mutex);
+    git_patch_print(patch, color_printer, NULL);
+    git_patch_free(patch);
+    std::cout << colors[COLOR_CYAN] << "Apply these changes? [y,N]"
+              << colors[COLOR_RESET] << std::endl;
+    std::string line;
+    std::getline(std::cin, line);
+    return line.size() > 0 && line[0] == 'y' || line[0] == 'Y';
+}
+
+struct options {
+    bool apply;
+    int rule_number;
+    std::set<std::string> files;
+};
+
+struct stats {
+    size_t num_files;
+    size_t num_files_changed;
+    size_t num_rewrites_applied;
+};
+
 int main(int argc, char** argv) {
 
     options opt = {.apply = false, .rule_number = -1, .files = {}};
+    stats s = {};
 
     for (int i = 1; i < argc; i++) {
         std::string s(argv[i]);
@@ -106,6 +129,8 @@ int main(int argc, char** argv) {
             }
         }
     }
+
+    s.num_files = opt.files.size();
 
     if (opt.rule_number == -1) {
         std::cerr << "No rule specified" << std::endl;
@@ -128,7 +153,7 @@ int main(int argc, char** argv) {
     for (const auto& file : opt.files) {
         futures.emplace_back(
             std::async(std::launch::async, [&opt, &count, &file, &io_mutex,
-                                            &found_first_rewrite] {
+                                            &found_first_rewrite, &s] {
                 logifix::program program;
                 std::string input = read_file(file);
                 program.add_string(file.c_str(), input.c_str());
@@ -175,6 +200,7 @@ int main(int argc, char** argv) {
 
                 /* The resulting file */
                 size_t curr_pos = 0;
+                size_t num_changes = 0;
                 std::string result;
 
                 while (curr_pos < input.size()) {
@@ -191,31 +217,8 @@ int main(int argc, char** argv) {
 
                     auto [_, start, end, replacement] = rewrites.back();
 
-                    if (opt.apply) {
-                        result += input.substr(curr_pos, start - curr_pos);
-                        result += replacement;
-                        curr_pos = end;
-                        continue;
-                    }
-
-                    std::string output = input.substr(0, start) + replacement + input.substr(end);
-                    git_patch* patch = NULL;
-                    git_patch_from_buffers(&patch, input.c_str(), input.size(),
-                                           file.c_str(), output.c_str(),
-                                           output.size(), file.c_str(), NULL);
-
-                    /* Show patch to user and prompt for feedback */
-                    found_first_rewrite = true;
-                    std::lock_guard<std::mutex> lock(io_mutex);
-                    git_patch_print(patch, color_printer, NULL);
-                    git_patch_free(patch);
-                    std::cout << colors[COLOR_CYAN] << "Apply these changes? [y,N]"
-                              << colors[COLOR_RESET] << std::endl;
-                    std::string line;
-                    std::getline(std::cin, line);
-
-                    /* User said yes */
-                    if (line[0] == 'y' || line[0] == 'Y') {
+                    if (opt.apply || ask_user_about_rewrite(input, replacement, start, end, file, io_mutex)) {
+                        num_changes++;
                         result += input.substr(curr_pos, start - curr_pos);
                         result += replacement;
                         curr_pos = end;
@@ -232,8 +235,14 @@ int main(int argc, char** argv) {
                     f.close();
                 }
 
+                std::lock_guard<std::mutex> lock(io_mutex);
+
+                if (num_changes > 0) {
+                    s.num_files_changed++;
+                    s.num_rewrites_applied += num_changes;
+                }
+
                 if (!found_first_rewrite) {
-                    std::lock_guard<std::mutex> lock(io_mutex);
                     count++;
                     if (file.size() > 50) {
                         std::cerr << "analyzing " << file.substr(0, 50) << " ...\r" << std::flush;
@@ -248,6 +257,9 @@ int main(int argc, char** argv) {
         f.wait();
     }
 
+    std::cerr << s.num_files << " files analyzed" << std::endl;
+    std::cerr << s.num_rewrites_applied << " rewrites applied across ";
+    std::cerr << s.num_files_changed << " files" << std::endl;
     std::cerr << std::endl;
 
     return 0;
