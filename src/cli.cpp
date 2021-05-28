@@ -84,7 +84,6 @@ bool ask_user_about_rewrite(const std::string& input, const std::string& replace
     git_patch_from_buffers(&patch, input.c_str(), input.size(),
                            file.c_str(), output.c_str(),
                            output.size(), file.c_str(), NULL);
-    std::lock_guard<std::mutex> lock(io_mutex);
     git_patch_print(patch, color_printer, NULL);
     git_patch_free(patch);
     std::cout << colors[COLOR_CYAN] << "Apply these changes? [y,N]"
@@ -215,6 +214,8 @@ int main(int argc, char** argv) {
                 size_t num_changes = 0;
                 std::string result;
 
+                std::lock_guard<std::mutex> lock(io_mutex);
+
                 while (curr_pos < input.size()) {
 
                     /* discard rewrites that we can't apply because of conflicts */
@@ -241,13 +242,10 @@ int main(int argc, char** argv) {
                 }
 
                 if (result != input) {
-                    /* no mutex needed since filenames are unique */
                     std::ofstream f(file);
                     f << result;
                     f.close();
                 }
-
-                std::lock_guard<std::mutex> lock(io_mutex);
 
                 if (num_changes > 0) {
                     s.files_changed.emplace(file, num_changes);
