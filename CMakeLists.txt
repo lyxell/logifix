@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(logifix)
+project(logifix HOMEPAGE_URL "https://github.com/lyxell/logifix")
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)

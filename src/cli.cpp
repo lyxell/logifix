@@ -154,6 +154,9 @@ options_t parse_options(int argc, char** argv) {
         for (const auto [option, _, description] : opts) {
             std::cout << " " << std::setw(19) << std::left << option << description << std::endl;
         }
+        std::cout << std::endl;
+        std::cout << PROJECT_NAME << " was created by Anton Lyxell, more information and the" << std::endl;
+        std::cout << "latest release can be found at " << PROJECT_URL << std::endl;
         std::exit(exit_code);
     };
 
