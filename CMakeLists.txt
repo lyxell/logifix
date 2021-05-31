@@ -5,6 +5,8 @@ project(logifix)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)
 
+configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_CLAR OFF)
 set(USE_BUNDLED_ZLIB ON)
@@ -42,6 +44,7 @@ ELSE ()
 ENDIF ()
 
 target_link_libraries(logifix git2 sjp)
+target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 
 ## TESTS
 

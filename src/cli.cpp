@@ -1,4 +1,5 @@
 #include "logifix.h"
+#include "config.h"
 #include <filesystem>
 #include <future>
 #include <git2.h>
@@ -104,6 +105,27 @@ struct stats {
     std::map<std::string,size_t> files_changed;
 };
 
+void print_usage() {
+    std::cout << "Usage: " << PROJECT_NAME << " [OPTIONS] [PATH ...]" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Example:" << std::endl;
+    std::cout << "  " << PROJECT_NAME << " --auto --rules=1125,1155 src/main" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  --apply           Rewrite files on disk (default)" << std::endl;
+    std::cout << "  --color           Colorize diffs when asking for confirmation (default)" << std::endl;
+    std::cout << "  --interactive     Prompt user to confirm each rewrite (default)" << std::endl;
+    std::cout << "  --no-apply        Do not rewrite files on disk, output patch to stdout instead" << std::endl;
+    std::cout << "  --no-color        Do not colorize diffs when asking for confirmation " << std::endl;
+    std::cout << "  --no-interactive  Do not prompt user for confirmation, apply all rewrites" << std::endl;
+    std::cout << "  --no-recurse      Do not recursively search for files" << std::endl;
+    std::cout << "  --recurse         Recursively search for files if PATH is folder (default)" << std::endl;
+    std::cout << "  --rules=<rules>   Comma-separated set of rules to find patches for" << std::endl;
+    std::cout << "  --suffix=<suffix> Only consider files ending with suffix (default=\".java\")" << std::endl;
+    std::cout << "  --version         Print version information and exit" << std::endl;
+
+}
+
 int main(int argc, char** argv) {
 
     options opt = {
@@ -144,12 +166,12 @@ int main(int argc, char** argv) {
     }
 
     if (opt.rule_number == -1) {
-        std::cerr << "No rule specified" << std::endl;
+        print_usage();
         return 1;
     }
 
     if (opt.files.empty()) {
-        std::cerr << "No files specified" << std::endl;
+        print_usage();
         return 1;
     }
 
