@@ -1,5 +1,0 @@
-/**
- * Min and max used in combination should not always return the same value
- *
- * https://rules.sonarsource.com/java/type/Bug/RSPEC-3065
- */

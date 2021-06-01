@@ -1,5 +1,0 @@
-/**
- * Collection sizes and array length comparisons should make sense
- *
- * https://rules.sonarsource.com/java/type/Bug/RSPEC-3981
- */

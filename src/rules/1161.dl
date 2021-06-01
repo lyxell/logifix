@@ -1,5 +1,0 @@
-/**
- * "@Override" should be used on overriding and implementing methods
- *
- * https://rules.sonarsource.com/java/RSPEC-1161
- */

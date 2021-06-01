@@ -1,5 +1,0 @@
-/**
- * Arrays should not be copied using loops
- *
- * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-3012
- */

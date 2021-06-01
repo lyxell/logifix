@@ -1,5 +1,0 @@
-/**
- * Related "if/else if" statements should not have the same condition
- *
- * https://rules.sonarsource.com/java/type/Bug/RSPEC-1862
- */

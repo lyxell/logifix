@@ -1,5 +1,0 @@
-/**
- * Conditionally executed code should be reachable
- *
- * https://rules.sonarsource.com/java/RSPEC-2583
- */

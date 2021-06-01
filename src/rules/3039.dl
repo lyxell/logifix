@@ -1,5 +1,0 @@
-/**
- * "String" calls should not go beyond their bounds
- *
- * https://rules.sonarsource.com/java/type/Bug/RSPEC-3039
- */
