@@ -22,14 +22,64 @@ To download and build the project, perform the following steps:
 * `cd logifix && git submodule update --init`
 * `mkdir build && cd build && cmake .. && cmake --build .`
 
-## Targeted rules
+## Available fixes
 
-* [S1125 - Boolean literals should not be redundant](https://github.com/lyxell/logifix/blob/master/rules/1125.dl)
-* [S1132 - Strings literals should be placed on the left side when checking for equality](https://github.com/lyxell/logifix/blob/master/rules/1132.dl)
-* [S1155 - Collection.isEmpty() should be used to test for emptiness](https://github.com/lyxell/logifix/blob/master/rules/1155.dl)
-* [S1596 - Collections.EMPTY_LIST, EMPTY_MAP, and EMPTY_SET should not be used](https://github.com/lyxell/logifix/blob/master/rules/1596.dl)
-* [S2111 - BigDecimal(double) should not be used](https://github.com/lyxell/logifix/blob/master/rules/2111.dl)
-* [S2204 - .equals() should not be used to test the values of Atomic classes](https://github.com/lyxell/logifix/blob/master/rules/2204.dl)
-* [S2272 - Iterator.next() methods should throw NoSuchElementException](https://github.com/lyxell/logifix/blob/master/rules/2272.dl)
-* [S3984 - Exceptions should not be created without being thrown](https://github.com/lyxell/logifix/blob/master/rules/3984.dl)
-* [S4973 - Strings and Boxed types should be compared using equals()](https://github.com/lyxell/logifix/blob/master/rules/4973.dl)
+### Boolean literals should not be redundant
+
+Redundant Boolean literals should be removed from expressions to improve readability.
+
+* SonarQube ID: [S1125](https://rules.sonarsource.com/java/RSPEC-1125)
+
+### Strings literals should be placed on the left side when checking for equality
+
+It is preferable to place string literals on the left-hand side of an equals() or equalsIgnoreCase() method call.
+
+This prevents null pointer exceptions from being raised, as a string literal can never be null by definition.
+
+* SonarQube ID: [S1132](https://rules.sonarsource.com/java/RSPEC-1132)
+
+### Collection.isEmpty() should be used to test for emptiness
+
+Using `Collection.size()` to test for emptiness works, but using `Collection.isEmpty()` makes the code more readable and can be more performant. The time complexity of any `isEmpty()` method implementation should be O(1) whereas some implementations of `size()` can be O(n).
+
+* SonarQube ID: [S1155](https://rules.sonarsource.com/java/RSPEC-1155)
+
+### Collections.EMPTY_LIST, EMPTY_MAP, and EMPTY_SET should not be used
+
+Since the introduction of generics in Java 5, the use of generic types such as List<String> is recommended over the use of raw ones such as List. Assigning a raw type to a generic one is not type safe, and will generate a warning. The old EMPTY_... fields of the Collections class return raw types, whereas the newer empty...() methods return generic ones.
+
+* SonarQube ID: [S1596](https://rules.sonarsource.com/java/RSPEC-1596)
+
+### BigDecimal(double) should not be used
+  
+Because of floating point imprecision, you're unlikely to get the value you expect from the BigDecimal(double) constructor.
+
+Instead, you should use BigDecimal.valueOf, which uses a string under the covers to eliminate floating point rounding errors, or the constructor that takes a String argument.
+ 
+* SonarQube ID: [S2111](https://rules.sonarsource.com/java/RSPEC-2111)
+
+### .equals() should not be used to test the values of Atomic classes
+
+`AtomicInteger`, and `AtomicLong` extend `Number`, but they're distinct from `Integer` and `Long` and should be handled differently. `AtomicInteger` and `AtomicLong are` designed to support lock-free, thread-safe programming on single variables. As such, an `AtomicInteger` will only ever be "equal" to itself. Instead, you should .get() the value and make comparisons on it.
+
+This applies to all the atomic, seeming-primitive wrapper classes: `AtomicInteger`, `AtomicLong`, and `AtomicBoolean`.
+  
+* SonarQube ID: [S2204](https://rules.sonarsource.com/java/RSPEC-2204)
+
+### Iterator.next() methods should throw NoSuchElementException
+  
+By contract, any implementation of the `java.util.Iterator.next()` method should throw a `NoSuchElementException` exception when the iteration has no more elements. Any other behavior when the iteration is done could lead to unexpected behavior for users of this `Iterator`.
+  
+* [S2272](https://rules.sonarsource.com/java/RSPEC-2272)
+  
+### Exceptions should not be created without being thrown
+  
+Creating a new `Throwable` without actually throwing it is useless and is probably due to a mistake.
+  
+* [S3984](https://rules.sonarsource.com/java/RSPEC-3984)
+  
+### Strings and Boxed types should be compared using equals()
+  
+It's almost always a mistake to compare two instances of `java.lang.String` or boxed types like `java.lang.Integer` using reference equality == or !=, because it is not comparing actual value but locations in memory.
+  
+* [S4973](https://rules.sonarsource.com/java/RSPEC-4973)
