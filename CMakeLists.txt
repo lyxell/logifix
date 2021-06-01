@@ -47,6 +47,8 @@ if(NOT DEFINED LOGIFIX_VERSION)
   message(WARNING "Failed to determine LOGIFIX_VERSION from Git tags. Using default version \"${LOGIFIX_VERSION}\".")
 endif()
 
+message(STATUS "Building logifix version ${LOGIFIX_VERSION}")
+
 file(GLOB RULES src/rules/*.dl)
 
 add_custom_command(
