@@ -6,6 +6,7 @@
 #include "rules/1602_lambda_single_statement.dl"
 #include "rules/2095_close_resources.dl"
 #include "rules/2111_bigdecimal_double.dl"
+#include "rules/2272_throw_nosuchelementexception.dl"
 #include "rules/4973_use_equals_method.dl"
 
 #include "nodes.dl"

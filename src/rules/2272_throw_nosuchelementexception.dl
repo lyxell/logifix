@@ -11,13 +11,20 @@ throws_no_such_element_exception(method) :-
     throw_statement(throw, expr),
     class_instance_creation_expression(expr, _, _, type, _, _),
     string_representation(type, "NoSuchElementException").
-    
-rewrite(2272, filename, id, "TODO") :-
-    class_declaration(id, _, _, _, superinterfaces, class_body),
-    filename_of(id, filename),
+
+.decl implements_interface(class: id, sym: symbol)
+implements_interface(id, sym) :-
+    class_declaration(id, _, _, _, superinterfaces, _),
     list_contains(superinterfaces, interface),
     class_type(interface, interface_name, _, _),
-    string_representation(interface_name, "Iterator"),
+    string_representation(interface_name, sym).
+
+rewrite(2272, filename, method_body, "") :-
+    class_declaration(id, _, _, _, _, class_body),
+    filename_of(id, filename),
+    implements_interface(id, "Iterator"),
     list_contains(class_body, method),
-    method_declaration(method, _, _, _),
-    ! throws_no_such_element_exception(method).
+    method_declaration(method, _, _, method_body),
+    ! throws_no_such_element_exception(method),
+    block(method_body, _),
+    string_representation(method_body, method_body_str).
