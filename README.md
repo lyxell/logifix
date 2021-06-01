@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logo.svg" alt="Logifix">
 </h1>
 
-Logifix automatically repairs SonarQube static analysis
+Logifix automatically fixes SonarQube static analysis
 violations for Java. Logifix is implemented in a high-performance
 Datalog dialect that is synthesized into fast multi-threaded C++
 code.
@@ -58,6 +58,18 @@ Instead, you should use BigDecimal.valueOf, which uses a string under the covers
  
 * SonarQube ID: [S2111](https://rules.sonarsource.com/java/RSPEC-2111)
 
+### Lambdas containing only one statement should not nest this statement in a block
+
+There are two ways to write lambdas that contain single statement, but one is definitely more compact and readable than the other.
+
+* SonarQube ID: [S1602](https://rules.sonarsource.com/java/RSPEC-1602)
+
+### Resources should be closed
+
+Connections, streams, files, and other classes that implement the Closeable interface or its super-interface, AutoCloseable, needs to be closed after use. Further, that close call must be made in a finally block otherwise an exception could keep the call from being made. Preferably, when class implements AutoCloseable, resource should be created using "try-with-resources" pattern and will be closed automatically.
+
+* SonarQube ID: [S2095](https://rules.sonarsource.com/java/RSPEC-2095)
+
 ### .equals() should not be used to test the values of Atomic classes
 
 `AtomicInteger`, and `AtomicLong` extend `Number`, but they're distinct from `Integer` and `Long` and should be handled differently. `AtomicInteger` and `AtomicLong are` designed to support lock-free, thread-safe programming on single variables. As such, an `AtomicInteger` will only ever be "equal" to itself. Instead, you should .get() the value and make comparisons on it.
@@ -70,16 +82,16 @@ This applies to all the atomic, seeming-primitive wrapper classes: `AtomicIntege
   
 By contract, any implementation of the `java.util.Iterator.next()` method should throw a `NoSuchElementException` exception when the iteration has no more elements. Any other behavior when the iteration is done could lead to unexpected behavior for users of this `Iterator`.
   
-* [S2272](https://rules.sonarsource.com/java/RSPEC-2272)
+* SonarQube ID: [S2272](https://rules.sonarsource.com/java/RSPEC-2272)
   
 ### Exceptions should not be created without being thrown
   
 Creating a new `Throwable` without actually throwing it is useless and is probably due to a mistake.
   
-* [S3984](https://rules.sonarsource.com/java/RSPEC-3984)
+* SonarQube ID: [S3984](https://rules.sonarsource.com/java/RSPEC-3984)
   
 ### Strings and Boxed types should be compared using equals()
   
 It's almost always a mistake to compare two instances of `java.lang.String` or boxed types like `java.lang.Integer` using reference equality == or !=, because it is not comparing actual value but locations in memory.
   
-* [S4973](https://rules.sonarsource.com/java/RSPEC-4973)
+* SonarQube ID: [S4973](https://rules.sonarsource.com/java/RSPEC-4973)
