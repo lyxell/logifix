@@ -128,9 +128,6 @@ void print_version_and_exit() {
     std::exit(0);
 }
 
-void print_usage_and_exit(int exit_code) {
-}
-
 options_t parse_options(int argc, char** argv) {
     options_t options = {
         .apply          = true,
@@ -148,7 +145,7 @@ options_t parse_options(int argc, char** argv) {
         std::cout << "Usage: " << PROJECT_NAME << " [OPTIONS] PATH [PATH ...]" << std::endl;
         std::cout << std::endl;
         std::cout << "Example:" << std::endl;
-        std::cout << "  " << PROJECT_NAME << " --auto --rules=1125,1155 src/main src/test" << std::endl;
+        std::cout << "  " << PROJECT_NAME << " --rules=1125,1155 src/main src/test" << std::endl;
         std::cout << std::endl;
         std::cout << "Options:" << std::endl;
         for (const auto [option, _, description] : opts) {
