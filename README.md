@@ -7,7 +7,7 @@ violations for Java. Logifix is implemented in a high-performance
 Datalog dialect that is synthesized into fast multi-threaded C++
 code.
 
-https://user-images.githubusercontent.com/4975941/119820849-3413ad80-bef2-11eb-8954-e23f9a5fdde8.mp4
+https://user-images.githubusercontent.com/4975941/120327017-9c470280-c2e9-11eb-88d1-163943d550ce.mp4
 
 ## Downloading
 
