@@ -12,6 +12,12 @@ CI pipelines and bots.
 
 https://user-images.githubusercontent.com/4975941/119820849-3413ad80-bef2-11eb-8954-e23f9a5fdde8.mp4
 
+## Downloading
+
+There are pre-built binaries available for GNU/Linux without any
+runtime dependencies, see
+[Releases](https://github.com/lyxell/logifix/releases).
+
 ## Building
 
 To build from source you will need [CMake](https://cmake.org/), [GNU Bison](https://www.gnu.org/software/bison/) and [re2c](https://re2c.org/).
