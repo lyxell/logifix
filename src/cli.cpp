@@ -124,7 +124,7 @@ struct stats {
 };
 
 void print_version_and_exit() {
-    // TODO
+    std::cout << PROJECT_VERSION << std::endl;
     std::exit(0);
 }
 

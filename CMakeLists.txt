@@ -5,7 +5,7 @@ project(logifix HOMEPAGE_URL "https://github.com/lyxell/logifix")
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)
 
-configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+### DEPENENCIES
 
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_CLAR OFF)
@@ -23,6 +23,29 @@ set_target_properties(souffleprof PROPERTIES EXCLUDE_FROM_ALL 1)
 include_directories(vendor/souffle/src/include)
 
 add_subdirectory(vendor/sjp)
+
+### SOURCE
+
+find_package(Git)
+
+if(GIT_EXECUTABLE)
+  # Generate a git-describe version string from Git repository tags
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} describe --tags --dirty --match "v*"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_DESCRIBE_VERSION
+    RESULT_VARIABLE GIT_DESCRIBE_ERROR_CODE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(NOT GIT_DESCRIBE_ERROR_CODE)
+    set(LOGIFIX_VERSION ${GIT_DESCRIBE_VERSION})
+  endif()
+endif()
+
+if(NOT DEFINED LOGIFIX_VERSION)
+  set(LOGIFIX_VERSION v0.0.0-unknown)
+  message(WARNING "Failed to determine LOGIFIX_VERSION from Git tags. Using default version \"${LOGIFIX_VERSION}\".")
+endif()
 
 file(GLOB RULES src/rules/*.dl)
 
@@ -46,7 +69,9 @@ ENDIF ()
 target_link_libraries(logifix git2 sjp)
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 
-## TESTS
+configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+
+### TESTS
 
 add_custom_target(test
      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/download_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv
