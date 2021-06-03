@@ -64,7 +64,7 @@ rewrite(2095, filename, id, cat("try (", declaration_str, ") {", first_frag, sec
     first_frag = substr(code, first_frag_start, first_frag_end - first_frag_start),
 
     /**
-     * The second source code fragment starts at the end of the method invoation
+     * The second source code fragment starts at the end of the method invocation
        and ends at the end of the try-catch statement
      */
     ends_at(expr_statement, second_frag_start),
