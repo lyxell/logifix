@@ -1,0 +1,43 @@
+
+/*
+static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Consumer<V> initializer) {
+    V value = map.get(key);
+    if (value == null) {
+        value = valueCreator.get();
+        map.put(key, value);
+        if (initializer != null) {
+            initializer.accept(value);
+        }
+    }
+    return value;
+}
+
+static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Consumer<V> initializer) {
+    return map.computeIfAbsent(k -> {
+        V value = valueCreator.get();
+        if (initializer != null) {
+            initializer.accept(value);
+        }
+        return value;
+    });
+}*/
+
+rewrite(3824, filename, b, cat("{", "}")) :-
+    filename_of(b, filename),
+    /* we are in a block with three statements */
+    block(b, [s1, [s2, [s3, nil]]]),
+    /* The first statement is a local variable declaration statement */
+    local_variable_declaration_statement(s1, decl),
+    /* The second statement is an if-statement */
+    if_statement(s2, cond, then, nil),
+        /* The condition is an equality expression which checks if the value
+           from the initializer is null */
+        equals_expression_unordered(cond, fst, snd),
+        null_literal(fst),
+        point_of_declaration(snd, decl),
+        /* The then-clause is a block */
+        block(then, _),
+    /* The third statement is a return statement */
+    return_statement(s3, var),
+    point_of_declaration(var, decl).
+
