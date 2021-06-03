@@ -5,6 +5,13 @@
         parent_of(id, "left", left), \
         parent_of(id, "right", right).
 
+#define UNORDERED(name, org_name) \
+    .decl name(id: id, left: id, right: id) \
+    name(id, left, right) :- \
+        org_name(id, left, right). \
+    name(id, left, right) :- \
+        org_name(id, right, left).
+
 /* AST node types
  ********************************/
 
@@ -22,6 +29,13 @@ expression_statement(id, expr) :-
 return_statement(id, expr) :-
     name_of(id, "return_statement"),
     parent_of(id, "expression", expr).
+
+.decl if_statement(id: id, condition: id, then: id, else: id)
+if_statement(id, condition, then, else) :-
+    name_of(id, "if_statement"),
+    parent_of(id, "condition", condition),
+    parent_of(id, "then", then),
+    parent_of(id, "else", else).
 
 .decl try_statement(id: id, body: id, catches: id_list, finally: id)
 try_statement(id, body, catches, finally) :-
@@ -51,6 +65,9 @@ INFIX(subtraction_expression)
 INFIX(multiplication_expression)
 INFIX(division_expression)
 INFIX(remainder_expression)
+
+UNORDERED(equals_expression_unordered, equals_expression)
+UNORDERED(not_equals_expression_unordered, not_equals_expression)
 
 .decl conditional_expression(id: id, cond: id, then: id, else: id)
 conditional_expression(id, cond, then, else) :-
@@ -167,6 +184,9 @@ primitive_type(id, annotations, name) :-
 block(id, statements) :-
     name_of(id, "block"),
     parent_of_list(id, "statements", statements).
+
+.decl null_literal(id: id)
+null_literal(id) :- name_of(id, "null_literal").
 
 .decl integer_literal(id: id)
 integer_literal(id) :- name_of(id, "integer_literal").

@@ -9,9 +9,7 @@
 /* Rewrite x.size() == 0 into x.isEmpty() */
 rewrite(1155, filename, parent, cat(subject_str, ".isEmpty()")) :-
     filename_of(parent, filename),
-    equals_expression(parent, _, _),
-    parent_of(parent, _, invocation),
-    parent_of(parent, _, integer),
+    equals_expression_unordered(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -21,9 +19,7 @@ rewrite(1155, filename, parent, cat(subject_str, ".isEmpty()")) :-
 /* Rewrite x.size() != 0 into x.isEmpty() */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
     filename_of(parent, filename),
-    not_equals_expression(parent, _, _),
-    parent_of(parent, _, invocation),
-    parent_of(parent, _, integer),
+    not_equals_expression_unordered(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -55,9 +51,7 @@ rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
 /* Rewrite x.length() == 0 into x.isEmpty() */
 rewrite(1155, filename, parent, cat(subject_str, ".isEmpty()")) :-
     filename_of(parent, filename),
-    equals_expression(parent, _, _),
-    parent_of(parent, _, invocation),
-    parent_of(parent, _, integer),
+    equals_expression_unordered(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -67,9 +61,7 @@ rewrite(1155, filename, parent, cat(subject_str, ".isEmpty()")) :-
 /* Rewrite x.length() != 0 into x.isEmpty() */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
     filename_of(parent, filename),
-    not_equals_expression(parent, _, _),
-    parent_of(parent, _, invocation),
-    parent_of(parent, _, integer),
+    not_equals_expression_unordered(parent, invocation, integer),
     method_invocation(invocation, subject, method, nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
