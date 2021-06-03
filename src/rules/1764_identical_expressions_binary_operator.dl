@@ -1,0 +1,43 @@
+/* Rewrite a == a => true */
+rewrite(1764, filename, id, "true") :-
+    filename_of(id, filename),
+    equals_expression(id, left, right),
+        /* allow x == x as a check for NaN (https://rules.sonarsource.com/java/RSPEC-1764) */
+        ! has_floating_point_type(left),
+    string_representation(left, str),
+    string_representation(right, str).
+
+/* Rewrite a != a => false */
+rewrite(1764, filename, id, "false") :-
+    filename_of(id, filename),
+    not_equals_expression(id, left, right),
+    string_representation(left, str),
+    string_representation(right, str).
+
+/* Rewrite x && x => x */
+rewrite(1764, filename, id, str) :-
+    filename_of(id, filename),
+    conditional_and_expression(id, left, right),
+    string_representation(left, str),
+    string_representation(right, str).
+
+/* Rewrite x || x => x */
+rewrite(1764, filename, id, str) :-
+    filename_of(id, filename),
+    conditional_or_expression(id, left, right),
+    string_representation(left, str),
+    string_representation(right, str).
+
+/* Rewrite x - x => 0 */
+rewrite(1764, filename, id, "0") :-
+    filename_of(id, filename),
+    subtraction_expression(id, left, right),
+    string_representation(left, str),
+    string_representation(right, str).
+
+/* Rewrite x / x => 1 */
+rewrite(1764, filename, id, "1") :-
+    filename_of(id, filename),
+    division_expression(id, left, right),
+    string_representation(left, str),
+    string_representation(right, str).

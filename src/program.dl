@@ -2,6 +2,7 @@
 #include "rules/1132_string_literals_left_side.dl"
 #include "rules/1155_use_isempty.dl"
 #include "rules/1481_unused_local_variables.dl"
+#include "rules/1764_identical_expressions_binary_operator.dl"
 #include "rules/1596_fix_old_empty_collection.dl"
 #include "rules/1602_lambda_single_statement.dl"
 #include "rules/2095_close_resources.dl"
@@ -548,7 +549,6 @@ has_semantic_parenthesization(id) :- conditional_or_expression(id, _, _).
 has_semantic_parenthesization(id) :- conditional_and_expression(id, _, _).
 has_semantic_parenthesization(id) :- inclusive_or_expression(id, _, _).
 has_semantic_parenthesization(id) :- exclusive_or_expression(id, _, _).
-has_semantic_parenthesization(id) :- and_expression(id, _, _).
 has_semantic_parenthesization(id) :- equals_expression(id, _, _).
 has_semantic_parenthesization(id) :- not_equals_expression(id, _, _).
 has_semantic_parenthesization(id) :- less_than_expression(id, _, _).
