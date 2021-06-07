@@ -40,5 +40,6 @@ To download and build the project, perform the following steps:
 | [S2111](https://rules.sonarsource.com/java/RSPEC-2111) | Bug        | BigDecimal(double) should not be used                                           |
 | [S2204](https://rules.sonarsource.com/java/RSPEC-2204) | Bug        | equals() should not be used to test the values of Atomic classes                |
 | [S2272](https://rules.sonarsource.com/java/RSPEC-2272) | Bug        | Iterator.next() methods should throw NoSuchElementException                     |
+| [S2259](https://rules.sonarsource.com/java/RSPEC-2259) | Bug        | Null pointers should not be dereferenced                                        |
 | [S3984](https://rules.sonarsource.com/java/RSPEC-3984) | Bug        | Exceptions should not be created without being thrown                           |
 | [S4973](https://rules.sonarsource.com/java/RSPEC-4973) | Bug        | Strings and Boxed types should be compared using equals()                       |

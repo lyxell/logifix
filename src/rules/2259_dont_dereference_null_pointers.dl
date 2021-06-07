@@ -1,0 +1,15 @@
+/**
+ * https://rules.sonarsource.com/java/RSPEC-2259
+ */
+
+/* Rewrite x == null && x.y() to x != null && x.y() */
+rewrite(2259, filename, id, cat(expr_name_str, " != null && ", meth_invocation_str)) :-
+    filename_of(id, filename),
+    conditional_and_expression(id, eq_expr, meth_invocation),
+    equals_expression(eq_expr, expr_name, null_lit),
+    expression_name(expr_name, _),
+    null_literal(null_lit),
+    method_invocation(meth_invocation, subject, _, _),
+    string_representation(expr_name, expr_name_str),
+    string_representation(subject, expr_name_str),
+    string_representation(meth_invocation, meth_invocation_str).
