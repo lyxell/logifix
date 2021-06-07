@@ -38,6 +38,7 @@ To download and build the project, perform the following steps:
 | [S1764](https://rules.sonarsource.com/java/RSPEC-1764) | Bug        | Identical expressions should not be used on both sides of a binary operator     |
 | [S2095](https://rules.sonarsource.com/java/RSPEC-2095) | Bug        | Resources should be closed                                                      |
 | [S2111](https://rules.sonarsource.com/java/RSPEC-2111) | Bug        | BigDecimal(double) should not be used                                           |
+| [S2121](https://rules.sonarsource.com/java/RSPEC-2121) | Bug        | Silly String operations should not be made                                      |
 | [S2204](https://rules.sonarsource.com/java/RSPEC-2204) | Bug        | equals() should not be used to test the values of Atomic classes                |
 | [S2272](https://rules.sonarsource.com/java/RSPEC-2272) | Bug        | Iterator.next() methods should throw NoSuchElementException                     |
 | [S2259](https://rules.sonarsource.com/java/RSPEC-2259) | Bug        | Null pointers should not be dereferenced                                        |

@@ -23,6 +23,20 @@ void program::run() { prog->run(); }
 
 void program::print() { prog->printAll(); }
 
+static void unescape(std::string& str) {
+    size_t index = 0;
+    while (true) {
+         index = str.find('\\', index);
+         if (index == std::string::npos || index == str.size() - 1) break;
+         if (str[index+1] == 'n') {
+            str.replace(index, 2, "\n");
+         } else if (str[index+1] == '"') {
+            str.replace(index, 2, "\"");
+         }
+         index += 1;
+    }
+}
+
 std::vector<std::tuple<int, size_t, size_t, std::string>>
 program::get_possible_rewrites(const char* filename) {
     auto get_ast_node_from_id = [this](int id) {
@@ -46,6 +60,8 @@ program::get_possible_rewrites(const char* filename) {
         }
         // if (tuple_filename != filename) continue;
         auto [str, a, b] = get_ast_node_from_id(id);
+        // workaround for https://github.com/souffle-lang/souffle/issues/1947
+        unescape(replacement);
         result.emplace_back(rule_number, a, b, replacement);
     }
     return result;
