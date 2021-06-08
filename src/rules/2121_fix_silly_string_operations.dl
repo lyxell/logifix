@@ -13,7 +13,7 @@ rewrite(2121, filename, id, subject_str) :-
     string_representation(subject, subject_str).
 
 /* Rewrite x.substring(x.length()) into "" */
-rewrite(2121, filename, id, "\"\"") :-
+rewrite(2121, filename, id, "%U+0022%%U+0022%") :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg, nil]),
     has_string_type(subject),

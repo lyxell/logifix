@@ -2,6 +2,27 @@
 #include <filesystem>
 #include <iostream>
 
+static void replace_all(std::string& source, const std::string& from, const std::string& to)
+{
+    std::string new_string;
+    new_string.reserve(source.length());
+    std::string::size_type last_pos = 0;
+    std::string::size_type find_pos;
+    while (std::string::npos != (find_pos = source.find(from, last_pos))) {
+        new_string.append(source, last_pos, find_pos - last_pos);
+        new_string += to;
+        last_pos = find_pos + from.length();
+    }
+    new_string += source.substr(last_pos);
+    source.swap(new_string);
+}
+
+/* workaround for https://github.com/souffle-lang/souffle/issues/1947 */
+static void unescape(std::string& str) {
+    replace_all(str, "%U+0022%", "\"");
+}
+
+
 static const char* PROGRAM_NAME = "logifix";
 
 namespace logifix {
@@ -22,20 +43,6 @@ void program::add_string(const char* filename, const char* content) {
 void program::run() { prog->run(); }
 
 void program::print() { prog->printAll(); }
-
-static void unescape(std::string& str) {
-    size_t index = 0;
-    while (true) {
-         index = str.find('\\', index);
-         if (index == std::string::npos || index == str.size() - 1) break;
-         if (str[index+1] == 'n') {
-            str.replace(index, 2, "\n");
-         } else if (str[index+1] == '"') {
-            str.replace(index, 2, "\"");
-         }
-         index += 1;
-    }
-}
 
 std::vector<std::tuple<int, size_t, size_t, std::string>>
 program::get_possible_rewrites(const char* filename) {
