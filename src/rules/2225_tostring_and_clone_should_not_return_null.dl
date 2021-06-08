@@ -4,7 +4,12 @@
 /* Rewrite null => "" in return statement of a toString method declaration */
 rewrite(2225, filename, expr, "%U+0022%%U+0022%") :-
     filename_of(method_decl, filename),
-    method_declaration(method_decl, _, _, method_body),
+    method_declaration(method_decl, _, method_head, method_body),
+    /* Check that the method name is toString */
+    method_header(method_head, _, declarator, _),
+    parent_of(declarator, "name", name),
+    string_representation(name, "toString"),
+    /* Check the values of the return statements */
     ancestor_of(method_body, return_stmt),
     return_statement(return_stmt, expr),
     null_literal(expr).
