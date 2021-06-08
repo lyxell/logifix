@@ -70,6 +70,7 @@ ENDIF ()
 
 target_link_libraries(logifix git2 sjp)
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
+target_include_directories(logifix PRIVATE vendor/libgit2/include)
 
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
