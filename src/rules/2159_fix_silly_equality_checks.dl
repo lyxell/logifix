@@ -1,0 +1,19 @@
+/**
+ * TODO
+ * 
+ * comparing an object with an unrelated primitive (E.G. a string with an int)
+ * comparing unrelated classes
+ * comparing an unrelated class and interface
+ * comparing unrelated interface types
+ * comparing an array to a non-array
+ * comparing two arrays
+ */
+
+/* Rewrite x.equals(null) => x == null */
+rewrite(2159, filename, id, cat(subject_str, " == null")) :-
+    filename_of(id, filename),
+    method_invocation(id, subject, method, [arg, nil]),
+    string_representation(method, "equals"),
+    string_representation(subject, subject_str),
+    null_literal(arg).
+
