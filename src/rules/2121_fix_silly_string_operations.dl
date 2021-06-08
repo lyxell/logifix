@@ -7,8 +7,17 @@ rewrite(2121, filename, id, subject_str) :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg, nil]),
     has_string_type(subject),
-    integer_literal(arg),
     string_representation(arg, "0"),
+    string_representation(method, "substring"),
+    string_representation(subject, subject_str).
+
+/* Rewrite x.substring(0, x.length()) into x */
+rewrite(2121, filename, id, subject_str) :-
+    filename_of(id, filename),
+    method_invocation(id, subject, method, [arg1, [arg2, nil]]),
+    has_string_type(subject),
+    string_representation(arg1, "0"),
+    string_representation(arg2, cat(subject_str, ".length()")),
     string_representation(method, "substring"),
     string_representation(subject, subject_str).
 
@@ -26,6 +35,7 @@ rewrite(2121, filename, id, cat(subject_str, ".substring(", arg1_str, ")")) :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg1, [arg2, nil]]),
     has_string_type(subject),
+    ! string_representation(arg1, "0"),
     string_representation(arg2, cat(subject_str, ".length()")),
     string_representation(method, "substring"),
     string_representation(arg1, arg1_str),
