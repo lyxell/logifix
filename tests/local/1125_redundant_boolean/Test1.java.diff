@@ -1,0 +1,33 @@
+diff --git a/1125_redundant_boolean/Test1.java b/1125_redundant_boolean/Test1.java
+@@ -2,8 +2,8 @@ import java.util.Random;
+ 
+ public class Test1 {
+     public void test1(boolean x) {
+-        if (x == false) System.out.println("false");
+-        if (x == true) System.out.println("true");
++        if (!x) System.out.println("false");
++        if (x) System.out.println("true");
+     }
+     class Inner {
+         boolean run() {
+@@ -11,15 +11,15 @@ public class Test1 {
+         }
+     }
+     public void test2(Inner obj) {
+-        return obj == null ? false : obj.run();
++        return obj != null && obj.run();
+     }
+     public void test3(int x) {
+-        if ((x == 3) == false) System.out.println("false");
+-        if ((x == 3 || x == 4) == false) System.out.println("false");
++        if (!(x == 3)) System.out.println("false");
++        if (!(x == 3 || x == 4)) System.out.println("false");
+     }
+     public void test4() {
+         Inner obj = new Inner();
+-        if (obj.run() == false) System.out.println("false");
+-        if (obj.run() == true) System.out.println("true");
++        if (!obj.run()) System.out.println("false");
++        if (obj.run()) System.out.println("true");
+     }
+ }
