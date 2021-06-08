@@ -1,0 +1,28 @@
+diff --git a/CompareStringsBoxedTypesWithEquals.java b/CompareStringsBoxedTypesWithEquals.java
+@@ -7,7 +7,7 @@ public class CompareStringsBoxedTypesWithEquals {
+         String firstName = getFirstName(); // String overrides equals
+         String lastName = getLastName();
+ 
+-        if (firstName == lastName) { } ; // Noncompliant; false even if the strings have the same value
++        if (firstName.equals(lastName)) { } ; // Noncompliant; false even if the strings have the same value
+     }
+ 
+     // Aditional tests
+@@ -25,7 +25,7 @@ public class CompareStringsBoxedTypesWithEquals {
+     private boolean IntegerCompare() {
+         Integer a = 5;
+         Integer b = 5;
+-        return b != a; // Noncompliant
++        return !b.equals(a); // Noncompliant
+     }
+ 
+     // Int is primitive and can use ==
+@@ -59,7 +59,7 @@ public class CompareStringsBoxedTypesWithEquals {
+     private boolean stringCompare() {
+         String firstName = getFirstName(); // String overrides equals
+         String lastName = getLastName();
+-        if (firstName == lastName) { // Noncompliant
++        if (firstName.equals(lastName)) { // Noncompliant
+             return true;
+         }
+         return false;
