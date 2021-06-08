@@ -32,6 +32,7 @@ To download and build the project, perform the following steps:
 | [S1125](https://rules.sonarsource.com/java/RSPEC-1125) | Code Smell | Boolean literals should not be redundant                                        |
 | [S1132](https://rules.sonarsource.com/java/RSPEC-1132) | Code Smell | Strings literals should be placed on the left side when checking for equality   |
 | [S1155](https://rules.sonarsource.com/java/RSPEC-1155) | Code Smell | Collection.isEmpty() should be used to test for emptiness                       |
+| [S1217](https://rules.sonarsource.com/java/RSPEC-1217) | Bug        | Thread.run() should not be called directly                                      |
 | [S1481](https://rules.sonarsource.com/java/RSPEC-1481) | Code Smell | Unused local variables should be removed                                        |
 | [S1596](https://rules.sonarsource.com/java/RSPEC-1596) | Code Smell | Collections.EMPTY_LIST, EMPTY_MAP, and EMPTY_SET should not be used             |
 | [S1602](https://rules.sonarsource.com/java/RSPEC-1602) | Code Smell | Lambdas containing only one statement should not nest this statement in a block |

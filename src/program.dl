@@ -1,6 +1,7 @@
 #include "rules/1125_redundant_boolean.dl"
 #include "rules/1132_string_literals_left_side.dl"
 #include "rules/1155_use_isempty.dl"
+#include "rules/1217_dont_call_thread_run.dl"
 #include "rules/1481_unused_local_variables.dl"
 #include "rules/1764_identical_expressions_binary_operator.dl"
 #include "rules/1596_fix_old_empty_collection.dl"
@@ -513,6 +514,11 @@ is_atomic_class_type(id) :-
     string_representation(name, name_str),
     atomic_class_type_name(name_str).
 
+.decl is_thread_type(id: id)
+is_thread_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, "Thread").
+
 .decl has_floating_point_type(id: id)
 has_floating_point_type(id) :- floating_point_literal(id).
 has_floating_point_type(id) :- has_type(id, type), is_floating_point_type(type).
@@ -523,6 +529,9 @@ has_floating_point_type(id) :-
 
 .decl has_autocloseable_type(id: id)
 has_autocloseable_type(id) :- has_type(id, type), is_autocloseable_type(type).
+
+.decl has_thread_type(id: id)
+has_thread_type(id) :- has_type(id, type), is_thread_type(type).
 
 .decl has_string_type(id: id)
 has_string_type(id) :- string_literal(id).

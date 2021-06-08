@@ -1,0 +1,7 @@
+/* Rewrite thread.run() into thread.start() */
+rewrite(1217, filename, id, cat(subject_str, ".start()")) :-
+    filename_of(id, filename),
+    method_invocation(id, subject, method, nil),
+    has_thread_type(subject),
+    string_representation(method, "run"),
+    string_representation(subject, subject_str).
