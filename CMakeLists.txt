@@ -77,6 +77,6 @@ configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 ### TESTS
 
 add_custom_target(test
-     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/download_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv
-     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/tests.csv ${CMAKE_CURRENT_BINARY_DIR}/logifix)
+     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/real_world/download_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/real_world/tests.csv
+     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/real_world/run_tests.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/real_world/tests.csv ${CMAKE_CURRENT_BINARY_DIR}/logifix)
 add_dependencies(test logifix)
