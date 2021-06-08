@@ -1,0 +1,9 @@
+
+rewrite(1153, filename, right, arg_string) :-
+    filename_of(id, filename),
+    addition_expression(id, left, right),
+    has_string_type(left),
+    method_invocation(right, subject, method, [arg, nil]),
+    string_representation(subject, "String"),
+    string_representation(method, "valueOf"),
+    string_representation(arg, arg_string).
