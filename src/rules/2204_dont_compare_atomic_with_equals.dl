@@ -4,9 +4,8 @@
  * https://rules.sonarsource.com/java/RSPEC-2204
  */
 
-#define MESSAGE "Use .get() to retrieve the value and compare it instead"
-
-rewrite(MESSAGE, id, cat(left_str, ".get() == ", right_str, ".get()")) :-
+rewrite(2204, filename, id, cat(left_str, ".get() == ", right_str, ".get()")) :-
+    filename_of(id, filename),
     method_invocation(id, left, method, [right, nil]),
     has_atomic_class_type(left),
     has_atomic_class_type(right),
