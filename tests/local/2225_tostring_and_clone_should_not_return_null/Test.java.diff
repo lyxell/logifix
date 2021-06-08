@@ -1,0 +1,10 @@
+diff --git a/Test.java b/Test.java
+@@ -3,7 +3,7 @@ public class Test {
+     public String toString() {
+         Random r = new Random();
+         if (r.nextBoolean()) {
+-            return null; // Noncompliant
++            return ""; // Noncompliant
+         }
+         return "";
+     }

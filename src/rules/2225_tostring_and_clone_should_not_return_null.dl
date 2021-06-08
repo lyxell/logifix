@@ -1,0 +1,10 @@
+/* TODO This implementation has a bug where inner classes and lambdas will also be rewritten */
+/* Solve by introducing a rule like parent_method(method_decl, node) */
+
+/* Rewrite null => "" in return statement of a toString method declaration */
+rewrite(2225, filename, expr, "%U+0022%%U+0022%") :-
+    filename_of(method_decl, filename),
+    method_declaration(method_decl, _, _, method_body),
+    ancestor_of(method_body, return_stmt),
+    return_statement(return_stmt, expr),
+    null_literal(expr).
