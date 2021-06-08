@@ -1,4 +1,4 @@
-/* Rewrite a == a => true */
+/* Rewrite x == x => true */
 rewrite(1764, filename, id, "true") :-
     filename_of(id, filename),
     equals_expression(id, left, right),
@@ -7,7 +7,7 @@ rewrite(1764, filename, id, "true") :-
     string_representation(left, str),
     string_representation(right, str).
 
-/* Rewrite a != a => false */
+/* Rewrite x != x => false */
 rewrite(1764, filename, id, "false") :-
     filename_of(id, filename),
     not_equals_expression(id, left, right),
