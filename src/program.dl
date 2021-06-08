@@ -14,9 +14,9 @@
 #include "rules/2204_dont_compare_atomic_with_equals.dl"
 #include "rules/2225_tostring_and_clone_should_not_return_null.dl"
 #include "rules/2259_dont_dereference_null_pointers.dl"
-#include "rules/3824_replace_map_get.dl"
 #include "rules/4973_use_equals_method.dl"
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
+#include "rules/experimental/3824_replace_map_get.dl"
 
 #include "nodes.dl"
 
