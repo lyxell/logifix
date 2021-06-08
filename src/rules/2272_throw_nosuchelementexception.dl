@@ -4,13 +4,18 @@
  * https://rules.sonarsource.com/java/RSPEC-2272
  */
 
+.decl no_such_element_exception_string(str: symbol)
+no_such_element_exception_string("NoSuchElementException").
+no_such_element_exception_string("java.util.NoSuchElementException").
+
 .decl throws_no_such_element_exception(method: id)
 throws_no_such_element_exception(method) :-
     method_declaration(method, _, _, method_body),
     ancestor_of(method_body, throw),
     throw_statement(throw, expr),
     class_instance_creation_expression(expr, _, _, type, _, _),
-    string_representation(type, "NoSuchElementException").
+    string_representation(type, type_str),
+    no_such_element_exception_string(type_str).
 
 .decl implements_interface(class: id, sym: symbol)
 implements_interface(id, sym) :-
