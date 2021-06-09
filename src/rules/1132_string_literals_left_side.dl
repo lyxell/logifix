@@ -7,26 +7,24 @@
 /* Pre  [:x].equals("[:y]") */
 /* Post "[:y]".equals([:x]) */
 rewrite(1132, filename, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
-    method_invocation(invocation, subject, method, [arg, nil]),
+    method_invocation(invocation, subject, "equals", [arg, nil]),
     filename_of(invocation, filename),
     string_literal(arg),
     has_string_type(subject),
-    string_representation(method, "equals"),
     string_representation(arg, arg_str),
     string_representation(subject, subject_str).
 
 /* Pre  [:x] != null && [:x].equals("[:y]") */
 /* Post "[:y]".equals([:x]) */
 rewrite(1132, filename, and_expr, cat(arg_str, ".equals(", subject_str, ")")) :-
-    filename_of(and_expr, filename),
     conditional_and_expression(and_expr, noteqnull, invocation),
+    filename_of(and_expr, filename),
     /* left side is a null check */
     not_equals_expression_unordered(noteqnull, null, noteqnull_subject),
     null_literal(null),
     /* right side is a method invocation */
-    method_invocation(invocation, subject, method, [arg, nil]),
+    method_invocation(invocation, subject, "equals", [arg, nil]),
     string_literal(arg),
-    string_representation(method, "equals"),
     string_representation(arg, arg_str),
     string_representation(subject, subject_str),
     string_representation(noteqnull_subject, subject_str).

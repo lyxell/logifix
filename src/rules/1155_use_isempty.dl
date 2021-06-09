@@ -8,89 +8,81 @@
 /* Pre  [:x].size() == 0 */
 /* Post [:x].isEmpty()   */
 rewrite(1155, filename, parent, cat(subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     equals_expression_unordered(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
-    string_representation(subject, subject_str),
-    string_representation(method, "size").
+    string_representation(subject, subject_str).
 
 /* Pre  [:x].size() != 0 */
 /* Post ![:x].isEmpty()  */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     not_equals_expression_unordered(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
-    string_representation(subject, subject_str),
-    string_representation(method, "size").
+    string_representation(subject, subject_str).
 
 /* Pre  [:x].size() > 0 */
 /* Post ![:x].isEmpty()  */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     greater_than_expression(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
-    string_representation(subject, subject_str),
-    string_representation(method, "size").
+    string_representation(subject, subject_str).
 
 /* Pre  [:x].size() >= 1 */
 /* Post ![:x].isEmpty()  */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     greater_than_or_equals_expression(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 1),
-    string_representation(subject, subject_str),
-    string_representation(method, "size").
+    string_representation(subject, subject_str).
 
 /* Strings */
 
 /* Pre  [:x].length() == 0 */
 /* Post [:x].isEmpty()     */
 rewrite(1155, filename, parent, cat(subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     equals_expression_unordered(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
-    string_representation(subject, subject_str),
-    string_representation(method, "length").
+    string_representation(subject, subject_str).
 
 /* Pre  [:x].length() != 0 */
 /* Post ![:x].isEmpty()    */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     not_equals_expression_unordered(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
-    string_representation(subject, subject_str),
-    string_representation(method, "length").
+    string_representation(subject, subject_str).
 
 /* Pre  [:x].length() > 0 */
 /* Post ![:x].isEmpty()   */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     greater_than_expression(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
-    string_representation(subject, subject_str),
-    string_representation(method, "length").
+    string_representation(subject, subject_str).
 
 /* Pre  [:x].length() >= 1 */
 /* Post ![:x].isEmpty()    */
 rewrite(1155, filename, parent, cat("!", subject_str, ".isEmpty()")) :-
-    filename_of(parent, filename),
     greater_than_or_equals_expression(parent, invocation, integer),
-    method_invocation(invocation, subject, method, nil),
+    filename_of(parent, filename),
+    method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 1),
-    string_representation(subject, subject_str),
-    string_representation(method, "length").
+    string_representation(subject, subject_str).

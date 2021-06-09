@@ -4,11 +4,11 @@
  */
 
 rewrite(1596, filename, id, "Collections.emptyList()") :-
-    filename_of(id, filename),
-    string_representation(id, "Collections.EMPTY_LIST").
+    string_representation(id, "Collections.EMPTY_LIST"),
+    filename_of(id, filename).
 rewrite(1596, filename, id, "Collections.emptyMap()") :-
-    filename_of(id, filename),
-    string_representation(id, "Collections.EMPTY_MAP").
+    string_representation(id, "Collections.EMPTY_MAP"),
+    filename_of(id, filename).
 rewrite(1596, filename, id, "Collections.emptySet()") :-
-    filename_of(id, filename),
-    string_representation(id, "Collections.EMPTY_SET").
+    string_representation(id, "Collections.EMPTY_SET"),
+    filename_of(id, filename).

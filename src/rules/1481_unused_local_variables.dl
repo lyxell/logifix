@@ -6,8 +6,8 @@
 /* Pre  [:local_var_decl] */
 /* Post                   */
 rewrite(1481, filename, id, "") :-
-    filename_of(id, filename),
     local_variable_declaration_statement(id, declaration),
+    filename_of(id, filename),
     local_variable_declaration(declaration, _, _, _),
     ! point_of_declaration(_, declaration).
 

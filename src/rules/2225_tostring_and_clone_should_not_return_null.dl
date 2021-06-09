@@ -11,8 +11,8 @@
 /* Pre  null */
 /* Post ""   */
 rewrite(2225, filename, expr, "%U+0022%%U+0022%") :-
-    filename_of(method_decl, filename),
     method_declaration(method_decl, _, method_head, method_body),
+        filename_of(method_decl, filename),
     /* Check that the method name is toString */
     method_header(method_head, _, declarator, _),
     parent_of(declarator, "name", name),

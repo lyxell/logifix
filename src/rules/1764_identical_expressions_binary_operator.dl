@@ -6,8 +6,8 @@
 /* Pre  [:x] == [:x] */
 /* Post true         */
 rewrite(1764, filename, id, "true") :-
-    filename_of(id, filename),
     equals_expression(id, left, right),
+    filename_of(id, filename),
         /* allow x == x as a check for NaN, see
            https://rules.sonarsource.com/java/RSPEC-1764 */
         ! has_floating_point_type(left),
@@ -17,39 +17,39 @@ rewrite(1764, filename, id, "true") :-
 /* Pre  [:x] != [:x] */
 /* Post false        */
 rewrite(1764, filename, id, "false") :-
-    filename_of(id, filename),
     not_equals_expression(id, left, right),
+    filename_of(id, filename),
     string_representation(left, str),
     string_representation(right, str).
 
 /* Pre  [:x] && [:x] */
 /* Post [:x]         */
 rewrite(1764, filename, id, str) :-
-    filename_of(id, filename),
     conditional_and_expression(id, left, right),
+    filename_of(id, filename),
     string_representation(left, str),
     string_representation(right, str).
 
 /* Pre  [:x] || [:x] */
 /* Post [:x]         */
 rewrite(1764, filename, id, str) :-
-    filename_of(id, filename),
     conditional_or_expression(id, left, right),
+    filename_of(id, filename),
     string_representation(left, str),
     string_representation(right, str).
 
 /* Pre  [:x] - [:x] */
 /* Post 0           */
 rewrite(1764, filename, id, "0") :-
-    filename_of(id, filename),
     subtraction_expression(id, left, right),
+    filename_of(id, filename),
     string_representation(left, str),
     string_representation(right, str).
 
 /* Pre  [:x] / [:x] */
 /* Post 1           */
 rewrite(1764, filename, id, "1") :-
-    filename_of(id, filename),
     division_expression(id, left, right),
+    filename_of(id, filename),
     string_representation(left, str),
     string_representation(right, str).

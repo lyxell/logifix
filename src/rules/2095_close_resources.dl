@@ -43,9 +43,8 @@ rewrite(2095, filename, id, cat("try (", declaration_str, ") {", first_frag, sec
      */
     list_contains(statements, expr_statement),
     expression_statement(expr_statement, expr),
-    method_invocation(expr, subject, method, nil),
+    method_invocation(expr, subject, "close", nil),
     point_of_declaration(subject, declaration),
-    string_representation(method, "close"),
 
     /**
      * Output

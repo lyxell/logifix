@@ -6,8 +6,8 @@
 /* Pre  new [:exception]       */
 /* Post throw new [:exception] */
 rewrite(3984, filename, stmt, cat("throw ", stmt_str)) :-
-    filename_of(stmt, filename),
     expression_statement(stmt, class_instance_creation),
+        filename_of(stmt, filename),
     string_representation(stmt, stmt_str),
     class_instance_creation_expression(class_instance_creation, nil, _, type, _, _),
     is_exception_type(type).

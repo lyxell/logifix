@@ -17,9 +17,8 @@
 /* Pre  [:x].equals(null) */
 /* Post [:x] == null      */
 rewrite(2159, filename, id, cat(subject_str, " == null")) :-
-    filename_of(id, filename),
-    method_invocation(id, subject, method, [arg, nil]),
-    string_representation(method, "equals"),
+    method_invocation(id, subject, "equals", [arg, nil]),
+        filename_of(id, filename),
     string_representation(subject, subject_str),
     null_literal(arg).
 

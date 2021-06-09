@@ -4,16 +4,16 @@
  */
 
 rewrite(4973, filename, eq, cat(x_str, ".equals(", y_str, ")")) :-
-    filename_of(eq, filename),
     equals_expression(eq, x, y),
+        filename_of(eq, filename),
     has_string_or_boxed_type(x),
     has_string_or_boxed_type(y),
     string_representation(x, x_str),
     string_representation(y, y_str).
 
 rewrite(4973, filename, eq, cat("!", x_str, ".equals(", y_str, ")")) :-
-    filename_of(eq, filename),
     not_equals_expression(eq, x, y),
+        filename_of(eq, filename),
     has_string_or_boxed_type(x),
     has_string_or_boxed_type(y),
     string_representation(x, x_str),

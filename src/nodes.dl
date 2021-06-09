@@ -126,12 +126,13 @@ field_access(id, subject, field) :-
     parent_of(id, "subject", subject),
     parent_of(id, "field", field).
 
-.decl method_invocation(id: id, subject: id, method: id, arguments: id_list)
-method_invocation(id, subject, method, arguments) :-
+.decl method_invocation(id: id, subject: id, method: symbol, arguments: id_list)
+method_invocation(id, subject, method_str, arguments) :-
     name_of(id, "method_invocation"),
     parent_of(id, "subject", subject),
     parent_of(id, "method", method),
-    parent_of_list(id, "arguments", arguments).
+    parent_of_list(id, "arguments", arguments),
+    string_representation(method, method_str).
 
 .decl formal_parameter(id: id, modifiers: id_list, type: id, name: id)
 formal_parameter(id, modifiers, type, name) :-

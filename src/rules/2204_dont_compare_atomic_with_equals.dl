@@ -4,10 +4,9 @@
  */
 
 rewrite(2204, filename, id, cat(left_str, ".get() == ", right_str, ".get()")) :-
-    filename_of(id, filename),
-    method_invocation(id, left, method, [right, nil]),
+    method_invocation(id, left, "equals", [right, nil]),
+        filename_of(id, filename),
     has_atomic_class_type(left),
     has_atomic_class_type(right),
-    string_representation(method, "equals"),
     string_representation(left, left_str),
     string_representation(right, right_str).
