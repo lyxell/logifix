@@ -5,25 +5,31 @@
 
 /* Pre  [:x] == true */
 /* Post [:x]         */
-rewrite(1125, filename, eq_expr, other_expr_str) :-
+rewrite([1125, filename, start, end, other_expr_str]) :-
     equals_expression_unordered(eq_expr, true_expr, other_expr),
-    filename_of(eq_expr, filename),
+        filename_of(eq_expr, filename),
+        starts_at(eq_expr, start),
+        ends_at(eq_expr, end),
     evaluates_to_boolean_value(true_expr, 1),
     string_representation_with_parentheses(other_expr, other_expr_str).
 
 /* Pre  [:x] == false */
 /* Post ![:x]         */
-rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
+rewrite([1125, filename, start, end, cat("!", other_expr_str)]) :-
     equals_expression_unordered(eq_expr, false_expr, other_expr),
-    filename_of(eq_expr, filename),
+        filename_of(eq_expr, filename),
+        starts_at(eq_expr, start),
+        ends_at(eq_expr, end),
     evaluates_to_boolean_value(false_expr, 0),
     string_representation_with_parentheses(other_expr, other_expr_str).
 
 /* Pre   [:x] == [:y] ? false : [:z] */
 /* Post  [:x] != [:y] && [:z]        */
-rewrite(1125, filename, cond_expr, cat(left_str, " != ", right_str, " && ", other_expr_str)) :-
+rewrite([1125, filename, start, end, cat(left_str, " != ", right_str, " && ", other_expr_str)]) :-
     conditional_expression(cond_expr, cond, false_expr, other_expr),
-    filename_of(cond_expr, filename),
+        filename_of(cond_expr, filename),
+        starts_at(cond_expr, start),
+        ends_at(cond_expr, end),
     evaluates_to_boolean_value(false_expr, 0),
     equals_expression(cond, left, right),
     string_representation_with_parentheses(left, left_str),

@@ -22,10 +22,12 @@ static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Cons
     });
 }*/
 
-rewrite(3824, filename, b, cat("{", "}")) :-
-    filename_of(b, filename),
+rewrite([3824, filename, start, end, cat("{", "}")]) :-
     /* we are in a block with three statements */
     block(b, [s1, [s2, [s3, nil]]]),
+        filename_of(b, filename),
+        starts_at(b, start),
+        ends_at(b, end),
     /* The first statement is a local variable declaration statement */
     local_variable_declaration_statement(s1, decl),
     /* The second statement is an if-statement */

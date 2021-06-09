@@ -6,10 +6,12 @@
 
 /* Pre  [:lambda_params] -> { return [:x] } */
 /* Post [:lambda_params] -> [:x] */
-rewrite(1602, filename, lambda_body, expr_str) :-
+rewrite([1602, filename, start, end, expr_str]) :-
     lambda_expression(lambda_expr, _, lambda_body),
-    filename_of(lambda_expr, filename),
+        filename_of(lambda_expr, filename),
     block(lambda_body, [statement, nil]),
+        starts_at(lambda_body, start),
+        ends_at(lambda_body, end),
     return_statement(statement, expr),
     string_representation(expr, expr_str).
 

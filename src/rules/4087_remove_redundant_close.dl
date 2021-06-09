@@ -5,12 +5,14 @@
 
 /* Pre  [:x].close() */
 /* Post              */
-rewrite(4087, filename, expr_stmt, "") :-
+rewrite([4087, filename, start, end, ""]) :-
     try_with_resources_statement(id, resources, body, _, _),
-    filename_of(id, filename),
+        filename_of(id, filename),
     list_contains(resources, resource),
     block(body, stmts),
     list_contains(stmts, expr_stmt),
     expression_statement(expr_stmt, expr),
+        starts_at(expr_stmt, start),
+        ends_at(expr_stmt, end),
     method_invocation(expr, subject, "close", nil),
     point_of_declaration(subject, resource).

@@ -22,7 +22,6 @@ static void unescape(std::string& str) {
     replace_all(str, "%U+0022%", "\"");
 }
 
-
 static const char* PROGRAM_NAME = "logifix";
 
 namespace logifix {
@@ -32,6 +31,7 @@ program::program() : prog(souffle::ProgramFactory::newInstance(PROGRAM_NAME)) {
 }
 
 void program::add_string(const char* filename, const char* content) {
+    files.emplace(filename, content);
     sjp::parse(prog.get(), filename, content);
     assert(content != nullptr);
     souffle::Relation* relation = prog->getRelation("source_code");
@@ -57,19 +57,14 @@ program::get_possible_rewrites(const char* filename) {
     souffle::Relation* relation = prog->getRelation("rewrite");
     assert(relation != nullptr);
     for (souffle::tuple& output : *relation) {
-        int rule_number;
-        int id;
-        std::string replacement;
-        std::string tuple_filename;
-        output >> rule_number >> tuple_filename >> id >> replacement;
-        if (id == 0) {
-            continue;
-        }
-        // if (tuple_filename != filename) continue;
-        auto [str, a, b] = get_ast_node_from_id(id);
+        int record_id;
+        output >> record_id;
+        const auto* record = prog->getRecordTable().unpack(record_id, 5);
+        assert(record != nullptr);
+        auto replacement = prog->getSymbolTable().decode(record[4]);
         // workaround for https://github.com/souffle-lang/souffle/issues/1947
         unescape(replacement);
-        result.emplace_back(rule_number, a, b, replacement);
+        result.emplace_back(record[0], record[2], record[3], replacement);
     }
     return result;
 }

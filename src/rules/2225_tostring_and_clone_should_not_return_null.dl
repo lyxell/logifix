@@ -10,7 +10,7 @@
 
 /* Pre  null */
 /* Post ""   */
-rewrite(2225, filename, expr, "%U+0022%%U+0022%") :-
+rewrite([2225, filename, start, end, "%U+0022%%U+0022%"]) :-
     method_declaration(method_decl, _, method_head, method_body),
         filename_of(method_decl, filename),
     /* Check that the method name is toString */
@@ -20,4 +20,6 @@ rewrite(2225, filename, expr, "%U+0022%%U+0022%") :-
     /* Check the values of the return statements */
     ancestor_of(method_body, return_stmt),
     return_statement(return_stmt, expr),
+        starts_at(expr, start),
+        ends_at(expr, end),
     null_literal(expr).
