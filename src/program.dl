@@ -201,7 +201,7 @@ in_scope(body, identifier_str, param) :-
 /* Make field declarations in scope in the method bodies of their class */
 in_scope(method_body, identifier_str, field) :-
     class_declaration(_, _, _, _, _, class_body),
-    /* declared_at */
+    /* declared at */
     list_contains(class_body, field),
     field_declaration(field, _, _, declarators),
     list_contains(declarators, declarator),
@@ -214,7 +214,7 @@ in_scope(method_body, identifier_str, field) :-
 /* Make field declarations in scope in the constructor bodies of their class */
 in_scope(constructor_body, identifier_str, field) :-
     class_declaration(_, _, _, _, _, class_body),
-    /* declared_at */
+    /* declared at */
     list_contains(class_body, field),
     field_declaration(field, _, _, declarators),
     list_contains(declarators, declarator),
