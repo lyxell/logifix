@@ -3,6 +3,8 @@
  * https://rules.sonarsource.com/java/RSPEC-3984
  */
 
+/* Pre  new [:exception]       */
+/* Post throw new [:exception] */
 rewrite(3984, filename, stmt, cat("throw ", stmt_str)) :-
     filename_of(stmt, filename),
     expression_statement(stmt, class_instance_creation),

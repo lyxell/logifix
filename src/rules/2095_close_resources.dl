@@ -1,14 +1,14 @@
 /* https://rules.sonarsource.com/java/RSPEC-2095 */
 
-/*
-    TODO: Instances of the following classes should be ignored by this rule because close has no effect:
-
-    java.io.ByteArrayOutputStream
-    java.io.ByteArrayInputStream
-    java.io.CharArrayReader
-    java.io.CharArrayWriter
-    java.io.StringReader
-    java.io.StringWriter
+/**
+ * FIXME Instances of the following classes should be ignored by this rule because close has no effect:
+ *
+ * java.io.ByteArrayOutputStream
+ * java.io.ByteArrayInputStream
+ * java.io.CharArrayReader
+ * java.io.CharArrayWriter
+ * java.io.StringReader
+ * java.io.StringWriter
  */
 
 /**

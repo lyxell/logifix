@@ -5,10 +5,11 @@
 
 /* NOTE Only handles toString() methods */
 
-/* TODO This implementation has a bug where inner classes and lambdas will also be rewritten */
+/* FIXME This implementation has a bug where inner classes and lambdas will also be rewritten */
 /* Solve by introducing a rule like parent_method(method_decl, node) */
 
-/* Rewrite null => "" in return statement of a toString method declaration */
+/* Pre  null */
+/* Post ""   */
 rewrite(2225, filename, expr, "%U+0022%%U+0022%") :-
     filename_of(method_decl, filename),
     method_declaration(method_decl, _, method_head, method_body),

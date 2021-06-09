@@ -3,7 +3,8 @@
  * https://rules.sonarsource.com/java/RSPEC-1125
  */
 
-/* Rewrite x == true into x */
+/* Pre  [:x] == true */
+/* Post [:x]         */
 rewrite(1125, filename, eq_expr, other_expr_str) :-
     filename_of(eq_expr, filename),
     equals_expression(eq_expr, _, _),
@@ -13,7 +14,8 @@ rewrite(1125, filename, eq_expr, other_expr_str) :-
     evaluates_to_boolean_value(true_expr, 1),
     string_representation_with_parentheses(other_expr, other_expr_str).
 
-/* Rewrite x == false into !x */
+/* Pre  [:x] == false */
+/* Post ![:x]         */
 rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
     filename_of(eq_expr, filename),
     equals_expression(eq_expr, _, _),
@@ -23,7 +25,8 @@ rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
     evaluates_to_boolean_value(false_expr, 0),
     string_representation_with_parentheses(other_expr, other_expr_str).
 
-/* Rewrite x == y ? false : z into x != y && z */
+/* Pre   [:x] == [:y] ? false : [:z] */
+/* Post  [:x] != [:y] && [:z]        */
 rewrite(1125, filename, cond_expr, cat(left_str, " != ", right_str, " && ", other_expr_str)) :-
     filename_of(cond_expr, filename),
     conditional_expression(cond_expr, cond, false_expr, other_expr),

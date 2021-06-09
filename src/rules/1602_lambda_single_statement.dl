@@ -4,6 +4,8 @@
  * https://rules.sonarsource.com/java/RSPEC-1602
  */
 
+/* Pre  [:lambda_params] -> { return [:x] } */
+/* Post [:lambda_params] -> [:x] */
 rewrite(1602, filename, lambda_body, expr_str) :-
     filename_of(lambda_expr, filename),
     lambda_expression(lambda_expr, _, lambda_body),

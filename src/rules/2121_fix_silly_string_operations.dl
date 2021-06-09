@@ -3,7 +3,8 @@
  * https://rules.sonarsource.com/java/RSPEC-2121
  */
 
-/* Rewrite x.substring(0) into x */
+/* Pre  [:x].substring(0) */
+/* Post [:x]              */
 rewrite(2121, filename, id, subject_str) :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg, nil]),
@@ -12,7 +13,8 @@ rewrite(2121, filename, id, subject_str) :-
     string_representation(method, "substring"),
     string_representation(subject, subject_str).
 
-/* Rewrite x.substring(0, x.length()) into x */
+/* Pre  [:x].substring(0, [:x].length()) */
+/* Post [:x]                             */
 rewrite(2121, filename, id, subject_str) :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg1, [arg2, nil]]),
@@ -22,7 +24,8 @@ rewrite(2121, filename, id, subject_str) :-
     string_representation(method, "substring"),
     string_representation(subject, subject_str).
 
-/* Rewrite x.substring(x.length()) into "" */
+/* Pre  [:x].substring([:x].length()) */
+/* Post ""                         */
 rewrite(2121, filename, id, "%U+0022%%U+0022%") :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg, nil]),
@@ -31,7 +34,8 @@ rewrite(2121, filename, id, "%U+0022%%U+0022%") :-
     string_representation(method, "substring"),
     string_representation(subject, subject_str).
 
-/* Rewrite x.substring(y, x.length()) into x.substring(y) */
+/* Pre  [:x].substring([:y], [:x].length()) */
+/* Post [:x].substring([:y])                */
 rewrite(2121, filename, id, cat(subject_str, ".substring(", arg1_str, ")")) :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg1, [arg2, nil]]),

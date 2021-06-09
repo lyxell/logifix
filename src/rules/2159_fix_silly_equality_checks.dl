@@ -14,7 +14,8 @@
  * comparing two arrays
  */
 
-/* Rewrite x.equals(null) => x == null */
+/* Pre  [:x].equals(null) */
+/* Post [:x] == null      */
 rewrite(2159, filename, id, cat(subject_str, " == null")) :-
     filename_of(id, filename),
     method_invocation(id, subject, method, [arg, nil]),

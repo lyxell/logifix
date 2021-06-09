@@ -3,6 +3,8 @@
  * https://rules.sonarsource.com/java/RSPEC-1481
  */
 
+/* Pre  [:local_var_decl] */
+/* Post                   */
 rewrite(1481, filename, id, "") :-
     filename_of(id, filename),
     local_variable_declaration_statement(id, declaration),

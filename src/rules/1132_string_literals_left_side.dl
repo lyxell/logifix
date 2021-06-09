@@ -4,7 +4,8 @@
  * https://rules.sonarsource.com/java/RSPEC-1132
  */
 
-/* Rewrite foo.equals("x") into "x".equals(foo) */
+/* Pre  [:x].equals("[:y]") */
+/* Post "[:y]".equals([:x]) */
 rewrite(1132, filename, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
     method_invocation(invocation, subject, method, [arg, nil]),
     filename_of(invocation, filename),
@@ -14,7 +15,8 @@ rewrite(1132, filename, invocation, cat(arg_str, ".equals(", subject_str, ")")) 
     string_representation(arg, arg_str),
     string_representation(subject, subject_str).
 
-/* Rewrite foo != null && foo.equals("x") into "x".equals(foo) */
+/* Pre  [:x] != null && [:x].equals("[:y]") */
+/* Post "[:y]".equals([:x]) */
 rewrite(1132, filename, and_expr, cat(arg_str, ".equals(", subject_str, ")")) :-
     filename_of(and_expr, filename),
     conditional_and_expression(and_expr, noteqnull, invocation),

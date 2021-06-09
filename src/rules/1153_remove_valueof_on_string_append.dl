@@ -3,6 +3,8 @@
  * https://rules.sonarsource.com/java/RSPEC-1153
  */
 
+/* Pre  String.valueOf([:x]) */
+/* Post [:x] */
 rewrite(1153, filename, right, arg_string) :-
     filename_of(id, filename),
     addition_expression(id, left, right),
