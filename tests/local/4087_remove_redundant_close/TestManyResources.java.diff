@@ -1,0 +1,14 @@
+diff --git a/TestManyResources.java b/TestManyResources.java
+@@ -8,12 +8,6 @@ class Test {
+                 FileInputStream is2 = new FileInputStream(new File("foo"))) {
+             byte[] bytes = is1.readAllBytes();
+             byte[] bytes = is2.readAllBytes();
+-            is1.close();
+-            is1.close();
+-            is2.close();
+-            is1.close();
+-            is1.close();
+-            is2.close();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
