@@ -1,8 +1,7 @@
 /**
  * Strings literals should be placed on the left side when checking
  * for equality
- *
- * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1132
+ * https://rules.sonarsource.com/java/RSPEC-1132
  */
 
 /* Rewrite foo.equals("x") into "x".equals(foo) */

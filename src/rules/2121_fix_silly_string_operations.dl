@@ -1,4 +1,5 @@
 /**
+ * Silly String operations should not be made
  * https://rules.sonarsource.com/java/RSPEC-2121
  */
 

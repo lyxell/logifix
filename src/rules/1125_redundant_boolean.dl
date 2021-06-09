@@ -1,6 +1,5 @@
 /**
  * Boolean literals should not be redundant
- *
  * https://rules.sonarsource.com/java/RSPEC-1125
  */
 

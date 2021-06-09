@@ -1,6 +1,5 @@
 /**
  * Exceptions should not be created without being thrown
- *
  * https://rules.sonarsource.com/java/RSPEC-3984
  */
 

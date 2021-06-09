@@ -1,3 +1,7 @@
+/**
+ * String.valueOf() should not be appended to a String
+ * https://rules.sonarsource.com/java/RSPEC-1153
+ */
 
 rewrite(1153, filename, right, arg_string) :-
     filename_of(id, filename),

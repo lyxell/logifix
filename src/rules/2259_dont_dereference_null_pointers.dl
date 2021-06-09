@@ -1,6 +1,10 @@
 /**
+ * Null pointers should not be dereferenced
  * https://rules.sonarsource.com/java/RSPEC-2259
  */
+
+/* NOTE Only handles the case described in
+   https://rules.sonarsource.com/java/type/Bug/RSPEC-1697 */
 
 /* Rewrite x == null && x.y() to x != null && x.y() */
 rewrite(2259, filename, id, cat(expr_name_str, " != null && ", meth_invocation_str)) :-

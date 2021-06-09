@@ -1,6 +1,6 @@
 /**
- * Lambdas containing only one statement should not nest this statement in a block
- *
+ * Lambdas containing only one statement should not nest this statement in a
+ * block
  * https://rules.sonarsource.com/java/RSPEC-1602
  */
 

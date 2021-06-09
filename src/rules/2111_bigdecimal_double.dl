@@ -1,6 +1,5 @@
 /**
- * "BigDecimal(double)" should not be used
- *
+ * BigDecimal(double) should not be used
  * https://rules.sonarsource.com/java/RSPEC-2111
  */
 

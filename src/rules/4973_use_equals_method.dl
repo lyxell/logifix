@@ -1,6 +1,5 @@
 /**
- * Strings and Boxed types should be compared using "equals()"
- *
+ * Strings and Boxed types should be compared using equals()
  * https://rules.sonarsource.com/java/RSPEC-4973
  */
 

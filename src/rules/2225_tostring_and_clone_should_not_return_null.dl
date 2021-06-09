@@ -1,3 +1,10 @@
+/**
+ * toString() and clone() methods should not return null
+ * https://rules.sonarsource.com/java/RSPEC-2225
+ */
+
+/* NOTE Only handles toString() methods */
+
 /* TODO This implementation has a bug where inner classes and lambdas will also be rewritten */
 /* Solve by introducing a rule like parent_method(method_decl, node) */
 

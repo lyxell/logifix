@@ -1,7 +1,6 @@
 /**
  * Unused local variables should be removed
- *
- * https://rules.sonarsource.com/java/type/Code%20Smell/RSPEC-1481
+ * https://rules.sonarsource.com/java/RSPEC-1481
  */
 
 rewrite(1481, filename, id, "") :-
