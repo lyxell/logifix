@@ -7,10 +7,7 @@
 /* Post [:x]         */
 rewrite(1125, filename, eq_expr, other_expr_str) :-
     filename_of(eq_expr, filename),
-    equals_expression(eq_expr, _, _),
-    parent_of(eq_expr, _, true_expr),
-    parent_of(eq_expr, _, other_expr),
-    true_expr != other_expr,
+    equals_expression_unordered(eq_expr, true_expr, other_expr),
     evaluates_to_boolean_value(true_expr, 1),
     string_representation_with_parentheses(other_expr, other_expr_str).
 
@@ -18,10 +15,7 @@ rewrite(1125, filename, eq_expr, other_expr_str) :-
 /* Post ![:x]         */
 rewrite(1125, filename, eq_expr, cat("!", other_expr_str)) :-
     filename_of(eq_expr, filename),
-    equals_expression(eq_expr, _, _),
-    parent_of(eq_expr, _, false_expr),
-    parent_of(eq_expr, _, other_expr),
-    false_expr != other_expr,
+    equals_expression_unordered(eq_expr, false_expr, other_expr),
     evaluates_to_boolean_value(false_expr, 0),
     string_representation_with_parentheses(other_expr, other_expr_str).
 
