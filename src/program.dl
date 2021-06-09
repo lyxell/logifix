@@ -582,4 +582,16 @@ string_representation_with_parentheses(id, cat("(", id_str, ")")) :-
  ********************************/
 
 .decl rewrite(rule: number, filename: symbol, from: id, to: symbol)
+rewrite(rule, filename, ["x", filename, start1, end3], cat(to1, substr(code, end1, start2 - end1), to2, substr(code, end2, start3 - end2), to3)) :-
+    rewrite_3(rule, filename, start1, end1, to1,
+                              start2, end2, to2,
+                              start3, end3, to3),
+    source_code(filename, code).
+
+
+
+.decl rewrite_3(rule: number, filename: symbol, start1: number, end1: number, to1: symbol,
+                                                start2: number, end2: number, to2: symbol,
+                                                start3: number, end3: number, to3: symbol)
+.output rewrite_3(IO=stdout)
 .output rewrite(IO=stdout)
