@@ -67,6 +67,7 @@ INFIX(remainder_expression)
 
 UNORDERED(equals_expression_unordered, equals_expression)
 UNORDERED(not_equals_expression_unordered, not_equals_expression)
+UNORDERED(conditional_and_expression_unordered, conditional_and_expression)
 
 .decl conditional_expression(id: id, cond: id, then: id, else: id)
 conditional_expression(id, cond, then, else) :-

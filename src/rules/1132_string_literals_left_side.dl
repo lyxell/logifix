@@ -16,15 +16,15 @@ rewrite(1132, filename, invocation, cat(arg_str, ".equals(", subject_str, ")")) 
     string_representation(subject, subject_str).
 
 /* Rewrite foo != null && foo.equals("x") into "x".equals(foo) */
-rewrite(1132, filename, invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
-    conditional_and_expression(and, _, _),
-    filename_of(and, filename),
-    not_equals_null_expression(noteqnull, noteqnull_subject),
-    parent_of(and, _, noteqnull),
-    parent_of(and, _, invocation),
+rewrite(1132, filename, and_expr, cat(arg_str, ".equals(", subject_str, ")")) :-
+    filename_of(and_expr, filename),
+    conditional_and_expression(and_expr, noteqnull, invocation),
+    /* left side is a null check */
+    not_equals_expression_unordered(noteqnull, null, noteqnull_subject),
+    null_literal(null),
+    /* right side is a method invocation */
     method_invocation(invocation, subject, method, [arg, nil]),
     string_literal(arg),
-    has_string_type(subject),
     string_representation(method, "equals"),
     string_representation(arg, arg_str),
     string_representation(subject, subject_str),
