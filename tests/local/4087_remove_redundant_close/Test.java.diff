@@ -1,0 +1,9 @@
+diff --git a/Test.java b/Test.java
+@@ -2,7 +2,6 @@ class Test {
+     void test() {
+         try (FileInputStream is = new FileInputStream(new File("foo"))) {
+             byte[] bytes = is.readAllBytes();
+-            is.close();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }

@@ -44,6 +44,13 @@ try_statement(id, body, catches, finally) :-
     parent_of_list(id, "catches", catches),
     parent_of(id, "finally", finally).
 
+.decl try_with_resources_statement(id: id, resources: id_list, body: id, catches: id_list, finally: id)
+try_with_resources_statement(id, resources, body, catches, finally) :-
+    parent_of_list(id, "resources", resources),
+    parent_of(id, "body", body),
+    parent_of_list(id, "catches", catches),
+    parent_of(id, "finally", finally).
+
 INFIX(assignment_expression)
 INFIX(conditional_or_expression)
 INFIX(conditional_and_expression)

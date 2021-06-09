@@ -14,6 +14,7 @@
 #include "rules/2204_dont_compare_atomic_with_equals.dl"
 #include "rules/2225_tostring_and_clone_should_not_return_null.dl"
 #include "rules/2259_dont_dereference_null_pointers.dl"
+#include "rules/4087_remove_redundant_close.dl"
 #include "rules/4973_use_equals_method.dl"
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
 #include "rules/experimental/3824_replace_map_get.dl"
@@ -185,11 +186,18 @@ string_representation([name, filename, A, B], substr(code, A, B - A)) :-
 .output in_scope
 
 /* Scope of variables is transitive (TODO: lambda is a special case?) */
-in_scope(descendant, identifier, type) :-
-    in_scope(ancestor, identifier, type),
+in_scope(descendant, identifier, decl_point) :-
+    in_scope(ancestor, identifier, decl_point),
     ancestor_of(ancestor, descendant).
 
-/* Make parameter in enhanced for statement accessible in its body */
+/* Make resource in try_with_resources_statement accessible in its body */
+in_scope(body, identifier_str, resource) :-
+    try_with_resources_statement(_, resources, body, _, _),
+    list_contains(resources, resource),
+    parent_of(resource, "name", identifier),
+    string_representation(identifier, identifier_str).
+
+/* Make formal parameter in enhanced_for_statement accessible in its body */
 in_scope(body, identifier_str, param) :-
     ast_node(stmt),
     name_of(stmt, "enhanced_for_statement"),
@@ -264,6 +272,11 @@ has_formal_parameter_or_local_var_decl_in_scope(id) :-
     in_scope(id, identifier, decl),
     formal_parameter(decl, _, _, _),
     string_representation(head, identifier).
+has_formal_parameter_or_local_var_decl_in_scope(id) :-
+    expression_name(id, [head, _]),
+    in_scope(id, identifier, decl),
+    name_of(decl, "resource"),
+    string_representation(head, identifier).
 
 .decl point_of_declaration(id: id, declaration: id)
 .output point_of_declaration(IO=stdout)
@@ -278,6 +291,11 @@ point_of_declaration(head, decl) :-
     expression_name(id, [head, _]),
     in_scope(id, identifier, decl),
     formal_parameter(decl, _, _, _),
+    string_representation(head, identifier).
+point_of_declaration(head, decl) :-
+    expression_name(id, [head, _]),
+    in_scope(id, identifier, decl),
+    name_of(decl, "resource"),
     string_representation(head, identifier).
 /* If there is no local variable declarations of formal parameters in scope
    the identifier refers to the field */
