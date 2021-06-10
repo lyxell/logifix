@@ -13,7 +13,7 @@ static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Cons
 }
 
 static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Consumer<V> initializer) {
-    return map.computeIfAbsent(k -> {
+    return map.computeIfAbsent(key, k -> {
         V value = valueCreator.get();
         if (initializer != null) {
             initializer.accept(value);
