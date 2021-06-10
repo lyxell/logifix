@@ -15,6 +15,18 @@
 /* AST node types
  ********************************/
 
+.decl for_statement(id: id, init: id, condition: id, update: id, body: id)
+for_statement(id, init, condition, update, body) :-
+    name_of(id, "for_statement"),
+    parent_of(id, "init", init),
+    parent_of(id, "condition", condition),
+    parent_of(id, "update", update),
+    parent_of(id, "body", body).
+
+.decl empty_statement(id: id)
+empty_statement(id) :-
+    name_of(id, "empty_statement").
+
 .decl throw_statement(id: id, expr: id)
 throw_statement(id, expr) :-
     name_of(id, "throw_statement"),

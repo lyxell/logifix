@@ -7,7 +7,7 @@ public class CompareStringsBoxedTypesWithEquals {
         String firstName = getFirstName(); // String overrides equals
         String lastName = getLastName();
 
-        if (firstName == lastName) { } ; // Noncompliant; false even if the strings have the same value
+        if (firstName == lastName) { } // Noncompliant; false even if the strings have the same value
     }
 
     // Aditional tests

@@ -1,3 +1,4 @@
+#include "rules/1116_remove_empty_statements.dl"
 #include "rules/1125_redundant_boolean.dl"
 #include "rules/1132_string_literals_left_side.dl"
 #include "rules/1153_remove_valueof_on_string_append.dl"
@@ -205,7 +206,7 @@ in_scope(body, identifier_str, param) :-
     parent_of(stmt, "param", param),
     formal_parameter(param, _, _, identifier),
     string_representation(identifier, identifier_str),
-    parent_of(stmt, "statement", body).
+    parent_of(stmt, "body", body).
 
 /* Make field declarations in scope in the method bodies of their class */
 in_scope(method_body, identifier_str, field) :-

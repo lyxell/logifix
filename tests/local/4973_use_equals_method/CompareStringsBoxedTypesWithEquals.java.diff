@@ -3,8 +3,8 @@ diff --git a/CompareStringsBoxedTypesWithEquals.java b/CompareStringsBoxedTypesW
          String firstName = getFirstName(); // String overrides equals
          String lastName = getLastName();
  
--        if (firstName == lastName) { } ; // Noncompliant; false even if the strings have the same value
-+        if (firstName.equals(lastName)) { } ; // Noncompliant; false even if the strings have the same value
+-        if (firstName == lastName) { } // Noncompliant; false even if the strings have the same value
++        if (firstName.equals(lastName)) { } // Noncompliant; false even if the strings have the same value
      }
  
      // Aditional tests
