@@ -16,6 +16,7 @@
 #include "rules/2225_tostring_and_clone_should_not_return_null.dl"
 #include "rules/2259_dont_dereference_null_pointers.dl"
 #include "rules/4087_remove_redundant_close.dl"
+#include "rules/4635_use_string_offset_methods.dl"
 #include "rules/4973_use_equals_method.dl"
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
 #include "rules/experimental/3824_replace_map_get.dl"

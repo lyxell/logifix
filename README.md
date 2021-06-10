@@ -48,4 +48,5 @@ To download and build the project, perform the following steps:
 | [S2259](https://rules.sonarsource.com/java/RSPEC-2259) | Bug        | Null pointers should not be dereferenced                                        |
 | [S3984](https://rules.sonarsource.com/java/RSPEC-3984) | Bug        | Exceptions should not be created without being thrown                           |
 | [S4087](https://rules.sonarsource.com/java/RSPEC-4087) | Code Smell | close() calls should not be redundant                                           |
+| [S4635](https://rules.sonarsource.com/java/RSPEC-4635) | Code Smell | String offset-based methods should be preferred for finding substrings          |
 | [S4973](https://rules.sonarsource.com/java/RSPEC-4973) | Bug        | Strings and Boxed types should be compared using equals()                       |
