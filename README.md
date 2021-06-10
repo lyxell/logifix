@@ -29,7 +29,7 @@ To download and build the project, perform the following steps:
 
 | ID                                                     | Category   | Description                                                                     |
 |--------------------------------------------------------|------------|---------------------------------------------------------------------------------|
-| [S1125](https://rules.sonarsource.com/java/RSPEC-1116) | Code Smell | Empty statements should be removed                                              |
+| [S1116](https://rules.sonarsource.com/java/RSPEC-1116) | Code Smell | Empty statements should be removed                                              |
 | [S1125](https://rules.sonarsource.com/java/RSPEC-1125) | Code Smell | Boolean literals should not be redundant                                        |
 | [S1132](https://rules.sonarsource.com/java/RSPEC-1132) | Code Smell | Strings literals should be placed on the left side when checking for equality   |
 | [S1153](https://rules.sonarsource.com/java/RSPEC-1153) | Code Smell | String.valueOf() should not be appended to a String                             |
