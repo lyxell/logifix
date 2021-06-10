@@ -1,0 +1,10 @@
+diff --git a/Test.java b/Test.java
+@@ -7,7 +7,7 @@ public class Test {
+         list.add(3);
+         list.add(9);
+         System.out.println(list);
+-        list.removeAll(list); // Noncompliant
++        list.clear(); // Noncompliant
+         System.out.println(list);
+     }
+ }
