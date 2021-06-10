@@ -283,6 +283,8 @@ int main(int argc, char** argv) {
                     }
                 }
 
+                program = {};
+
                 /**
                  * Expand rewrites that only does deletion to also remove
                  * whitespace at the beginning of the line as well as the
