@@ -1,26 +1,25 @@
 
-/*
-static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Consumer<V> initializer) {
-    V value = map.get(key);
-    if (value == null) {
-        value = valueCreator.get();
-        map.put(key, value);
-        if (initializer != null) {
-            initializer.accept(value);
-        }
+/* Pre
+{
+    [:value_type] [:value_var] = [:map_var].get([:key_var]);
+    if ([:value_var] == null) {
+        [:value_var] = [:value_initializer];
+        [:map_var].put([:key_var], [:value_var]);
+        [:trailing_statements]
     }
-    return value;
+    return [:value_var];
 }
+*/
 
-static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Consumer<V> initializer) {
-    return map.computeIfAbsent(key, k -> {
-        V value = valueCreator.get();
-        if (initializer != null) {
-            initializer.accept(value);
-        }
-        return value;
+/* Post
+{
+    return [:map_var].computeIfAbsent([:key_var], [:key_var] -> {
+        [:value_type] [:value_var] = [:value_initializer];
+        [:trailing_statements]
+        return [:value_var];
     });
-}*/
+}
+*/
 
 rewrite([3824, filename, start, end, cat("{", "}")]) :-
     /* we are in a block with three statements */
