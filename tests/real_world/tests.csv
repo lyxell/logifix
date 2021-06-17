@@ -7,6 +7,8 @@ rule,commit,extra_diff_flags
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/Tb.java,
 1125_redundant_boolean,https://github.com/Onevizion/ui-test-api/blob/8f6b2d5582ec444ebe00cd29436e86383aa56109/src/main/java/com/onevizion/uitest/api/helper/formdesigner/FormDesigner.java,
 1125_redundant_boolean,https://github.com/locationtech/jts/blob/bf8a0cb2a5f93f2671b59a089fe67d146846a57b/modules/core/src/main/java/org/locationtech/jts/operation/predicate/RectangleIntersects.java,
+1132_string_literals_left_side,https://github.com/spring-projects/spring-data-mongodb/blob/550b62b070880f5bdb499ac3387c229f2ac6b931/spring-data-mongodb/src/main/java/org/springframework/data/mongodb/core/convert/QueryMapper.java,
+1132_string_literals_left_side,https://github.com/hibernate/hibernate-validator/blob/e2c659c039bf822c064df948395735df090cda04/test-utils/src/main/java/org/hibernate/validator/testutil/ValidationXmlTestHelper.java,--ignore-all-space
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/BAMIndexMetaData.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/SAMUtils.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/samtools/SamFileHeaderMerger.java,
