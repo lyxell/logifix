@@ -50,7 +50,7 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
     std::set<std::string> file_set;
     std::set<std::string> has_children;
 
-    std::vector<std::pair<std::string,std::string>> produced_from;
+    std::map<std::string, std::tuple<std::string, size_t, size_t, size_t>> created_from;
 
     while (true) {
 
@@ -71,10 +71,29 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             // workaround for https://github.com/souffle-lang/souffle/issues/1947
             unescape(replacement);
             rewrite_t rewrite = {rule, filename, start, end, replacement};
-            if (rewrites.find(rewrite) == rewrites.end()) {
-                new_rewrites.emplace_back(rewrite);
-                rewrites.emplace(rewrite);
+            // skip this rewrite if it has been applied to this file before
+            if (rewrites.find(rewrite) != rewrites.end()) continue;
+
+            rewrites.emplace(rewrite);
+
+            // skip this rewrite if it exists in a parent
+            if (created_from.find(filename) != created_from.end()) {
+                auto [parent_filename, pstart, pend, psize] = created_from[filename];
+                if (end <= pstart) {
+                    rewrite_t matching_rewrite = {rule, parent_filename, start, end, replacement};
+                    if (rewrites.find(matching_rewrite) != rewrites.end()) {
+                        continue;
+                    }
+                } else if (start >= (pstart + psize)) {
+                    auto diff = (pend - pstart) - psize;
+                    rewrite_t matching_rewrite = {rule, parent_filename, start + diff, end + diff, replacement};
+                    if (rewrites.find(matching_rewrite) != rewrites.end()) {
+                        continue;
+                    }
+                }
             }
+
+            new_rewrites.emplace_back(rewrite);
         }
 
         /**
@@ -82,34 +101,17 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
          * whitespace at the beginning of the line as well as the
          * trailing newline on the previous line
          */
-        for (auto& [rule_number, filename, start, end, replacement] : new_rewrites) {
-            const auto& input = files[filename];
-            if (replacement.empty()) {
-                /* expand start to include whitespace */
-                while (start > 1 && input[start - 1] != '\n' &&
-                       std::isspace(input[start - 1])) {
-                    start--;
-                }
-                /* expand start to include trailing newline */
-                if (start > 2 && input.substr(start - 2, 2) == "\r\n") {
-                    start -= 2;
-                } else if (start > 1 &&
-                           input.substr(start - 1, 1) == "\n") {
-                    start--;
-                }
-            }
-        }
 
         std::vector<std::string> new_files;
         for (auto [rule, filename, start, end, replacement] : new_rewrites) {
 
             // do not perform rewrites of the original file that the user is not interested in
             if (filename == "original" && rules.find(rule) == rules.end()) continue;
-
             auto source = files[filename];
             auto dest = source.substr(0, start) + replacement + source.substr(end);
             auto dest_filename = filename + "-[" + std::to_string(rule) + "," + std::to_string(start) + "," + std::to_string(end) + "]";
             has_children.emplace(source);
+            created_from.emplace(dest_filename, std::tuple(filename, start, end, replacement.size()));
             if (file_set.find(dest) == file_set.end()) {
                 new_files.emplace_back(dest);
                 file_set.emplace(dest);
