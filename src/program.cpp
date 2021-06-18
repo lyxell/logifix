@@ -48,6 +48,9 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
 
     std::set<rewrite_t> rewrites;
     std::set<std::string> file_set;
+    std::set<std::string> has_children;
+
+    std::vector<std::pair<std::string,std::string>> produced_from;
 
     while (true) {
 
@@ -106,6 +109,7 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             auto source = files[filename];
             auto dest = source.substr(0, start) + replacement + source.substr(end);
             auto dest_filename = filename + "-[" + std::to_string(rule) + "," + std::to_string(start) + "," + std::to_string(end) + "]";
+            has_children.emplace(source);
             if (file_set.find(dest) == file_set.end()) {
                 new_files.emplace_back(dest);
                 file_set.emplace(dest);
@@ -118,9 +122,13 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
 
     }
 
-    // TODO: filter out one candidate from each branch
+    std::set<std::string> result;
+
+    for (auto str : file_set) {
+        if (has_children.find(str) == has_children.end()) result.emplace(str);
+    }
     
-    return file_set;
+    return result;
 
 }
 
