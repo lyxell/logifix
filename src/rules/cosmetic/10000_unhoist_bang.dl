@@ -1,0 +1,11 @@
+
+/* Pre  !([:x] == [:y]) */
+/* Post [:x] != [:y]    */
+rewrite(10000, filename, start, end, cat(left_str, " != ", right_str)) :-
+    logical_complement_expression(id, expr),
+    filename_of(id, filename),
+    starts_at(id, start),
+    ends_at(id, end),
+    equals_expression(expr, left, right),
+    string_representation(left, left_str),
+    string_representation(right, right_str).

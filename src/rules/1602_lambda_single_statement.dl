@@ -6,7 +6,7 @@
 
 /* Pre  [:lambda_params] -> { return [:x] } */
 /* Post [:lambda_params] -> [:x] */
-rewrite([1602, filename, start, end, expr_str]) :-
+rewrite(1602, filename, start, end, expr_str) :-
     lambda_expression(lambda_expr, _, lambda_body),
         filename_of(lambda_expr, filename),
     block(lambda_body, [statement, nil]),

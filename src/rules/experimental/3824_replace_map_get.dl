@@ -21,7 +21,7 @@
 }
 */
 
-rewrite([3824, filename, start, end, cat("{", "}")]) :-
+rewrite(3824, filename, start, end, cat("{", "}")) :-
     /* we are in a block with three statements */
     block(b, [s1, [s2, [s3, nil]]]),
         filename_of(b, filename),

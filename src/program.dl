@@ -21,6 +21,7 @@
 #include "rules/4973_use_equals_method.dl"
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
 #include "rules/experimental/3824_replace_map_get.dl"
+#include "rules/cosmetic/10000_unhoist_bang.dl"
 
 #include "nodes.dl"
 
@@ -28,7 +29,6 @@
 /* Types
  ********************************/
 
-.type rewrite_t = [rule: number, filename: symbol, start: number, end: number, to: symbol]
 .type id = [type: symbol, filename: symbol, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
 .type symbol_list = [head: symbol, tail: symbol_list]
@@ -603,10 +603,10 @@ string_representation_with_parentheses(id, cat("(", id_str, ")")) :-
 /* Rewrite rules
  ********************************/
 
-.decl rewrite(r: rewrite_t)
-rewrite([rule, filename, start1, end3, cat(to1, substr(code, end1, start2 - end1),
+.decl rewrite(rule: number, filename: symbol, start: number, end: number, to: symbol)
+rewrite(rule, filename, start1, end3, cat(to1, substr(code, end1, start2 - end1),
                                        to2, substr(code, end2, start3 - end2),
-                                       to3)]) :-
+                                       to3)) :-
     rewrite_3(rule, filename, start1, end1, to1,
                               start2, end2, to2,
                               start3, end3, to3),

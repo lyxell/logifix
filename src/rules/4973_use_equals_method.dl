@@ -3,7 +3,7 @@
  * https://rules.sonarsource.com/java/RSPEC-4973
  */
 
-rewrite([4973, filename, start, end, cat(x_str, ".equals(", y_str, ")")]) :-
+rewrite(4973, filename, start, end, cat(x_str, ".equals(", y_str, ")")) :-
     equals_expression(eq, x, y),
         filename_of(eq, filename),
         starts_at(eq, start),
@@ -13,7 +13,7 @@ rewrite([4973, filename, start, end, cat(x_str, ".equals(", y_str, ")")]) :-
     string_representation(x, x_str),
     string_representation(y, y_str).
 
-rewrite([4973, filename, start, end, cat("!", x_str, ".equals(", y_str, ")")]) :-
+rewrite(4973, filename, start, end, cat("!", x_str, ".equals(", y_str, ")")) :-
     not_equals_expression(eq, x, y),
         filename_of(eq, filename),
         starts_at(eq, start),

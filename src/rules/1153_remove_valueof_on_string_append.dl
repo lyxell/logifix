@@ -5,7 +5,7 @@
 
 /* Pre  String.valueOf([:x]) */
 /* Post [:x] */
-rewrite([1153, filename, start, end, arg_string]) :-
+rewrite(1153, filename, start, end, arg_string) :-
     addition_expression(id, left, right),
         filename_of(id, filename),
     has_string_type(left),

@@ -270,10 +270,10 @@ int main(int argc, char** argv) {
             std::async(std::launch::async, [&] {
                 logifix::program program;
                 std::string input = read_file(file);
-                program.add_string(file.c_str(), input.c_str());
-                program.run();
+                auto result = program.run(input, options.rules);
 
                 /* Filter rewrites by their id */
+                /*
                 std::vector<
                     std::tuple<int, size_t, size_t, std::string>>
                     rewrites;
@@ -281,74 +281,47 @@ int main(int argc, char** argv) {
                     if (options.rules.find(std::get<0>(r)) != options.rules.end()) {
                         rewrites.emplace_back(std::move(r));
                     }
-                }
+                }*/
 
                 program = {};
 
-                /**
-                 * Expand rewrites that only does deletion to also remove
-                 * whitespace at the beginning of the line as well as the
-                 * trailing newline on the previous line
-                 */
-                for (auto& [rule_number, start, end, replacement] :
-                     rewrites) {
-                    if (replacement.empty()) {
-                        /* expand start to include whitespace */
-                        while (start > 1 && input[start - 1] != '\n' &&
-                               std::isspace(input[start - 1])) {
-                            start--;
-                        }
-                        /* expand start to include trailing newline */
-                        if (start > 2 && input.substr(start - 2, 2) == "\r\n") {
-                            start -= 2;
-                        } else if (start > 1 &&
-                                   input.substr(start - 1, 1) == "\n") {
-                            start--;
-                        }
-                    }
-                }
-
-                /* Sort rewrites */
-                std::sort(rewrites.begin(), rewrites.end(), [](auto x, auto y) {
-                    if (std::get<1>(x) == std::get<1>(y))
-                        return std::get<2>(x) < std::get<2>(y);
-                    return std::get<1>(x) > std::get<1>(y);
-                });
-
                 /* The resulting file */
-                size_t curr_pos = 0;
-                size_t num_changes = 0;
-                std::string result;
+                //size_t curr_pos = 0;
+                //size_t num_changes = 0;
+                //std::string result;
 
                 std::lock_guard<std::mutex> lock(io_mutex);
 
-                while (curr_pos < input.size()) {
+                //if (result.size() == 1) {
+
+                for (auto rewrite : result) {
 
                     /* discard rewrites that we can't apply because of conflicts */
-                    while (rewrites.size() && std::get<1>(rewrites.back()) < curr_pos) {
-                        rewrites.pop_back();
+                    //while (rewrites.size() && std::get<1>(rewrites.back()) < curr_pos) {
+                    //    rewrites.pop_back();
+                    //}
+
+                    //if (!rewrites.size()) {
+                    //    result += input.substr(curr_pos);
+                    //    break;
+                    //}
+
+                    //auto [_, start, end, replacement] = rewrites.back();
+
+                    //auto after = input.substr(0, start) + replacement + input.substr(end);
+
+                    if (!options.interactive || ask_user_about_rewrite(file, input, rewrite, options.color)) {
+                        //num_changes++;
+                        //result += input.substr(curr_pos, start - curr_pos);
+                        //result += replacement;
+                        //curr_pos = end;
                     }
 
-                    if (!rewrites.size()) {
-                        result += input.substr(curr_pos);
-                        break;
-                    }
-
-                    auto [_, start, end, replacement] = rewrites.back();
-
-                    auto after = input.substr(0, start) + replacement + input.substr(end);
-
-                    if (!options.interactive || ask_user_about_rewrite(file, input, std::move(after), options.color)) {
-                        num_changes++;
-                        result += input.substr(curr_pos, start - curr_pos);
-                        result += replacement;
-                        curr_pos = end;
-                    }
-
-                    rewrites.pop_back();
+                    //rewrites.pop_back();
 
                 }
 
+                /*
                 if (result != input) {
                     if (options.apply) {
                         std::ofstream f(file);
@@ -370,7 +343,7 @@ int main(int argc, char** argv) {
                     } else {
                         std::cerr << "analyzing " << file << "\r" << std::flush;
                     }
-                }
+                }*/
             }));
     }
 

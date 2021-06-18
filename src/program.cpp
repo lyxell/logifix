@@ -1,6 +1,9 @@
 #include "logifix.h"
 #include <filesystem>
+#include <unordered_set>
 #include <iostream>
+
+using rewrite_t = std::tuple<int,std::string,size_t,size_t,std::string>;
 
 static void replace_all(std::string& source, const std::string& from, const std::string& to)
 {
@@ -40,7 +43,86 @@ void program::add_string(const char* filename, const char* content) {
                                   prog->getSymbolTable().encode(content)}));
 }
 
-void program::run() { prog->run(); }
+std::set<std::string> program::run(std::string file, std::set<int> rules) {
+    add_string("original", file.c_str());
+
+    std::set<rewrite_t> rewrites;
+    std::set<std::string> file_set;
+
+    while (true) {
+
+        // run program
+        prog->run();
+
+        // collect all new rewrites
+        souffle::Relation* relation = prog->getRelation("rewrite");
+        assert(relation != nullptr);
+        std::vector<rewrite_t> new_rewrites;
+        for (souffle::tuple& output : *relation) {
+            int rule;
+            std::string filename;
+            int start;
+            int end;
+            std::string replacement;
+            output >> rule >> filename >> start >> end >> replacement;
+            // workaround for https://github.com/souffle-lang/souffle/issues/1947
+            unescape(replacement);
+            rewrite_t rewrite = {rule, filename, start, end, replacement};
+            if (rewrites.find(rewrite) == rewrites.end()) {
+                new_rewrites.emplace_back(rewrite);
+                rewrites.emplace(rewrite);
+            }
+        }
+
+        /**
+         * Expand rewrites that only does deletion to also remove
+         * whitespace at the beginning of the line as well as the
+         * trailing newline on the previous line
+         */
+        for (auto& [rule_number, filename, start, end, replacement] : new_rewrites) {
+            const auto& input = files[filename];
+            if (replacement.empty()) {
+                /* expand start to include whitespace */
+                while (start > 1 && input[start - 1] != '\n' &&
+                       std::isspace(input[start - 1])) {
+                    start--;
+                }
+                /* expand start to include trailing newline */
+                if (start > 2 && input.substr(start - 2, 2) == "\r\n") {
+                    start -= 2;
+                } else if (start > 1 &&
+                           input.substr(start - 1, 1) == "\n") {
+                    start--;
+                }
+            }
+        }
+
+        std::vector<std::string> new_files;
+        for (auto [rule, filename, start, end, replacement] : new_rewrites) {
+
+            // do not perform rewrites of the original file that the user is not interested in
+            if (filename == "original" && rules.find(rule) == rules.end()) continue;
+
+            auto source = files[filename];
+            auto dest = source.substr(0, start) + replacement + source.substr(end);
+            auto dest_filename = filename + "-[" + std::to_string(rule) + "," + std::to_string(start) + "," + std::to_string(end) + "]";
+            if (file_set.find(dest) == file_set.end()) {
+                new_files.emplace_back(dest);
+                file_set.emplace(dest);
+                add_string(dest_filename.c_str(), dest.c_str());
+            }
+        }
+
+        // if there are no new source files, break
+        if (new_files.size() == 0) break;
+
+    }
+
+    // TODO: filter out one candidate from each branch
+    
+    return file_set;
+
+}
 
 void program::print() { prog->printAll(); }
 
@@ -57,14 +139,15 @@ program::get_possible_rewrites(const char* filename) {
     souffle::Relation* relation = prog->getRelation("rewrite");
     assert(relation != nullptr);
     for (souffle::tuple& output : *relation) {
-        int record_id;
-        output >> record_id;
-        const auto* record = prog->getRecordTable().unpack(record_id, 5);
-        assert(record != nullptr);
-        auto replacement = prog->getSymbolTable().decode(record[4]);
+        int rule;
+        std::string filename;
+        int start;
+        int end;
+        std::string replacement;
+        output >> rule >> filename >> start >> end >> replacement;
         // workaround for https://github.com/souffle-lang/souffle/issues/1947
         unescape(replacement);
-        result.emplace_back(record[0], record[2], record[3], replacement);
+        result.emplace_back(rule, start, end, replacement);
     }
     return result;
 }
