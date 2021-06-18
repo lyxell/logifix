@@ -36,6 +36,8 @@ enum { COLOR_RESET, COLOR_BOLD, COLOR_RED, COLOR_GREEN, COLOR_CYAN };
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
                          const git_diff_line* line, void* data) {
 
+    if (line->origin == GIT_DIFF_LINE_FILE_HDR) return 0;
+
     bool color = *((bool*)data);
     (void)delta;
     (void)hunk;
@@ -285,6 +287,8 @@ int main(int argc, char** argv) {
 
                 program = {};
 
+                if (result.size() == 0) return;
+
                 /* The resulting file */
                 //size_t curr_pos = 0;
                 //size_t num_changes = 0;
@@ -292,32 +296,30 @@ int main(int argc, char** argv) {
 
                 std::lock_guard<std::mutex> lock(io_mutex);
 
-                //if (result.size() == 1) {
+                if (options.color) {
+                    std::cerr << colors[COLOR_BOLD];
+                }
+                std::cerr << "File " << file << std::endl;
+                if (options.color) {
+                    std::cerr << colors[COLOR_RESET];
+                }
 
+                size_t curr = 1;
                 for (auto rewrite : result) {
-
-                    /* discard rewrites that we can't apply because of conflicts */
-                    //while (rewrites.size() && std::get<1>(rewrites.back()) < curr_pos) {
-                    //    rewrites.pop_back();
-                    //}
-
-                    //if (!rewrites.size()) {
-                    //    result += input.substr(curr_pos);
-                    //    break;
-                    //}
-
-                    //auto [_, start, end, replacement] = rewrites.back();
-
-                    //auto after = input.substr(0, start) + replacement + input.substr(end);
-
+                    if (options.color) {
+                        std::cerr << colors[COLOR_BOLD];
+                    }
+                    std::cerr << "Rewrite " << curr << "/" << result.size() << std::endl;
+                    if (options.color) {
+                        std::cerr << colors[COLOR_RESET];
+                    }
+                    curr++;
                     if (!options.interactive || ask_user_about_rewrite(file, input, rewrite, options.color)) {
                         //num_changes++;
                         //result += input.substr(curr_pos, start - curr_pos);
                         //result += replacement;
                         //curr_pos = end;
                     }
-
-                    //rewrites.pop_back();
 
                 }
 
