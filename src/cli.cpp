@@ -267,7 +267,6 @@ int main(int argc, char** argv) {
 
     git_libgit2_init();
 
-    /* Perform analysis */
     int count = 0;
     bool found_first_rewrite = false;
     std::mutex io_mutex;
