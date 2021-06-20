@@ -20,7 +20,7 @@ diff --git a/Test1.java b/Test1.java
      void test3(int x) {
 -        if ((x == 3) == false) System.out.println("false");
 -        if ((x == 3 || x == 4) == false) System.out.println("false");
-+        if (!(x == 3)) System.out.println("false");
++        if (x != 3) System.out.println("false");
 +        if (!(x == 3 || x == 4)) System.out.println("false");
      }
      void test4() {

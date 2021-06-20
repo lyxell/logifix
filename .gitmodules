@@ -7,3 +7,6 @@
 [submodule "vendor/souffle"]
 	path = vendor/souffle
 	url = https://github.com/souffle-lang/souffle.git
+[submodule "vendor/nway"]
+	path = vendor/nway
+	url = https://github.com/lyxell/nway.git

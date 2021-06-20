@@ -31,7 +31,6 @@ rule,commit,extra_diff_flags
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/a71f1373521b3d9153d4184a0cf99729b757feb0/src/java/htsjdk/variant/vcf/VCFHeaderLine.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/HighAccuracyDownsamplingIterator.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/samtools/util/DiskBackedQueue.java,
-1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/variantcontext/CommonInfo.java,--ignore-all-space
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/vcf/AbstractVCFCodec.java,--ignore-all-space
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/vcf/VCF3Codec.java,--ignore-all-space
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/vcf/VCFCodec.java,--ignore-all-space
@@ -90,11 +89,6 @@ rule,commit,extra_diff_flags
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/baksmali/src/main/java/org/jf/baksmali/Adaptors/MethodDefinition.java,
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/dexlib2/src/main/java/org/jf/dexlib2/builder/MutableMethodImplementation.java,
 1155_use_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/util/src/main/java/org/jf/util/ImmutableConverter.java,
-1481_unused_local_variables,https://github.com/Netflix/astyanax/blob/8daa973723a42d08196ae666bebeacdefe4ace19/astyanax-entity-mapper/src/main/java/com/netflix/astyanax/entitystore/CompositeEntityMapper.java,
-1481_unused_local_variables,https://github.com/Netflix/astyanax/blob/8daa973723a42d08196ae666bebeacdefe4ace19/astyanax-recipes/src/main/java/com/netflix/astyanax/recipes/storage/ObjectReader.java,
-1481_unused_local_variables,https://github.com/informatici/openhospital-api/blob/9cf75d34db764fc17352d2f3b7a0c54debc95732/src/test/java/org/isf/admission/rest/AdmissionControllerTest.java,
-1481_unused_local_variables,https://github.com/informatici/openhospital-api/blob/9cf75d34db764fc17352d2f3b7a0c54debc95732/src/test/java/org/isf/disctype/rest/DischargeTypeControllerTest.java,--ignore-all-space --ignore-blank-lines
-1481_unused_local_variables,https://github.com/slarse/sorald/blob/519ce67f017074fc41c7b846c32f0b22588dcd4e/src/main/java/sorald/GitPatchGenerator.java,--ignore-blank-lines
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/processing/src/test/java/org/apache/druid/query/groupby/GroupByQueryRunnerTest.java,
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/processing/src/test/java/org/apache/druid/query/groupby/orderby/TopNSequenceTest.java,
 1596_fix_old_empty_collection,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/main/java/org/apache/druid/server/emitter/ComposingEmitterModule.java,

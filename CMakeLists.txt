@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 ### DEPENENCIES
 
+add_subdirectory(vendor/nway)
+
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_CLAR OFF)
 set(USE_BUNDLED_ZLIB ON)
@@ -68,7 +70,7 @@ ELSE ()
     add_executable(logifix src/cli.cpp src/program.cpp logifix.cpp)
 ENDIF ()
 
-target_link_libraries(logifix git2 sjp)
+target_link_libraries(logifix git2 sjp nway)
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 target_include_directories(logifix PRIVATE vendor/libgit2/include)
 

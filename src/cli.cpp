@@ -7,6 +7,7 @@
 #include <set>
 #include <tuple>
 #include <mutex>
+#include <nway.h>
 
 namespace fs = std::filesystem;
 
@@ -33,16 +34,22 @@ static const char* colors[] = {
 
 enum { COLOR_RESET, COLOR_BOLD, COLOR_RED, COLOR_GREEN, COLOR_CYAN };
 
+struct printer_opts {
+    bool color;
+    bool print_file_header;
+};
+
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
                          const git_diff_line* line, void* data) {
 
-    if (line->origin == GIT_DIFF_LINE_FILE_HDR) return 0;
+    printer_opts* opts = (printer_opts*) data;
 
-    bool color = *((bool*)data);
+    if (!opts->print_file_header && line->origin == GIT_DIFF_LINE_FILE_HDR) return 0;
+
     (void)delta;
     (void)hunk;
 
-    if (color) {
+    if (opts->color) {
         switch (line->origin) {
             case GIT_DIFF_LINE_ADD_EOFNL:
             case GIT_DIFF_LINE_ADDITION:
@@ -78,7 +85,7 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
 
     std::cout << std::endl;
 
-    if (color) {
+    if (opts->color) {
         std::cout << colors[COLOR_RESET];
     }
 
@@ -98,17 +105,17 @@ std::string read_file(std::string_view path) {
     return out;
 }
 
-void print_patch(std::string filename, std::string before, std::string after, bool color) {
+void print_patch(std::string filename, std::string before, std::string after, printer_opts opts) {
     git_patch* patch = nullptr;
     git_patch_from_buffers(&patch, before.c_str(), before.size(),
                            filename.c_str(), after.c_str(),
                            after.size(), filename.c_str(), nullptr);
-    git_patch_print(patch, color_printer, &color);
+    git_patch_print(patch, color_printer, &opts);
     git_patch_free(patch);
 }
 
 bool ask_user_about_rewrite(std::string filename, std::string before, std::string after, bool color) {
-    print_patch(std::move(filename), std::move(before), std::move(after), true);
+    print_patch(std::move(filename), std::move(before), std::move(after), {color, false});
     if (color) {
         std::cout << colors[COLOR_CYAN];
     }
@@ -273,29 +280,9 @@ int main(int argc, char** argv) {
                 logifix::program program;
                 std::string input = read_file(file);
                 auto result = program.run(input, options.rules);
-
-                /* Filter rewrites by their id */
-                /*
-                std::vector<
-                    std::tuple<int, size_t, size_t, std::string>>
-                    rewrites;
-                for (auto r : program.get_possible_rewrites(file.c_str())) {
-                    if (options.rules.find(std::get<0>(r)) != options.rules.end()) {
-                        rewrites.emplace_back(std::move(r));
-                    }
-                }*/
-
                 program = {};
-
                 if (result.size() == 0) return;
-
-                /* The resulting file */
-                //size_t curr_pos = 0;
-                //size_t num_changes = 0;
-                //std::string result;
-
                 std::lock_guard<std::mutex> lock(io_mutex);
-
                 if (options.color) {
                     std::cerr << colors[COLOR_BOLD];
                 }
@@ -303,7 +290,7 @@ int main(int argc, char** argv) {
                 if (options.color) {
                     std::cerr << colors[COLOR_RESET];
                 }
-
+                std::vector<std::string> chosen_rewrites;
                 size_t curr = 1;
                 for (auto rewrite : result) {
                     if (options.color) {
@@ -315,37 +302,22 @@ int main(int argc, char** argv) {
                     }
                     curr++;
                     if (!options.interactive || ask_user_about_rewrite(file, input, rewrite, options.color)) {
-                        //num_changes++;
-                        //result += input.substr(curr_pos, start - curr_pos);
-                        //result += replacement;
-                        //curr_pos = end;
+                        chosen_rewrites.emplace_back(rewrite);
                     }
 
                 }
-
-                /*
-                if (result != input) {
+                auto diff = nway::diff(input, chosen_rewrites);
+                assert(!nway::has_conflicts(diff));
+                auto output = nway::merge(diff);
+                if (output != input) {
                     if (options.apply) {
                         std::ofstream f(file);
-                        f << result;
+                        f << output;
                         f.close();
                     } else {
-                        patch.emplace(file, result);
+                        patch.emplace(file, output);
                     }
                 }
-
-                if (num_changes > 0) {
-                    s.files_changed.emplace(file, num_changes);
-                }
-
-                if (!found_first_rewrite) {
-                    count++;
-                    if (file.size() > 50) {
-                        std::cerr << "analyzing " << file.substr(0, 50) << " ...\r" << std::flush;
-                    } else {
-                        std::cerr << "analyzing " << file << "\r" << std::flush;
-                    }
-                }*/
             }));
     }
 
@@ -353,23 +325,10 @@ int main(int argc, char** argv) {
         f.wait();
     }
 
-    size_t sum_rewrites = 0;
-    for (const auto& [file, changes] : s.files_changed) {
-        sum_rewrites += changes;
-    }
-
-    std::cerr << options.files.size() << " files analyzed" << std::endl;
-    std::cerr << sum_rewrites << " rewrites applied across ";
-    std::cerr << s.files_changed.size() << " files" << std::endl;
-    for (const auto& [file, changes] : s.files_changed) {
-        std::cerr << '\t' << changes << " changes in " << file << std::endl;
-    }
-    std::cerr << std::endl;
-
     if (!options.apply) {
         for (auto [filename, after] : patch) {
             std::string before = read_file(filename);
-            print_patch(filename, before, after, options.color);
+            print_patch(filename, before, after, {options.color, true});
         }
     }
 
