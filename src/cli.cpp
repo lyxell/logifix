@@ -24,7 +24,7 @@ struct options_t {
     std::set<int> rules;
 };
 
-static const char* colors[] = {
+std::array colors = {
     "\033[m",   /* reset */
     "\033[1m",  /* bold */
     "\033[31m", /* red */
@@ -42,7 +42,7 @@ struct printer_opts {
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
                          const git_diff_line* line, void* data) {
 
-    printer_opts* opts = (printer_opts*) data;
+    auto* opts = (printer_opts*) data;
 
     if (!opts->print_file_header && line->origin == GIT_DIFF_LINE_FILE_HDR) return 0;
 
@@ -170,7 +170,9 @@ options_t parse_options(int argc, char** argv) {
         std::stringstream ss(str);
         for (int i; ss >> i;) {
             options.rules.emplace(i);
-            if (ss.peek() == ',') ss.ignore();
+            if (ss.peek() == ',') {
+                ss.ignore();
+            }
         }
     };
 
@@ -267,8 +269,6 @@ int main(int argc, char** argv) {
 
     git_libgit2_init();
 
-    int count = 0;
-    bool found_first_rewrite = false;
     std::mutex io_mutex;
     std::vector<std::future<void>> futures;
     std::map<std::string,std::string> patch;
