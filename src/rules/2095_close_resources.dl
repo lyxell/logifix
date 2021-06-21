@@ -14,41 +14,16 @@
 /**
  * Rewrite a try-catch statement into a try-with-resources statement.
  */
-rewrite_3(2095, filename, try_start,    try_start + 3,  cat("try (", declaration_str, ")"),
-                          decl_start,   decl_end,       "",
-                          close_start,  close_end,      "") :-
-
-    /**
-     * We are inside a try statement
-     */
+rewrite(2095, filename, try_start, decl_end, cat("try (", declaration_str, ") {")) :-
     try_statement(try_stmt, body, _, _),
     filename_of(try_stmt, filename),
-    block(body, stmts),
-    starts_at(try_stmt, try_start),
-
-    /**
-     * The first statement of the try body is a local variable declaration that
-     * declares exactly one autocloseable resource
-     */
-    stmts = [declaration_stmt, _],
+    block(body, [declaration_stmt, _]),
     local_variable_declaration_statement(declaration_stmt, declaration),
     local_variable_declaration(declaration, _, type, [_, nil]),
     string_representation(declaration, declaration_str),
     is_autocloseable_type(type),
-    starts_at(body, body_start),
-    decl_start = body_start + 1,
-    ends_at(declaration_stmt, decl_end),
-
-    /**
-     * The try body also contains a method invocation, closing the resource
-     */
-    list_contains(stmts, expr_stmt),
-    expression_statement(expr_stmt, expr),
-    method_invocation(expr, subject, "close", nil),
-    point_of_declaration(subject, declaration),
-    predecessor_of(pred, expr_stmt),
-    ends_at(pred, close_start),
-    ends_at(expr_stmt, close_end).
+    starts_at(try_stmt, try_start),
+    ends_at(declaration_stmt, decl_end).
 
 /**
  * Rewrite
