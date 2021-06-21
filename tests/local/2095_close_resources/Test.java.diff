@@ -1,0 +1,14 @@
+diff --git a/../tests/local/2095_close_resources/Test.java b/../tests/local/2095_close_resources/Test.java
+@@ -5,11 +5,9 @@ import java.util.Arrays;
+ 
+ public class Test {
+     public static void main(String[] args) {
+-        try {
+-            FileInputStream is = new FileInputStream(new File("Test.java")); // Noncompliant
++        try (FileInputStream is = new FileInputStream(new File("Test.java"))) { // Noncompliant
+             byte[] bytes = is.readAllBytes();
+             System.out.println(Arrays.toString(bytes));
+-            is.close();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }

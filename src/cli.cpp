@@ -2,6 +2,7 @@
 #include "config.h"
 #include <filesystem>
 #include <future>
+#include <cctype>
 #include <git2.h>
 #include <iostream>
 #include <set>
@@ -39,12 +40,40 @@ struct printer_opts {
     bool print_file_header;
 };
 
+bool string_has_only_whitespace(const std::string& str) {
+    return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
+}
+
+std::vector<std::string> line_split(std::string str) {
+    std::vector<std::string> result;
+    while (!str.empty()) {
+        size_t i;
+        for (i = 0; i < str.size() - 1; i++) {
+            if (str[i] == '\n') break;
+        }
+        result.emplace_back(str.substr(0, i + 1));
+        str = str.substr(i + 1);
+    }
+    return result;
+}
+
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
                          const git_diff_line* line, void* data) {
 
+
     auto* opts = (printer_opts*) data;
 
-    if (!opts->print_file_header && line->origin == GIT_DIFF_LINE_FILE_HDR) return 0;
+    /* Skip added empty lines since they will not be included in end result */
+    auto* end = line->content;
+    while (*end != '\0' && *end != '\n') end++;
+    std::string content(line->content, end);
+    if (line->origin == GIT_DIFF_LINE_ADDITION && string_has_only_whitespace(content)) {
+        return 0;
+    }
+
+    if (!opts->print_file_header && line->origin == GIT_DIFF_LINE_FILE_HDR) {
+        return 0;
+    }
 
     (void)delta;
     (void)hunk;
@@ -309,12 +338,23 @@ int main(int argc, char** argv) {
                 assert(!nway::has_conflicts(diff));
                 auto output = nway::merge(diff);
                 if (output != input) {
+                    /* post-processing, remove introduced empty lines */
+                    auto output_lines = line_split(std::move(output));
+                    auto input_lines = line_split(std::move(input));
+                    auto lcs = nway::longest_common_subsequence(output_lines, input_lines);
+                    std::string processed;
+                    for (size_t i = 0; i < output_lines.size(); i++) {
+                        if (lcs.find(i) == lcs.end() && string_has_only_whitespace(output_lines[i])) {
+                            continue;
+                        }
+                        processed += output_lines[i];
+                    }
                     if (options.apply) {
                         std::ofstream f(file);
-                        f << output;
+                        f << processed;
                         f.close();
                     } else {
-                        patch.emplace(file, output);
+                        patch.emplace(file, processed);
                     }
                 }
             }));

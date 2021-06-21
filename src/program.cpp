@@ -68,9 +68,11 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             int end;
             std::string replacement;
             output >> rule >> filename >> start >> end >> replacement;
+
             // workaround for https://github.com/souffle-lang/souffle/issues/1947
             unescape(replacement);
             rewrite_t rewrite = {rule, filename, start, end, replacement};
+
             // skip this rewrite if it has been applied to this file before
             if (rewrites.find(rewrite) != rewrites.end()) continue;
 
@@ -96,11 +98,6 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             new_rewrites.emplace_back(rewrite);
         }
 
-        /**
-         * Expand rewrites that only does deletion to also remove
-         * whitespace at the beginning of the line as well as the
-         * trailing newline on the previous line
-         */
 
         std::vector<std::string> new_files;
         for (auto [rule, filename, start, end, replacement] : new_rewrites) {
