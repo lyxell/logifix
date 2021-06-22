@@ -23,6 +23,7 @@ static void replace_all(std::string& source, const std::string& from, const std:
 /* workaround for https://github.com/souffle-lang/souffle/issues/1947 */
 static void unescape(std::string& str) {
     replace_all(str, "%U+0022%", "\"");
+    replace_all(str, "%U+000A%", "\n");
 }
 
 static const char* PROGRAM_NAME = "logifix";

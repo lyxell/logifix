@@ -16,11 +16,11 @@
 #include "rules/2204_dont_compare_atomic_with_equals.dl"
 #include "rules/2225_tostring_and_clone_should_not_return_null.dl"
 #include "rules/2259_dont_dereference_null_pointers.dl"
+#include "rules/3824_replace_map_get.dl"
 #include "rules/4087_remove_redundant_close.dl"
 #include "rules/4635_use_string_offset_methods.dl"
 #include "rules/4973_use_equals_method.dl"
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
-#include "rules/experimental/3824_replace_map_get.dl"
 #include "rules/cosmetic/10000_unhoist_bang.dl"
 
 #include "nodes.dl"
@@ -112,6 +112,11 @@ list_contains([head,tail], head) :-
 list_contains(list, b) :-
     list_contains(list, a),
     predecessor_of(a, b).
+
+.decl list_last_element(list: id_list, id: id)
+list_last_element(list, id) :-
+    list_contains(list, id),
+    head_of(id, nil).
 
 /* Constant evaluation
  ********************************/
@@ -500,6 +505,11 @@ is_exception_type(id) :-
     string_representation(name, name_str),
     match(".*Exception", name_str).
 
+.decl is_map_type(id: id)
+is_map_type(id) :-
+    class_type(id, name, _, _),
+    string_representation(name, "Map").
+
 .decl is_string_type(id: id)
 is_string_type(id) :-
     class_type(id, name, _, _),
@@ -551,6 +561,9 @@ has_thread_type(id) :- has_type(id, type), is_thread_type(type).
 .decl has_string_type(id: id)
 has_string_type(id) :- string_literal(id).
 has_string_type(id) :- has_type(id, type), is_string_type(type).
+
+.decl has_map_type(id: id)
+has_map_type(id) :- has_type(id, type), is_map_type(type).
 
 .decl has_string_or_boxed_type(id: id)
 has_string_or_boxed_type(id) :- has_type(id, type), is_boxed_type(type).
