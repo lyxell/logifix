@@ -1,5 +1,5 @@
 diff --git a/TestMultiple.java b/TestMultiple.java
-@@ -6,12 +6,6 @@ class Test {
+@@ -7,12 +7,6 @@ class Test {
      void test() {
          try (FileInputStream is = new FileInputStream(new File("foo"))) {
              byte[] bytes = is.readAllBytes();
@@ -9,6 +9,6 @@ diff --git a/TestMultiple.java b/TestMultiple.java
 -            is.close();
 -            is.close();
 -            is.close();
+             System.out.println(Arrays.toString(bytes));
          } catch (IOException e) {
              e.printStackTrace();
-         }

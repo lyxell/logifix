@@ -72,6 +72,7 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             rewrites.emplace(rewrite);
 
             // skip this rewrite if it exists in a parent
+            // FIXME this could be simplified with nway
             if (created_from.find(filename) != created_from.end()) {
                 auto [parent_filename, pstart, pend, psize] = created_from[filename];
                 if (end <= pstart) {
@@ -96,7 +97,7 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
         for (auto [rule, filename, start, end, replacement] : new_rewrites) {
 
             // do not perform rewrites of the original file that the user is not interested in
-            if (filename == "original" && rules.find(rule) == rules.end()) continue;
+            if (filename == "original" && !rules.empty() && rules.find(rule) == rules.end()) continue;
             auto source = files[filename];
             auto dest = source.substr(0, start) + replacement + source.substr(end);
             auto dest_filename = filename + "-[" + std::to_string(rule) + "," + std::to_string(start) + "," + std::to_string(end) + "]";
