@@ -2,10 +2,10 @@
   <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logo.svg" alt="Logifix">
 </h1>
 
-Logifix automatically fixes SonarQube static analysis
-violations for Java. Logifix is implemented in a high-performance
-Datalog dialect that is synthesized into fast multi-threaded C++
-code.
+Logifix statically detects and automatically fixes bugs and code
+smells in Java source code. Logifix is implemented in a
+high-performance Datalog dialect that is synthesized into fast
+multi-threaded C++ code.
 
 https://user-images.githubusercontent.com/4975941/120327017-9c470280-c2e9-11eb-88d1-163943d550ce.mp4
 
