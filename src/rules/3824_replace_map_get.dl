@@ -21,12 +21,12 @@
 }
 */
 
-rewrite(3824, filename, start, end, cat("{", "%U+000A%",
-    "		return ", map_var_str, ".computeIfAbsent(", key_var_str, ", ", key_var_str, " -> {", "%U+000A%",
-    "			", value_type_str, " ", value_var_str, " = ", value_initializer_str, ";", "%U+000A%",
-                substr(code, t2_end, last_element_end - t2_end), "%U+000A%",
-    "			return ", value_var_str, ";", "%U+000A%",
-    "		});", "%U+000A%",
+rewrite(3824, filename, start, end, cat("{\n",
+    "		return ", map_var_str, ".computeIfAbsent(", key_var_str, ", ", key_var_str, " -> {\n",
+    "			", value_type_str, " ", value_var_str, " = ", value_initializer_str, ";\n",
+                substr(code, t2_end, last_element_end - t2_end), "\n",
+    "			return ", value_var_str, ";\n",
+    "		});\n",
     "	}"
 )) :-
 

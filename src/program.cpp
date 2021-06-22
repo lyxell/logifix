@@ -20,12 +20,6 @@ static void replace_all(std::string& source, const std::string& from, const std:
     source.swap(new_string);
 }
 
-/* workaround for https://github.com/souffle-lang/souffle/issues/1947 */
-static void unescape(std::string& str) {
-    replace_all(str, "%U+0022%", "\"");
-    replace_all(str, "%U+000A%", "\n");
-}
-
 static const char* PROGRAM_NAME = "logifix";
 
 namespace logifix {
@@ -70,8 +64,6 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             std::string replacement;
             output >> rule >> filename >> start >> end >> replacement;
 
-            // workaround for https://github.com/souffle-lang/souffle/issues/1947
-            unescape(replacement);
             rewrite_t rewrite = {rule, filename, start, end, replacement};
 
             // skip this rewrite if it has been applied to this file before
@@ -153,8 +145,6 @@ program::get_possible_rewrites(const char* filename) {
         int end;
         std::string replacement;
         output >> rule >> filename >> start >> end >> replacement;
-        // workaround for https://github.com/souffle-lang/souffle/issues/1947
-        unescape(replacement);
         result.emplace_back(rule, start, end, replacement);
     }
     return result;

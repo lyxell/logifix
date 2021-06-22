@@ -51,7 +51,7 @@ endif()
 
 message(STATUS "Building logifix version ${LOGIFIX_VERSION}")
 
-file(GLOB RULES src/rules/**/*.dl)
+file(GLOB RULES src/**/*.dl)
 
 add_custom_command(
   OUTPUT logifix.cpp
