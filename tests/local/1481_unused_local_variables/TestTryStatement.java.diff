@@ -1,0 +1,11 @@
+diff --git a/TestTryStatement.java b/TestTryStatement.java
+@@ -1,9 +1,4 @@
+ class Test {
+     void test() {
+-        try {
+-            int x = 20;
+-        } catch (Exception e) {
+-
+-        }
+     }
+ }

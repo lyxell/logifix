@@ -22,6 +22,7 @@
 #include "rules/4973_use_equals_method.dl"
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
 #include "rules/cosmetic/10000_unhoist_bang.dl"
+#include "rules/cosmetic/10001_remove_empty_try_statement.dl"
 
 #include "nodes.dl"
 
