@@ -22,12 +22,12 @@
 */
 
 rewrite(3824, filename, start, end, cat("{\n",
-    "		return ", map_var_str, ".computeIfAbsent(", key_var_str, ", ", key_var_str, " -> {\n",
-    "			", value_type_str, " ", value_var_str, " = ", value_initializer_str, ";\n",
-                substr(code, t2_end, last_element_end - t2_end), "\n",
-    "			return ", value_var_str, ";\n",
-    "		});\n",
-    "	}"
+    "        return ", map_var_str, ".computeIfAbsent(", key_var_str, ", k -> {\n",
+    "            ", value_type_str, " ", value_var_str, " = ", value_initializer_str, ";\n",
+                 substr(code, t2_end, last_element_end - t2_end), "\n",
+    "            return ", value_var_str, ";\n",
+    "        });\n",
+    "    }"
 )) :-
 
     /* We are in a block with three statements */

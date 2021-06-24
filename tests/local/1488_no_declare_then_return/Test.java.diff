@@ -1,0 +1,9 @@
+diff --git a/Test.java b/Test.java
+@@ -1,6 +1,5 @@
+ class Test {
+     int test() {
+-        int x = 20;
+-        return x;
++        return 20;
+     }
+ }

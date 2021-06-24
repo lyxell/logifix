@@ -3,6 +3,7 @@
 #include "rules/1132_string_literals_left_side.dl"
 #include "rules/1153_remove_valueof_on_string_append.dl"
 #include "rules/1155_use_isempty.dl"
+#include "rules/1488_no_declare_then_return.dl"
 #include "rules/1217_dont_call_thread_run.dl"
 #include "rules/1481_unused_local_variables.dl"
 #include "rules/1596_fix_old_empty_collection.dl"
