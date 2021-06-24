@@ -24,6 +24,7 @@
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
 #include "rules/cosmetic/10000_unhoist_bang.dl"
 #include "rules/cosmetic/10001_remove_empty_try_statement.dl"
+#include "rules/cosmetic/10002_remove_empty_finally_clause.dl"
 
 #include "nodes.dl"
 

@@ -1,0 +1,9 @@
+/* Pre  try [:body] finally {} */
+/* Post try [:body]            */
+rewrite(10002, filename, start, end, "") :-
+    try_statement(id, body, nil, finally),
+        filename_of(id, filename),
+        ends_at(id, end),
+    block(body, _),
+        ends_at(body, start),
+    block(finally, nil).
