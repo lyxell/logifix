@@ -25,6 +25,7 @@
 #include "rules/cosmetic/10000_unhoist_bang.dl"
 #include "rules/cosmetic/10001_remove_empty_try_statement.dl"
 #include "rules/cosmetic/10002_remove_empty_finally_clause.dl"
+#include "rules/cosmetic/10003_remove_empty_block.dl"
 
 #include "nodes.dl"
 
