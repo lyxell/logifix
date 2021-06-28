@@ -115,6 +115,11 @@ class_declaration(id, mods, name, superclass, superinterfaces, body) :-
     parent_of_list(id, "superinterfaces", superinterfaces),
     parent_of_list(id, "body", body).
 
+.decl static_initializer(id: id, block: id)
+static_initializer(id, block) :-
+    name_of(id, "static_initializer"),
+    parent_of(id, "block", block).
+
 .decl field_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
 field_declaration(id, mods, type, declarators) :-
     name_of(id, "field_declaration"),

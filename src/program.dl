@@ -1,3 +1,4 @@
+#include "rules/1068_remove_unused_private_field.dl"
 #include "rules/1116_remove_empty_statements.dl"
 #include "rules/1125_redundant_boolean.dl"
 #include "rules/1126_simplify_boolean_return.dl"
@@ -244,6 +245,19 @@ in_scope(constructor_body, identifier_str, field) :-
     /* available at */
     list_contains(class_body, constructor),
     constructor_declaration(constructor, _, _, _, constructor_body).
+
+/* Make field declarations in scope in the static initializers of their class */
+in_scope(initializer_body, identifier_str, field) :-
+    class_declaration(_, _, _, _, _, class_body),
+    /* declared at */
+    list_contains(class_body, field),
+    field_declaration(field, _, _, declarators),
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, identifier, _),
+    string_representation(identifier, identifier_str),
+    /* available at */
+    list_contains(class_body, constructor),
+    static_initializer(_, initializer_body).
 
 /* Make formal parameters accessible in the body of a method */
 in_scope(body, identifier_str, param) :-
