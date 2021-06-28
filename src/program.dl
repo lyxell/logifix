@@ -9,7 +9,6 @@
 #include "rules/1488_no_declare_then_return.dl"
 #include "rules/1596_fix_old_empty_collection.dl"
 #include "rules/1602_lambda_single_statement.dl"
-#include "rules/1764_identical_expressions_binary_operator.dl"
 #include "rules/1940_fix_inverted_boolean_expressions.dl"
 #include "rules/2095_close_resources.dl"
 #include "rules/2111_bigdecimal_double.dl"
