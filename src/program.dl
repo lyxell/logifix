@@ -1,5 +1,6 @@
 #include "rules/1116_remove_empty_statements.dl"
 #include "rules/1125_redundant_boolean.dl"
+#include "rules/1126_simplify_boolean_return.dl"
 #include "rules/1132_string_literals_left_side.dl"
 #include "rules/1153_remove_valueof_on_string_append.dl"
 #include "rules/1155_use_isempty.dl"
