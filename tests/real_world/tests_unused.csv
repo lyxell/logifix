@@ -42,3 +42,5 @@ rule,commit,reason
 2293_diamond_operator,https://github.com/zaproxy/zap-extensions/blob/dbe86dfb1b9404821dc65dcbfb73ba3c3bd22065/addOns/alertFilters/src/main/java/org/zaproxy/zap/extension/alertFilters/DialogAddAlertFilter.java,
 2293_diamond_operator,https://github.com/zaproxy/zap-extensions/blob/dbe86dfb1b9404821dc65dcbfb73ba3c3bd22065/addOns/alertFilters/src/main/java/org/zaproxy/zap/extension/alertFilters/ExtensionAlertFilters.java,
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/variantcontext/CommonInfo.java,we repair too much
+2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Matrices.java,need to fix detection of field references
+2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Vectors.java,need to fix detection of field references
