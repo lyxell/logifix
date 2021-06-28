@@ -13,7 +13,7 @@
 
 /* Post
 {
-    return [:map_var].computeIfAbsent([:key_var], [:key_var] -> {
+    return [:map_var].computeIfAbsent([:key_var], k -> {
         [:value_type] [:value_var] = [:value_initializer];
         [:trailing_statements]
         return [:value_var];
