@@ -503,12 +503,6 @@ is_collection_type(id) :-
     string_representation(name, name_str),
     collection_type_name(name_str).
 
-.decl is_exception_type(id: id)
-is_exception_type(id) :-
-    class_type(id, name, _, _),
-    string_representation(name, name_str),
-    match(".*Exception", name_str).
-
 .decl is_map_type(id: id)
 is_map_type(id) :-
     class_type(id, name, _, _),
