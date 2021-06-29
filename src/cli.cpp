@@ -1,5 +1,6 @@
 #include "logifix.h"
 #include "config.h"
+#include <regex>
 #include <filesystem>
 #include <future>
 #include <stack>
@@ -24,6 +25,7 @@ struct options_t {
     std::string extension;
     std::set<std::string> files;
     std::set<int> rules;
+    std::optional<std::string> ignore;
 };
 
 std::array colors = {
@@ -176,6 +178,7 @@ options_t parse_options(int argc, char** argv) {
         .extension      = ".java",
         .files          = {},
         .rules          = {},
+        .ignore         = {},
     };
 
     std::vector<std::tuple<std::string,std::function<void(std::string)>,std::string>> opts;
@@ -212,6 +215,7 @@ options_t parse_options(int argc, char** argv) {
         {"--extension=<ext>", [&](std::string str) { options.extension = str; },     "Only consider files ending with extension (default=\".java\")"},
         {"--help",            [&](std::string str) { print_usage_and_exit(0); },     "Print this information and exit"},
         {"--interactive",     [&](std::string str) { options.interactive = true; },  "Prompt for confirmation before each rewrite (default)"},
+        {"--ignore=<pattern>",[&](std::string str) { options.ignore = str; },        "Pattern for files to ignore"},
         {"--no-apply",        [&](std::string str) { options.apply = false; },       "Do not rewrite files on disk, output patch to stdout instead"},
         {"--no-color",        [&](std::string str) { options.color = false; },       "Do not colorize diffs"},
         {"--no-interactive",  [&](std::string str) { options.interactive = false; }, "Do not prompt for confirmation, apply all rewrites"},
@@ -262,6 +266,7 @@ options_t parse_options(int argc, char** argv) {
     }
 
     while (arguments.size()) {
+        std::cmatch m;
         auto argument = arguments.back();
         if (!fs::exists(argument)) {
             std::cout << "Error: Path '" << argument << "' does not exist" << std::endl;
@@ -271,15 +276,19 @@ options_t parse_options(int argc, char** argv) {
         if (fs::is_directory(argument)) {
             if (options.recurse) {
                 for (const auto& entry : fs::recursive_directory_iterator(argument)) {
-                    if (entry.is_regular_file() && entry.path().extension() == ".java") {
-                        options.files.emplace(entry.path().lexically_normal());
-                    }
+                    if (!entry.is_regular_file()) continue;
+                    if (entry.path().extension() != ".java") continue;
+                    std::string s = entry.path().lexically_normal();
+                    if (options.ignore && s.find(*(options.ignore)) != std::string::npos) continue;
+                    options.files.emplace(entry.path().lexically_normal());
                 }
             } else {
                 for (const auto& entry : fs::directory_iterator(argument)) {
-                    if (entry.is_regular_file() && entry.path().extension() == ".java") {
-                        options.files.emplace(entry.path().lexically_normal());
-                    }
+                    if (!entry.is_regular_file()) continue;
+                    if (entry.path().extension() != ".java") continue;
+                    std::string s = entry.path().lexically_normal();
+                    if (options.ignore && s.find(*(options.ignore)) != std::string::npos) continue;
+                    options.files.emplace(entry.path().lexically_normal());
                 }
             }
         } else {
