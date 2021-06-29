@@ -1,0 +1,10 @@
+{
+    "description": "Simplify calls to Collection.removeAll",
+    "sonar": {
+        "id": "S2114",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2114"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

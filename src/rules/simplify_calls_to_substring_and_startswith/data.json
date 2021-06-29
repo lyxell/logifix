@@ -1,0 +1,10 @@
+{
+    "description": "Simplify calls to String.substring and String.startsWith",
+    "sonar": {
+        "id": "S4635",
+        "url": "https://rules.sonarsource.com/java/RSPEC-4635"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

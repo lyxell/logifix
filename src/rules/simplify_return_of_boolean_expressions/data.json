@@ -1,0 +1,11 @@
+{
+    "description": "Simplify return of boolean expressions",
+    "sonar": {
+        "id": "S1126",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1126"
+    },
+    "pmd": {
+        "id": "SimplifyBooleanReturns",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_design.html#simplifybooleanreturns"
+    }
+}

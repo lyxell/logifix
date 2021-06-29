@@ -1,0 +1,10 @@
+{
+    "description": "Remove empty nested blocks",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "EmptyStatementBlock",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptystatementblock"
+    }
+}

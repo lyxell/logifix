@@ -1,0 +1,11 @@
+{
+    "description": "Remove unnecessary calls to String.valueOf",
+    "sonar": {
+        "id": "S1153",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1153"
+    },
+    "pmd": {
+        "id": "UselessStringValueOf",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_performance.html#uselessstringvalueof"
+    }
+}

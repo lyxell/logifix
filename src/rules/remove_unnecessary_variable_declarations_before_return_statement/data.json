@@ -1,0 +1,11 @@
+{
+    "description": "Remove unnecessary variable declarations before return statements",
+    "sonar": {
+        "id": "S1488",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1488"
+    },
+    "pmd": {
+        "id": "UnnecessaryLocalBeforeReturn",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "description": "Remove empty try blocks",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "EmptyTryBlock",
+        "url": "https://pmd.github.io/pmd-6.36.0/pmd_rules_java_errorprone.html#emptytryblock"
+    }
+}

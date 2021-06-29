@@ -1,0 +1,11 @@
+{
+    "description": "Fix broken null checks",
+    "sonar": {
+        "id": "S2259",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2259"
+    },
+    "pmd": {
+        "id": "BrokenNullCheck",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#brokennullcheck"
+    }
+}

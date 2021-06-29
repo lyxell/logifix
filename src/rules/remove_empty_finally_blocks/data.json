@@ -1,0 +1,10 @@
+{
+    "description": "Remove empty finally blocks",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "EmptyFinallyBlock",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptyfinallyblock"
+    }
+}

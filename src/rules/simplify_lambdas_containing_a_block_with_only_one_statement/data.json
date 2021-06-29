@@ -1,0 +1,10 @@
+{
+    "description": "Simplify lambdas containing a block with only one statement",
+    "sonar": {
+        "id": "S1602",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1602"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

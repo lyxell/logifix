@@ -1,0 +1,11 @@
+{
+    "description": "Simplify inverted boolean expressions",
+    "sonar": {
+        "id": "S1940",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1940"
+    },
+    "pmd": {
+        "id": "LogicInversion",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_design.html#logicinversion"
+    }
+}

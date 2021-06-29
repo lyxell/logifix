@@ -1,0 +1,11 @@
+{
+    "description": "Fix calls to Thread.run",
+    "sonar": {
+        "id": "S1217",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1217"
+    },
+    "pmd": {
+        "id": "DontCallThreadRun",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_multithreading.html#dontcallthreadrun"
+    }
+}

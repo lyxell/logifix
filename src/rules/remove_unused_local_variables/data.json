@@ -1,0 +1,11 @@
+{
+    "description": "Remove unused local variables",
+    "sonar": {
+        "id": "S1481",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1481"
+    },
+    "pmd": {
+        "id": "UnusedLocalVariable",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_bestpractices.html#unusedlocalvariable"
+    }
+}

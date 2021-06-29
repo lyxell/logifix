@@ -1,0 +1,10 @@
+{
+    "description": "Simplify code using Map.computeIfAbsent",
+    "sonar": {
+        "id": "S3824",
+        "url": "https://rules.sonarsource.com/java/RSPEC-3824"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

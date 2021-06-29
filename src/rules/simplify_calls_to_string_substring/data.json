@@ -1,0 +1,10 @@
+{
+    "description": "Simplify calls to String.substring",
+    "sonar": {
+        "id": "S2121",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2121"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

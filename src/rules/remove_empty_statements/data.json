@@ -1,0 +1,11 @@
+{
+    "description": "Remove empty statements",
+    "sonar": {
+        "id": "S1116",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1116"
+    },
+    "pmd": {
+        "id": "EmptyStatementNotInLoop",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptystatementnotinloop"
+    }
+}

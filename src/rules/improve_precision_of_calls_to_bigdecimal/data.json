@@ -1,0 +1,11 @@
+{
+    "description": "Improve precision of calls to BigDecimal",
+    "sonar": {
+        "id": "S2111",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2111"
+    },
+    "pmd": {
+        "id": "AvoidDecimalLiteralsInBigDecimalConstructor",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#avoiddecimalliteralsinbigdecimalconstructor"
+    }
+}

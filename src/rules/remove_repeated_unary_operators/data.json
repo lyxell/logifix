@@ -1,0 +1,11 @@
+{
+    "description": "Remove repeated unary operators",
+    "sonar": {
+        "id": "S2761",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2761"
+    },
+    "pmd": {
+        "id": "AvoidMultipleUnaryOperators",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#avoidmultipleunaryoperators"
+    }
+}
