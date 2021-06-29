@@ -10,12 +10,13 @@ namespace logifix {
 
 class program {
   private:
-    std::unique_ptr<souffle::SouffleProgram> prog;
+    souffle::SouffleProgram* prog;
     std::map<std::string, std::string> files;
     void add_string(const char* filename, const char* content);
 
   public:
     program();
+    ~program();
     std::set<std::string> run(std::string file, std::set<int> rules);
     void print();
     std::vector<std::tuple<int, size_t, size_t, std::string>>

@@ -2,6 +2,7 @@
 #include "config.h"
 #include <filesystem>
 #include <future>
+#include <stack>
 #include <cctype>
 #include <git2.h>
 #include <iostream>
@@ -298,70 +299,84 @@ int main(int argc, char** argv) {
 
     git_libgit2_init();
 
+
+    int curr_threads = 0;
     std::mutex io_mutex;
-    std::vector<std::future<void>> futures;
+    std::mutex thread_mutex;
+    std::vector<std::thread> thread_pool;
     std::map<std::string,std::string> patch;
 
-    for (const auto& file : options.files) {
-        futures.emplace_back(
-            std::async(std::launch::async, [&] {
-                logifix::program program;
-                std::string input = read_file(file);
-                auto result = program.run(input, options.rules);
-                program = {};
-                if (result.size() == 0) return;
-                std::lock_guard<std::mutex> lock(io_mutex);
-                if (options.color) {
-                    std::cerr << colors[COLOR_BOLD];
-                }
-                std::cerr << "File " << file << std::endl;
-                if (options.color) {
-                    std::cerr << colors[COLOR_RESET];
-                }
-                std::vector<std::string> chosen_rewrites;
-                size_t curr = 1;
-                for (auto rewrite : result) {
+    std::vector<std::string> file_stack(options.files.begin(), options.files.end());
+
+    for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+        thread_pool.emplace_back(
+            std::thread([&] {
+                while (true) {
+                    std::string file;
+                    {
+                        std::lock_guard<std::mutex> lock(thread_mutex);
+                        if (file_stack.empty()) return;
+                        file = file_stack.back();
+                        file_stack.pop_back();
+                    }
+                    std::unique_ptr<logifix::program> program = std::make_unique<logifix::program>();
+                    std::string input = read_file(file);
+                    auto result = program->run(input, options.rules);
+                    program = nullptr;
+                    if (result.size() == 0) continue;
+                    std::lock_guard<std::mutex> lock(io_mutex);
                     if (options.color) {
                         std::cerr << colors[COLOR_BOLD];
                     }
-                    std::cerr << "Rewrite " << curr << "/" << result.size() << std::endl;
+                    std::cerr << "File " << file << std::endl;
                     if (options.color) {
                         std::cerr << colors[COLOR_RESET];
                     }
-                    curr++;
-                    if (!options.interactive || ask_user_about_rewrite(file, input, rewrite, options.color)) {
-                        chosen_rewrites.emplace_back(rewrite);
-                    }
-
-                }
-                auto diff = nway::diff(input, chosen_rewrites);
-                assert(!nway::has_conflicts(diff));
-                auto output = nway::merge(diff);
-                if (output != input) {
-                    /* post-processing, remove introduced empty lines */
-                    auto output_lines = line_split(std::move(output));
-                    auto input_lines = line_split(std::move(input));
-                    auto lcs = nway::longest_common_subsequence(output_lines, input_lines);
-                    std::string processed;
-                    for (size_t i = 0; i < output_lines.size(); i++) {
-                        if (lcs.find(i) == lcs.end() && string_has_only_whitespace(output_lines[i])) {
-                            continue;
+                    std::vector<std::string> chosen_rewrites;
+                    size_t curr = 1;
+                    for (auto rewrite : result) {
+                        if (options.color) {
+                            std::cerr << colors[COLOR_BOLD];
                         }
-                        processed += output_lines[i];
+                        std::cerr << "Rewrite " << curr << "/" << result.size() << std::endl;
+                        if (options.color) {
+                            std::cerr << colors[COLOR_RESET];
+                        }
+                        curr++;
+                        if (!options.interactive || ask_user_about_rewrite(file, input, rewrite, options.color)) {
+                            chosen_rewrites.emplace_back(rewrite);
+                        }
+
                     }
-                    if (options.apply) {
-                        std::ofstream f(file);
-                        f << processed;
-                        f.close();
-                    } else {
-                        patch.emplace(file, processed);
+                    auto diff = nway::diff(input, chosen_rewrites);
+                    assert(!nway::has_conflict(diff));
+                    auto output = nway::merge(diff);
+                    if (output != input) {
+                        /* post-processing, remove introduced empty lines */
+                        auto output_lines = line_split(std::move(output));
+                        auto input_lines = line_split(std::move(input));
+                        auto lcs = nway::longest_common_subsequence(output_lines, input_lines);
+                        std::string processed;
+                        for (size_t i = 0; i < output_lines.size(); i++) {
+                            if (lcs.find(i) == lcs.end() && string_has_only_whitespace(output_lines[i])) {
+                                continue;
+                            }
+                            processed += output_lines[i];
+                        }
+                        if (options.apply) {
+                            std::ofstream f(file);
+                            f << processed;
+                            f.close();
+                        } else {
+                            patch.emplace(file, processed);
+                        }
                     }
                 }
             }));
     }
 
-    for (auto& f : futures) {
-        f.wait();
+    for (auto& f : thread_pool) {
+        f.join();
     }
 
     if (!options.apply) {

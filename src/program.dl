@@ -38,13 +38,6 @@
 
 .type id = [type: symbol, filename: symbol, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
-.type symbol_list = [head: symbol, tail: symbol_list]
-
-/* Tokens
- ********************************/
-
-.decl token(str: symbol, from: number, to: number)
-.input token
 
 /* AST nodes
  ********************************/
@@ -55,7 +48,9 @@
 
 .decl ast_node(id: id)
 ast_node(id) :- root(id).
-ast_node(child) :- ast_node(ancestor), ancestor_of(ancestor, child).
+ast_node(child) :-
+    ast_node(ancestor),
+    ancestor_of(ancestor, child).
 
 .decl filename_of(id: id, filename: symbol)
 filename_of([name, fn, A, B], fn) :- ast_node([name, fn, A, B]).

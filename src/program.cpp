@@ -24,13 +24,18 @@ static const char* PROGRAM_NAME = "logifix";
 
 namespace logifix {
 
-program::program() : prog(souffle::ProgramFactory::newInstance(PROGRAM_NAME)) {
+program::program() {
+    prog = souffle::ProgramFactory::newInstance(PROGRAM_NAME);
     assert(prog != nullptr);
+}
+
+program::~program() {
+    delete prog;
 }
 
 void program::add_string(const char* filename, const char* content) {
     files.emplace(filename, content);
-    sjp::parse(prog.get(), filename, content);
+    sjp::parse(prog, filename, content);
     assert(content != nullptr);
     souffle::Relation* relation = prog->getRelation("source_code");
     relation->insert(
