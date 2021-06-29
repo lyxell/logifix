@@ -1,0 +1,11 @@
+diff --git a/tests/Test.java b/tests/Test.java
+@@ -1,9 +1,4 @@
+ public class Test {
+     void test() {
+-        try {
+-
+-        } catch (Exception e) {
+-            e.printStackTrace();
+-        }
+     }
+ }

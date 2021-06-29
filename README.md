@@ -207,6 +207,19 @@ To download and build the project, perform the following steps:
 * PMD ID: [EmptyTryBlock](https://pmd.github.io/pmd-6.36.0/pmd_rules_java_errorprone.html#emptytryblock)
 * SonarSource ID: N/A
 
+#### Examples
+```diff
+         master.getDispatcherList().addFirst(new CommitLogDispatcher() {
+             @Override
+             public void dispatch(DispatchRequest request) {
+-                try {
+-                } catch (Throwable e) {
+-                    e.printStackTrace();
+-                }
+             }
+         });
+         master.getDispatcherList().addFirst(new CommitLogDispatcherCalcBitMap(brokerConfig, filterManager));
+```
 
 <ul> </ul>
 

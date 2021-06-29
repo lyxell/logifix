@@ -1,0 +1,10 @@
+         master.getDispatcherList().addFirst(new CommitLogDispatcher() {
+             @Override
+             public void dispatch(DispatchRequest request) {
+-                try {
+-                } catch (Throwable e) {
+-                    e.printStackTrace();
+-                }
+             }
+         });
+         master.getDispatcherList().addFirst(new CommitLogDispatcherCalcBitMap(brokerConfig, filterManager));
