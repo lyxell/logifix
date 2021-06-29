@@ -271,13 +271,13 @@ options_t parse_options(int argc, char** argv) {
         if (fs::is_directory(argument)) {
             if (options.recurse) {
                 for (const auto& entry : fs::recursive_directory_iterator(argument)) {
-                    if (entry.path().extension() == ".java") {
+                    if (entry.is_regular_file() && entry.path().extension() == ".java") {
                         options.files.emplace(entry.path().lexically_normal());
                     }
                 }
             } else {
                 for (const auto& entry : fs::directory_iterator(argument)) {
-                    if (entry.path().extension() == ".java") {
+                    if (entry.is_regular_file() && entry.path().extension() == ".java") {
                         options.files.emplace(entry.path().lexically_normal());
                     }
                 }
