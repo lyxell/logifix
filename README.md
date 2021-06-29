@@ -100,13 +100,13 @@ To download and build the project, perform the following steps:
 
 #### Examples
 ```diff
-      * @param tags the array of <code>Tag</code>s representing of this custom tag.
-      */
-     @Override public String toString(Tag[] tags) {
--        return null;
-+        return "";
+         case PROVIDER_KEY:
+           return "providerKey[" + key + "]";
+       }
+-      return null;
++      return "";
      }
- }
+   }
 ```
 
 <ul> </ul>

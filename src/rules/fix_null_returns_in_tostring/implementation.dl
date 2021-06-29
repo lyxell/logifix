@@ -8,7 +8,7 @@ rewrite(2225, filename, start, end, "\"\"") :-
         filename_of(method_decl, filename),
     /* Check that the method name is toString */
     method_header(method_head, _, declarator, _),
-    parent_of(declarator, "name", name),
+    method_declarator(declarator, name, nil),
     string_representation(name, "toString"),
     /* Check the values of the return statements */
     ancestor_of(method_body, return_stmt),
