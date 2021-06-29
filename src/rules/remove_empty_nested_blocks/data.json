@@ -1,7 +1,8 @@
 {
     "description": "Remove empty nested blocks",
     "sonar": {
-        "id": "N/A"
+        "id": "S108",
+        "url": "https://rules.sonarsource.com/java/RSPEC-108"
     },
     "pmd": {
         "id": "EmptyStatementBlock",
