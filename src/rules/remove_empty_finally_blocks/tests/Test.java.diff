@@ -1,0 +1,10 @@
+diff --git a/tests/Test.java b/tests/Test.java
+@@ -10,8 +10,6 @@ public class Test {
+             System.out.println(Arrays.toString(bytes));
+         } catch (IOException e) {
+             e.printStackTrace();
+-        } finally {
+-            // do nothing
+         }
+     }
+ }
