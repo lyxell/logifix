@@ -1,10 +1,11 @@
 {
-    "description": "Remove redundant calls to close",
+    "description": "Fix resource leaks",
     "sonar": {
-        "id": "S4087",
+        "id": "S2095",
         "url": "https://rules.sonarsource.com/java/RSPEC-4087"
     },
     "pmd": {
-        "id": "N/A"
+        "id": "CloseResource",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#closeresource"
     }
 }

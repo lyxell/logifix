@@ -111,10 +111,10 @@ To download and build the project, perform the following steps:
 <ul> </ul>
 
 
-### Remove redundant calls to close
+### Fix resource leaks
 
-* PMD ID: N/A
-* SonarSource ID: [S4087](https://rules.sonarsource.com/java/RSPEC-4087)
+* PMD ID: [CloseResource](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#closeresource)
+* SonarSource ID: [S2095](https://rules.sonarsource.com/java/RSPEC-4087)
 
 #### Examples
 ```diff
@@ -219,6 +219,24 @@ To download and build the project, perform the following steps:
              }
          });
          master.getDispatcherList().addFirst(new CommitLogDispatcherCalcBitMap(brokerConfig, filterManager));
+```
+
+<ul> </ul>
+
+
+### Fix redundant calls to close
+
+* PMD ID: N/A
+* SonarSource ID: [S4087](https://rules.sonarsource.com/java/RSPEC-4087)
+
+#### Examples
+```diff
+                     return;
+             }
+
+-            dataLdr.close();
+         }
+     }
 ```
 
 <ul> </ul>
