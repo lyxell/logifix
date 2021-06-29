@@ -1,0 +1,8 @@
+diff --git a/TestNegation.java b/TestNegation.java
+@@ -1,5 +1,5 @@
+ class TestNegation {
+     void test(boolean b) {
+-        System.out.println(!!b);
++        System.out.println(b);
+     }
+ }

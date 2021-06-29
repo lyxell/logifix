@@ -1,0 +1,11 @@
+diff --git a/TestIf.java b/TestIf.java
+@@ -1,8 +1,7 @@
+ class Test {
+     int test(boolean val) {
+         if (val) {
+-            int x = 20;
+-            return x;
++            return 20;
+         }
+         return 10;
+     }

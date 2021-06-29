@@ -44,3 +44,10 @@ rule,commit,reason
 1155_use_isempty,https://github.com/Micront/htsjdk/blob/c340afec92d8e54fe014695a7499a08e1948a26d/src/java/htsjdk/variant/variantcontext/CommonInfo.java,we repair too much
 2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Matrices.java,need to fix detection of field references
 2111_bigdecimal_double,https://github.com/vkostyukov/la4j/blob/fcbdaf2f8d88478d5dd48ca3575e976c7591a9cb/src/main/java/org/la4j/Vectors.java,need to fix detection of field references
+4973,https://github.com/Projeto-Partiu/RxJava/blob/10fd2c3e2fd8875800ff324607215f61698907a8/src/main/java/io/reactivex/internal/operators/flowable/FlowableGroupJoin.java,
+4973,https://github.com/Projeto-Partiu/RxJava/blob/10fd2c3e2fd8875800ff324607215f61698907a8/src/main/java/io/reactivex/internal/operators/flowable/FlowableJoin.java,
+4973,https://github.com/Projeto-Partiu/RxJava/blob/10fd2c3e2fd8875800ff324607215f61698907a8/src/main/java/io/reactivex/internal/operators/observable/ObservableGroupJoin.java,
+4973,https://github.com/Projeto-Partiu/RxJava/blob/10fd2c3e2fd8875800ff324607215f61698907a8/src/main/java/io/reactivex/internal/operators/observable/ObservableJoin.java,
+4973,https://github.com/apache/jspwiki/blob/ca88c2635936af3f057af80f5e79547a07c37b97/jspwiki-main/src/main/java/org/apache/wiki/WikiSession.java,
+4973,https://github.com/apache/jspwiki/blob/ca88c2635936af3f057af80f5e79547a07c37b97/jspwiki-main/src/main/java/org/apache/wiki/plugin/InsertPage.java,
+4973,https://github.com/apache/sling-org-apache-sling-discovery-impl/blob/5fe781459a8ffe6afc14280e3860da49cfa6eea0/src/main/java/org/apache/sling/discovery/impl/cluster/voting/VotingView.java,

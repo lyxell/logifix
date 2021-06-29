@@ -1,0 +1,9 @@
+diff --git a/TestEmptyBlock.java b/TestEmptyBlock.java
+@@ -1,7 +1,4 @@
+ class Test {
+     void test() {
+-        {
+-            int x = 20;
+-        }
+     }
+ }

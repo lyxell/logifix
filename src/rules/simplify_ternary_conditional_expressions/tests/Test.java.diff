@@ -1,0 +1,9 @@
+diff --git a/Test.java b/Test.java
+@@ -7,6 +7,6 @@ class Test1 {
+         }
+     }
+     boolean test(Inner obj) {
+-        return obj == null ? false : obj.run();
++        return obj != null && obj.run();
+     }
+ }

@@ -1,8 +1,0 @@
-diff --git a/Test.java b/Test.java
-@@ -1,5 +1,5 @@
- class Test {
-     void test() {
--        System.out.println(!!true);
-+        System.out.println(true);
-     }
- }

@@ -1,0 +1,18 @@
+/* FIXME This implementation has a bug where inner classes and lambdas will also be rewritten */
+/* Solve by introducing a rule like parent_method(method_decl, node) */
+
+/* Pre  null */
+/* Post ""   */
+rewrite(2225, filename, start, end, "\"\"") :-
+    method_declaration(method_decl, _, method_head, method_body),
+        filename_of(method_decl, filename),
+    /* Check that the method name is toString */
+    method_header(method_head, _, declarator, _),
+    parent_of(declarator, "name", name),
+    string_representation(name, "toString"),
+    /* Check the values of the return statements */
+    ancestor_of(method_body, return_stmt),
+    return_statement(return_stmt, expr),
+        starts_at(expr, start),
+        ends_at(expr, end),
+    null_literal(expr).

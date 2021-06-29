@@ -1,0 +1,19 @@
+/* Pre  [:x] == true */
+/* Post [:x]         */
+rewrite(1125, filename, start, end, other_expr_str) :-
+    equals_expression_unordered(eq_expr, true_expr, other_expr),
+        filename_of(eq_expr, filename),
+        starts_at(eq_expr, start),
+        ends_at(eq_expr, end),
+    evaluates_to_boolean_value(true_expr, 1),
+    string_representation_with_parentheses(other_expr, other_expr_str).
+
+/* Pre  [:x] == false */
+/* Post ![:x]         */
+rewrite(1125, filename, start, end, cat("!", other_expr_str)) :-
+    equals_expression_unordered(eq_expr, false_expr, other_expr),
+        filename_of(eq_expr, filename),
+        starts_at(eq_expr, start),
+        ends_at(eq_expr, end),
+    evaluates_to_boolean_value(false_expr, 0),
+    string_representation_with_parentheses(other_expr, other_expr_str).
