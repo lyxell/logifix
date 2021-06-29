@@ -41,6 +41,17 @@ To download and build the project, perform the following steps:
 * PMD ID: [DontCallThreadRun](https://pmd.github.io/latest/pmd_rules_java_multithreading.html#dontcallthreadrun)
 * SonarSource ID: [S1217](https://rules.sonarsource.com/java/RSPEC-1217)
 
+#### Examples
+```diff
+                 Thread.currentThread().interrupt();
+             }
+
+-            thread.run();
++            thread.start();
+         } catch (Throwable ex) {
+             dispatchUncaughtException(thread, ex);
+         } finally {
+```
 
 <ul> </ul>
 

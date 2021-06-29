@@ -1,0 +1,8 @@
+                 Thread.currentThread().interrupt();
+             }
+
+-            thread.run();
++            thread.start();
+         } catch (Throwable ex) {
+             dispatchUncaughtException(thread, ex);
+         } finally {
