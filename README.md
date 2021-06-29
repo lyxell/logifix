@@ -87,6 +87,16 @@ To download and build the project, perform the following steps:
 * PMD ID: N/A
 * SonarSource ID: [S2225](https://rules.sonarsource.com/java/RSPEC-2225)
 
+#### Examples
+```diff
+      * @param tags the array of <code>Tag</code>s representing of this custom tag.
+      */
+     @Override public String toString(Tag[] tags) {
+-        return null;
++        return "";
+     }
+ }
+```
 
 <ul> </ul>
 
@@ -141,6 +151,17 @@ To download and build the project, perform the following steps:
 * PMD ID: [AvoidDecimalLiteralsInBigDecimalConstructor](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#avoiddecimalliteralsinbigdecimalconstructor)
 * SonarSource ID: [S2111](https://rules.sonarsource.com/java/RSPEC-2111)
 
+#### Examples
+```diff
+     private int taskNotificationThreads = 5;
+     private int taskYieldThreads = 3;
+
+-    private BigDecimal levelTimeMultiplier = new BigDecimal(2.0);
++    private BigDecimal levelTimeMultiplier = BigDecimal.valueOf(2.0);
+
+     private boolean legacyLifespanCompletionCondition;
+     private TaskPriorityTracking taskPriorityTracking = TaskPriorityTracking.TASK_FAIR;
+```
 
 <ul> </ul>
 

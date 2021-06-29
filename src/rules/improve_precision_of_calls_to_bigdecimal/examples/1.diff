@@ -1,0 +1,8 @@
+     private int taskNotificationThreads = 5;
+     private int taskYieldThreads = 3;
+
+-    private BigDecimal levelTimeMultiplier = new BigDecimal(2.0);
++    private BigDecimal levelTimeMultiplier = BigDecimal.valueOf(2.0);
+
+     private boolean legacyLifespanCompletionCondition;
+     private TaskPriorityTracking taskPriorityTracking = TaskPriorityTracking.TASK_FAIR;
