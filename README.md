@@ -224,7 +224,7 @@ To download and build the project, perform the following steps:
 <ul> </ul>
 
 
-### Fix redundant calls to close
+### Remove redundant calls to close
 
 * PMD ID: N/A
 * SonarSource ID: [S4087](https://rules.sonarsource.com/java/RSPEC-4087)

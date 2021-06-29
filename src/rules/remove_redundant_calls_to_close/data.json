@@ -1,5 +1,5 @@
 {
-    "description": "Fix redundant calls to close",
+    "description": "Remove redundant calls to close",
     "sonar": {
         "id": "S4087",
         "url": "https://rules.sonarsource.com/java/RSPEC-4087"
