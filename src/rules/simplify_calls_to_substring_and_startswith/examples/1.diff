@@ -1,0 +1,8 @@
+                     String path = entry.getPath();
+                     int index = path.lastIndexOf('/') + 1;
+
+-                    if (path.substring(index).startsWith(name + '.')) {
++                    if (path.startsWith(name + '.', index)) {
+                         // Select the correct root type
+                         mainType = currentType;
+                     }

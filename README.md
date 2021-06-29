@@ -117,6 +117,16 @@ To download and build the project, perform the following steps:
  		return metadata.keySet();
  	}
 ```
+```diff
+     @NotNull
+     public Map<String, AdvertisedListener> getAdvertisedListeners() {
+         if (this.advertisedListeners == null) {
+-            return Collections.EMPTY_MAP;
++            return Collections.emptyMap();
+         }
+         return Collections.unmodifiableMap(this.advertisedListeners);
+     }
+```
 
 <ul> </ul>
 
@@ -395,6 +405,17 @@ To download and build the project, perform the following steps:
 * PMD ID: N/A
 * SonarSource ID: [S4635](https://rules.sonarsource.com/java/RSPEC-4635)
 
+#### Examples
+```diff
+                     String path = entry.getPath();
+                     int index = path.lastIndexOf('/') + 1;
+
+-                    if (path.substring(index).startsWith(name + '.')) {
++                    if (path.startsWith(name + '.', index)) {
+                         // Select the correct root type
+                         mainType = currentType;
+                     }
+```
 
 <ul> </ul>
 
