@@ -1,0 +1,12 @@
+diff --git a/Test.java b/Test.java
+@@ -8,9 +8,7 @@ public class TestLambda {
+         numbers.add(3);
+         numbers.add(4);
+         numbers.add(5);
+-        numbers.removeIf(n -> {
+-            return n % 2 == 0;
+-        });
++        numbers.removeIf(n -> n % 2 == 0);
+         System.out.println(numbers);
+     }
+ }
