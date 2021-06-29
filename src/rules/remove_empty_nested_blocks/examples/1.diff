@@ -1,0 +1,7 @@
+ public class SnippetCommentResource {
+
+     public void modifiedMethod() {
+-        {
+-        }
+         return;
+     }

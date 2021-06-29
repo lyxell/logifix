@@ -1,0 +1,19 @@
+      * @param initializer is called immediately after the value is added to the map
+      */
+     static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Consumer<V> initializer) {
+-        V value = map.get(key);
+-        if (value == null) {
+-            value = valueCreator.get();
+-            map.put(key, value);
++        return map.computeIfAbsent(key, k -> {
++            V value = valueCreator.get();
+             if (initializer != null) {
+                 initializer.accept(value);
+             }
+-        }
+-        return value;
++            return value;
++        });
+     }
+     static <T> boolean addUniqueObject(Collection<T> col, T o) {
+         if (containsObject(col, o)) {

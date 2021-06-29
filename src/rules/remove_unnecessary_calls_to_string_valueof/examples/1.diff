@@ -1,0 +1,8 @@
+         if (size == 0) {
+             return String.valueOf(r.nextFloat());
+         }
+-        String format = "%" + String.valueOf(size) + "f";
++        String format = "%" + size + "f";
+
+         return String.format(format, _getFloatValue(size));
+     }

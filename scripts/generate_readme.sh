@@ -4,6 +4,7 @@ cat header.md
 
 for f in ../src/rules/*; do
     json_file="$f/data.json"
+    examples_dir="$f/examples"
     if [ -f "$json_file" ]; then
 
         echo ""
@@ -18,6 +19,15 @@ for f in ../src/rules/*; do
             echo "* SonarSource ID: N/A"
         else
             echo "* SonarSource ID: [$(jq --raw-output .sonar.id $json_file)]($(jq --raw-output .sonar.url $json_file))"
+        fi
+        echo ""
+        if [ -d "$examples_dir" ]; then
+            echo "#### Examples"
+            for ex in "$examples_dir"/*; do
+                echo "\`\`\`diff"
+                cat "$ex"
+                echo "\`\`\`"
+            done
         fi
         echo ""
         echo "<ul> </ul>"

@@ -1,0 +1,7 @@
+ 		//move end after the last char
+ 		end++;
+-		while (start < end && explicitModifiersByName.size() > 0) {
++		while (start < end && !explicitModifiersByName.isEmpty()) {
+ 			int o1 = findNextNonWhitespace(contents, end - 1, start);
+ 			if (o1 == -1) {
+ 				break;

@@ -1,0 +1,8 @@
+ 	@Override
+ 	public Set<String> getMetadataKeys() {
+ 		if (metadata == null) {
+-			return Collections.EMPTY_SET;
++			return Collections.emptySet();
+ 		}
+ 		return metadata.keySet();
+ 	}

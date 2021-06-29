@@ -1,0 +1,8 @@
+ 				Collections.singletonList(compilationUnit.getOriginalSourceFragment()),
+ 				new ChangeResolver(getChangeCollector(), compilationUnit)),
+ 		() -> {
+-			super.calculate(sourceCompilationUnit, types);;
++			super.calculate(sourceCompilationUnit, types);
+ 		});
+ 	}
+

@@ -1,0 +1,8 @@
+ 		return false;
+ 	}
+ 	private boolean checkIdentifierChars(String simplename) {
+-		if (simplename.length() == 0) {
++		if (simplename.isEmpty()) {
+ 			return false;
+ 		}
+ 		return (!Character.isJavaIdentifierStart(simplename.charAt(0)))

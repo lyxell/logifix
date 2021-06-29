@@ -1,0 +1,13 @@
+      * @return the associated list of {@link HttpData} for the request
+      */
+     private List<HttpData> getList(HttpRequest request) {
+-        List<HttpData> list = requestFileDeleteMap.get(request);
+-        if (list == null) {
+-            list = new ArrayList<HttpData>();
+-            requestFileDeleteMap.put(request, list);
+-        }
+-        return list;
++        return requestFileDeleteMap.computeIfAbsent(request, k -> new ArrayList<HttpData>());
+     }
+
+     @Override

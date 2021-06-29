@@ -1,0 +1,10 @@
+ 	 * @param conflictMode
+ 	 */
+ 	void setNodeOfElement(CtElement element, RootNode node, ConflictResolutionMode conflictMode) {
+-		modifyNodeOfElement(element, conflictMode, oldNode -> {
+-			return node;
+-		});
++		modifyNodeOfElement(element, conflictMode, oldNode -> node);
+ 	}
+
+ 	/**

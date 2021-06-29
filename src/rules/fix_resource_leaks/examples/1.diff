@@ -1,0 +1,13 @@
+     public static Object unwrapResp(URL url, TripleWrapper.TripleResponseWrapper wrap,
+                                     MultipleSerialization serialization) {
+         String serializeType = convertHessianFromWrapper(wrap.getSerializeType());
+-        try {
+-            final ByteArrayInputStream bais = new ByteArrayInputStream(wrap.getData().toByteArray());
+-            final Object ret = serialization.deserialize(url, serializeType, wrap.getType(), bais);
+-            bais.close();
+-            return ret;
++        try (final ByteArrayInputStream bais = new ByteArrayInputStream(wrap.getData().toByteArray())) {
++            return serialization.deserialize(url, serializeType, wrap.getType(), bais);
+         } catch (Exception e) {
+             throw new RuntimeException("Failed to unwrap resp", e);
+         }

@@ -1,0 +1,8 @@
+     @Override
+     public TypeDefinition build(ProcessingEnvironment processingEnv, DeclaredType type, Map<String, TypeDefinition> typeCache) {
+-        TypeDefinition td = new TypeDefinition(type.toString());
+-        return td;
++        return new TypeDefinition(type.toString());
+     }
+
+     @Override
