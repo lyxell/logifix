@@ -208,7 +208,7 @@ To download and build the project, perform the following steps:
 ### Remove empty nested blocks
 
 * PMD ID: [EmptyStatementBlock](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptystatementblock)
-* SonarSource ID: N/A
+* SonarSource ID: [S108](https://rules.sonarsource.com/java/RSPEC-108)
 
 #### Examples
 ```diff
@@ -308,6 +308,24 @@ To download and build the project, perform the following steps:
 
          return String.format(format, _getFloatValue(size));
      }
+```
+
+<ul> </ul>
+
+
+### Remove unnecessary return statements
+
+* PMD ID: [UnnecessaryReturn](https://pmd.github.io/latest/pmd_rules_java_codestyle.html#unnecessaryreturn)
+* SonarSource ID: [S3626](https://rules.sonarsource.com/java/RSPEC-3626)
+
+#### Examples
+```diff
+             into.addError(error);
+         }
+-        return;
+     }
+
+     public static void main(String[] argv) throws IOException {
 ```
 
 <ul> </ul>

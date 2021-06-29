@@ -33,5 +33,7 @@ for f in ../src/rules/*; do
         echo "<ul> </ul>"
         echo ""
         
+    else
+        >&2 echo "$f not found"
     fi
 done

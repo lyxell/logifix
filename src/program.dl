@@ -1,19 +1,20 @@
-#include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
 #include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
+#include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
 #include "rules/fix_comparisons_of_objects_with_null/implementation.dl"
 #include "rules/fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison/implementation.dl"
 #include "rules/fix_null_returns_in_tostring/implementation.dl"
 #include "rules/fix_references_to_collections_empty_list_empty_map_and_empty_set/implementation.dl"
 #include "rules/fix_resource_leaks/implementation.dl"
 #include "rules/improve_precision_of_calls_to_bigdecimal/implementation.dl"
-#include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_finally_blocks/implementation.dl"
+#include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_repeated_unary_operators/implementation.dl"
 #include "rules/remove_unnecessary_calls_to_string_valueof/implementation.dl"
+#include "rules/remove_unnecessary_return/implementation.dl"
 #include "rules/remove_unnecessary_variable_declarations_before_return_statement/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
 #include "rules/remove_unused_private_fields/implementation.dl"
@@ -625,16 +626,4 @@ string_representation_with_parentheses(id, cat("(", id_str, ")")) :-
  ********************************/
 
 .decl rewrite(rule: number, filename: symbol, start: number, end: number, to: symbol)
-rewrite(rule, filename, start1, end3, cat(to1, substr(code, end1, start2 - end1),
-                                       to2, substr(code, end2, start3 - end2),
-                                       to3)) :-
-    rewrite_3(rule, filename, start1, end1, to1,
-                              start2, end2, to2,
-                              start3, end3, to3),
-    source_code(filename, code).
-
-.decl rewrite_3(rule: number, filename: symbol, start1: number, end1: number, to1: symbol,
-                                                start2: number, end2: number, to2: symbol,
-                                                start3: number, end3: number, to3: symbol)
-.output rewrite_3(IO=stdout)
-.output rewrite(IO=stdout)
+.output rewrite
