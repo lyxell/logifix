@@ -201,7 +201,6 @@ string_representation([name, filename, A, B], substr(code, A, B - A)) :-
 .decl in_scope(position: id, identifier: symbol, type: id)
 .output in_scope
 
-/* Scope of variables is transitive (TODO: lambda is a special case?) */
 in_scope(descendant, identifier, decl_point) :-
     in_scope(ancestor, identifier, decl_point),
     ancestor_of(ancestor, descendant).
