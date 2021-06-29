@@ -22,14 +22,3 @@ rewrite(1125, filename, start, end, cat("!", other_expr_str)) :-
         ends_at(eq_expr, end),
     evaluates_to_boolean_value(false_expr, 0),
     string_representation_with_parentheses(other_expr, other_expr_str).
-
-/* Pre   [:x] ? false : [:z] */
-/* Post  ![:x] && [:z]        */
-rewrite(1125, filename, start, end, cat("!", cond_str, " && ", other_expr_str)) :-
-    conditional_expression(cond_expr, cond, false_expr, other_expr),
-        filename_of(cond_expr, filename),
-        starts_at(cond_expr, start),
-        ends_at(cond_expr, end),
-    evaluates_to_boolean_value(false_expr, 0),
-    string_representation_with_parentheses(cond, cond_str),
-    string_representation_with_parentheses(other_expr, other_expr_str).

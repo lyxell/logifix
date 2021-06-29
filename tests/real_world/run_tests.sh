@@ -1,5 +1,5 @@
 #!/bin/bash
-regex="([0-9]{4})([a-z0-9_]+),.*/blob/[a-z0-9-]+/(.*),(.*)$"
+regex="([0-9]{4}),.*/blob/[a-z0-9-]+/(.*),(.*)$"
 set -e
 set -o pipefail
 
@@ -9,10 +9,9 @@ logifix_cli="$2"
 tail +2 < "$csv" | while IFS= read -r f; do
     if [[ $f =~ $regex ]]; then
         rule_number="${BASH_REMATCH[1]}"
-        suffix="${BASH_REMATCH[2]}"
-        file="${BASH_REMATCH[3]}"
-        diff_flags="--color=always --unified ${BASH_REMATCH[4]}"
-        input="${rule_number}${suffix}/${file}"
+        file="${BASH_REMATCH[2]}"
+        diff_flags="--color=always --unified ${BASH_REMATCH[3]}"
+        input="${rule_number}/${file}"
         t1=$(mktemp)
         t2=$(mktemp)
         echo "$rule_number"
