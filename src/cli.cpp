@@ -28,15 +28,11 @@ struct options_t {
     std::optional<std::string> ignore;
 };
 
-std::array colors = {
-    "\033[m",   /* reset */
-    "\033[1m",  /* bold */
-    "\033[31m", /* red */
-    "\033[32m", /* green */
-    "\033[36m"  /* cyan */
-};
-
-enum { COLOR_RESET, COLOR_BOLD, COLOR_RED, COLOR_GREEN, COLOR_CYAN };
+static const char* COLOR_BOLD  = "\033[1m";
+static const char* COLOR_RESET = "\033[m";
+static const char* COLOR_RED   = "\033[31m";
+static const char* COLOR_GREEN = "\033[32m";
+static const char* COLOR_CYAN  = "\033[36m";
 
 struct printer_opts {
     bool color;
@@ -85,17 +81,17 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
         switch (line->origin) {
             case GIT_DIFF_LINE_ADD_EOFNL:
             case GIT_DIFF_LINE_ADDITION:
-                std::cout << colors[COLOR_GREEN];
+                std::cout << COLOR_GREEN;
                 break;
             case GIT_DIFF_LINE_DEL_EOFNL:
             case GIT_DIFF_LINE_DELETION:
-                std::cout << colors[COLOR_RED];
+                std::cout << COLOR_RED;
                 break;
             case GIT_DIFF_LINE_FILE_HDR:
-                std::cout << colors[COLOR_BOLD];
+                std::cout << COLOR_BOLD;
                 break;
             case GIT_DIFF_LINE_HUNK_HDR:
-                std::cout << colors[COLOR_CYAN];
+                std::cout << COLOR_CYAN;
                 break;
             default:
                 break;
@@ -118,7 +114,7 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
     std::cout << std::endl;
 
     if (opts->color) {
-        std::cout << colors[COLOR_RESET];
+        std::cout << COLOR_RESET;
     }
 
     return 0;
@@ -149,11 +145,11 @@ void print_patch(std::string filename, std::string before, std::string after, pr
 bool ask_user_about_rewrite(std::string filename, std::string before, std::string after, bool color) {
     print_patch(std::move(filename), std::move(before), std::move(after), {color, false});
     if (color) {
-        std::cout << colors[COLOR_CYAN];
+        std::cout << COLOR_CYAN;
     }
     std::cout << "Apply these changes? [y,N]" << std::endl;
     if (color) {
-        std::cout << colors[COLOR_RESET] ;
+        std::cout << COLOR_RESET;
     }
     std::string line;
     std::getline(std::cin, line);
@@ -184,12 +180,13 @@ options_t parse_options(int argc, char** argv) {
     std::vector<std::tuple<std::string,std::function<void(std::string)>,std::string>> opts;
 
     auto print_usage_and_exit = [&opts](int exit_code) {
-        std::cout << "Usage: " << PROJECT_NAME << " [OPTIONS] PATH [PATH ...]" << std::endl;
+        std::cout << COLOR_BOLD << "USAGE" << COLOR_RESET << std::endl;
+        std::cout << "  " << PROJECT_NAME << " [OPTIONS] PATH [PATH ...]" << std::endl;
         std::cout << std::endl;
-        std::cout << "Example:" << std::endl;
+        std::cout << COLOR_BOLD << "EXAMPLES" << COLOR_RESET << std::endl;
         std::cout << "  " << PROJECT_NAME << " --rules=1125,1155 src/main src/test" << std::endl;
         std::cout << std::endl;
-        std::cout << "Options:" << std::endl;
+        std::cout << COLOR_BOLD << "OPTIONS" << COLOR_RESET << std::endl;
         for (const auto [option, _, description] : opts) {
             std::cout << " " << std::setw(19) << std::left << option << description << std::endl;
         }
@@ -335,21 +332,21 @@ int main(int argc, char** argv) {
                     if (result.size() == 0) continue;
                     std::lock_guard<std::mutex> lock(io_mutex);
                     if (options.color) {
-                        std::cerr << colors[COLOR_BOLD];
+                        std::cerr << COLOR_BOLD;
                     }
                     std::cerr << "File " << file << std::endl;
                     if (options.color) {
-                        std::cerr << colors[COLOR_RESET];
+                        std::cerr << COLOR_RESET;
                     }
                     std::vector<std::string> chosen_rewrites;
                     size_t curr = 1;
                     for (auto rewrite : result) {
                         if (options.color) {
-                            std::cerr << colors[COLOR_BOLD];
+                            std::cerr << COLOR_BOLD;
                         }
                         std::cerr << "Rewrite " << curr << "/" << result.size() << std::endl;
                         if (options.color) {
-                            std::cerr << colors[COLOR_RESET];
+                            std::cerr << COLOR_RESET;
                         }
                         curr++;
                         if (!options.interactive || ask_user_about_rewrite(file, input, rewrite, options.color)) {
