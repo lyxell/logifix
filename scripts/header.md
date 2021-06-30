@@ -9,11 +9,15 @@ multi-threaded C++ code.
 
 https://user-images.githubusercontent.com/4975941/120327017-9c470280-c2e9-11eb-88d1-163943d550ce.mp4
 
+<ul> </ul>
+
 ## Downloading
 
 There are pre-built binaries available for GNU/Linux without any
 runtime dependencies, see
 [Releases](https://github.com/lyxell/logifix/releases).
+
+<ul> </ul>
 
 ## Building
 
@@ -24,5 +28,7 @@ To download and build the project, perform the following steps:
 * `git clone https://github.com/lyxell/logifix`
 * `cd logifix && git submodule update --init`
 * `mkdir build && cd build && cmake .. && cmake --build .`
+
+<ul> </ul>
 
 ## Available fixes
