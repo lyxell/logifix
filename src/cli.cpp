@@ -145,7 +145,7 @@ void print_patch(std::string filename, std::string before, std::string after, pr
 bool ask_user_about_rewrite(std::string filename, std::string before, std::string after, bool color) {
     print_patch(std::move(filename), std::move(before), std::move(after), {color, false});
     std::cout << COLOR_BOLD << COLOR_GREEN << "?" << COLOR_RESET;
-    std::cout << COLOR_BOLD << " Do you want to apply these changes?" << COLOR_RESET;
+    std::cout << COLOR_BOLD << " Do you want to keep these changes?" << COLOR_RESET;
     std::cout << " [y,N] " << COLOR_RESET;
     std::string line;
     std::getline(std::cin, line);
