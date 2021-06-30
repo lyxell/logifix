@@ -37,3 +37,5 @@ for f in ../src/rules/*; do
         >&2 echo "$f not found"
     fi
 done
+
+cat footer.md
