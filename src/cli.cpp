@@ -108,7 +108,13 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
 
     while (true) {
         if (line->content[i] == '\0' || line->content[i] == '\n' || line->content[i] == '\r') break;
-        std::cout << line->content[i++];
+        // render tab as four spaces
+        if (line->content[i] == '\t') {
+            std::cout << "    ";
+        } else {
+            std::cout << line->content[i];
+        }
+        i++;
     }
 
     std::cout << std::endl;
