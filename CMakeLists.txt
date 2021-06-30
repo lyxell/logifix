@@ -67,7 +67,7 @@ option(LOGIFIX_BUILD_LIBRARY "Build logifix as a library" OFF)
 IF (LOGIFIX_BUILD_LIBRARY)
     add_library(logifix OBJECT src/program.cpp logifix.cpp)
 ELSE ()
-    add_executable(logifix src/cli.cpp src/program.cpp logifix.cpp)
+    add_executable(logifix src/cli.cpp src/tty.cpp src/program.cpp logifix.cpp)
 ENDIF ()
 
 target_link_libraries(logifix git2 sjp nway)

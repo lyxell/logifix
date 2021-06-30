@@ -1,4 +1,5 @@
 #include "logifix.h"
+#include "tty.h"
 #include "config.h"
 #include <regex>
 #include <filesystem>
@@ -54,6 +55,28 @@ std::vector<std::string> line_split(std::string str) {
         str = str.substr(i + 1);
     }
     return result;
+}
+
+std::string get_char() {
+    switch (getchar()) {
+    case 0x0d: return "return";
+    case 0x1b:
+        switch (getchar()) {
+            case 0x5b:
+                switch (getchar()) {
+                    case 0x41: return "up";
+                    case 0x42: return "down";
+                    case 0x44: return "left";
+                    case 0x43: return "right";
+                    default: break;
+                }
+                break;
+            default: break;
+        }
+        break;
+    default: break;
+    }
+    return "unknown";
 }
 
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
@@ -299,6 +322,46 @@ options_t parse_options(int argc, char** argv) {
     return options;
 }
 
+size_t multi_choice(std::string question, std::vector<std::string> alternatives) {
+    std::cout << COLOR_BOLD << COLOR_GREEN << "?" << COLOR_RESET;
+    std::cout << COLOR_BOLD << " " << question << COLOR_RESET;
+    std::cout << " [Use arrows to move] " << COLOR_RESET;
+    size_t cursor = 0;
+    size_t scroll = 0;
+    size_t height = 10;
+    while (true) {
+        if (cursor < scroll) {
+            scroll = cursor;
+        } else if (cursor == scroll + height) {
+            scroll = cursor - height + 1;
+        }
+        for (size_t i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
+            std::cout << std::endl;
+            if (cursor == i) {
+                std::cout << COLOR_CYAN << "> ";
+            } else {
+                std::cout << "  ";
+            }
+            std::cout << alternatives[i] << "\x1b[K";
+            std::cout << COLOR_RESET;
+        }
+        for (size_t i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
+            std::cout << "\x1b[A";
+        }
+        auto res = get_char();
+        if (res == "up" && cursor > 0) {
+            cursor--;
+        }
+        if (res == "down" && cursor + 1 < alternatives.size()) {
+            cursor++;
+        }
+        if (res == "return") {
+            return cursor;
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char** argv) {
 
     options_t options = parse_options(argc, argv);
@@ -312,7 +375,7 @@ int main(int argc, char** argv) {
     std::mutex io_mutex;
     std::mutex thread_mutex;
     std::vector<std::thread> thread_pool;
-    std::map<std::string,std::string> patch;
+    std::map<std::string,std::vector<std::string>> rewrites;
 
     std::vector<std::string> file_stack(options.files.begin(), options.files.end());
 
@@ -332,7 +395,7 @@ int main(int argc, char** argv) {
                     auto result = program->run(input, options.rules);
                     program = nullptr;
                     if (result.size() == 0) continue;
-                    std::lock_guard<std::mutex> lock(io_mutex);
+                    /*std::lock_guard<std::mutex> lock(io_mutex);
                     if (options.color) {
                         std::cerr << COLOR_BOLD;
                     }
@@ -359,19 +422,22 @@ int main(int argc, char** argv) {
                     auto diff = nway::diff(input, chosen_rewrites);
                     assert(!nway::has_conflict(diff));
                     auto output = nway::merge(diff);
-                    if (output != input) {
-                        /* post-processing, remove introduced empty lines */
-                        auto output_lines = line_split(std::move(output));
-                        auto input_lines = line_split(std::move(input));
-                        auto lcs = nway::longest_common_subsequence(output_lines, input_lines);
-                        std::string processed;
-                        for (size_t i = 0; i < output_lines.size(); i++) {
-                            if (lcs.find(i) == lcs.end() && string_has_only_whitespace(output_lines[i])) {
-                                continue;
+                    */
+                    for (auto output : result) {
+                        if (output != input) {
+                            /* post-processing, remove introduced empty lines */
+                            auto output_lines = line_split(std::move(output));
+                            auto input_lines = line_split(std::move(input));
+                            auto lcs = nway::longest_common_subsequence(output_lines, input_lines);
+                            std::string processed;
+                            for (size_t i = 0; i < output_lines.size(); i++) {
+                                if (lcs.find(i) == lcs.end() && string_has_only_whitespace(output_lines[i])) {
+                                    continue;
+                                }
+                                processed += output_lines[i];
                             }
-                            processed += output_lines[i];
+                            rewrites[file].emplace_back(processed);
                         }
-                        patch.emplace(file, processed);
                     }
                 }
             }));
@@ -381,10 +447,33 @@ int main(int argc, char** argv) {
         f.join();
     }
 
-    if (options.interactive) {
-        std::cout << COLOR_BOLD << patch.size() << " files changed" << COLOR_RESET << std::endl;
+    size_t rewrites_sum = 0;
+    for (const auto& [file, rws] : rewrites) {
+        rewrites_sum += rws.size();
     }
 
+    tty_enable_cbreak_mode();
+
+    if (options.interactive) {
+        std::cout << COLOR_BOLD << "Found " << rewrites_sum << " rewrites across ";
+        std::cout << rewrites.size() << " files " << COLOR_RESET << std::endl << std::endl;
+        size_t selection;
+        selection = multi_choice("What would you like to do?", {
+            "Review rewrites by rule",
+            "Review rewrites by file",
+            "Exit without doing anything",
+        });
+
+        if (selection == 1) {
+            std::vector<std::string> options;
+            for (auto& [k, v] : rewrites) options.emplace_back(k);
+            selection = multi_choice("What would you like to do?", options);
+        }
+    }
+
+    tty_disable_cbreak_mode();
+
+    /*
     for (auto [filename, after] : patch) {
         if (options.apply) {
             std::ofstream f(filename);
@@ -394,7 +483,7 @@ int main(int argc, char** argv) {
             std::string before = read_file(filename);
             print_patch(filename, before, after, {options.color, true});
         }
-    }
+    }*/
 
     return 0;
 }
