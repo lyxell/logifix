@@ -365,13 +365,7 @@ int main(int argc, char** argv) {
                             }
                             processed += output_lines[i];
                         }
-                        if (options.apply) {
-                            std::ofstream f(file);
-                            f << processed;
-                            f.close();
-                        } else {
-                            patch.emplace(file, processed);
-                        }
+                        patch.emplace(file, processed);
                     }
                 }
             }));
@@ -381,8 +375,16 @@ int main(int argc, char** argv) {
         f.join();
     }
 
-    if (!options.apply) {
-        for (auto [filename, after] : patch) {
+    if (options.interactive) {
+        std::cout << COLOR_BOLD << patch.size() << " files changed" << COLOR_RESET << std::endl;
+    }
+
+    for (auto [filename, after] : patch) {
+        if (options.apply) {
+            std::ofstream f(filename);
+            f << after;
+            f.close();
+        } else {
             std::string before = read_file(filename);
             print_patch(filename, before, after, {options.color, true});
         }
