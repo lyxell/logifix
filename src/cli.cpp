@@ -1,5 +1,6 @@
 #include "logifix.h"
 #include "tty.h"
+#include "rules.h"
 #include "config.h"
 #include <regex>
 #include <filesystem>
@@ -487,7 +488,14 @@ int main(int argc, char** argv) {
                     std::vector<std::string> options;
                     for (auto& [rule, rws] : rules) {
                         keys.emplace_back(rule);
-                        options.emplace_back(std::to_string(rule) + " (" + std::to_string(rws.size()) + ")");
+                        std::string description = std::to_string(rule);
+                        for (auto [squid, pmdid, desc] : rule_data) {
+                            if (squid == "S" + std::to_string(rule)) {
+                                description = desc;
+                                break;
+                            }
+                        }
+                        options.emplace_back(description + " (" + std::to_string(rws.size()) + ")");
                     }
                     auto rule_selection = multi_choice("Which rule would you like to review?", options, true);
                     if (rule_selection == -1) break;
