@@ -15,9 +15,6 @@
 
 namespace fs = std::filesystem;
 
-static const char* TTY_HIDE_CURSOR = "\033[?25l";
-static const char* TTY_SHOW_CURSOR = "\033[?25h";
-
 struct options_t {
     bool apply;
     bool color;
@@ -29,11 +26,13 @@ struct options_t {
     std::optional<std::string> ignore;
 };
 
-static const char* COLOR_BOLD  = "\033[1m";
-static const char* COLOR_RESET = "\033[m";
-static const char* COLOR_RED   = "\033[31m";
-static const char* COLOR_GREEN = "\033[32m";
-static const char* COLOR_CYAN  = "\033[36m";
+static const char* COLOR_BOLD       = "\033[1m";
+static const char* COLOR_CYAN       = "\033[36m";
+static const char* COLOR_GREEN      = "\033[32m";
+static const char* COLOR_RED        = "\033[31m";
+static const char* COLOR_RESET      = "\033[m";
+static const char* TTY_HIDE_CURSOR  = "\033[?25l";
+static const char* TTY_SHOW_CURSOR  = "\033[?25h";
 
 struct printer_opts {
     bool color;
