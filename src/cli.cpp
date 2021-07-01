@@ -469,6 +469,7 @@ int main(int argc, char** argv) {
     tty_enable_cbreak_mode();
 
     if (options.interactive) {
+        std::cout << std::endl;
         std::cout << COLOR_BOLD << "Found " << rewrites_sum << " rewrites across ";
         std::cout << rewrites.size() << " files " << COLOR_RESET << std::endl << std::endl;
         size_t selection;
