@@ -1,7 +1,6 @@
 #!/bin/bash
 
 function generate {
-    echo "#pragma once"
     echo "#include <vector>"
     echo "#include <tuple>"
     echo "#include <string>"

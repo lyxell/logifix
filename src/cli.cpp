@@ -1,6 +1,5 @@
 #include "logifix.h"
 #include "tty.h"
-#include "rules.h"
 #include "config.h"
 #include <regex>
 #include <filesystem>
@@ -13,6 +12,8 @@
 #include <tuple>
 #include <mutex>
 #include <nway.h>
+
+extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
 
 namespace fs = std::filesystem;
 
