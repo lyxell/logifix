@@ -339,7 +339,7 @@ int multi_choice(std::string question, std::vector<std::string> alternatives, bo
     }
     int cursor = 0;
     size_t scroll = 0;
-    size_t height = 10;
+    size_t height = 15;
     bool found = false;
     while (true) {
         if (cursor != -1 && cursor < scroll) {
