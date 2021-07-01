@@ -43,14 +43,14 @@ void program::add_string(const char* filename, const char* content) {
                                   prog->getSymbolTable().encode(content)}));
 }
 
-std::set<std::string> program::run(std::string file, std::set<int> rules) {
+std::set<std::pair<std::string, int>> program::run(std::string file, std::set<int> rules) {
     add_string("original", file.c_str());
 
     std::set<rewrite_t> rewrites;
-    std::set<std::string> file_set;
+    std::map<std::string,std::string> file_set;
     std::set<std::string> has_children;
 
-    std::map<std::string, std::tuple<std::string, size_t, size_t, size_t>> created_from;
+    std::map<std::string, rewrite_t> created_from;
 
     while (true) {
 
@@ -79,14 +79,14 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             // skip this rewrite if it exists in a parent
             // FIXME this could be simplified with nway
             if (created_from.find(filename) != created_from.end()) {
-                auto [parent_filename, pstart, pend, psize] = created_from[filename];
+                auto [prule, parent_filename, pstart, pend, prepl] = created_from[filename];
                 if (end <= pstart) {
                     rewrite_t matching_rewrite = {rule, parent_filename, start, end, replacement};
                     if (rewrites.find(matching_rewrite) != rewrites.end()) {
                         continue;
                     }
-                } else if (start >= (pstart + psize)) {
-                    auto diff = (pend - pstart) - psize;
+                } else if (start >= (pstart + prepl.size())) {
+                    auto diff = (pend - pstart) - prepl.size();
                     rewrite_t matching_rewrite = {rule, parent_filename, start + diff, end + diff, replacement};
                     if (rewrites.find(matching_rewrite) != rewrites.end()) {
                         continue;
@@ -99,31 +99,41 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
 
 
         std::vector<std::string> new_files;
-        for (auto [rule, filename, start, end, replacement] : new_rewrites) {
-
+        for (auto new_rewrite : new_rewrites) {
+            auto [rule, filename, start, end, replacement] = new_rewrite;
             // do not perform rewrites of the original file that the user is not interested in
-            if (filename == "original" && !rules.empty() && rules.find(rule) == rules.end()) continue;
+            if (filename == "original" && !rules.empty() && rules.find(rule) == rules.end()) {
+                continue;
+            }
             auto source = files[filename];
             auto dest = source.substr(0, start) + replacement + source.substr(end);
             auto dest_filename = filename + "-[" + std::to_string(rule) + "," + std::to_string(start) + "," + std::to_string(end) + "]";
             has_children.emplace(source);
-            created_from.emplace(dest_filename, std::tuple(filename, start, end, replacement.size()));
+            created_from.emplace(dest_filename, new_rewrite);
             if (file_set.find(dest) == file_set.end()) {
                 new_files.emplace_back(dest);
-                file_set.emplace(dest);
+                file_set.emplace(dest, dest_filename);
                 add_string(dest_filename.c_str(), dest.c_str());
             }
         }
 
         // if there are no new source files, break
-        if (new_files.size() == 0) break;
+        if (new_files.size() == 0) {
+            break;
+        }
 
     }
 
-    std::set<std::string> result;
+    std::set<std::pair<std::string, int>> result;
 
-    for (auto str : file_set) {
-        if (has_children.find(str) == has_children.end()) result.emplace(str);
+    for (auto [str,fn] : file_set) {
+        if (has_children.find(str) == has_children.end()) {
+            auto curr = fn;
+            while (std::get<1>(created_from[curr]) != "original") {
+                curr = std::get<1>(created_from[curr]);
+            }
+            result.emplace(str, std::get<0>(created_from[curr]));
+        }
     }
     
     return result;

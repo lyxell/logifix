@@ -17,7 +17,7 @@ class program {
   public:
     program();
     ~program();
-    std::set<std::string> run(std::string file, std::set<int> rules);
+    std::set<std::pair<std::string, int>> run(std::string file, std::set<int> rules);
     void print();
     std::vector<std::tuple<int, size_t, size_t, std::string>>
     get_possible_rewrites(const char* filename);

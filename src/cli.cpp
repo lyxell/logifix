@@ -386,7 +386,7 @@ int main(int argc, char** argv) {
     std::mutex io_mutex;
     std::mutex thread_mutex;
     std::vector<std::thread> thread_pool;
-    std::map<std::string,std::vector<std::string>> rewrites;
+    std::vector<std::tuple<std::string,int,std::string>> rewrites;
 
     std::vector<std::string> file_stack(options.files.begin(), options.files.end());
 
@@ -434,7 +434,7 @@ int main(int argc, char** argv) {
                     assert(!nway::has_conflict(diff));
                     auto output = nway::merge(diff);
                     */
-                    for (auto output : result) {
+                    for (auto [output, rule] : result) {
                         if (output != input) {
                             /* post-processing, remove introduced empty lines */
                             /*
@@ -450,7 +450,8 @@ int main(int argc, char** argv) {
                             }
                             rewrites[file].emplace_back(processed);
                             */
-                            rewrites[file].emplace_back(output);
+                            std::lock_guard<std::mutex> lock(thread_mutex);
+                            rewrites.emplace_back(file, rule, output);
                         }
                     }
                 }
@@ -461,17 +462,11 @@ int main(int argc, char** argv) {
         f.join();
     }
 
-    size_t rewrites_sum = 0;
-    for (const auto& [file, rws] : rewrites) {
-        rewrites_sum += rws.size();
-    }
-
     tty_enable_cbreak_mode();
 
     if (options.interactive) {
         std::cout << std::endl;
-        std::cout << COLOR_BOLD << "Found " << rewrites_sum << " rewrites across ";
-        std::cout << rewrites.size() << " files " << COLOR_RESET << std::endl << std::endl;
+        std::cout << COLOR_BOLD << "Found " << rewrites.size() << " rewrites" << COLOR_RESET << std::endl << std::endl;
         size_t selection;
         selection = multi_choice("What would you like to do?", {
             "Review rewrites by rule",
@@ -479,26 +474,58 @@ int main(int argc, char** argv) {
             "Exit without doing anything",
         });
 
+        if (selection == 0) {
+            std::map<int,std::vector<std::tuple<std::string,std::string>>> rules;
+            for (auto& [fn, rule, res] : rewrites) {
+                rules[rule].emplace_back(fn, res);
+            }
+
+            std::vector<int> keys;
+            std::vector<std::string> options;
+            for (auto& [rule, rws] : rules) {
+                keys.emplace_back(rule);
+                options.emplace_back(std::to_string(rule) + " (" + std::to_string(rws.size()) + ")");
+            }
+            selection = multi_choice("Which rule would you like to review?", options);
+            tty_disable_cbreak_mode();
+            auto rule = keys[selection];
+            size_t curr = 1;
+            for (auto [fn, rewrite] : rules[rule]) {
+                std::cout << std::endl;
+                std::cout << "-----------------------------------------------------------" << std::endl;
+                std::cout << std::endl << COLOR_BOLD << "Rewrite " << curr++ << "/" << rules[rule].size() << " • " << fn << COLOR_RESET << std::endl << std::endl;
+                std::string input = read_file(fn);
+                ask_user_about_rewrite("", input, rewrite, true);
+
+            }
+        }
+
         if (selection == 1) {
+            std::map<std::string,std::vector<std::tuple<int,std::string>>> files;
+            for (auto& [fn, rule, res] : rewrites) {
+                files[fn].emplace_back(rule, res);
+            }
+
             std::vector<std::string> keys;
             std::vector<std::string> options;
-            for (auto& [k, v] : rewrites) {
-                keys.emplace_back(k);
-                options.emplace_back(k + " (" + std::to_string(v.size()) + ")");
+            for (auto& [fn, rws] : files) {
+                keys.emplace_back(fn);
+                options.emplace_back(fn + " (" + std::to_string(rws.size()) + ")");
             }
             selection = multi_choice("Which file would you like to review?", options);
             tty_disable_cbreak_mode();
             auto file = keys[selection];
             size_t curr = 1;
-            for (auto rewrite : rewrites[file]) {
+            for (auto [rule, rewrite] : files[file]) {
                 std::cout << std::endl;
                 std::cout << "-----------------------------------------------------------" << std::endl;
-                std::cout << std::endl << COLOR_BOLD << "Rewrite " << curr++ << "/" << rewrites[file].size() << " • " << file << COLOR_RESET << std::endl << std::endl;
+                std::cout << std::endl << COLOR_BOLD << "Rewrite " << curr++ << "/" << files[file].size() << " • " << file << COLOR_RESET << std::endl << std::endl;
                 std::string input = read_file(file);
                 ask_user_about_rewrite("", input, rewrite, true);
 
             }
         }
+
     }
 
     tty_disable_cbreak_mode();
