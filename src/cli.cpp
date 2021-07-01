@@ -488,9 +488,11 @@ int main(int argc, char** argv) {
             selection = multi_choice("Which file would you like to review?", options);
             tty_disable_cbreak_mode();
             auto file = keys[selection];
-            std::cout << file << std::endl << std::endl;
+            size_t curr = 1;
             for (auto rewrite : rewrites[file]) {
-                //std::cout << "Rewrite " <<  << "/" << result.size() << std::endl;
+                std::cout << std::endl;
+                std::cout << "-----------------------------------------------------------" << std::endl;
+                std::cout << std::endl << COLOR_BOLD << "Rewrite " << curr++ << "/" << rewrites[file].size() << " • " << file << COLOR_RESET << std::endl << std::endl;
                 std::string input = read_file(file);
                 ask_user_about_rewrite("", input, rewrite, true);
 
