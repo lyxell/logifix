@@ -329,6 +329,7 @@ size_t multi_choice(std::string question, std::vector<std::string> alternatives)
     size_t cursor = 0;
     size_t scroll = 0;
     size_t height = 10;
+    bool found = false;
     while (true) {
         if (cursor < scroll) {
             scroll = cursor;
@@ -338,12 +339,17 @@ size_t multi_choice(std::string question, std::vector<std::string> alternatives)
         for (size_t i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
             std::cout << std::endl;
             if (cursor == i) {
-                std::cout << COLOR_CYAN << "> ";
+                std::cout << "> ";
             } else {
                 std::cout << "  ";
             }
             std::cout << alternatives[i] << "\x1b[K";
             std::cout << COLOR_RESET;
+        }
+        if (found) {
+            std::cout << std::endl;
+            std::cout << std::endl;
+            return cursor;
         }
         for (size_t i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
             std::cout << "\x1b[A";
@@ -356,7 +362,7 @@ size_t multi_choice(std::string question, std::vector<std::string> alternatives)
             cursor++;
         }
         if (res == "return") {
-            return cursor;
+            found = true;
         }
     }
     return 0;
@@ -467,7 +473,7 @@ int main(int argc, char** argv) {
         if (selection == 1) {
             std::vector<std::string> options;
             for (auto& [k, v] : rewrites) options.emplace_back(k);
-            selection = multi_choice("What would you like to do?", options);
+            selection = multi_choice("Which file would you like to review?", options);
         }
     }
 

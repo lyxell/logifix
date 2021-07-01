@@ -1,0 +1,7 @@
+diff --git a/tests/Test.java b/tests/Test.java
+@@ -1,5 +1,4 @@
+ public class Test {
+     void test() {
+-        return;
+     }
+ }

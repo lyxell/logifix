@@ -1,0 +1,10 @@
+{
+    "description": "Simplify calls to constructor for string conversion",
+    "sonar": {
+        "id": "S2131",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2131"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

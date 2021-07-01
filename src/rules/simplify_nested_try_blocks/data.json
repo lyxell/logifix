@@ -1,0 +1,10 @@
+{
+    "description": "",
+    "sonar": {
+        "id": "S1141",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1141"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}
