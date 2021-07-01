@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
     std::mutex io_mutex;
     std::mutex thread_mutex;
     std::vector<std::thread> thread_pool;
-    std::vector<std::tuple<std::string,int,std::string>> rewrites;
+    std::vector<std::tuple<std::string,int,std::string, bool>> rewrites;
 
     std::vector<std::string> file_stack(options.files.begin(), options.files.end());
 
@@ -428,7 +428,7 @@ int main(int argc, char** argv) {
                             rewrites[file].emplace_back(processed);
                             */
                             std::lock_guard<std::mutex> lock(thread_mutex);
-                            rewrites.emplace_back(file, rule, output);
+                            rewrites.emplace_back(file, rule, output, false);
                         }
                     }
                 }
@@ -439,26 +439,35 @@ int main(int argc, char** argv) {
         f.join();
     }
 
-    auto review = [](decltype(rewrites) rw) {
-        size_t curr = 1;
-        for (auto [fn, rule, rewrite] : rw) {
-            std::cout << "-----------------------------------------------------------" << std::endl;
-            std::cout << std::endl << COLOR_BOLD << "Rewrite ";
-            std::cout << curr++ << "/" << rw.size() << " • ";
-            std::cout << fn << COLOR_RESET << std::endl << std::endl;
-            std::string input = read_file(fn);
-            ask_user_about_rewrite("", input, rewrite, true);
-            std::cout << std::endl;
-        }
+    auto review = [](auto& rw, size_t curr, size_t total) {
+        auto& [fn, rule, rewrite, accepted] = rw;
+        std::cout << "-----------------------------------------------------------" << std::endl;
+        std::cout << std::endl << COLOR_BOLD << "Rewrite ";
+        std::cout << curr << "/" << total << " • ";
+        std::cout << fn << COLOR_RESET << std::endl << std::endl;
+        std::string input = read_file(fn);
+        accepted = ask_user_about_rewrite("", input, rewrite, true);
+        std::cout << std::endl;
     };
 
     if (!options.patch && !options.in_place) {
 
         while (true) {
 
-            std::cout << std::endl;
-            std::cout << COLOR_BOLD << "Found " << rewrites.size();
-            std::cout << " rewrites" << COLOR_RESET << std::endl << std::endl;
+            size_t selected_rewrites = std::count_if(rewrites.begin(), rewrites.end(), [](auto rewrite) {
+                return std::get<3>(rewrite);
+            });
+
+            if (selected_rewrites > 0) {
+                std::cout << std::endl;
+                std::cout << COLOR_BOLD << "Selected " << selected_rewrites << "/";
+                std::cout << rewrites.size();
+                std::cout << " rewrites" << COLOR_RESET << std::endl << std::endl;
+            } else {
+                std::cout << std::endl;
+                std::cout << COLOR_BOLD << "Found " << rewrites.size();
+                std::cout << " rewrites" << COLOR_RESET << std::endl << std::endl;
+            }
 
             auto selection = multi_choice("What would you like to do?", {
                 "Review rewrites by rule",
@@ -471,13 +480,17 @@ int main(int argc, char** argv) {
             while (true) {
 
                 if (selection == 0) {
-                    std::map<int,decltype(rewrites)> rules;
-                    for (auto rewrite : rewrites) {
+                    std::map<int, decltype(rewrites)> rules;
+                    for (auto& rewrite : rewrites) {
                         rules[std::get<1>(rewrite)].emplace_back(rewrite);
                     }
                     std::vector<int> keys;
                     std::vector<std::string> options;
                     for (auto& [rule, rws] : rules) {
+                        size_t accepted = 0;
+                        for (auto rw : rws) {
+                            if (std::get<3>(rw)) accepted++;
+                        }
                         keys.emplace_back(rule);
                         std::string description = std::to_string(rule);
                         for (auto [squid, pmdid, desc] : rule_data) {
@@ -486,14 +499,25 @@ int main(int argc, char** argv) {
                                 break;
                             }
                         }
-                        options.emplace_back(description + " (" + std::to_string(rws.size()) + ")");
+                        if (accepted > 0) {
+                            options.emplace_back(description + COLOR_GREEN + " (" + std::to_string(accepted) + "/" + std::to_string(rws.size()) + ")" + COLOR_RESET);
+                        } else {
+                            options.emplace_back(description + " (" + std::to_string(accepted) + "/" + std::to_string(rws.size()) + ")");
+
+                        }
                     }
                     auto rule_selection = multi_choice("Which rule would you like to review?", options, true);
                     if (rule_selection == -1) break;
                     auto rule = keys[rule_selection];
-                    review(rules[rule]);
+                    size_t curr = 1;
+                    size_t total = rules[rule].size();
+                    for (auto& rw : rewrites) {
+                        if (std::get<1>(rw) == rule) {
+                            review(rw, curr, total);
+                        }
+                    }
                 } else if (selection == 1) {
-                    std::map<std::string,decltype(rewrites)> files;
+                    /*std::map<std::string, decltype(rewrites)> files;
                     for (auto rewrite : rewrites) {
                         files[std::get<0>(rewrite)].emplace_back(rewrite);
                     }
@@ -506,7 +530,7 @@ int main(int argc, char** argv) {
                     auto file_selection = multi_choice("Which file would you like to review?", options, true);
                     if (file_selection == -1) break;
                     auto file = keys[file_selection];
-                    review(files[file]);
+                    review(files[file]);*/
                 } else {
                     break;
                 }
