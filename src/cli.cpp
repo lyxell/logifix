@@ -63,6 +63,10 @@ std::vector<std::string> line_split(std::string str) {
 std::string get_char() {
     switch (getchar()) {
     case 0x0d: return "return";
+    case  'k': return "up";
+    case  'j': return "down";
+    case  'h': return "left";
+    case  'l': return "right";
     case 0x1b:
         switch (getchar()) {
             case 0x5b:
@@ -381,7 +385,7 @@ int multi_choice(std::string question, std::vector<std::string> alternatives, bo
         if (res == "down" && cursor + 1 < alternatives.size()) {
             cursor++;
         }
-        if (res == "return") {
+        if (res == "return" || res == "right") {
             found = true;
         }
     }
