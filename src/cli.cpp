@@ -18,14 +18,11 @@ extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
 namespace fs = std::filesystem;
 
 struct options_t {
-    bool apply;
-    bool color;
-    bool recurse;
-    bool interactive;
-    std::string extension;
+    bool accept_all;
+    bool in_place;
+    bool patch;
     std::set<std::string> files;
-    std::set<int> rules;
-    std::optional<std::string> ignore;
+    std::set<std::string> accepted;
 };
 
 static const char* COLOR_BOLD       = "\033[1m";
@@ -203,59 +200,55 @@ void print_version_and_exit() {
 }
 
 options_t parse_options(int argc, char** argv) {
+
     options_t options = {
-        .apply          = true,
-        .color          = true,
-        .recurse        = true,
-        .interactive    = true,
-        .extension      = ".java",
+        .accept_all     = false,
+        .in_place       = false,
+        .patch          = false,
         .files          = {},
-        .rules          = {},
-        .ignore         = {},
+        .accepted       = {},
     };
 
     std::vector<std::tuple<std::string,std::function<void(std::string)>,std::string>> opts;
 
-    auto print_usage_and_exit = [&opts](int exit_code) {
+    auto print_usage = []() {
         std::cout << COLOR_BOLD << "USAGE" << COLOR_RESET << std::endl;
-        std::cout << "  " << PROJECT_NAME << " [OPTIONS] PATH [PATH ...]" << std::endl;
+        std::cout << "  " << PROJECT_NAME << " [flags] path [path ...]" << std::endl;
         std::cout << std::endl;
-        std::cout << COLOR_BOLD << "EXAMPLES" << COLOR_RESET << std::endl;
-        std::cout << "  " << PROJECT_NAME << " --rules=1125,1155 src/main src/test" << std::endl;
-        std::cout << std::endl;
-        std::cout << COLOR_BOLD << "OPTIONS" << COLOR_RESET << std::endl;
+    };
+
+    auto print_flags = [&opts]() {
+        std::cout << COLOR_BOLD << "FLAGS" << COLOR_RESET << std::endl;
         for (const auto [option, _, description] : opts) {
             std::cout << " " << std::setw(19) << std::left << option << description << std::endl;
         }
         std::cout << std::endl;
-        std::cout << PROJECT_NAME << " was created by Anton Lyxell, more information and the" << std::endl;
-        std::cout << "latest release can be found at " << PROJECT_URL << std::endl;
-        std::exit(exit_code);
     };
 
-    auto parse_rules = [&](std::string str) {
+    auto print_examples = []() {
+        std::cout << COLOR_BOLD << "EXAMPLES" << COLOR_RESET << std::endl;
+        std::cout << std::endl;
+        std::cout << "  " << PROJECT_NAME << " src/main src/test" << std::endl;
+        std::cout << std::endl;
+        std::cout << "  " << PROJECT_NAME << " --in-place --accept=1125,1155 Test.java" << std::endl;
+        std::cout << std::endl;
+    };
+
+    auto parse_accepted = [&](std::string str) {
         std::stringstream ss(str);
-        for (int i; ss >> i;) {
-            options.rules.emplace(i);
-            if (ss.peek() == ',') {
-                ss.ignore();
-            }
+        while (ss.good()) {
+            std::string substr;
+            std::getline(ss, substr, ',');
+            options.accepted.emplace(substr);
         }
     };
 
     opts = {
-        {"--apply",           [&](std::string str) { options.apply = true; },        "Rewrite files on disk (default)"},
-        {"--color",           [&](std::string str) { options.color = true; },        "Colorize diffs (default)"},
-        {"--extension=<ext>", [&](std::string str) { options.extension = str; },     "Only consider files ending with extension (default=\".java\")"},
-        {"--help",            [&](std::string str) { print_usage_and_exit(0); },     "Print this information and exit"},
-        {"--interactive",     [&](std::string str) { options.interactive = true; },  "Prompt for confirmation before each rewrite (default)"},
-        {"--ignore=<pattern>",[&](std::string str) { options.ignore = str; },        "Pattern for files to ignore"},
-        {"--no-apply",        [&](std::string str) { options.apply = false; },       "Do not rewrite files on disk, output patch to stdout instead"},
-        {"--no-color",        [&](std::string str) { options.color = false; },       "Do not colorize diffs"},
-        {"--no-interactive",  [&](std::string str) { options.interactive = false; }, "Do not prompt for confirmation, apply all rewrites"},
-        {"--no-recurse",      [&](std::string str) { options.recurse = false; },     "Do not recursively search in subfolders"},
-        {"--recurse",         [&](std::string str) { options.recurse = true; },      "Recursively search in subfolders (default)"},
-        {"--rules=<rules>",   [&](std::string str) { parse_rules(str); },            "Comma-separated set of rules to find rewrites for"},
+        {"--accept-all",      [&](std::string str) { options.accept_all = true; },   "Accept all rewrites without asking"},
+        {"--accept=<rules>",  [&](std::string str) { parse_accepted(str);  },        "Comma-separated list of rules to accept"},
+        {"--in-place",        [&](std::string str) { options.in_place = true; },        "Disable interaction, rewrite files on disk"},
+        {"--patch",           [&](std::string str) { options.patch = true; },        "Disable interaction, output a patch to stdout"},
+        {"--help",            [&](std::string str) { print_usage(); print_flags(); print_examples(); std::exit(0); },     "Print this information and exit"},
         {"--version",         [&](std::string str) { print_version_and_exit(); },    "Print version information and exit"},
     };
 
@@ -286,17 +279,20 @@ options_t parse_options(int argc, char** argv) {
             }
         }
         if (!found) {
-            std::cout << "Error: Found invalid argument '" << argument << "'" << std::endl;
+            std::cout << "Error: Found invalid flag '" << argument << "'" << std::endl;
             std::cout << std::endl;
-            print_usage_and_exit(1);
+            print_usage();
+            print_flags();
+            std::exit(1);
         }
         arguments.pop_back();
     }
 
     if (arguments.empty()) {
-        std::cout << "Error: No path specified" << std::endl;
-        std::cout << std::endl;
-        print_usage_and_exit(1);
+        print_usage();
+        print_flags();
+        print_examples();
+        std::exit(0);
     }
 
     while (arguments.size()) {
@@ -305,25 +301,15 @@ options_t parse_options(int argc, char** argv) {
         if (!fs::exists(argument)) {
             std::cout << "Error: Path '" << argument << "' does not exist" << std::endl;
             std::cout << std::endl;
-            print_usage_and_exit(1);
+            print_usage();
+            std::exit(1);
         }
         if (fs::is_directory(argument)) {
-            if (options.recurse) {
-                for (const auto& entry : fs::recursive_directory_iterator(argument)) {
-                    if (!entry.is_regular_file()) continue;
-                    if (entry.path().extension() != ".java") continue;
-                    std::string s = entry.path().lexically_normal();
-                    if (options.ignore && s.find(*(options.ignore)) != std::string::npos) continue;
-                    options.files.emplace(entry.path().lexically_normal());
-                }
-            } else {
-                for (const auto& entry : fs::directory_iterator(argument)) {
-                    if (!entry.is_regular_file()) continue;
-                    if (entry.path().extension() != ".java") continue;
-                    std::string s = entry.path().lexically_normal();
-                    if (options.ignore && s.find(*(options.ignore)) != std::string::npos) continue;
-                    options.files.emplace(entry.path().lexically_normal());
-                }
+            for (const auto& entry : fs::recursive_directory_iterator(argument)) {
+                if (!entry.is_regular_file()) continue;
+                if (entry.path().extension() != ".java") continue;
+                std::string s = entry.path().lexically_normal();
+                options.files.emplace(entry.path().lexically_normal());
             }
         } else {
             options.files.emplace(fs::path(std::move(argument)).lexically_normal());
@@ -422,7 +408,7 @@ int main(int argc, char** argv) {
                     }
                     std::unique_ptr<logifix::program> program = std::make_unique<logifix::program>();
                     std::string input = read_file(file);
-                    auto result = program->run(input, options.rules);
+                    auto result = program->run(input, {});
                     program = nullptr;
                     if (result.size() == 0) continue;
                     for (auto [output, rule] : result) {
@@ -466,7 +452,7 @@ int main(int argc, char** argv) {
         }
     };
 
-    if (options.interactive) {
+    if (!options.patch && !options.in_place) {
 
         while (true) {
 
