@@ -31,6 +31,8 @@ static const char* COLOR_CYAN       = "\033[36m";
 static const char* COLOR_GREEN      = "\033[32m";
 static const char* COLOR_RED        = "\033[31m";
 static const char* COLOR_RESET      = "\033[m";
+static const char* TTY_CLEAR_TO_EOL = "\033[K";
+static const char* TTY_CURSOR_UP    = "\033[A";
 static const char* TTY_HIDE_CURSOR  = "\033[?25l";
 static const char* TTY_SHOW_CURSOR  = "\033[?25h";
 
@@ -353,7 +355,7 @@ int multi_choice(std::string question, std::vector<std::string> alternatives, bo
             } else {
                 std::cout << "  ";
             }
-            std::cout << alternatives[i] << "\x1b[K";
+            std::cout << alternatives[i] << TTY_CLEAR_TO_EOL;
             std::cout << COLOR_RESET;
         }
         if (found) {
@@ -364,7 +366,7 @@ int multi_choice(std::string question, std::vector<std::string> alternatives, bo
             return cursor;
         }
         for (size_t i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
-            std::cout << "\x1b[A";
+            std::cout << TTY_CURSOR_UP;
         }
         auto res = get_char();
         if (res == "left" && exit_on_left) {
@@ -417,34 +419,6 @@ int main(int argc, char** argv) {
                     auto result = program->run(input, options.rules);
                     program = nullptr;
                     if (result.size() == 0) continue;
-                    /*std::lock_guard<std::mutex> lock(io_mutex);
-                    if (options.color) {
-                        std::cerr << COLOR_BOLD;
-                    }
-                    std::cerr << "File " << file << std::endl;
-                    if (options.color) {
-                        std::cerr << COLOR_RESET;
-                    }
-                    std::vector<std::string> chosen_rewrites;
-                    size_t curr = 1;
-                    for (auto rewrite : result) {
-                        if (options.color) {
-                            std::cerr << COLOR_BOLD;
-                        }
-                        std::cerr << "Rewrite " << curr << "/" << result.size() << std::endl;
-                        if (options.color) {
-                            std::cerr << COLOR_RESET;
-                        }
-                        curr++;
-                        if (!options.interactive || ask_user_about_rewrite(file, input, rewrite, options.color)) {
-                            chosen_rewrites.emplace_back(rewrite);
-                        }
-
-                    }
-                    auto diff = nway::diff(input, chosen_rewrites);
-                    assert(!nway::has_conflict(diff));
-                    auto output = nway::merge(diff);
-                    */
                     for (auto [output, rule] : result) {
                         if (output != input) {
                             /* post-processing, remove introduced empty lines */
@@ -554,6 +528,12 @@ int main(int argc, char** argv) {
             print_patch(filename, before, after, {options.color, true});
         }
     }*/
+
+    /*
+    auto diff = nway::diff(input, chosen_rewrites);
+    assert(!nway::has_conflict(diff));
+    auto output = nway::merge(diff);
+    */
 
     return 0;
 }
