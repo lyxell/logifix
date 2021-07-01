@@ -97,6 +97,10 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
         return 0;
     }
 
+    if (!opts->print_file_header && line->origin == GIT_DIFF_LINE_HUNK_HDR) {
+        return 0;
+    }
+
     (void)delta;
     (void)hunk;
 
@@ -173,8 +177,9 @@ void print_patch(std::string filename, std::string before, std::string after, pr
 
 bool ask_user_about_rewrite(std::string filename, std::string before, std::string after, bool color) {
     print_patch(std::move(filename), std::move(before), std::move(after), {color, false});
+    std::cout << std::endl;
     std::cout << COLOR_BOLD << COLOR_GREEN << "?" << COLOR_RESET;
-    std::cout << COLOR_BOLD << " Do you want to keep these changes?" << COLOR_RESET;
+    std::cout << COLOR_BOLD << " Do you want to use this rewrite?" << COLOR_RESET;
     std::cout << " [y,N] " << COLOR_RESET;
     std::string line;
     std::getline(std::cin, line);
@@ -432,6 +437,7 @@ int main(int argc, char** argv) {
                     for (auto output : result) {
                         if (output != input) {
                             /* post-processing, remove introduced empty lines */
+                            /*
                             auto output_lines = line_split(std::move(output));
                             auto input_lines = line_split(std::move(input));
                             auto lcs = nway::longest_common_subsequence(output_lines, input_lines);
@@ -443,6 +449,8 @@ int main(int argc, char** argv) {
                                 processed += output_lines[i];
                             }
                             rewrites[file].emplace_back(processed);
+                            */
+                            rewrites[file].emplace_back(output);
                         }
                     }
                 }
@@ -471,9 +479,22 @@ int main(int argc, char** argv) {
         });
 
         if (selection == 1) {
+            std::vector<std::string> keys;
             std::vector<std::string> options;
-            for (auto& [k, v] : rewrites) options.emplace_back(k);
+            for (auto& [k, v] : rewrites) {
+                keys.emplace_back(k);
+                options.emplace_back(k + " (" + std::to_string(v.size()) + ")");
+            }
             selection = multi_choice("Which file would you like to review?", options);
+            tty_disable_cbreak_mode();
+            auto file = keys[selection];
+            std::cout << file << std::endl << std::endl;
+            for (auto rewrite : rewrites[file]) {
+                //std::cout << "Rewrite " <<  << "/" << result.size() << std::endl;
+                std::string input = read_file(file);
+                ask_user_about_rewrite("", input, rewrite, true);
+
+            }
         }
     }
 
