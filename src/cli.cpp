@@ -498,8 +498,8 @@ int main(int argc, char** argv) {
                     "Review rewrites by rule",
                     "Review rewrites by file",
                     "Show a diff of the current changes",
-                    "Rewrite files in place and exit",
-                    "Exit without doing anything",
+                    "Apply changes to files on disk and exit",
+                    "Discard changes and exit",
                 });
 
                 if (selection == 2) {
