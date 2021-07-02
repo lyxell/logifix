@@ -14,7 +14,7 @@
 /**
  * Rewrite a try-catch statement into a try-with-resources statement.
  */
-rewrite(2095, filename, try_start, decl_end, cat("try (", declaration_str, ") {")) :-
+rewrite("S2095", filename, try_start, decl_end, cat("try (", declaration_str, ") {")) :-
     try_statement(try_stmt, body, _, _),
     filename_of(try_stmt, filename),
     block(body, [declaration_stmt, _]),

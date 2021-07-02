@@ -227,7 +227,7 @@ options_t parse_options(int argc, char** argv) {
     auto print_examples = []() {
         fmt::print(fmt::emphasis::bold, "EXAMPLES\n\n");
         fmt::print("  {} src/main src/test\n\n", PROJECT_NAME);
-        fmt::print("  {} src/main --in-place --accept=1125,1155 Test.java\n\n", PROJECT_NAME);
+        fmt::print("  {} src/main --in-place --accept=S1125,S1155 Test.java\n\n", PROJECT_NAME);
     };
 
     auto parse_accepted = [&](std::string str) {
@@ -375,7 +375,7 @@ int main(int argc, char** argv) {
 
     std::mutex thread_mutex;
     std::vector<std::thread> thread_pool;
-    std::vector<std::tuple<std::string,int,std::string, bool>> rewrites;
+    std::vector<std::tuple<std::string,std::string,std::string, bool>> rewrites;
 
     std::vector<std::string> file_stack(options.files.begin(), options.files.end());
 
@@ -492,11 +492,11 @@ int main(int argc, char** argv) {
             while (true) {
 
                 if (selection == 0) {
-                    std::map<int, decltype(rewrites)> rules;
+                    std::map<std::string, decltype(rewrites)> rules;
                     for (auto& rewrite : rewrites) {
                         rules[std::get<1>(rewrite)].emplace_back(rewrite);
                     }
-                    std::vector<int> keys;
+                    std::vector<std::string> keys;
                     std::vector<std::string> options;
                     for (auto& [rule, rws] : rules) {
                         size_t accepted = 0;
@@ -504,9 +504,9 @@ int main(int argc, char** argv) {
                             if (std::get<3>(rw)) accepted++;
                         }
                         keys.emplace_back(rule);
-                        std::string description = std::to_string(rule);
+                        std::string description = rule;
                         for (auto [squid, pmdid, desc] : rule_data) {
-                            if (squid == "S" + std::to_string(rule)) {
+                            if (squid == rule) {
                                 description = fmt::format("{} • {}", desc, squid);
                                 break;
                             }
@@ -560,7 +560,7 @@ int main(int argc, char** argv) {
         }
         if (!options.accepted.empty()) {
             for (auto& rw : rewrites) {
-                if (options.accepted.find(std::to_string(std::get<1>(rw))) != options.accepted.end()) {
+                if (options.accepted.find(std::get<1>(rw)) != options.accepted.end()) {
                     std::get<3>(rw) = true;
                 }
             }

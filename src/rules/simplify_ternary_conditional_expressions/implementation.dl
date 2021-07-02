@@ -1,6 +1,6 @@
 /* Pre   [:x] ? false : [:z] */
 /* Post  ![:x] && [:z]        */
-rewrite(1125, filename, start, end, cat("!", cond_str, " && ", other_expr_str)) :-
+rewrite("S1125", filename, start, end, cat("!", cond_str, " && ", other_expr_str)) :-
     conditional_expression(cond_expr, cond, false_expr, other_expr),
         filename_of(cond_expr, filename),
         starts_at(cond_expr, start),

@@ -7,7 +7,7 @@
 
 /* Pre  [:x].size() == 0 */
 /* Post [:x].isEmpty()   */
-rewrite(1155, filename, start, end, cat(subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat(subject_str, ".isEmpty()")) :-
     equals_expression_unordered(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),
@@ -19,7 +19,7 @@ rewrite(1155, filename, start, end, cat(subject_str, ".isEmpty()")) :-
 
 /* Pre  [:x].size() != 0 */
 /* Post ![:x].isEmpty()  */
-rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
     not_equals_expression_unordered(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),
@@ -31,7 +31,7 @@ rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
 
 /* Pre  [:x].size() > 0 */
 /* Post ![:x].isEmpty()  */
-rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_expression(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),
@@ -43,7 +43,7 @@ rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
 
 /* Pre  [:x].size() >= 1 */
 /* Post ![:x].isEmpty()  */
-rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_or_equals_expression(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),
@@ -57,7 +57,7 @@ rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
 
 /* Pre  [:x].length() == 0 */
 /* Post [:x].isEmpty()     */
-rewrite(1155, filename, start, end, cat(subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat(subject_str, ".isEmpty()")) :-
     equals_expression_unordered(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),
@@ -69,7 +69,7 @@ rewrite(1155, filename, start, end, cat(subject_str, ".isEmpty()")) :-
 
 /* Pre  [:x].length() != 0 */
 /* Post ![:x].isEmpty()    */
-rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
     not_equals_expression_unordered(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),
@@ -81,7 +81,7 @@ rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
 
 /* Pre  [:x].length() > 0 */
 /* Post ![:x].isEmpty()   */
-rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_expression(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),
@@ -93,7 +93,7 @@ rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
 
 /* Pre  [:x].length() >= 1 */
 /* Post ![:x].isEmpty()    */
-rewrite(1155, filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
+rewrite("S1155", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_or_equals_expression(parent, invocation, integer),
         filename_of(parent, filename),
         starts_at(parent, start),

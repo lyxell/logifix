@@ -1,4 +1,4 @@
-rewrite(1116, filename, start, end, "") :-
+rewrite("S1116", filename, start, end, "") :-
     empty_statement(id),
     ! for_statement(_, _, _, _, id),
     filename_of(id, filename),

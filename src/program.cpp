@@ -3,7 +3,7 @@
 #include <unordered_set>
 #include <iostream>
 
-using rewrite_t = std::tuple<int,std::string,size_t,size_t,std::string>;
+using rewrite_t = std::tuple<std::string,std::string,size_t,size_t,std::string>;
 
 static void replace_all(std::string& source, const std::string& from, const std::string& to)
 {
@@ -43,7 +43,7 @@ void program::add_string(const char* filename, const char* content) {
                                   prog->getSymbolTable().encode(content)}));
 }
 
-std::set<std::pair<std::string, int>> program::run(std::string file, std::set<int> rules) {
+std::set<std::pair<std::string, std::string>> program::run(std::string file, std::set<std::string> rules) {
     add_string("original", file.c_str());
 
     std::set<rewrite_t> rewrites;
@@ -62,7 +62,7 @@ std::set<std::pair<std::string, int>> program::run(std::string file, std::set<in
         assert(relation != nullptr);
         std::vector<rewrite_t> new_rewrites;
         for (souffle::tuple& output : *relation) {
-            int rule;
+            std::string rule;
             std::string filename;
             int start;
             int end;
@@ -107,7 +107,7 @@ std::set<std::pair<std::string, int>> program::run(std::string file, std::set<in
             }
             auto source = files[filename];
             auto dest = source.substr(0, start) + replacement + source.substr(end);
-            auto dest_filename = filename + "-[" + std::to_string(rule) + "," + std::to_string(start) + "," + std::to_string(end) + "]";
+            auto dest_filename = filename + "-[" + rule + "," + std::to_string(start) + "," + std::to_string(end) + "]";
             has_children.emplace(source);
             created_from.emplace(dest_filename, new_rewrite);
             if (file_set.find(dest) == file_set.end()) {
@@ -124,7 +124,7 @@ std::set<std::pair<std::string, int>> program::run(std::string file, std::set<in
 
     }
 
-    std::set<std::pair<std::string, int>> result;
+    std::set<std::pair<std::string, std::string>> result;
 
     for (auto [str,fn] : file_set) {
         if (has_children.find(str) == has_children.end()) {

@@ -1,5 +1,5 @@
 #!/bin/bash
-regex="([0-9]{4}),.*/blob/[a-z0-9-]+/(.*),(.*)$"
+regex="(S[0-9]+),.*/blob/[a-z0-9-]+/(.*),(.*)$"
 set -e
 set -o pipefail
 

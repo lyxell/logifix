@@ -620,5 +620,5 @@ string_representation_with_parentheses(id, cat("(", id_str, ")")) :-
 /* Rewrite rules
  ********************************/
 
-.decl rewrite(rule: number, filename: symbol, start: number, end: number, to: symbol)
+.decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
 .output rewrite(IO=stdout)

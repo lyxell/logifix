@@ -6,7 +6,7 @@
 
 /* Pre  [:x].equals("[:y]") */
 /* Post "[:y]".equals([:x]) */
-rewrite(1132, filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
+rewrite("S1132", filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
     method_invocation(invocation, subject, "equals", [arg, nil]),
         filename_of(invocation, filename),
         starts_at(invocation, start),
@@ -18,7 +18,7 @@ rewrite(1132, filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) 
 
 /* Pre  [:x] != null && [:x].equals("[:y]") */
 /* Post "[:y]".equals([:x]) */
-rewrite(1132, filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
+rewrite("S1132", filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
     conditional_and_expression(and_expr, noteqnull, invocation),
         filename_of(and_expr, filename),
         starts_at(and_expr, start),
