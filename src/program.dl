@@ -209,7 +209,6 @@ in_scope(start, end, filename, identifier_str, resource) :-
 
 /* Make formal parameter in enhanced_for_statement accessible in its body */
 in_scope(start, end, filename, identifier_str, param) :-
-    ast_node(stmt),
     name_of(stmt, "enhanced_for_statement"),
     parent_of(stmt, "param", param),
     formal_parameter(param, _, _, identifier),
@@ -326,7 +325,7 @@ point_of_declaration(head, decl) :-
         expr_end <= end,
     ! has_formal_parameter_or_local_var_decl_in_scope(id, _).
 
-/* We can always refer to the field of the class using "this" */
+/* We can always refer to the field of a class using "this" */
 point_of_declaration(id, type) :-
     field_access(id, this, field),
         starts_at(id, expr_start),
@@ -351,11 +350,6 @@ point_of_declaration(id, decl) :-
 has_type(id, type) :-
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", type).
-/* If an expression_name only has one identifier, then the expression_name has the same
-   type as the identifier */
-has_type(exprname, type) :-
-    expression_name(exprname, [head, nil]),
-    has_type(head, type).
 
 /* Type checking
  ********************************/
