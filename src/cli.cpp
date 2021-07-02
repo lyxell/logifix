@@ -18,10 +18,9 @@
 #define PERF
 
 using namespace std::string_literals;
+namespace fs = std::filesystem;
 
 extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
-
-namespace fs = std::filesystem;
 
 struct options_t {
     bool accept_all;
@@ -29,6 +28,11 @@ struct options_t {
     bool patch;
     std::set<std::string> files;
     std::set<std::string> accepted;
+};
+
+struct printer_opts {
+    bool color;
+    bool print_file_header;
 };
 
 enum class key {
@@ -50,29 +54,20 @@ static const char* TTY_CURSOR_UP    = "\033[A";
 static const char* TTY_HIDE_CURSOR  = "\033[?25l";
 static const char* TTY_SHOW_CURSOR  = "\033[?25h";
 
-struct printer_opts {
-    bool color;
-    bool print_file_header;
-};
-
-bool string_has_only_whitespace(const std::string& str) {
-    return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
-}
-
-std::vector<std::string> line_split(std::string str) {
-    std::vector<std::string> result;
-    while (!str.empty()) {
-        size_t i;
-        for (i = 0; i < str.size() - 1; i++) {
-            if (str[i] == '\n') break;
-        }
-        result.emplace_back(str.substr(0, i + 1));
-        str = str.substr(i + 1);
+static std::string read_file(std::string_view path) {
+    constexpr auto read_size = std::size_t {4096};
+    auto stream = std::ifstream {path.data()};
+    stream.exceptions(std::ios_base::badbit);
+    auto out = std::string {};
+    auto buf = std::string(read_size, '\0');
+    while (stream.read(& buf[0], read_size)) {
+        out.append(buf, 0, stream.gcount());
     }
-    return result;
+    out.append(buf, 0, stream.gcount());
+    return out;
 }
 
-key get_keypress() {
+static key get_keypress() {
     switch (getchar()) {
     case 0x0d: return key::ret;
     case  'k': return key::up;
@@ -101,27 +96,14 @@ key get_keypress() {
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
                          const git_diff_line* line, void* data) {
 
+    (void)delta;
+    (void)hunk;
 
     auto* opts = (printer_opts*) data;
 
-    /* Skip added empty lines since they will not be included in end result */
-    auto* end = line->content;
-    while (*end != '\0' && *end != '\n') end++;
-    std::string content(line->content, end);
-    if (line->origin == GIT_DIFF_LINE_ADDITION && string_has_only_whitespace(content)) {
+    if (!opts->print_file_header && (line->origin == GIT_DIFF_LINE_FILE_HDR || line->origin == GIT_DIFF_LINE_HUNK_HDR)) {
         return 0;
     }
-
-    if (!opts->print_file_header && line->origin == GIT_DIFF_LINE_FILE_HDR) {
-        return 0;
-    }
-
-    if (!opts->print_file_header && line->origin == GIT_DIFF_LINE_HUNK_HDR) {
-        return 0;
-    }
-
-    (void)delta;
-    (void)hunk;
 
     if (opts->color) {
         switch (line->origin) {
@@ -172,20 +154,7 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
     return 0;
 }
 
-std::string read_file(std::string_view path) {
-    constexpr auto read_size = std::size_t {4096};
-    auto stream = std::ifstream {path.data()};
-    stream.exceptions(std::ios_base::badbit);
-    auto out = std::string {};
-    auto buf = std::string(read_size, '\0');
-    while (stream.read(& buf[0], read_size)) {
-        out.append(buf, 0, stream.gcount());
-    }
-    out.append(buf, 0, stream.gcount());
-    return out;
-}
-
-void print_patch(std::string filename, std::string before, std::string after, printer_opts opts) {
+static void print_patch(std::string filename, std::string before, std::string after, printer_opts opts) {
     git_patch* patch = nullptr;
     git_patch_from_buffers(&patch, before.c_str(), before.size(),
                            filename.c_str(), after.c_str(),
@@ -194,12 +163,7 @@ void print_patch(std::string filename, std::string before, std::string after, pr
     git_patch_free(patch);
 }
 
-void print_version_and_exit() {
-    std::cout << PROJECT_VERSION << std::endl;
-    std::exit(0);
-}
-
-options_t parse_options(int argc, char** argv) {
+static options_t parse_options(int argc, char** argv) {
 
     options_t options = {
         .accept_all     = false,
@@ -210,6 +174,11 @@ options_t parse_options(int argc, char** argv) {
     };
 
     std::vector<std::tuple<std::string,std::function<void(std::string)>,std::string>> opts;
+
+    auto print_version_and_exit = []() {
+        std::cout << PROJECT_VERSION << std::endl;
+        std::exit(0);
+    };
 
     auto print_usage = []() {
         fmt::print(fmt::emphasis::bold, "USAGE\n");
@@ -314,7 +283,7 @@ options_t parse_options(int argc, char** argv) {
     return options;
 }
 
-int multi_choice(std::string question, std::vector<std::string> alternatives, bool exit_on_left = false) {
+static int multi_choice(std::string question, std::vector<std::string> alternatives, bool exit_on_left = false) {
     tty_enable_cbreak_mode();
     std::cout << TTY_HIDE_CURSOR;
     fmt::print(fg(fmt::terminal_color::green) | fmt::emphasis::bold, "?");
@@ -365,6 +334,35 @@ int multi_choice(std::string question, std::vector<std::string> alternatives, bo
         }
     }
     return 0;
+}
+
+static std::string post_process(std::string before, std::string after) {
+    auto line_split = [](std::string str) {
+        std::vector<std::string> result;
+        while (!str.empty()) {
+            size_t i;
+            for (i = 0; i < str.size() - 1; i++) {
+                if (str[i] == '\n') break;
+            }
+            result.emplace_back(str.substr(0, i + 1));
+            str = str.substr(i + 1);
+        }
+        return result;
+    };
+    auto string_has_only_whitespace = [](const auto& str) {
+        return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
+    };
+    auto after_lines = line_split(std::move(after));
+    auto before_lines = line_split(std::move(before));
+    auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
+    std::string processed;
+    for (size_t i = 0; i < after_lines.size(); i++) {
+        if (lcs.find(i) == lcs.end() && string_has_only_whitespace(after_lines[i])) {
+            continue;
+        }
+        processed += after_lines[i];
+    }
+    return processed;
 }
 
 int main(int argc, char** argv) {
@@ -442,11 +440,11 @@ int main(int argc, char** argv) {
     });
 
     auto review = [](auto& rw, size_t curr, size_t total) {
-        auto& [filename, rule, rewrite, accepted] = rw;
+        auto& [filename, rule, after, accepted] = rw;
         std::cout << "-----------------------------------------------------------" << std::endl;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
-        std::string input = read_file(filename);
-        print_patch(filename, input, rewrite, {true, false});
+        std::string before = read_file(filename);
+        print_patch(filename, before, post_process(before, after), {true, false});
         std::cout << std::endl;
         auto choice = multi_choice("What would you like to do?", {
             "Accept this rewrite",
@@ -470,24 +468,45 @@ int main(int argc, char** argv) {
                 return std::get<3>(rewrite);
             });
 
+            int selection;
+
             if (selected_rewrites > 0) {
                 fmt::print(fmt::emphasis::bold,
                     "\nSelected {}/{} rewrites\n\n",
                     selected_rewrites,
                     rewrites.size());
+                selection = multi_choice("What would you like to do?", {
+                    "Review rewrites by rule",
+                    "Review rewrites by file",
+                    "Show a diff of the current changes",
+                    "Rewrite files in place and exit",
+                    "Exit without doing anything",
+                });
+
+                if (selection == 2) {
+                    FILE *fp = popen("less -R", "w");
+                    if (fp != NULL)
+                    {
+                        fprintf(fp, "\x1b[1mhello world");
+                        pclose(fp);
+                    }
+                }
+                if (selection == 3) {
+                    options.in_place = true;
+                    break;
+                }
+                if (selection == 4) break;
             } else {
                 fmt::print(fmt::emphasis::bold,
                     "\nFound {} rewrites\n\n",
                     rewrites.size());
+                selection = multi_choice("What would you like to do?", {
+                    "Review rewrites by rule",
+                    "Review rewrites by file",
+                    "Exit without doing anything",
+                });
+                if (selection == 2) break;
             }
-
-            auto selection = multi_choice("What would you like to do?", {
-                "Review rewrites by rule",
-                "Review rewrites by file",
-                "Exit without doing anything",
-            });
-
-            if (selection == 2) break;
 
             while (true) {
 
@@ -580,25 +599,12 @@ int main(int argc, char** argv) {
         auto diff = nway::diff(before, rewrites);
         assert(!nway::has_conflict(diff));
         auto after = nway::merge(diff);
-        /* post-processing, remove introduced empty lines */
-        auto after_lines = line_split(after);
-        auto before_lines = line_split(before);
-        auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
-        std::string processed;
-        for (size_t i = 0; i < after_lines.size(); i++) {
-            if (lcs.find(i) == lcs.end() && string_has_only_whitespace(after_lines[i])) {
-                continue;
-            }
-            processed += after_lines[i];
-        }
         if (options.in_place) {
             std::ofstream f(filename);
-            f << processed;
+            f << post_process(before, after);
             f.close();
         } else if (options.patch) {
-            print_patch(filename, before, processed, {false, true});
-        } else {
-            assert(false);
+            print_patch(filename, before, post_process(before, after), {false, true});
         }
     }
 
