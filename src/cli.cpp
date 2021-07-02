@@ -13,6 +13,8 @@
 #include <mutex>
 #include <nway.h>
 
+#define PERF
+
 extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
 
 namespace fs = std::filesystem;
@@ -375,6 +377,13 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> file_stack(options.files.begin(), options.files.end());
 
+#ifdef PERF
+    std::vector<std::pair<double, std::string>> file_time;
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::milliseconds;
+#endif
+
     for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
         thread_pool.emplace_back(
             std::thread([&] {
@@ -385,15 +394,26 @@ int main(int argc, char** argv) {
                         if (file_stack.empty()) return;
                         file = file_stack.back();
                         file_stack.pop_back();
+                        std::cerr << "\r" << options.files.size() - file_stack.size() << "/" <<  options.files.size();
                     }
+#ifdef PERF
+                    std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+#endif
                     std::unique_ptr<logifix::program> program = std::make_unique<logifix::program>();
                     std::string input = read_file(file);
                     auto result = program->run(input, {});
                     program = nullptr;
+#ifdef PERF
+                    std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
+                    auto diff = duration_cast<milliseconds>(end - start).count();
+#endif
+                    std::lock_guard<std::mutex> lock(thread_mutex);
+#ifdef PERF
+                    file_time.emplace_back(double(diff) / 1000.0f, file);
+#endif
                     if (result.size() == 0) continue;
                     for (auto [output, rule] : result) {
                         if (output != input) {
-                            std::lock_guard<std::mutex> lock(thread_mutex);
                             rewrites.emplace_back(file, rule, output, false);
                         }
                     }
@@ -404,6 +424,15 @@ int main(int argc, char** argv) {
     for (auto& f : thread_pool) {
         f.join();
     }
+
+#ifdef PERF
+    std::sort(file_time.begin(), file_time.end());
+    for (auto [t, f] : file_time) {
+        printf("%.3f ", t);
+        std::cout << f << std::endl;
+    }
+#endif
+
 
     /* Sort rewrites by filename */
     std::sort(rewrites.begin(), rewrites.end(), [](const auto& a, const auto& b) -> bool {
