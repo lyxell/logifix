@@ -179,21 +179,6 @@ void print_patch(std::string filename, std::string before, std::string after, pr
     git_patch_free(patch);
 }
 
-bool ask_user_about_rewrite(std::string filename, std::string before, std::string after, bool color) {
-    print_patch(std::move(filename), std::move(before), std::move(after), {color, false});
-    std::cout << std::endl;
-    std::cout << COLOR_BOLD << COLOR_GREEN << "?" << COLOR_RESET;
-    std::cout << COLOR_BOLD << " Do you want to use this rewrite?" << COLOR_RESET;
-    std::cout << " [y,N] " << COLOR_RESET;
-    std::string line;
-    std::getline(std::cin, line);
-    return line.size() > 0 && line[0] == 'y' || line[0] == 'Y';
-}
-
-struct stats {
-    std::map<std::string,size_t> files_changed;
-};
-
 void print_version_and_exit() {
     std::cout << PROJECT_VERSION << std::endl;
     std::exit(0);
@@ -382,13 +367,8 @@ int main(int argc, char** argv) {
 
     options_t options = parse_options(argc, argv);
 
-    stats s = {};
-
     git_libgit2_init();
 
-
-    int curr_threads = 0;
-    std::mutex io_mutex;
     std::mutex thread_mutex;
     std::vector<std::thread> thread_pool;
     std::vector<std::tuple<std::string,int,std::string, bool>> rewrites;
@@ -413,20 +393,6 @@ int main(int argc, char** argv) {
                     if (result.size() == 0) continue;
                     for (auto [output, rule] : result) {
                         if (output != input) {
-                            /* post-processing, remove introduced empty lines */
-                            /*
-                            auto output_lines = line_split(std::move(output));
-                            auto input_lines = line_split(std::move(input));
-                            auto lcs = nway::longest_common_subsequence(output_lines, input_lines);
-                            std::string processed;
-                            for (size_t i = 0; i < output_lines.size(); i++) {
-                                if (lcs.find(i) == lcs.end() && string_has_only_whitespace(output_lines[i])) {
-                                    continue;
-                                }
-                                processed += output_lines[i];
-                            }
-                            rewrites[file].emplace_back(processed);
-                            */
                             std::lock_guard<std::mutex> lock(thread_mutex);
                             rewrites.emplace_back(file, rule, output, false);
                         }
@@ -446,8 +412,16 @@ int main(int argc, char** argv) {
         std::cout << curr << "/" << total << " • ";
         std::cout << fn << COLOR_RESET << std::endl << std::endl;
         std::string input = read_file(fn);
-        accepted = ask_user_about_rewrite("", input, rewrite, true);
+        print_patch(fn, input, rewrite, {true, false});
         std::cout << std::endl;
+        auto choice = multi_choice("What would you like to do?", {
+            "Accept this rewrite",
+            "Reject this rewrite"
+        }, true);
+        if (choice == -1) return false;
+        if (choice == 0) accepted = true;
+        if (choice == 1) accepted = false;
+        return true;
     };
 
     if (!options.patch && !options.in_place) {
@@ -513,7 +487,7 @@ int main(int argc, char** argv) {
                     size_t total = rules[rule].size();
                     for (auto& rw : rewrites) {
                         if (std::get<1>(rw) == rule) {
-                            review(rw, curr, total);
+                            if (!review(rw, curr, total)) break;
                         }
                     }
                 } else if (selection == 1) {
@@ -538,25 +512,56 @@ int main(int argc, char** argv) {
             }
         }
 
+    } else {
+        if (options.accept_all) {
+            for (auto& rw : rewrites) {
+                std::get<3>(rw) = true;
+            }
+        }
+        if (!options.accepted.empty()) {
+            for (auto& rw : rewrites) {
+                if (options.accepted.find(std::to_string(std::get<1>(rw))) != options.accepted.end()) {
+                    std::get<3>(rw) = true;
+                }
+            }
+        }
     }
 
-    /*
-    for (auto [filename, after] : patch) {
-        if (options.apply) {
-            std::ofstream f(filename);
-            f << after;
-            f.close();
-        } else {
-            std::string before = read_file(filename);
-            print_patch(filename, before, after, {options.color, true});
-        }
-    }*/
+    std::map<std::string, std::vector<std::string>> result;
 
-    /*
-    auto diff = nway::diff(input, chosen_rewrites);
-    assert(!nway::has_conflict(diff));
-    auto output = nway::merge(diff);
-    */
+    for (auto& [filename, rule, rewrite, accepted] : rewrites) {
+        if (accepted) {
+            result[filename].emplace_back(rewrite);
+        }
+    }
+
+    for (auto [filename, rewrites] : result) {
+        std::string before = read_file(filename);
+        auto diff = nway::diff(before, rewrites);
+        assert(!nway::has_conflict(diff));
+        auto after = nway::merge(diff);
+        /* post-processing, remove introduced empty lines */
+        auto after_lines = line_split(after);
+        auto before_lines = line_split(before);
+        auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
+        std::string processed;
+        for (size_t i = 0; i < after_lines.size(); i++) {
+            if (lcs.find(i) == lcs.end() && string_has_only_whitespace(after_lines[i])) {
+                continue;
+            }
+            processed += after_lines[i];
+        }
+        if (options.in_place) {
+            std::ofstream f(filename);
+            f << processed;
+            f.close();
+        } else if (options.patch) {
+            std::string before = read_file(filename);
+            print_patch(filename, before, processed, {false, true});
+        } else {
+            assert(false);
+        }
+    }
 
     return 0;
 }
