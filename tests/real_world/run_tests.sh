@@ -17,7 +17,7 @@ tail +2 < "$csv" | while IFS= read -r f; do
         echo "$rule_number"
         cp "$input" "$t1"
         # run the logifix tool on t1
-        "$logifix_cli" --no-interactive --rules="$rule_number" "$t1"
+        "$logifix_cli" --in-place --accept="$rule_number" "$t1"
         # run the patch tool and place the result in t2
         patch -p0 --input="$input.diff" --output="$t2"
         # compare the diffs
