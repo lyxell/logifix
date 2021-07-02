@@ -403,6 +403,8 @@ int main(int argc, char** argv) {
     using std::chrono::milliseconds;
 #endif
 
+    std::cout << TTY_HIDE_CURSOR;
+
     for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
         thread_pool.emplace_back(
             std::thread([&] {
@@ -413,7 +415,7 @@ int main(int argc, char** argv) {
                         if (file_stack.empty()) return;
                         file = file_stack.back();
                         file_stack.pop_back();
-                        std::cerr << "\r" << options.files.size() - file_stack.size() << "/" <<  options.files.size();
+                        std::cerr << "\rAnalyzed " << options.files.size() - file_stack.size() << "/" <<  options.files.size() << " files";
                     }
 #ifdef PERF
                     std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
@@ -443,6 +445,8 @@ int main(int argc, char** argv) {
     for (auto& f : thread_pool) {
         f.join();
     }
+
+    std::cout << TTY_SHOW_CURSOR;
 
 #ifdef PERF
     std::sort(file_time.begin(), file_time.end());
