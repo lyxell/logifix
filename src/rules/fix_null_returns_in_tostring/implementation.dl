@@ -3,7 +3,7 @@
 
 /* Pre  null */
 /* Post ""   */
-rewrite(2225, filename, start, end, "\"\"") :-
+rewrite("S2225", filename, start, end, "\"\"") :-
     method_declaration(method_decl, _, method_head, method_body),
         filename_of(method_decl, filename),
     /* Check that the method name is toString */

@@ -80,7 +80,7 @@ To download and build the project, perform the following steps:
 <ul> </ul>
 
 
-### Fix null pointer exceptions by changing the order of arguments in string comparison
+### Fix null pointer exceptions by inverting string comparison
 
 * PMD ID: [LiteralsFirstInComparison](https://pmd.github.io/latest/pmd_rules_java_bestpractices.html#literalsfirstincomparisons)
 * SonarSource ID: [S1132](https://rules.sonarsource.com/java/RSPEC-1132)
@@ -414,6 +414,15 @@ To download and build the project, perform the following steps:
 <ul> </ul>
 
 
+### Simplify calls to constructor for string conversion
+
+* PMD ID: N/A
+* SonarSource ID: [S2131](https://rules.sonarsource.com/java/RSPEC-2131)
+
+
+<ul> </ul>
+
+
 ### Simplify calls to String.substring
 
 * PMD ID: N/A
@@ -570,6 +579,16 @@ To download and build the project, perform the following steps:
 ```
 
 <ul> </ul>
+
+
+### 
+
+* PMD ID: N/A
+* SonarSource ID: [S1141](https://rules.sonarsource.com/java/RSPEC-1141)
+
+
+<ul> </ul>
+
 
 ### Simplify return of boolean expressions
 

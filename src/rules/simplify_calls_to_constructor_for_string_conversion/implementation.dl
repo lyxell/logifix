@@ -1,0 +1,2 @@
+/* Pre  new Integer([:argument]).toString() */
+/* Post Integer.toString([:argument])       */

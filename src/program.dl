@@ -194,71 +194,48 @@ string_representation([name, filename, A, B], substr(code, A, B - A)) :-
  * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
  */
 
-.decl in_scope(position: id, identifier: symbol, type: id)
-.output in_scope
-
-in_scope(descendant, identifier, decl_point) :-
-    in_scope(ancestor, identifier, decl_point),
-    ancestor_of(ancestor, descendant).
+.decl in_scope(start: number, end: number, filename: symbol, identifier: symbol, type: id)
+.output in_scope(IO=stdout)
 
 /* Make resource in try_with_resources_statement accessible in its body */
-in_scope(body, identifier_str, resource) :-
+in_scope(start, end, filename, identifier_str, resource) :-
     try_with_resources_statement(_, resources, body, _, _),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
     list_contains(resources, resource),
     parent_of(resource, "name", identifier),
     string_representation(identifier, identifier_str).
 
 /* Make formal parameter in enhanced_for_statement accessible in its body */
-in_scope(body, identifier_str, param) :-
-    ast_node(stmt),
+in_scope(start, end, filename, identifier_str, param) :-
     name_of(stmt, "enhanced_for_statement"),
     parent_of(stmt, "param", param),
     formal_parameter(param, _, _, identifier),
     string_representation(identifier, identifier_str),
-    parent_of(stmt, "body", body).
+    parent_of(stmt, "body", body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename).
 
-/* Make field declarations in scope in the method bodies of their class */
-in_scope(method_body, identifier_str, field) :-
-    class_declaration(_, _, _, _, _, class_body),
-    /* declared at */
+/* Make field declarations in scope in the bodies of their vlass */
+in_scope(start, end, filename, identifier_str, field) :-
+    class_declaration(id, _, _, _, _, class_body),
+        starts_at(id, start),
+        ends_at(id, end),
+        filename_of(id, filename),
     list_contains(class_body, field),
     field_declaration(field, _, _, declarators),
     list_contains(declarators, declarator),
     variable_declarator(declarator, identifier, _),
-    string_representation(identifier, identifier_str),
-    /* available at */
-    list_contains(class_body, method),
-    method_declaration(method, _, _, method_body).
-
-/* Make field declarations in scope in the constructor bodies of their class */
-in_scope(constructor_body, identifier_str, field) :-
-    class_declaration(_, _, _, _, _, class_body),
-    /* declared at */
-    list_contains(class_body, field),
-    field_declaration(field, _, _, declarators),
-    list_contains(declarators, declarator),
-    variable_declarator(declarator, identifier, _),
-    string_representation(identifier, identifier_str),
-    /* available at */
-    list_contains(class_body, constructor),
-    constructor_declaration(constructor, _, _, _, constructor_body).
-
-/* Make field declarations in scope in the static initializers of their class */
-in_scope(initializer_body, identifier_str, field) :-
-    class_declaration(_, _, _, _, _, class_body),
-    /* declared at */
-    list_contains(class_body, field),
-    field_declaration(field, _, _, declarators),
-    list_contains(declarators, declarator),
-    variable_declarator(declarator, identifier, _),
-    string_representation(identifier, identifier_str),
-    /* available at */
-    list_contains(class_body, constructor),
-    static_initializer(_, initializer_body).
+    string_representation(identifier, identifier_str).
 
 /* Make formal parameters accessible in the body of a method */
-in_scope(body, identifier_str, param) :-
+in_scope(start, end, filename, identifier_str, param) :-
     method_declaration(_, _, header, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
     method_header(header, _, declarator, _),
     parent_of_list(declarator, "params", params),
     list_contains(params, param),
@@ -266,18 +243,26 @@ in_scope(body, identifier_str, param) :-
     string_representation(identifier, identifier_str).
 
 /* Make formal parameters accessible in the body of a constructor */
-in_scope(body, identifier_str, param) :-
+in_scope(start, end, filename, identifier_str, param) :-
     constructor_declaration(_, _, declarator, _, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
     parent_of_list(declarator, "params", params),
     list_contains(params, param),
     formal_parameter(param, _, _, identifier),
     string_representation(identifier, identifier_str).
 
 /* Make local variable declarations accessible in the succeeding statements */
-in_scope(succeeding_statement, identifier_str, declaration) :-
+in_scope(start, end, filename, identifier_str, declaration) :-
+    parent_of_list(id, _, stmts),
+        ends_at(id, end),
+        filename_of(id, filename),
+    list_contains(stmts, declaration_statement),
     local_variable_declaration_statement(declaration_statement, declaration),
     local_variable_declaration(declaration, _, _, declarators),
-    precedes(declaration_statement, succeeding_statement),
+    predecessor_of(declaration_statement, succeeding_statement),
+        starts_at(succeeding_statement, start),
     list_contains(declarators, declarator),
     variable_declarator(declarator, identifier, _),
     string_representation(identifier, identifier_str).
@@ -285,22 +270,39 @@ in_scope(succeeding_statement, identifier_str, declaration) :-
 /* Point of declaration
  ********************************/
 
-.decl has_formal_parameter_or_local_var_decl_in_scope(id: id)
-has_formal_parameter_or_local_var_decl_in_scope(id) :-
+.decl has_formal_parameter_or_local_var_decl_in_scope(id: id, decl: id)
+has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
     expression_name(id, [head, _]),
-    in_scope(id, identifier, decl),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
+    in_scope(start, end, filename, identifier, decl),
     local_variable_declaration(decl, _, _, _),
-    string_representation(head, identifier).
-has_formal_parameter_or_local_var_decl_in_scope(id) :-
+    string_representation(head, identifier),
+        expr_start >= start,
+        expr_end <= end.
+    
+has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
     expression_name(id, [head, _]),
-    in_scope(id, identifier, decl),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
+    in_scope(start, end, filename, identifier, decl),
     formal_parameter(decl, _, _, _),
-    string_representation(head, identifier).
-has_formal_parameter_or_local_var_decl_in_scope(id) :-
+    string_representation(head, identifier),
+        expr_start >= start,
+        expr_end <= end.
+
+has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
     expression_name(id, [head, _]),
-    in_scope(id, identifier, decl),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
+    in_scope(start, end, filename, identifier, decl),
     name_of(decl, "resource"),
-    string_representation(head, identifier).
+    string_representation(head, identifier),
+        expr_start >= start,
+        expr_end <= end.
 
 .decl point_of_declaration(id: id, declaration: id)
 .output point_of_declaration(IO=stdout)
@@ -308,34 +310,32 @@ has_formal_parameter_or_local_var_decl_in_scope(id) :-
    the identifier definitely refers to it (these can't be shadowed) */
 point_of_declaration(head, decl) :-
     expression_name(id, [head, _]),
-    in_scope(id, identifier, decl),
-    local_variable_declaration(decl, _, _, _),
-    string_representation(head, identifier).
-point_of_declaration(head, decl) :-
-    expression_name(id, [head, _]),
-    in_scope(id, identifier, decl),
-    formal_parameter(decl, _, _, _),
-    string_representation(head, identifier).
-point_of_declaration(head, decl) :-
-    expression_name(id, [head, _]),
-    in_scope(id, identifier, decl),
-    name_of(decl, "resource"),
-    string_representation(head, identifier).
+    has_formal_parameter_or_local_var_decl_in_scope(id, decl).
 /* If there is no local variable declarations of formal parameters in scope
    the identifier refers to the field */
 point_of_declaration(head, decl) :-
     expression_name(id, [head, _]),
-    in_scope(id, identifier, decl),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
+    in_scope(start, end, filename, identifier, decl),
     string_representation(head, identifier),
     field_declaration(decl, _, _, _),
-    ! has_formal_parameter_or_local_var_decl_in_scope(id).
+        expr_start >= start,
+        expr_end <= end,
+    ! has_formal_parameter_or_local_var_decl_in_scope(id, _).
 
-/* We can always refer to the field of the class using "this" */
+/* We can always refer to the field of a class using "this" */
 point_of_declaration(id, type) :-
     field_access(id, this, field),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
     name_of(this, "this_expression"),
-    in_scope(id, identifier, type),
-    string_representation(field, identifier).
+    in_scope(start, end, filename, identifier, type),
+    string_representation(field, identifier),
+        expr_start >= start,
+        expr_end <= end.
 
 /* If an expression name contains only one identifier then the whole
    expression refers to its identifier */
@@ -350,11 +350,6 @@ point_of_declaration(id, decl) :-
 has_type(id, type) :-
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", type).
-/* If an expression_name only has one identifier, then the expression_name has the same
-   type as the identifier */
-has_type(exprname, type) :-
-    expression_name(exprname, [head, nil]),
-    has_type(head, type).
 
 /* Type checking
  ********************************/
@@ -625,5 +620,5 @@ string_representation_with_parentheses(id, cat("(", id_str, ")")) :-
 /* Rewrite rules
  ********************************/
 
-.decl rewrite(rule: number, filename: symbol, start: number, end: number, to: symbol)
-.output rewrite
+.decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
+.output rewrite(IO=stdout)

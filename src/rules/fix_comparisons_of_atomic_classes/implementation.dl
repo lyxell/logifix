@@ -1,4 +1,4 @@
-rewrite(2204, filename, start, end, cat(left_str, ".get() == ", right_str, ".get()")) :-
+rewrite("S2204", filename, start, end, cat(left_str, ".get() == ", right_str, ".get()")) :-
     method_invocation(id, left, "equals", [right, nil]),
         filename_of(id, filename),
         starts_at(id, start),

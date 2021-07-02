@@ -1,6 +1,6 @@
 /* Pre  return; */
 /* Post         */
-rewrite(3626, filename, start, end, "") :-
+rewrite("S3626", filename, start, end, "") :-
     method_declaration(_, _, _, body),
     block(body, stmts),
     list_last_element(stmts, return),

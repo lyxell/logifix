@@ -3,7 +3,7 @@
 #include <unordered_set>
 #include <iostream>
 
-using rewrite_t = std::tuple<int,std::string,size_t,size_t,std::string>;
+using rewrite_t = std::tuple<std::string,std::string,size_t,size_t,std::string>;
 
 static void replace_all(std::string& source, const std::string& from, const std::string& to)
 {
@@ -43,14 +43,14 @@ void program::add_string(const char* filename, const char* content) {
                                   prog->getSymbolTable().encode(content)}));
 }
 
-std::set<std::string> program::run(std::string file, std::set<int> rules) {
+std::set<std::pair<std::string, std::string>> program::run(std::string file, std::set<std::string> rules) {
     add_string("original", file.c_str());
 
     std::set<rewrite_t> rewrites;
-    std::set<std::string> file_set;
+    std::map<std::string,std::string> file_set;
     std::set<std::string> has_children;
 
-    std::map<std::string, std::tuple<std::string, size_t, size_t, size_t>> created_from;
+    std::map<std::string, rewrite_t> created_from;
 
     while (true) {
 
@@ -62,7 +62,7 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
         assert(relation != nullptr);
         std::vector<rewrite_t> new_rewrites;
         for (souffle::tuple& output : *relation) {
-            int rule;
+            std::string rule;
             std::string filename;
             int start;
             int end;
@@ -79,14 +79,14 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
             // skip this rewrite if it exists in a parent
             // FIXME this could be simplified with nway
             if (created_from.find(filename) != created_from.end()) {
-                auto [parent_filename, pstart, pend, psize] = created_from[filename];
+                auto [prule, parent_filename, pstart, pend, prepl] = created_from[filename];
                 if (end <= pstart) {
                     rewrite_t matching_rewrite = {rule, parent_filename, start, end, replacement};
                     if (rewrites.find(matching_rewrite) != rewrites.end()) {
                         continue;
                     }
-                } else if (start >= (pstart + psize)) {
-                    auto diff = (pend - pstart) - psize;
+                } else if (start >= (pstart + prepl.size())) {
+                    auto diff = (pend - pstart) - prepl.size();
                     rewrite_t matching_rewrite = {rule, parent_filename, start + diff, end + diff, replacement};
                     if (rewrites.find(matching_rewrite) != rewrites.end()) {
                         continue;
@@ -99,31 +99,41 @@ std::set<std::string> program::run(std::string file, std::set<int> rules) {
 
 
         std::vector<std::string> new_files;
-        for (auto [rule, filename, start, end, replacement] : new_rewrites) {
-
+        for (auto new_rewrite : new_rewrites) {
+            auto [rule, filename, start, end, replacement] = new_rewrite;
             // do not perform rewrites of the original file that the user is not interested in
-            if (filename == "original" && !rules.empty() && rules.find(rule) == rules.end()) continue;
+            if (filename == "original" && !rules.empty() && rules.find(rule) == rules.end()) {
+                continue;
+            }
             auto source = files[filename];
             auto dest = source.substr(0, start) + replacement + source.substr(end);
-            auto dest_filename = filename + "-[" + std::to_string(rule) + "," + std::to_string(start) + "," + std::to_string(end) + "]";
+            auto dest_filename = filename + "-[" + rule + "," + std::to_string(start) + "," + std::to_string(end) + "]";
             has_children.emplace(source);
-            created_from.emplace(dest_filename, std::tuple(filename, start, end, replacement.size()));
+            created_from.emplace(dest_filename, new_rewrite);
             if (file_set.find(dest) == file_set.end()) {
                 new_files.emplace_back(dest);
-                file_set.emplace(dest);
+                file_set.emplace(dest, dest_filename);
                 add_string(dest_filename.c_str(), dest.c_str());
             }
         }
 
         // if there are no new source files, break
-        if (new_files.size() == 0) break;
+        if (new_files.size() == 0) {
+            break;
+        }
 
     }
 
-    std::set<std::string> result;
+    std::set<std::pair<std::string, std::string>> result;
 
-    for (auto str : file_set) {
-        if (has_children.find(str) == has_children.end()) result.emplace(str);
+    for (auto [str,fn] : file_set) {
+        if (has_children.find(str) == has_children.end()) {
+            auto curr = fn;
+            while (std::get<1>(created_from[curr]) != "original") {
+                curr = std::get<1>(created_from[curr]);
+            }
+            result.emplace(str, std::get<0>(created_from[curr]));
+        }
     }
     
     return result;
@@ -157,6 +167,8 @@ program::get_possible_rewrites(const char* filename) {
 }
 
 std::vector<std::string> program::get_variables_in_scope(int id) {
+    return {};
+    /*
     std::vector<std::string> result;
     souffle::Relation* relation = prog->getRelation("in_scope");
     assert(relation != nullptr);
@@ -169,18 +181,21 @@ std::vector<std::string> program::get_variables_in_scope(int id) {
             continue;
         result.emplace_back(std::move(identifier));
     }
-    return result;
+    return result;*/
 }
 
 int program::get_point_of_declaration(int id) {
     souffle::Relation* relation = prog->getRelation("point_of_declaration");
     assert(relation != nullptr);
+    int result = 0;
+    int count = 0;
     for (auto& output : *relation) {
         int rel_id;
         int declaration;
         output >> rel_id >> declaration;
-        if (rel_id == id)
-            return declaration;
+        if (rel_id == id) {
+            result = declaration;
+        }
     }
     return 0;
 }

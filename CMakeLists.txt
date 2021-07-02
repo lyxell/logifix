@@ -5,7 +5,9 @@ project(logifix HOMEPAGE_URL "https://github.com/lyxell/logifix")
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)
 
-### DEPENENCIES
+### DEPENDENCIES
+
+add_subdirectory(vendor/fmt)
 
 add_subdirectory(vendor/nway)
 
@@ -22,6 +24,7 @@ set(SOUFFLE_USE_CURSES OFF)
 add_subdirectory(vendor/souffle)
 set_target_properties(souffleprof PROPERTIES EXCLUDE_FROM_ALL 1)
 
+# We need this to be global for project to allow sjp to use the Souffle headers
 include_directories(vendor/souffle/src/include)
 
 add_subdirectory(vendor/sjp)
@@ -51,13 +54,20 @@ endif()
 
 message(STATUS "Building logifix version ${LOGIFIX_VERSION}")
 
-file(GLOB RULES src/**/*.dl)
+file(GLOB_RECURSE RULE_IMPLEMENTATION_FILES src/rules/*.dl)
+file(GLOB_RECURSE RULE_DATA_FILES src/rules/*.json)
 
 add_custom_command(
   OUTPUT logifix.cpp
   COMMAND souffle --generate=logifix ${CMAKE_CURRENT_SOURCE_DIR}/src/program.dl
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/program.dl
-  DEPENDS ${RULES}
+  DEPENDS ${RULE_IMPLEMENTATION_FILES}
+  VERBATIM)
+
+add_custom_command(
+  OUTPUT rule_data.cpp
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_rule_data.sh rule_data.cpp
+  DEPENDS ${RULE_DATA_FILES}
   VERBATIM)
 
 set_source_files_properties(logifix.cpp PROPERTIES COMPILE_FLAGS -D__EMBEDDED_SOUFFLE__)
@@ -67,12 +77,14 @@ option(LOGIFIX_BUILD_LIBRARY "Build logifix as a library" OFF)
 IF (LOGIFIX_BUILD_LIBRARY)
     add_library(logifix OBJECT src/program.cpp logifix.cpp)
 ELSE ()
-    add_executable(logifix src/cli.cpp src/program.cpp logifix.cpp)
+    add_executable(logifix src/cli.cpp src/tty.cpp src/program.cpp logifix.cpp rule_data.cpp)
 ENDIF ()
-
-target_link_libraries(logifix git2 sjp nway)
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 target_include_directories(logifix PRIVATE vendor/libgit2/include)
+
+target_include_directories(logifix PRIVATE vendor/fmt/include)
+
+target_link_libraries(logifix git2 sjp nway fmt)
 
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 

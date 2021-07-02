@@ -1,6 +1,6 @@
 /* Pre  {} */
 /* Post    */
-rewrite(10003, filename, start, end, "") :-
+rewrite("S10003", filename, start, end, "") :-
     block(_, stmts),
     list_contains(stmts, id),
     block(id, nil),

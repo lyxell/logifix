@@ -14,7 +14,7 @@ does_nothing_but_return_false(id) :-
     block(id, [statement, nil]),
     does_nothing_but_return_false(statement).
 
-rewrite(1126, filename, start, end, cat("return ", cond_str, ";")) :-
+rewrite("S1126", filename, start, end, cat("return ", cond_str, ";")) :-
     if_statement(id, cond, then, else),
         starts_at(id, start),
         ends_at(id, end),
@@ -23,7 +23,7 @@ rewrite(1126, filename, start, end, cat("return ", cond_str, ";")) :-
     does_nothing_but_return_false(else),
     string_representation(cond, cond_str).
 
-rewrite(1126, filename, start, end, cat("return !(", cond_str, ");")) :-
+rewrite("S1126", filename, start, end, cat("return !(", cond_str, ");")) :-
     if_statement(id, cond, then, else),
         starts_at(id, start),
         ends_at(id, end),

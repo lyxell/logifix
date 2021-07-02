@@ -3,17 +3,17 @@
  * https://rules.sonarsource.com/java/RSPEC-1596
  */
 
-rewrite(1596, filename, start, end, "Collections.emptyList()") :-
+rewrite("S1596", filename, start, end, "Collections.emptyList()") :-
     string_representation(id, "Collections.EMPTY_LIST"),
     starts_at(id, start),
     ends_at(id, end),
     filename_of(id, filename).
-rewrite(1596, filename, start, end, "Collections.emptyMap()") :-
+rewrite("S1596", filename, start, end, "Collections.emptyMap()") :-
     string_representation(id, "Collections.EMPTY_MAP"),
     starts_at(id, start),
     ends_at(id, end),
     filename_of(id, filename).
-rewrite(1596, filename, start, end, "Collections.emptySet()") :-
+rewrite("S1596", filename, start, end, "Collections.emptySet()") :-
     string_representation(id, "Collections.EMPTY_SET"),
     starts_at(id, start),
     ends_at(id, end),

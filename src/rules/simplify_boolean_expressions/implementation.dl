@@ -1,6 +1,6 @@
 /* Pre  [:x] == true */
 /* Post [:x]         */
-rewrite(1125, filename, start, end, other_expr_str) :-
+rewrite("S1125", filename, start, end, other_expr_str) :-
     equals_expression_unordered(eq_expr, true_expr, other_expr),
         filename_of(eq_expr, filename),
         starts_at(eq_expr, start),
@@ -10,7 +10,7 @@ rewrite(1125, filename, start, end, other_expr_str) :-
 
 /* Pre  [:x] == false */
 /* Post ![:x]         */
-rewrite(1125, filename, start, end, cat("!", other_expr_str)) :-
+rewrite("S1125", filename, start, end, cat("!", other_expr_str)) :-
     equals_expression_unordered(eq_expr, false_expr, other_expr),
         filename_of(eq_expr, filename),
         starts_at(eq_expr, start),
