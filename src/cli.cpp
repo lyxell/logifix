@@ -16,8 +16,6 @@
 #include <fmt/core.h>
 #include <fmt/color.h>
 
-#define PERF
-
 using namespace std::string_literals;
 namespace fs = std::filesystem;
 
