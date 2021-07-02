@@ -7,7 +7,7 @@ smells in Java source code. Logifix is implemented in a
 high-performance Datalog dialect that is synthesized into fast
 multi-threaded C++ code.
 
-https://user-images.githubusercontent.com/4975941/120327017-9c470280-c2e9-11eb-88d1-163943d550ce.mp4
+https://user-images.githubusercontent.com/4975941/124334330-1099ed80-db97-11eb-9463-8d305e3953f4.mp4
 
 <ul> </ul>
 
