@@ -4,6 +4,7 @@
 #include <regex>
 #include <filesystem>
 #include <future>
+#include <cstdio>
 #include <stack>
 #include <cctype>
 #include <git2.h>
@@ -20,6 +21,8 @@
 using namespace std::string_literals;
 namespace fs = std::filesystem;
 
+using rewrite_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
+
 extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
 
 struct options_t {
@@ -33,6 +36,7 @@ struct options_t {
 struct printer_opts {
     bool color;
     bool print_file_header;
+    FILE* fp;
 };
 
 enum class key {
@@ -109,17 +113,17 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
         switch (line->origin) {
             case GIT_DIFF_LINE_ADD_EOFNL:
             case GIT_DIFF_LINE_ADDITION:
-                std::cout << COLOR_GREEN;
+                fprintf(opts->fp, COLOR_GREEN);
                 break;
             case GIT_DIFF_LINE_DEL_EOFNL:
             case GIT_DIFF_LINE_DELETION:
-                std::cout << COLOR_RED;
+                fprintf(opts->fp, COLOR_RED);
                 break;
             case GIT_DIFF_LINE_FILE_HDR:
-                std::cout << COLOR_BOLD;
+                fprintf(opts->fp, COLOR_BOLD);
                 break;
             case GIT_DIFF_LINE_HUNK_HDR:
-                std::cout << COLOR_CYAN;
+                fprintf(opts->fp, COLOR_CYAN);
                 break;
             default:
                 break;
@@ -129,7 +133,7 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
     if (line->origin == GIT_DIFF_LINE_CONTEXT ||
         line->origin == GIT_DIFF_LINE_ADDITION ||
         line->origin == GIT_DIFF_LINE_DELETION) {
-        std::cout << line->origin;
+        fprintf(opts->fp, "%c", line->origin);
     }
 
     size_t i = 0;
@@ -138,17 +142,17 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
         if (line->content[i] == '\0' || line->content[i] == '\n' || line->content[i] == '\r') break;
         // render tab as four spaces
         if (line->content[i] == '\t') {
-            std::cout << "    ";
+            fprintf(opts->fp, "    ");
         } else {
-            std::cout << line->content[i];
+            fprintf(opts->fp, "%c", line->content[i]);
         }
         i++;
     }
 
-    std::cout << std::endl;
+    fprintf(opts->fp, "\n");
 
     if (opts->color) {
-        std::cout << COLOR_RESET;
+        fprintf(opts->fp, COLOR_RESET);
     }
 
     return 0;
@@ -365,6 +369,23 @@ static std::string post_process(std::string before, std::string after) {
     return processed;
 }
 
+std::map<std::string, std::string> get_results(const rewrite_collection& rewrites) {
+    std::map<std::string, std::string> results;
+    std::map<std::string, std::vector<std::string>> rewrites_per_file;
+    for (auto& [filename, rule, after, is_accepted] : rewrites) {
+        if (is_accepted) {
+            rewrites_per_file[filename].emplace_back(after);
+        }
+    }
+    for (auto [filename, rewrites] : rewrites_per_file) {
+        std::string before = read_file(filename);
+        auto diff = nway::diff(before, rewrites);
+        assert(!nway::has_conflict(diff));
+        results[filename] = post_process(before, nway::merge(diff));
+    }
+    return results;
+}
+
 int main(int argc, char** argv) {
 
     options_t options = parse_options(argc, argv);
@@ -444,7 +465,7 @@ int main(int argc, char** argv) {
         std::cout << "-----------------------------------------------------------" << std::endl;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
-        print_patch(filename, before, post_process(before, after), {true, false});
+        print_patch(filename, before, post_process(before, after), {true, false, stdout});
         std::cout << std::endl;
         auto choice = multi_choice("What would you like to do?", {
             "Accept this rewrite",
@@ -484,10 +505,12 @@ int main(int argc, char** argv) {
                 });
 
                 if (selection == 2) {
-                    FILE *fp = popen("less -R", "w");
-                    if (fp != NULL)
-                    {
-                        fprintf(fp, "\x1b[1mhello world");
+                    auto* fp = popen("less -R", "w");
+                    if (fp != NULL) {
+                        for (auto [filename, after] : get_results(rewrites)) {
+                            std::string before = read_file(filename);
+                            print_patch(filename, before, after, {true, true, fp});
+                        }
                         pclose(fp);
                     }
                 }
@@ -573,38 +596,26 @@ int main(int argc, char** argv) {
 
     } else {
         if (options.accept_all) {
-            for (auto& rw : rewrites) {
-                std::get<3>(rw) = true;
+            for (auto& [filename, rule, after, accepted] : rewrites) {
+                accepted = true;
             }
-        }
-        if (!options.accepted.empty()) {
-            for (auto& rw : rewrites) {
-                if (options.accepted.find(std::get<1>(rw)) != options.accepted.end()) {
-                    std::get<3>(rw) = true;
+        } else if (!options.accepted.empty()) {
+            for (auto& [filename, rule, after, accepted] : rewrites) {
+                if (options.accepted.find(rule) != options.accepted.end()) {
+                    accepted = true;
                 }
             }
         }
     }
 
-    std::map<std::string, std::vector<std::string>> result;
-
-    for (auto& [filename, rule, rewrite, accepted] : rewrites) {
-        if (accepted) {
-            result[filename].emplace_back(rewrite);
-        }
-    }
-
-    for (auto [filename, rewrites] : result) {
-        std::string before = read_file(filename);
-        auto diff = nway::diff(before, rewrites);
-        assert(!nway::has_conflict(diff));
-        auto after = nway::merge(diff);
+    for (auto [filename, after] : get_results(rewrites)) {
         if (options.in_place) {
             std::ofstream f(filename);
-            f << post_process(before, after);
+            f << after;
             f.close();
         } else if (options.patch) {
-            print_patch(filename, before, post_process(before, after), {false, true});
+            std::string before = read_file(filename);
+            print_patch(filename, before, after, {false, true, stdout});
         }
     }
 
