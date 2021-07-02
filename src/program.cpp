@@ -167,6 +167,8 @@ program::get_possible_rewrites(const char* filename) {
 }
 
 std::vector<std::string> program::get_variables_in_scope(int id) {
+    return {};
+    /*
     std::vector<std::string> result;
     souffle::Relation* relation = prog->getRelation("in_scope");
     assert(relation != nullptr);
@@ -179,18 +181,21 @@ std::vector<std::string> program::get_variables_in_scope(int id) {
             continue;
         result.emplace_back(std::move(identifier));
     }
-    return result;
+    return result;*/
 }
 
 int program::get_point_of_declaration(int id) {
     souffle::Relation* relation = prog->getRelation("point_of_declaration");
     assert(relation != nullptr);
+    int result = 0;
+    int count = 0;
     for (auto& output : *relation) {
         int rel_id;
         int declaration;
         output >> rel_id >> declaration;
-        if (rel_id == id)
-            return declaration;
+        if (rel_id == id) {
+            result = declaration;
+        }
     }
     return 0;
 }

@@ -429,7 +429,7 @@ int main(int argc, char** argv) {
     std::sort(file_time.begin(), file_time.end());
     for (auto [t, f] : file_time) {
         printf("%.3f ", t);
-        std::cout << f << std::endl;
+        std::cerr << f << std::endl;
     }
 #endif
 
@@ -590,7 +590,6 @@ int main(int argc, char** argv) {
             f << processed;
             f.close();
         } else if (options.patch) {
-            std::string before = read_file(filename);
             print_patch(filename, before, processed, {false, true});
         } else {
             assert(false);
