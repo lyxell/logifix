@@ -10,3 +10,6 @@
 [submodule "vendor/nway"]
 	path = vendor/nway
 	url = https://github.com/lyxell/nway.git
+[submodule "vendor/fmt"]
+	path = vendor/fmt
+	url = https://github.com/fmtlib/fmt.git

@@ -5,7 +5,9 @@ project(logifix HOMEPAGE_URL "https://github.com/lyxell/logifix")
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)
 
-### DEPENENCIES
+### DEPENDENCIES
+
+add_subdirectory(vendor/fmt)
 
 add_subdirectory(vendor/nway)
 
@@ -80,7 +82,9 @@ ENDIF ()
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 target_include_directories(logifix PRIVATE vendor/libgit2/include)
 
-target_link_libraries(logifix git2 sjp nway)
+target_include_directories(logifix PRIVATE vendor/fmt/include)
+
+target_link_libraries(logifix git2 sjp nway fmt)
 
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 

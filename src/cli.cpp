@@ -12,8 +12,12 @@
 #include <tuple>
 #include <mutex>
 #include <nway.h>
+#include <fmt/core.h>
+#include <fmt/color.h>
 
 #define PERF
+
+using namespace std::string_literals;
 
 extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
 
@@ -25,6 +29,15 @@ struct options_t {
     bool patch;
     std::set<std::string> files;
     std::set<std::string> accepted;
+};
+
+enum class key {
+    down,
+    left,
+    ret,
+    right,
+    up,
+    unknown
 };
 
 static const char* COLOR_BOLD       = "\033[1m";
@@ -59,21 +72,21 @@ std::vector<std::string> line_split(std::string str) {
     return result;
 }
 
-std::string get_char() {
+key get_keypress() {
     switch (getchar()) {
-    case 0x0d: return "return";
-    case  'k': return "up";
-    case  'j': return "down";
-    case  'h': return "left";
-    case  'l': return "right";
+    case 0x0d: return key::ret;
+    case  'k': return key::up;
+    case  'j': return key::down;
+    case  'h': return key::left;
+    case  'l': return key::right;
     case 0x1b:
         switch (getchar()) {
             case 0x5b:
                 switch (getchar()) {
-                    case 0x41: return "up";
-                    case 0x42: return "down";
-                    case 0x44: return "left";
-                    case 0x43: return "right";
+                    case 0x41: return key::up;
+                    case 0x42: return key::down;
+                    case 0x44: return key::left;
+                    case 0x43: return key::right;
                     default: break;
                 }
                 break;
@@ -82,7 +95,7 @@ std::string get_char() {
         break;
     default: break;
     }
-    return "unknown";
+    return key::unknown;
 }
 
 static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
@@ -160,10 +173,10 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
 }
 
 std::string read_file(std::string_view path) {
-    constexpr auto read_size = std::size_t{4096};
+    constexpr auto read_size = std::size_t {4096};
     auto stream = std::ifstream {path.data()};
     stream.exceptions(std::ios_base::badbit);
-    auto out = std::string{};
+    auto out = std::string {};
     auto buf = std::string(read_size, '\0');
     while (stream.read(& buf[0], read_size)) {
         out.append(buf, 0, stream.gcount());
@@ -199,26 +212,22 @@ options_t parse_options(int argc, char** argv) {
     std::vector<std::tuple<std::string,std::function<void(std::string)>,std::string>> opts;
 
     auto print_usage = []() {
-        std::cout << COLOR_BOLD << "USAGE" << COLOR_RESET << std::endl;
-        std::cout << "  " << PROJECT_NAME << " [flags] path [path ...]" << std::endl;
-        std::cout << std::endl;
+        fmt::print(fmt::emphasis::bold, "USAGE\n");
+        fmt::print("  {} [flags] path [path ...]\n\n", PROJECT_NAME);
     };
 
     auto print_flags = [&opts]() {
-        std::cout << COLOR_BOLD << "FLAGS" << COLOR_RESET << std::endl;
-        for (const auto [option, _, description] : opts) {
+        fmt::print(fmt::emphasis::bold, "FLAGS\n");
+        for (const auto& [option, _, description] : opts) {
             std::cout << " " << std::setw(19) << std::left << option << description << std::endl;
         }
         std::cout << std::endl;
     };
 
     auto print_examples = []() {
-        std::cout << COLOR_BOLD << "EXAMPLES" << COLOR_RESET << std::endl;
-        std::cout << std::endl;
-        std::cout << "  " << PROJECT_NAME << " src/main src/test" << std::endl;
-        std::cout << std::endl;
-        std::cout << "  " << PROJECT_NAME << " --in-place --accept=1125,1155 Test.java" << std::endl;
-        std::cout << std::endl;
+        fmt::print(fmt::emphasis::bold, "EXAMPLES\n\n");
+        fmt::print("  {} src/main src/test\n\n", PROJECT_NAME);
+        fmt::print("  {} src/main --in-place --accept=1125,1155 Test.java\n\n", PROJECT_NAME);
     };
 
     auto parse_accepted = [&](std::string str) {
@@ -240,7 +249,7 @@ options_t parse_options(int argc, char** argv) {
     };
 
     std::vector<std::string> arguments;
-    for (int i = 1; i < argc; i++) {
+    for (auto i = 1; i < argc; i++) {
         arguments.emplace_back(argv[i]);
     }
     std::reverse(arguments.begin(), arguments.end());
@@ -248,7 +257,7 @@ options_t parse_options(int argc, char** argv) {
     while (arguments.size()) {
         auto argument = arguments.back();
         if (argument.size() < 2 || argument.substr(0, 2) != "--") break;
-        bool found = false;
+        auto found = false;
         for (const auto [option, fn, description] : opts) {
             if (option.find("=") != std::string::npos) {
                 auto opt_part = option.substr(0, option.find("=") + 1);
@@ -266,8 +275,7 @@ options_t parse_options(int argc, char** argv) {
             }
         }
         if (!found) {
-            std::cout << "Error: Found invalid flag '" << argument << "'" << std::endl;
-            std::cout << std::endl;
+            fmt::print("Error: Found invalid flag '{}'\n\n", argument);
             print_usage();
             print_flags();
             std::exit(1);
@@ -286,8 +294,7 @@ options_t parse_options(int argc, char** argv) {
         std::cmatch m;
         auto argument = arguments.back();
         if (!fs::exists(argument)) {
-            std::cout << "Error: Path '" << argument << "' does not exist" << std::endl;
-            std::cout << std::endl;
+            fmt::print("Error: Path '{}' does not exist\n\n", argument);
             print_usage();
             std::exit(1);
         }
@@ -310,12 +317,12 @@ options_t parse_options(int argc, char** argv) {
 int multi_choice(std::string question, std::vector<std::string> alternatives, bool exit_on_left = false) {
     tty_enable_cbreak_mode();
     std::cout << TTY_HIDE_CURSOR;
-    std::cout << COLOR_BOLD << COLOR_GREEN << "?" << COLOR_RESET;
-    std::cout << COLOR_BOLD << " " << question << COLOR_RESET;
+    fmt::print(fg(fmt::terminal_color::green) | fmt::emphasis::bold, "?");
+    fmt::print(fmt::emphasis::bold, " {} ", question);
     if (exit_on_left) {
-        std::cout << " [Use arrows to move, left to finish] " << COLOR_RESET;
+        fmt::print("[Use arrows to move, left to finish]");
     } else {
-        std::cout << " [Use arrows to move] " << COLOR_RESET;
+        fmt::print("[Use arrows to move]");
     }
     int cursor = 0;
     size_t scroll = 0;
@@ -327,15 +334,13 @@ int multi_choice(std::string question, std::vector<std::string> alternatives, bo
         } else if (cursor != -1 && cursor == scroll + height) {
             scroll = cursor - height + 1;
         }
-        for (size_t i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
-            std::cout << std::endl;
+        for (auto i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
             if (cursor == i) {
-                std::cout << "> ";
+                fmt::print("\n> {}", alternatives[i]);
             } else {
-                std::cout << "  ";
+                fmt::print("\n  {}", alternatives[i]);
             }
-            std::cout << alternatives[i] << TTY_CLEAR_TO_EOL;
-            std::cout << COLOR_RESET;
+            std::cout << TTY_CLEAR_TO_EOL;
         }
         if (found) {
             std::cout << std::endl;
@@ -344,21 +349,18 @@ int multi_choice(std::string question, std::vector<std::string> alternatives, bo
             tty_disable_cbreak_mode();
             return cursor;
         }
-        for (size_t i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
+        for (auto i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
             std::cout << TTY_CURSOR_UP;
         }
-        auto res = get_char();
-        if (res == "left" && exit_on_left) {
+        auto key_press = get_keypress();
+        if (key_press == key::left && exit_on_left) {
             cursor = -1;
             found = true;
-        }
-        if (res == "up" && cursor > 0) {
+        } else if (key_press == key::up && cursor > 0) {
             cursor--;
-        }
-        if (res == "down" && cursor + 1 < alternatives.size()) {
+        } else if (key_press == key::down && cursor + 1 < alternatives.size()) {
             cursor++;
-        }
-        if (res == "return" || res == "right") {
+        } else if (key_press == key::ret || key_press == key::right) {
             found = true;
         }
     }
@@ -440,21 +442,23 @@ int main(int argc, char** argv) {
     });
 
     auto review = [](auto& rw, size_t curr, size_t total) {
-        auto& [fn, rule, rewrite, accepted] = rw;
+        auto& [filename, rule, rewrite, accepted] = rw;
         std::cout << "-----------------------------------------------------------" << std::endl;
-        std::cout << std::endl << COLOR_BOLD << "Rewrite ";
-        std::cout << curr << "/" << total << " • ";
-        std::cout << fn << COLOR_RESET << std::endl << std::endl;
-        std::string input = read_file(fn);
-        print_patch(fn, input, rewrite, {true, false});
+        fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
+        std::string input = read_file(filename);
+        print_patch(filename, input, rewrite, {true, false});
         std::cout << std::endl;
         auto choice = multi_choice("What would you like to do?", {
             "Accept this rewrite",
             "Reject this rewrite"
         }, true);
-        if (choice == -1) return false;
-        if (choice == 0) accepted = true;
-        if (choice == 1) accepted = false;
+        if (choice == -1) {
+            return false;
+        } else if (choice == 0) {
+            accepted = true;
+        } else if (choice == 1) {
+            accepted = false;
+        }
         return true;
     };
 
@@ -462,19 +466,19 @@ int main(int argc, char** argv) {
 
         while (true) {
 
-            size_t selected_rewrites = std::count_if(rewrites.begin(), rewrites.end(), [](auto rewrite) {
+            size_t selected_rewrites = std::count_if(rewrites.begin(), rewrites.end(), [](const auto& rewrite) {
                 return std::get<3>(rewrite);
             });
 
             if (selected_rewrites > 0) {
-                std::cout << std::endl;
-                std::cout << COLOR_BOLD << "Selected " << selected_rewrites << "/";
-                std::cout << rewrites.size();
-                std::cout << " rewrites" << COLOR_RESET << std::endl << std::endl;
+                fmt::print(fmt::emphasis::bold,
+                    "\nSelected {}/{} rewrites\n\n",
+                    selected_rewrites,
+                    rewrites.size());
             } else {
-                std::cout << std::endl;
-                std::cout << COLOR_BOLD << "Found " << rewrites.size();
-                std::cout << " rewrites" << COLOR_RESET << std::endl << std::endl;
+                fmt::print(fmt::emphasis::bold,
+                    "\nFound {} rewrites\n\n",
+                    rewrites.size());
             }
 
             auto selection = multi_choice("What would you like to do?", {
@@ -503,25 +507,27 @@ int main(int argc, char** argv) {
                         std::string description = std::to_string(rule);
                         for (auto [squid, pmdid, desc] : rule_data) {
                             if (squid == "S" + std::to_string(rule)) {
-                                description = desc + " • " + squid;
+                                description = fmt::format("{} • {}", desc, squid);
                                 break;
                             }
                         }
+                        std::string status;
                         if (accepted > 0) {
-                            options.emplace_back(description + COLOR_GREEN + " (" + std::to_string(accepted) + "/" + std::to_string(rws.size()) + ")" + COLOR_RESET);
+                            status = fmt::format(fg(fmt::terminal_color::green), " ({}/{})", accepted, rws.size());
                         } else {
-                            options.emplace_back(description + " (" + std::to_string(accepted) + "/" + std::to_string(rws.size()) + ")");
-
+                            status = fmt::format(" ({}/{})", accepted, rws.size());
                         }
+                        options.emplace_back(description + status);
                     }
                     auto rule_selection = multi_choice("Which rule would you like to review?", options, true);
                     if (rule_selection == -1) break;
                     auto rule = keys[rule_selection];
-                    size_t curr = 1;
-                    size_t total = rules[rule].size();
+                    auto curr = 1;
+                    auto total = rules[rule].size();
                     for (auto& rw : rewrites) {
                         if (std::get<1>(rw) == rule) {
                             if (!review(rw, curr, total)) break;
+                            curr++;
                         }
                     }
                 } else if (selection == 1) {
