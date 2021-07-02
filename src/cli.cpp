@@ -405,6 +405,11 @@ int main(int argc, char** argv) {
         f.join();
     }
 
+    /* Sort rewrites by filename */
+    std::sort(rewrites.begin(), rewrites.end(), [](const auto& a, const auto& b) -> bool {
+        return std::get<0>(a) < std::get<0>(b);
+    });
+
     auto review = [](auto& rw, size_t curr, size_t total) {
         auto& [fn, rule, rewrite, accepted] = rw;
         std::cout << "-----------------------------------------------------------" << std::endl;
@@ -469,7 +474,7 @@ int main(int argc, char** argv) {
                         std::string description = std::to_string(rule);
                         for (auto [squid, pmdid, desc] : rule_data) {
                             if (squid == "S" + std::to_string(rule)) {
-                                description = desc;
+                                description = desc + " • " + squid;
                                 break;
                             }
                         }
