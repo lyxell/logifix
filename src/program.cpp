@@ -107,7 +107,7 @@ std::set<std::pair<std::string, std::string>> program::run(std::string file, std
             }
             auto source = files[filename];
             auto dest = source.substr(0, start) + replacement + source.substr(end);
-            auto dest_filename = filename + "-[" + rule + "," + std::to_string(start) + "," + std::to_string(end) + "]";
+            auto dest_filename = filename + "-[" + rule + "," + std::to_string(start) + "," + std::to_string(end) + "," + std::to_string(std::hash<std::string>{}(replacement)) + "]";
             has_children.emplace(source);
             created_from.emplace(dest_filename, new_rewrite);
             if (file_set.find(dest) == file_set.end()) {

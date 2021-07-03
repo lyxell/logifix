@@ -1,9 +1,29 @@
-diff --git a/Test.java b/Test.java
-@@ -7,6 +7,6 @@ class Test1 {
+diff --git a/tests/Test.java b/tests/Test.java
+@@ -7,21 +7,21 @@ class Test1 {
          }
      }
-     boolean test(Inner obj) {
--        return obj == null ? false : obj.run();
-+        return obj != null && obj.run();
+     boolean test1(boolean x, Inner obj) {
+-        return x ? true : obj.run();
++        return x || obj.run();
+     }
+     boolean test2(boolean x, Inner obj) {
+-        return x ? false : obj.run();
++        return !x && obj.run();
+     }
+     boolean test3(boolean x, Inner obj) {
+-        return x ? obj.run() : true;
++        return !x || obj.run();
+     }
+     boolean test4(boolean x, Inner obj) {
+-        return x ? obj.run() : false;
++        return x && obj.run();
+     }
+     boolean test5(boolean x) {
+-        return x ? true : false;
++        return x;
+     }
+     boolean test6(boolean x) {
+-        return x ? false : true;
++        return !x;
      }
  }
