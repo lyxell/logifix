@@ -2,6 +2,8 @@
 #include "tty.h"
 #include "config.h"
 #include <regex>
+#include <sys/ioctl.h>
+#include <termios.h>
 #include <filesystem>
 #include <future>
 #include <cstdio>
@@ -136,13 +138,25 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
 
     size_t i = 0;
 
+    struct winsize ws;
+    size_t cols = 1000;
+
+    if (ioctl(1, TIOCGWINSZ, &ws) != -1 && ws.ws_col > 0) {
+        cols = ws.ws_col;
+    }
+
+    size_t rendered = 1;
+
     while (true) {
+        if (rendered == cols) break;
         if (line->content[i] == '\0' || line->content[i] == '\n' || line->content[i] == '\r') break;
         // render tab as four spaces
         if (line->content[i] == '\t') {
             fprintf(opts->fp, "    ");
+            rendered += 4;
         } else {
             fprintf(opts->fp, "%c", line->content[i]);
+            rendered++;
         }
         i++;
     }
@@ -525,7 +539,6 @@ int main(int argc, char** argv) {
 
     auto review = [](auto& rw, size_t curr, size_t total) {
         auto& [filename, rule, after, accepted] = rw;
-        std::cout << "-----------------------------------------------------------" << std::endl;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
         print_patch(filename, before, post_process(before, after), {true, false, stdout});
