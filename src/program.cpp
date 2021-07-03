@@ -194,7 +194,7 @@ int program::get_point_of_declaration(int id) {
         int declaration;
         output >> rel_id >> declaration;
         if (rel_id == id) {
-            result = declaration;
+            return declaration;
         }
     }
     return 0;

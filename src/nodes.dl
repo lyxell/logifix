@@ -179,12 +179,12 @@ method_declarator(id, name, params) :-
     parent_of(id, "name", name),
     parent_of_list(id, "params", params).
 
-.decl formal_parameter(id: id, modifiers: id_list, type: id, name: id)
-formal_parameter(id, modifiers, type, name) :-
+.decl formal_parameter(id: id, modifiers: id_list, type: id, declarator_id: id)
+formal_parameter(id, modifiers, type, declarator_id) :-
     name_of(id, "formal_parameter"),
     parent_of_list(id, "modifiers", modifiers),
     parent_of(id, "type", type),
-    parent_of(id, "name", name).
+    parent_of(id, "declarator_id", declarator_id).
 
 .decl local_variable_declaration_statement(id: id, declaration: id)
 local_variable_declaration_statement(id, declaration) :-
@@ -198,11 +198,17 @@ local_variable_declaration(id, modifiers, type, declarators) :-
     parent_of(id, "type", type),
     parent_of_list(id, "declarators", declarators).
 
-.decl variable_declarator(id: id, name: id, initializer: id)
-variable_declarator(id, name, initializer) :-
+.decl variable_declarator(id: id, declarator_id: id, initializer: id)
+variable_declarator(id, declarator_id, initializer) :-
     name_of(id, "variable_declarator"),
-    parent_of(id, "name", name),
+    parent_of(id, "declarator_id", declarator_id),
     parent_of(id, "initializer", initializer).
+
+.decl variable_declarator_id(id: id, name: id, dims: id_list)
+variable_declarator_id(id, name, dims) :-
+    name_of(id, "variable_declarator_id"),
+    parent_of(id, "name", name),
+    parent_of_list(id, "dims", dims).
 
 .decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id_list, type: id, arguments: id_list, body: id_list)
 class_instance_creation_expression(id, qualifier, type_arguments, type, arguments, body) :-

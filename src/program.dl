@@ -219,7 +219,7 @@ in_scope(start, end, filename, identifier_str, param) :-
         ends_at(body, end),
         filename_of(body, filename).
 
-/* Make field declarations in scope in the bodies of their class */
+/* Make field declarations in scope in their class */
 in_scope(start, end, filename, identifier_str, field) :-
     parent_of_list(id, "body", body),
         starts_at(id, start),
@@ -228,7 +228,8 @@ in_scope(start, end, filename, identifier_str, field) :-
     list_contains(body, field),
     field_declaration(field, _, _, declarators),
     list_contains(declarators, declarator),
-    variable_declarator(declarator, identifier, _),
+    variable_declarator(declarator, declarator_id, _),
+    variable_declarator_id(declarator_id, identifier, _),
     string_representation(identifier, identifier_str).
 
 /* Make formal parameters accessible in the body of a method */
@@ -240,7 +241,8 @@ in_scope(start, end, filename, identifier_str, param) :-
     method_header(header, _, declarator, _),
     parent_of_list(declarator, "params", params),
     list_contains(params, param),
-    formal_parameter(param, _, _, identifier),
+    formal_parameter(param, _, _, declarator_id),
+    variable_declarator_id(declarator_id, identifier, _),
     string_representation(identifier, identifier_str).
 
 /* Make formal parameters accessible in the body of a constructor */
@@ -251,7 +253,8 @@ in_scope(start, end, filename, identifier_str, param) :-
         filename_of(body, filename),
     parent_of_list(declarator, "params", params),
     list_contains(params, param),
-    formal_parameter(param, _, _, identifier),
+    formal_parameter(param, _, _, declarator_id),
+    variable_declarator_id(declarator_id, identifier, _),
     string_representation(identifier, identifier_str).
 
 /* Make local variable declarations accessible in the succeeding statements */
@@ -265,7 +268,8 @@ in_scope(start, end, filename, identifier_str, declaration) :-
     predecessor_of(declaration_statement, succeeding_statement),
         starts_at(succeeding_statement, start),
     list_contains(declarators, declarator),
-    variable_declarator(declarator, identifier, _),
+    variable_declarator(declarator, declarator_id, _),
+    variable_declarator_id(declarator_id, identifier, _),
     string_representation(identifier, identifier_str).
 
 /* Point of declaration
