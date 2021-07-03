@@ -8,6 +8,7 @@
 #include "rules/fix_resource_leaks/implementation.dl"
 #include "rules/improve_precision_of_calls_to_bigdecimal/implementation.dl"
 #include "rules/remove_empty_finally_blocks/implementation.dl"
+#include "rules/remove_empty_declarations/implementation.dl"
 #include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"

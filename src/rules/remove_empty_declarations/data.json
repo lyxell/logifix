@@ -1,0 +1,10 @@
+{
+    "description": "Remove empty declarations",
+    "sonar": {
+        "id": "S1116",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1116"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

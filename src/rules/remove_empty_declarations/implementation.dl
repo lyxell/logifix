@@ -1,6 +1,5 @@
 rewrite("S1116", filename, start, end, "") :-
-    empty_statement(id),
+    empty_declaration(id),
         filename_of(id, filename),
         starts_at(id, start),
-        ends_at(id, end),
-    ! for_statement(_, _, _, _, id).
+        ends_at(id, end).

@@ -133,6 +133,10 @@ field_declaration(id, mods, type, declarators) :-
     parent_of(id, "type", type),
     parent_of_list(id, "declarators", declarators).
 
+.decl empty_declaration(id: id)
+empty_declaration(id) :-
+    name_of(id, "empty_declaration").
+
 .decl constructor_declaration(id: id, modifiers: id_list, declarator: id, throws: id_list, body: id)
 constructor_declaration(id, mods, declarator, throws, body) :-
     name_of(id, "constructor_declaration"),

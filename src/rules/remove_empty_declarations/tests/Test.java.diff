@@ -1,0 +1,7 @@
+diff --git a/Test.java b/Test.java
+@@ -1,5 +1,4 @@
+ public class Test {
+     public int test1 = 20;
+-    ;
+     public int test2 = 30;
+ }
