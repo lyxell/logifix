@@ -1,17 +1,6 @@
 /* https://rules.sonarsource.com/java/RSPEC-2095 */
 
 /**
- * FIXME Instances of the following classes should be ignored by this rule because close has no effect:
- *
- * java.io.ByteArrayOutputStream
- * java.io.ByteArrayInputStream
- * java.io.CharArrayReader
- * java.io.CharArrayWriter
- * java.io.StringReader
- * java.io.StringWriter
- */
-
-/**
  * Rewrite a try-catch statement into a try-with-resources statement.
  */
 rewrite("S2095", filename, try_start, decl_end, cat("try (", declaration_str, ") {")) :-
@@ -47,4 +36,15 @@ rewrite("S2095", filename, try_start, decl_end, cat("try (", declaration_str, ")
  *     }
  *     ... third fragment ...
  * }
+ */
+
+/**
+ * Instances of the following classes should be ignored by this rule because close has no effect:
+ *
+ * java.io.ByteArrayOutputStream
+ * java.io.ByteArrayInputStream
+ * java.io.CharArrayReader
+ * java.io.CharArrayWriter
+ * java.io.StringReader
+ * java.io.StringWriter
  */
