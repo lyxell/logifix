@@ -384,6 +384,15 @@ To download and build the project, perform the following steps:
 <ul> </ul>
 
 
+### Replace lambda with method reference
+
+* PMD ID: N/A
+* SonarSource ID: [S1612](https://rules.sonarsource.com/java/RSPEC-1612)
+
+
+<ul> </ul>
+
+
 ### Simplify boolean expressions
 
 * PMD ID: [SimplifyBooleanExpressions](https://pmd.github.io/latest/pmd_rules_java_design.html#simplifybooleanexpressions)

@@ -1,0 +1,12 @@
+/* Pre  [:x] -> [:y].[:z]([:x]) */
+/* Post [:y]::[:z] */
+rewrite("S1612", filename, start, end, cat(subject_str, "::", method)) :-
+    lambda_expression(lambda_expr, lambda_param, lambda_body),
+        filename_of(lambda_expr, filename),
+        starts_at(lambda_expr, start),
+        ends_at(lambda_expr, end),
+    method_invocation(lambda_body, subject, method, [arg, nil]),
+    string_representation(subject, subject_str),
+    string_representation(arg, arg_str),
+    string_representation(lambda_param, arg_str).
+

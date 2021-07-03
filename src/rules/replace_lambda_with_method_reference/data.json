@@ -1,0 +1,10 @@
+{
+    "description": "Replace lambda with method reference",
+    "sonar": {
+        "id": "S1612",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1612"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}
