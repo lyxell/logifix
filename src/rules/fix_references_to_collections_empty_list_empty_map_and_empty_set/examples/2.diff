@@ -1,8 +1,0 @@
-     @NotNull
-     public Map<String, AdvertisedListener> getAdvertisedListeners() {
-         if (this.advertisedListeners == null) {
--            return Collections.EMPTY_MAP;
-+            return Collections.emptyMap();
-         }
-         return Collections.unmodifiableMap(this.advertisedListeners);
-     }
