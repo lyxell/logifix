@@ -134,16 +134,6 @@ To download and build the project, perform the following steps:
  		return metadata.keySet();
  	}
 ```
-```diff
-     @NotNull
-     public Map<String, AdvertisedListener> getAdvertisedListeners() {
-         if (this.advertisedListeners == null) {
--            return Collections.EMPTY_MAP;
-+            return Collections.emptyMap();
-         }
-         return Collections.unmodifiableMap(this.advertisedListeners);
-     }
-```
 
 <ul> </ul>
 
@@ -189,6 +179,15 @@ To download and build the project, perform the following steps:
      private boolean legacyLifespanCompletionCondition;
      private TaskPriorityTracking taskPriorityTracking = TaskPriorityTracking.TASK_FAIR;
 ```
+
+<ul> </ul>
+
+
+### Remove empty declarations
+
+* PMD ID: N/A
+* SonarSource ID: [S1116](https://rules.sonarsource.com/java/RSPEC-1116)
+
 
 <ul> </ul>
 
