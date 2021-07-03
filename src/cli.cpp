@@ -339,7 +339,10 @@ static int multi_choice(std::string question, std::vector<std::string> alternati
 }
 
 static std::string post_process(std::string before, std::string after) {
-    auto line_split = [](std::string str) {
+    auto find_first_non_space = [](const std::string& str) {
+        return std::find_if(str.begin(), str.end(), [](char c) { return std::isspace(c) == 0; });
+    };
+    auto line_split = [](std::string str) -> std::vector<std::string> {
         std::vector<std::string> result;
         while (!str.empty()) {
             size_t i;
@@ -351,16 +354,74 @@ static std::string post_process(std::string before, std::string after) {
         }
         return result;
     };
+    auto bracket_balance = [](const std::string& str) {
+        int result = 0;
+        for (char c : str) {
+            if (c == '(' || c == '{') result++;
+            else if (c == ')' || c == '}') result--;
+        }
+        return result;
+    };
+    auto detect_indentation = [line_split, find_first_non_space](std::string str) {
+        auto lines = line_split(str);
+        std::vector<std::string> indentations;
+        for (auto line : lines) {
+            auto first_non_space_at = find_first_non_space(line);
+            if (first_non_space_at == line.end() || first_non_space_at == line.begin()) continue;
+            auto indent = line.substr(0, first_non_space_at - line.begin());
+            if (std::any_of(indent.begin(), indent.end(), [indent](char c) { return c != indent[0]; })) {
+                continue;
+            }
+            indentations.push_back(indent);
+        }
+        std::map<std::string, size_t> candidates;
+        for (size_t i = 1; i < indentations.size(); i++) {
+            auto a = indentations[i-1];
+            auto b = indentations[i];
+            if (a == b) continue;
+            if (a > b) std::swap(a, b);
+            if (b.find(a) != 0) continue;
+            candidates[b.substr(a.size())]++;
+        }
+        std::string best_candidate = "    ";
+        size_t best_result = 0;
+        for (auto [k, v] : candidates) {
+            if (v > best_result) {
+                best_result = v;
+                best_candidate = k;
+            }
+        }
+        return best_candidate;
+    };
+
+    auto indentation = detect_indentation(before);
+
     auto string_has_only_whitespace = [](const auto& str) {
         return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
     };
+
     auto after_lines = line_split(std::move(after));
     auto before_lines = line_split(std::move(before));
     auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
     std::string processed;
     for (size_t i = 0; i < after_lines.size(); i++) {
-        if (lcs.find(i) == lcs.end() && string_has_only_whitespace(after_lines[i])) {
-            continue;
+        if (lcs.find(i) == lcs.end()) {
+            if (string_has_only_whitespace(after_lines[i])) continue;
+            // auto-indent
+            if (i > 0 && find_first_non_space(after_lines[i]) == after_lines[i].begin()) {
+                auto prev_line = after_lines[i-1];
+                // get indent from previous line
+                auto new_indent = prev_line.substr(0, find_first_non_space(prev_line) - prev_line.begin());
+                // increase indent if previous line has an open bracket
+                if (bracket_balance(prev_line) > 0) {
+                    new_indent += indentation;
+                }
+                // decrease indent if we have closing bracket
+                if (bracket_balance(after_lines[i]) < 0) {
+                    new_indent = new_indent.substr(std::min(indentation.size(), new_indent.size()));
+                }
+                after_lines[i] = new_indent + after_lines[i];
+            }
         }
         processed += after_lines[i];
     }

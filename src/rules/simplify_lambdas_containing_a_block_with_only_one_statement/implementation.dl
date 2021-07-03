@@ -13,5 +13,6 @@ rewrite("S1602", filename, start, end, expr_str) :-
         starts_at(lambda_body, start),
         ends_at(lambda_body, end),
     return_statement(statement, expr),
-    string_representation(expr, expr_str).
+    string_representation(expr, expr_str),
+    end - start < 80.
 
