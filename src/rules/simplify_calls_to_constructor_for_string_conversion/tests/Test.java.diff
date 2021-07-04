@@ -1,0 +1,9 @@
+diff --git a/Test.java b/Test.java
+@@ -1,6 +1,6 @@
+ public class Test {
+     public void main(String[] args) {
+-        String x = new Integer(20).toString();
++        String x = Integer.toString(20);
+         System.out.println(x);
+     }
+ }
