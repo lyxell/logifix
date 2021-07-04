@@ -1,0 +1,10 @@
+diff --git a/TestLocalVariableDeclaration.java b/TestLocalVariableDeclaration.java
+@@ -3,7 +3,7 @@ import java.util.ArrayDeque;
+ 
+ public class TestLocalVariableDeclaration {
+     public static void main(String[] args) {
+-        Deque<String> deque = new ArrayDeque();
++        Deque<String> deque = new ArrayDeque<>();
+         System.out.println(deque.size());
+     }
+ }

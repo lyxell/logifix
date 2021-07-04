@@ -229,21 +229,26 @@ variable_declarator_id(id, name, dims) :-
     parent_of(id, "name", name),
     parent_of_list(id, "dims", dims).
 
-.decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id_list, type: id, arguments: id_list, body: id_list)
+.decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id, type: id, arguments: id_list, body: id_list)
 class_instance_creation_expression(id, qualifier, type_arguments, type, arguments, body) :-
     name_of(id, "class_instance_creation_expression"),
     parent_of(id, "qualifier", qualifier),
-    parent_of_list(id, "type_arguments", type_arguments),
+    parent_of(id, "type_arguments", type_arguments),
     parent_of(id, "type", type),
     parent_of_list(id, "arguments", arguments),
     parent_of_list(id, "body", body).
 
-.decl class_type(id: id, name: id, type_arguments: id_list, annotations: id_list)
+.decl class_type(id: id, name: id, type_arguments: id, annotations: id_list)
 class_type(id, name, type_arguments, annotations) :-
     name_of(id, "class_type"),
     parent_of(id, "name", name),
-    parent_of_list(id, "type_arguments", type_arguments),
+    parent_of(id, "type_arguments", type_arguments),
     parent_of_list(id, "annotations", annotations).
+
+.decl type_arguments(id: id, arguments: id_list)
+type_arguments(id, arguments) :-
+    name_of(id, "type_arguments"),
+    parent_of_list(id, "arguments", arguments).
 
 .decl primitive_type(id: id, annotations: id_list, name: id)
 primitive_type(id, annotations, name) :-

@@ -1,0 +1,10 @@
+{
+    "description": "Avoid raw types",
+    "sonar": {
+        "id": "S3740",
+        "url": "https://rules.sonarsource.com/java/RSPEC-3740"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

@@ -1,0 +1,27 @@
+/* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
+/* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
+rewrite("S3740", filename, start, start, "<>") :-
+    field_declaration(id, _, left_type, declarators),
+    class_type(left_type, _, type_args, _),
+    type_arguments(type_args, args),
+    args != nil,
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, _, initializer),
+    class_instance_creation_expression(initializer, nil, nil, right_type, _, nil),
+    class_type(right_type, _, nil, _),
+        ends_at(right_type, start),
+        filename_of(right_type, filename).
+
+/* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
+/* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
+rewrite("S3740", filename, start, start, "<>") :-
+    local_variable_declaration(id, _, left_type, declarators),
+    class_type(left_type, _, type_args, _),
+    type_arguments(type_args, args),
+    args != nil,
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, _, initializer),
+    class_instance_creation_expression(initializer, nil, nil, right_type, _, nil),
+    class_type(right_type, _, nil, _),
+        ends_at(right_type, start),
+        filename_of(right_type, filename).
