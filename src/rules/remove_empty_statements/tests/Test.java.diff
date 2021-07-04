@@ -1,7 +1,13 @@
 diff --git a/Test.java b/Test.java
-@@ -1,5 +1,4 @@
- public class X {
-     public void x() {
+@@ -7,11 +7,9 @@ public class Test {
+         list.add(0);
+ 
+         // remove
 -        ;
-     }
- }
+ 
+         while (y) {
+             // remove
+-            ;
+         }
+ 
+         // keep

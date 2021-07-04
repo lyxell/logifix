@@ -1,0 +1,9 @@
+diff --git a/Test.java b/Test.java
+@@ -4,7 +4,6 @@ public class Test {
+         String x = "hello";
+         System.out.println(x);
+         // unused assignment, should be removed
+-        x = "world";
+         // used assignment, refers to field
+         this.x = y;
+     }

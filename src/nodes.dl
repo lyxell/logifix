@@ -23,6 +23,25 @@ for_statement(id, init, condition, update, body) :-
     parent_of(id, "update", update),
     parent_of(id, "body", body).
 
+.decl enhanced_for_statement(id: id, param: id, expression: id, body: id)
+enhanced_for_statement(id, param, expression, body) :-
+    name_of(id, "enhanced_for_statement"),
+    parent_of(id, "param", param),
+    parent_of(id, "expression", expression),
+    parent_of(id, "body", body).
+
+.decl while_statement(id: id, condition: id, body: id)
+while_statement(id, condition, body) :-
+    name_of(id, "while_statement"),
+    parent_of(id, "condition", condition),
+    parent_of(id, "body", body).
+
+.decl do_statement(id: id, condition: id, body: id)
+do_statement(id, condition, body) :-
+    name_of(id, "do_statement"),
+    parent_of(id, "condition", condition),
+    parent_of(id, "body", body).
+
 .decl empty_statement(id: id)
 empty_statement(id) :-
     name_of(id, "empty_statement").

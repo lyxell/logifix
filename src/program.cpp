@@ -184,20 +184,19 @@ std::vector<std::string> program::get_variables_in_scope(int id) {
     return result;*/
 }
 
-int program::get_point_of_declaration(int id) {
+std::vector<int> program::get_point_of_declaration(int id) {
     souffle::Relation* relation = prog->getRelation("point_of_declaration");
     assert(relation != nullptr);
-    int result = 0;
-    int count = 0;
+    std::vector<int> result;
     for (auto& output : *relation) {
         int rel_id;
         int declaration;
         output >> rel_id >> declaration;
         if (rel_id == id) {
-            return declaration;
+            result.emplace_back(declaration);
         }
     }
-    return 0;
+    return result;
 }
 
 std::tuple<std::string, int, int> program::get_node_properties(int id) {

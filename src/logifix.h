@@ -28,7 +28,7 @@ class program {
     std::vector<std::pair<std::string, int>> get_children(int node);
     std::vector<std::pair<std::string, std::vector<int>>>
     get_child_lists(int node);
-    int get_point_of_declaration(int id);
+    std::vector<int> get_point_of_declaration(int id);
 };
 
 } // namespace logifix
