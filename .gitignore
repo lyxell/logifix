@@ -2,3 +2,4 @@ build
 *.class
 Release
 Debug
+scripts/GithubRelease
