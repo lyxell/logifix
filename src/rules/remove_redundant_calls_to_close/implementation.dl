@@ -1,7 +1,7 @@
 /* Pre  [:x].close() */
 /* Post              */
 rewrite("S4087", filename, start, end, "") :-
-    try_with_resources_statement(id, resources, body, _, _),
+    try_with_resources_statement(id, resources, _, _, _),
         filename_of(id, filename),
     list_contains(resources, resource),
     block(_, stmts),

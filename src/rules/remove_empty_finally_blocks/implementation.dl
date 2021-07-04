@@ -2,12 +2,12 @@
 last_node_before_finally(id, body) :-
     try_statement(id, body, nil, _).
 last_node_before_finally(id, last_elem) :-
-    try_statement(id, body, catches, _),
+    try_statement(id, _, catches, _),
     list_last_element(catches, last_elem).
 last_node_before_finally(id, body) :-
     try_with_resources_statement(id, _, body, nil, _).
 last_node_before_finally(id, last_elem) :-
-    try_with_resources_statement(id, _, body, catches, _),
+    try_with_resources_statement(id, _, _, catches, _),
     list_last_element(catches, last_elem).
 
 /* Pre  try [:body] [:catches] finally {} */

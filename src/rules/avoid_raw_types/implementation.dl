@@ -42,7 +42,7 @@ rewrite("S3740", filename, start, start, type_args_str) :-
     has_collection_type(subject),
     point_of_declaration(subject, decl),
     parent_of(decl, "type", original_type),
-    string_representation(original_type, org_type_str),
+    string_representation(original_type, _),
     class_type(original_type, _, type_args, _),
     type_arguments(type_args, arguments),
     arguments != nil,

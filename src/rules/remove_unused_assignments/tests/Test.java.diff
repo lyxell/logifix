@@ -1,9 +1,0 @@
-diff --git a/Test.java b/Test.java
-@@ -7,7 +7,6 @@ public class Test {
-         x = "hello!";
-         System.out.println(x);
-         // unused assignment
--        x = "world";
-         System.out.println(this.x);
-         // used assignment, refers to field
-         this.x = y;
