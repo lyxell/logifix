@@ -7,15 +7,22 @@ smells in Java source code. Logifix is implemented in a
 high-performance Datalog dialect that is synthesized into fast
 multi-threaded C++ code.
 
-https://user-images.githubusercontent.com/4975941/124334330-1099ed80-db97-11eb-9463-8d305e3953f4.mp4
+## Demo
+
+https://user-images.githubusercontent.com/4975941/124370679-9478d600-dc7a-11eb-83ae-68d7d818c547.mp4
 
 <ul> </ul>
 
-## Downloading
+## Getting started
 
-There are pre-built binaries available for GNU/Linux without any
-runtime dependencies, see
-[Releases](https://github.com/lyxell/logifix/releases).
+1. Watch [the demo](https://github.com/lyxell/logifix#demo)
+
+2. Download and unpack [the latest version](https://github.com/lyxell/logifix/releases/latest) (Currently only GNU/Linux)
+
+3. Put the `logifix` binary in `/usr/local/bin` or somewhere else
+   in your `$PATH`
+
+4. Run `logifix path/to/your/java/project`
 
 <ul> </ul>
 
