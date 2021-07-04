@@ -14,10 +14,10 @@
 #include "rules/remove_empty_try_blocks/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_repeated_unary_operators/implementation.dl"
-#include "rules/remove_unused_assignments/implementation.dl"
 #include "rules/remove_unnecessary_calls_to_string_valueof/implementation.dl"
 #include "rules/remove_unnecessary_return/implementation.dl"
 #include "rules/remove_unnecessary_variable_declarations_before_return_statement/implementation.dl"
+#include "rules/remove_unused_assignments/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
 #include "rules/remove_unused_private_fields/implementation.dl"
 #include "rules/replace_lambda_with_method_reference/implementation.dl"
@@ -31,7 +31,6 @@
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
 #include "rules/simplify_return_of_boolean_expressions/implementation.dl"
 #include "rules/simplify_ternary_conditional_expressions/implementation.dl"
-#include "rules/simplify_nested_try_blocks/implementation.dl"
 
 #include "rules/experimental/2272_throw_nosuchelementexception.dl"
 

@@ -1,8 +1,3 @@
-/**
- * Collections.EMPTY_LIST, EMPTY_MAP, and EMPTY_SET should not be used
- * https://rules.sonarsource.com/java/RSPEC-1596
- */
-
 rewrite("S1596", filename, start, end, "Collections.emptyList()") :-
     string_representation(id, "Collections.EMPTY_LIST"),
     starts_at(id, start),

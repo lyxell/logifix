@@ -1,8 +1,3 @@
-/**
- * BigDecimal(double) should not be used
- * https://rules.sonarsource.com/java/RSPEC-2111
- */
-
 rewrite("S2111", filename, start, end, cat("BigDecimal.valueOf(", arg_str, ")")) :-
     class_instance_creation_expression(id, nil, nil, type, args, nil),
         filename_of(id, filename),

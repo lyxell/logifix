@@ -1,20 +1,17 @@
 
-/* Pre
-[:value_type] [:value_var] = [:map_var].get([:key_var]);
-if ([:value_var] == null) {
-    [:value_var] = [:value_initializer];
-    [:map_var].put([:key_var], [:value_var]);
-    [:trailing_statements]
-}
-return [:value_var];
-*/
+/* Pre  [:value_type] [:value_var] = [:map_var].get([:key_var]);
+        if ([:value_var] == null) {
+            [:value_var] = [:value_initializer];
+            [:map_var].put([:key_var], [:value_var]);
+            [:trailing_statements]
+        }
+        return [:value_var];
 
-/* Post
-return [:map_var].computeIfAbsent([:key_var], k -> {
-    [:value_type] [:value_var] = [:value_initializer];
-    [:trailing_statements]
-    return [:value_var];
-});
+   Post return [:map_var].computeIfAbsent([:key_var], k -> {
+            [:value_type] [:value_var] = [:value_initializer];
+            [:trailing_statements]
+            return [:value_var];
+        });
 */
 
 rewrite("internal", filename, ident_start, ident_end, "k") :-

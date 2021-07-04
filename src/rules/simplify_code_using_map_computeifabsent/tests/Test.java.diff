@@ -1,0 +1,15 @@
+diff --git a/tests/Test.java b/tests/Test.java
+@@ -5,12 +5,7 @@ public class Test {
+     Map<String, Integer> myMap;
+ 
+     Integer test(String key) {
+-        Integer result = myMap.get(key);
+-        if (result == null) {
+-            result = key.length() + 10;
+-            myMap.put(key, result);
+-        }
+-        return result;
++        return myMap.computeIfAbsent(key, k -> k.length() + 10);
+     }
+ 
+     public static void main(String[] args) {
