@@ -1,28 +1,24 @@
 
 /* Pre
-{
-    [:value_type] [:value_var] = [:map_var].get([:key_var]);
-    if ([:value_var] == null) {
-        [:value_var] = [:value_initializer];
-        [:map_var].put([:key_var], [:value_var]);
-        [:trailing_statements]
-    }
-    return [:value_var];
+[:value_type] [:value_var] = [:map_var].get([:key_var]);
+if ([:value_var] == null) {
+    [:value_var] = [:value_initializer];
+    [:map_var].put([:key_var], [:value_var]);
+    [:trailing_statements]
 }
+return [:value_var];
 */
 
 /* Post
-{
-    return [:map_var].computeIfAbsent([:key_var], k -> {
-        [:value_type] [:value_var] = [:value_initializer];
-        [:trailing_statements]
-        return [:value_var];
-    });
-}
+return [:map_var].computeIfAbsent([:key_var], k -> {
+    [:value_type] [:value_var] = [:value_initializer];
+    [:trailing_statements]
+    return [:value_var];
+});
 */
 
 rewrite("internal", filename, ident_start, ident_end, "k") :-
-    method_invocation(invocation, map_var, "computeIfAbsent", [key_var, [lambda, nil]]),
+    method_invocation(invocation, _, "computeIfAbsent", [key_var, [lambda, nil]]),
         filename_of(invocation, filename),
     starts_at(lambda, lambda_start),
     ends_at(lambda, lambda_end),
@@ -43,15 +39,17 @@ rewrite("S3824", filename, start, end, cat(
     "});"
 )) :-
 
-    /* We are in a block with three statements */
-    block(b, [s1, [s2, [s3, nil]]]),
-        filename_of(b, filename),
-        starts_at(s1, start),
-        ends_at(s3, end),
-        source_code(filename, code),
+    predecessor_of(s1, s2),
+    predecessor_of(s2, s3),
+
+    filename_of(s1, filename),
+    starts_at(s1, start),
+    ends_at(s3, end),
+    source_code(filename, code),
 
     /* The first statement is a local variable declaration statement */
     local_variable_declaration_statement(s1, decl),
+
     local_variable_declaration(decl, _, value_type, [declarator, nil]),
     variable_declarator(declarator, value_var, initializer),
     method_invocation(initializer, map_var, "get", [key_var, nil]),
