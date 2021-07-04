@@ -20,7 +20,6 @@
 #include "rules/remove_unnecessary_variable_declarations_before_return_statement/implementation.dl"
 #include "rules/remove_unused_assignments/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
-#include "rules/remove_unused_private_fields/implementation.dl"
 #include "rules/replace_lambda_with_method_reference/implementation.dl"
 #include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
@@ -33,8 +32,6 @@
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
 #include "rules/simplify_return_of_boolean_expressions/implementation.dl"
 #include "rules/simplify_ternary_conditional_expressions/implementation.dl"
-
-#include "rules/experimental/2272_throw_nosuchelementexception.dl"
 
 #include "nodes.dl"
 
@@ -385,11 +382,13 @@ has_type(id, type) :-
 .decl collection_type_name(str: symbol)
 collection_type_name("ArrayList").
 collection_type_name("Collection").
+collection_type_name("ArrayDeque").
 collection_type_name("Deque").
 collection_type_name("LinkedList").
 collection_type_name("List").
 collection_type_name("Queue").
 collection_type_name("Set").
+collection_type_name("TreeMap"). // TODO not technically true
 collection_type_name("Map"). // TODO not technically true
 collection_type_name("LinkedHashMap"). // TODO not technically true
 collection_type_name("SortedSet").

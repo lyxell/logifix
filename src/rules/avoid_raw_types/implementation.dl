@@ -1,13 +1,15 @@
 /* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
 /* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
 rewrite("S3740", filename, start, start, "<>") :-
-    field_declaration(id, _, left_type, declarators),
+    field_declaration(_, _, left_type, declarators),
+    is_collection_type(left_type),
     class_type(left_type, _, type_args, _),
     type_arguments(type_args, args),
     args != nil,
     list_contains(declarators, declarator),
     variable_declarator(declarator, _, initializer),
     class_instance_creation_expression(initializer, nil, nil, right_type, _, nil),
+    is_collection_type(right_type),
     class_type(right_type, _, nil, _),
         ends_at(right_type, start),
         filename_of(right_type, filename).
@@ -15,13 +17,33 @@ rewrite("S3740", filename, start, start, "<>") :-
 /* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
 /* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
 rewrite("S3740", filename, start, start, "<>") :-
-    local_variable_declaration(id, _, left_type, declarators),
+    local_variable_declaration(_, _, left_type, declarators),
+    is_collection_type(left_type),
     class_type(left_type, _, type_args, _),
     type_arguments(type_args, args),
     args != nil,
     list_contains(declarators, declarator),
     variable_declarator(declarator, _, initializer),
     class_instance_creation_expression(initializer, nil, nil, right_type, _, nil),
+    is_collection_type(right_type),
     class_type(right_type, _, nil, _),
         ends_at(right_type, start),
         filename_of(right_type, filename).
+
+/* Pre  Iterator [:var] = [:coll].iterator(); */
+/* Post Iterator<[:type]> [:var] = [:coll].iterator(); */
+rewrite("S3740", filename, start, start, type_args_str) :-
+    local_variable_declaration(id, _, left_type, [declarator, nil]),
+        filename_of(id, filename),
+    string_representation(left_type, "Iterator"),
+        ends_at(left_type, start),
+    variable_declarator(declarator, _, initializer),
+    method_invocation(initializer, subject, "iterator", nil),
+    has_collection_type(subject),
+    point_of_declaration(subject, decl),
+    parent_of(decl, "type", original_type),
+    string_representation(original_type, org_type_str),
+    class_type(original_type, _, type_args, _),
+    type_arguments(type_args, arguments),
+    arguments != nil,
+    string_representation(type_args, type_args_str).

@@ -210,7 +210,7 @@ local_variable_declaration_statement(id, declaration) :-
     name_of(id, "local_variable_declaration_statement"),
     parent_of(id, "declaration", declaration).
 
-.decl local_variable_declaration(id: id, modiifers: id_list, type: id, declarators: id_list)
+.decl local_variable_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
 local_variable_declaration(id, modifiers, type, declarators) :-
     name_of(id, "local_variable_declaration"),
     parent_of_list(id, "modifiers", modifiers),
