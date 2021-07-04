@@ -84,7 +84,7 @@ target_include_directories(logifix PRIVATE vendor/libgit2/include)
 
 target_include_directories(logifix PRIVATE vendor/fmt/include)
 
-target_link_libraries(logifix git2 sjp nway fmt)
+target_link_libraries(logifix git2 sjp nway fmt -static-libgcc -static-libstdc++)
 
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
