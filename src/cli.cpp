@@ -1,12 +1,9 @@
 #include "logifix.h"
 #include "tty.h"
 #include "config.h"
-#include <regex>
-#include <sys/ioctl.h>
-#include <termios.h>
 #include <filesystem>
-#include <future>
 #include <cstdio>
+#include <thread>
 #include <stack>
 #include <cctype>
 #include <git2.h>
@@ -138,25 +135,13 @@ static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
 
     size_t i = 0;
 
-    struct winsize ws;
-    size_t cols = 1000;
-
-    if (ioctl(1, TIOCGWINSZ, &ws) != -1 && ws.ws_col > 0) {
-        cols = ws.ws_col;
-    }
-
-    size_t rendered = 1;
-
     while (true) {
-        if (rendered == cols) break;
         if (line->content[i] == '\0' || line->content[i] == '\n' || line->content[i] == '\r') break;
         // render tab as four spaces
         if (line->content[i] == '\t') {
             fprintf(opts->fp, "    ");
-            rendered += 4;
         } else {
             fprintf(opts->fp, "%c", line->content[i]);
-            rendered++;
         }
         i++;
     }
@@ -276,7 +261,6 @@ static options_t parse_options(int argc, char** argv) {
     }
 
     while (arguments.size()) {
-        std::cmatch m;
         auto argument = arguments.back();
         if (!fs::exists(argument)) {
             fmt::print("Error: Path '{}' does not exist\n\n", argument);
