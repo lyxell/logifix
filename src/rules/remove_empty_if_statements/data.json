@@ -1,0 +1,10 @@
+{
+    "description": "Remove empty if statements",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "EmptyIfStmt",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptyifstmt"
+    }
+}
