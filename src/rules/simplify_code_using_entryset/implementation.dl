@@ -1,0 +1,9 @@
+
+/* Pre  for ([:key_type] [:key_var] : [:map].keySet())   */
+/* Post for (Map.Entry<[:key_type], [:value_type]> entry : [:map].entrySet()) {
+            [:key_type] [:key_var] = entry.getKey();
+            [:value_type] [:value_var] = entry.getValue(); */
+/* When loop body contains call to [:map].get([:key_var]) */
+/* TODO Implementation */
+
+/* TODO Write a supporting rule that makes sure that all calls to [:map].get([:key_var]) is replaced by [:value_var] */
