@@ -1,8 +1,7 @@
-#include "rules/avoid_raw_types/implementation.dl"
+#include "rules/provide_parameterized_type_for_generic/implementation.dl"
 #include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
 #include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
-
 #include "rules/fix_comparisons_of_objects_with_null/implementation.dl"
 #include "rules/fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison/implementation.dl"
 #include "rules/fix_null_returns_in_tostring/implementation.dl"
