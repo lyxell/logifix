@@ -40,6 +40,15 @@ To download and build the project, perform the following steps:
 
 ## Available fixes
 
+### Avoid raw types
+
+* PMD ID: N/A
+* SonarSource ID: [S3740](https://rules.sonarsource.com/java/RSPEC-3740)
+
+
+<ul> </ul>
+
+
 ### Fix broken null checks
 
 * PMD ID: [BrokenNullCheck](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#brokennullcheck)
@@ -382,15 +391,6 @@ To download and build the project, perform the following steps:
 <ul> </ul>
 
 
-### Remove unused private fields
-
-* PMD ID: [UnusedPrivateField](https://pmd.github.io/latest/pmd_rules_java_bestpractices.html#unusedprivatefield)
-* SonarSource ID: [S1068](https://rules.sonarsource.com/java/RSPEC-1068)
-
-
-<ul> </ul>
-
-
 ### Replace lambda with method reference
 
 * PMD ID: N/A
@@ -592,15 +592,6 @@ To download and build the project, perform the following steps:
 
  	/**
 ```
-
-<ul> </ul>
-
-
-### 
-
-* PMD ID: N/A
-* SonarSource ID: [S1141](https://rules.sonarsource.com/java/RSPEC-1141)
-
 
 <ul> </ul>
 
