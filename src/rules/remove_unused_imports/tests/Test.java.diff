@@ -1,0 +1,6 @@
+diff --git a/tests/Test.java b/tests/Test.java
+@@ -1,4 +1,3 @@
+-import java.util.ArrayList;
+ 
+ public class Test {
+     public static void main(String[] args) {
