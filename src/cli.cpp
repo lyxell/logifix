@@ -556,15 +556,15 @@ int main(int argc, char** argv) {
                     "\nSelected {}/{} rewrites\n\n",
                     selected_rewrites,
                     rewrites.size());
-                selection = multi_choice("What would you like to do?", {
+                selection = multi_choice("What would you like to do?",
+                {
                     "Review rewrites by rule",
-                    "Review rewrites by file",
                     "Show a diff of the current changes",
                     "Apply changes to files on disk and exit",
                     "Discard changes and exit",
                 });
 
-                if (selection == 2) {
+                if (selection == 1) {
                     auto* fp = popen("less -R", "w");
                     if (fp != NULL) {
                         for (auto [filename, after] : get_results(rewrites)) {
@@ -574,21 +574,23 @@ int main(int argc, char** argv) {
                         pclose(fp);
                     }
                 }
-                if (selection == 3) {
+                if (selection == 2) {
                     options.in_place = true;
                     break;
                 }
-                if (selection == 4) break;
+                if (selection == 3) break;
             } else {
                 fmt::print(fmt::emphasis::bold,
                     "\nFound {} rewrites\n\n",
                     rewrites.size());
+
+                if (rewrites.size() == 0) break;
+
                 selection = multi_choice("What would you like to do?", {
                     "Review rewrites by rule",
-                    "Review rewrites by file",
                     "Exit without doing anything",
                 });
-                if (selection == 2) break;
+                if (selection == 1) break;
             }
 
             while (true) {
@@ -632,21 +634,6 @@ int main(int argc, char** argv) {
                             curr++;
                         }
                     }
-                } else if (selection == 1) {
-                    /*std::map<std::string, decltype(rewrites)> files;
-                    for (auto rewrite : rewrites) {
-                        files[std::get<0>(rewrite)].emplace_back(rewrite);
-                    }
-                    std::vector<std::string> keys;
-                    std::vector<std::string> options;
-                    for (auto& [fn, rws] : files) {
-                        keys.emplace_back(fn);
-                        options.emplace_back(fn + " (" + std::to_string(rws.size()) + ")");
-                    }
-                    auto file_selection = multi_choice("Which file would you like to review?", options, true);
-                    if (file_selection == -1) break;
-                    auto file = keys[file_selection];
-                    review(files[file]);*/
                 } else {
                     break;
                 }
