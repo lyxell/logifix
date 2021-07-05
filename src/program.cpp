@@ -5,21 +5,6 @@
 
 using rewrite_t = std::tuple<std::string,std::string,size_t,size_t,std::string>;
 
-static void replace_all(std::string& source, const std::string& from, const std::string& to)
-{
-    std::string new_string;
-    new_string.reserve(source.length());
-    std::string::size_type last_pos = 0;
-    std::string::size_type find_pos;
-    while (std::string::npos != (find_pos = source.find(from, last_pos))) {
-        new_string.append(source, last_pos, find_pos - last_pos);
-        new_string += to;
-        last_pos = find_pos + from.length();
-    }
-    new_string += source.substr(last_pos);
-    source.swap(new_string);
-}
-
 static const char* PROGRAM_NAME = "logifix";
 
 namespace logifix {
