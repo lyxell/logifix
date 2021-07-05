@@ -26,6 +26,88 @@ https://user-images.githubusercontent.com/4975941/124370679-9478d600-dc7a-11eb-8
 
 <ul> </ul>
 
+## How does it work?
+
+Logifix performs deep search and rewrite of code. Given the code below:
+
+```java
+  private static Pattern getPattern(String groupRegexp) {
+    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
+    if (groupPattern == null) {
+      groupPattern = Pattern.compile(groupRegexp);
+      PATTERN_CACHE.put(groupRegexp, groupPattern);
+    }
+    return groupPattern;
+  }
+```
+
+Logifix finds and performs a rewrite in four steps, where each version of the code gets incrementally better:
+
+```diff
+   private static Pattern getPattern(String groupRegexp) {
+-    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
+-    if (groupPattern == null) {
+-      groupPattern = Pattern.compile(groupRegexp);
+-      PATTERN_CACHE.put(groupRegexp, groupPattern);
+-    }
+-    return groupPattern;
++    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
++      Pattern groupPattern = Pattern.compile(k);
++      return groupPattern;
++    });
+   }
+ }
+```
+
+```diff
+   private static Pattern getPattern(String groupRegexp) {
+     return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
+-      Pattern groupPattern = Pattern.compile(k);
+-      return groupPattern;
++      return Pattern.compile(k);
+     });
+   }
+ }
+```
+
+```diff
+   private static Pattern getPattern(String groupRegexp) {
+-    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
+-      return Pattern.compile(k);
+-    });
++    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> Pattern.compile(k));
+   }
+```
+
+```diff
+   private static Pattern getPattern(String groupRegexp) {
+-    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> Pattern.compile(k));
++    return PATTERN_CACHE.computeIfAbsent(groupRegexp, Pattern::compile);
+   }
+ }
+```
+
+The diff that is presented by Logifix is the following:
+
+```diff
+   private static Pattern getPattern(String groupRegexp) {
+-    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
+-    if (groupPattern == null) {
+-      groupPattern = Pattern.compile(groupRegexp);
+-      PATTERN_CACHE.put(groupRegexp, groupPattern);
+-    }
+-    return groupPattern;
++    return PATTERN_CACHE.computeIfAbsent(groupRegexp, Pattern::compile);
+   }
+ }
+```
+
+Thanks to the [fast Datalog engine Soufflé](https://github.com/souffle-lang/souffle) and [fast diff/merge algorithms](https://github.com/lyxell/nway) this rewrite is found in a fraction of a second.
+
+This rewrite was incorporated in the pull request https://github.com/cbeust/testng/pull/2610
+
+<ul> </ul>
+
 ## Building
 
 To build from source you will need [CMake](https://cmake.org/), [GNU Bison](https://www.gnu.org/software/bison/) and [re2c](https://re2c.org/).
