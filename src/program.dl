@@ -6,7 +6,7 @@
 #include "rules/fix_null_returns_in_tostring/implementation.dl"
 #include "rules/fix_potential_resource_leaks/implementation.dl"
 #include "rules/fix_raw_use_of_generic_class/implementation.dl"
-#include "rules/fix_references_to_collections_empty_list_empty_map_and_empty_set/implementation.dl"
+#include "rules/fix_raw_use_of_empty_collections/implementation.dl"
 #include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/remove_empty_declarations/implementation.dl"
 #include "rules/remove_empty_finally_blocks/implementation.dl"

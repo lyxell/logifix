@@ -1,5 +1,5 @@
 {
-    "description": "Fix references to Collections.EMPTY_LIST, EMPTY_MAP and EMPTY_SET",
+    "description": "Fix raw use of empty collections",
     "sonar": {
         "id": "S1596",
         "url": "https://rules.sonarsource.com/java/RSPEC-1596"
