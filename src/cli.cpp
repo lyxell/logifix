@@ -1,12 +1,12 @@
 #include "logifix.h"
 #include "tty.h"
 #include "config.h"
+#include "libgit.h"
 #include <filesystem>
 #include <cstdio>
 #include <thread>
 #include <stack>
 #include <cctype>
-#include <git2.h>
 #include <iostream>
 #include <set>
 #include <tuple>
@@ -45,15 +45,54 @@ enum class key {
     unknown
 };
 
-static const char* COLOR_BOLD       = "\033[1m";
-static const char* COLOR_CYAN       = "\033[36m";
-static const char* COLOR_GREEN      = "\033[32m";
-static const char* COLOR_RED        = "\033[31m";
-static const char* COLOR_RESET      = "\033[m";
 static const char* TTY_CLEAR_TO_EOL = "\033[K";
 static const char* TTY_CURSOR_UP    = "\033[A";
 static const char* TTY_HIDE_CURSOR  = "\033[?25l";
 static const char* TTY_SHOW_CURSOR  = "\033[?25h";
+
+std::string replace_tabs_with_spaces(std::string str) {
+    std::string result;
+    for (char c : str) {
+        if (c == '\t') {
+            result += "    ";
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> prettify_patch(std::vector<std::string> lines) {
+    std::vector<std::string> result;
+    // erase first line, git header
+    lines.erase(lines.begin());
+    size_t line_number = 0;
+    size_t line_number_width = 1;
+    bool seen_header_before = false;
+    // colorize
+    for (auto& line : lines) {
+        line = replace_tabs_with_spaces(std::move(line));
+        if (line[0] == '+') {
+            result.emplace_back(fmt::format(fg(fmt::terminal_color::green), "{0:>{2}} {1}", line[0], line.substr(1), line_number_width));
+        } else if (line[0] == '-') {
+            result.emplace_back(fmt::format(fg(fmt::terminal_color::red), "{0:>{2}} {1}", line[0], line.substr(1), line_number_width));
+            line_number++;
+        } else if (line[0] == '@') {
+            if (seen_header_before) {
+                result.emplace_back(fmt::format("{0:>{1}}", "...", line_number_width));
+            }
+            auto start = line.find('-') + 1;
+            auto end = line.find(',');
+            line_number = std::stoi(line.substr(start, end));
+            line_number_width = end - start + 2;
+            seen_header_before = true;
+        } else {
+            result.emplace_back(fmt::format("{0:>{2}} {1}", line_number, line.substr(1), line_number_width));
+            line_number++;
+        }
+    }
+    return result;
+}
 
 static std::string read_file(std::string_view path) {
     constexpr auto read_size = std::size_t {4096};
@@ -92,76 +131,6 @@ static key get_keypress() {
     default: break;
     }
     return key::unknown;
-}
-
-static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
-                         const git_diff_line* line, void* data) {
-
-    (void)delta;
-    (void)hunk;
-
-    auto* opts = (printer_opts*) data;
-
-    if (!opts->print_file_header && (line->origin == GIT_DIFF_LINE_FILE_HDR || line->origin == GIT_DIFF_LINE_HUNK_HDR)) {
-        return 0;
-    }
-
-    if (opts->color) {
-        switch (line->origin) {
-            case GIT_DIFF_LINE_ADD_EOFNL:
-            case GIT_DIFF_LINE_ADDITION:
-                fprintf(opts->fp, COLOR_GREEN);
-                break;
-            case GIT_DIFF_LINE_DEL_EOFNL:
-            case GIT_DIFF_LINE_DELETION:
-                fprintf(opts->fp, COLOR_RED);
-                break;
-            case GIT_DIFF_LINE_FILE_HDR:
-                fprintf(opts->fp, COLOR_BOLD);
-                break;
-            case GIT_DIFF_LINE_HUNK_HDR:
-                fprintf(opts->fp, COLOR_CYAN);
-                break;
-            default:
-                break;
-        }
-    }
-
-    if (line->origin == GIT_DIFF_LINE_CONTEXT ||
-        line->origin == GIT_DIFF_LINE_ADDITION ||
-        line->origin == GIT_DIFF_LINE_DELETION) {
-        fprintf(opts->fp, "%c", line->origin);
-    }
-
-    size_t i = 0;
-
-    while (true) {
-        if (line->content[i] == '\0' || line->content[i] == '\n' || line->content[i] == '\r') break;
-        // render tab as four spaces
-        if (line->content[i] == '\t') {
-            fprintf(opts->fp, "    ");
-        } else {
-            fprintf(opts->fp, "%c", line->content[i]);
-        }
-        i++;
-    }
-
-    fprintf(opts->fp, "\n");
-
-    if (opts->color) {
-        fprintf(opts->fp, COLOR_RESET);
-    }
-
-    return 0;
-}
-
-static void print_patch(std::string filename, std::string before, std::string after, printer_opts opts) {
-    git_patch* patch = nullptr;
-    git_patch_from_buffers(&patch, before.c_str(), before.size(),
-                           filename.c_str(), after.c_str(),
-                           after.size(), filename.c_str(), nullptr);
-    git_patch_print(patch, color_printer, &opts);
-    git_patch_free(patch);
 }
 
 static options_t parse_options(int argc, char** argv) {
@@ -447,8 +416,6 @@ int main(int argc, char** argv) {
 
     options_t options = parse_options(argc, argv);
 
-    git_libgit2_init();
-
     std::mutex thread_mutex;
     std::vector<std::thread> thread_pool;
     std::vector<std::tuple<std::string,std::string,std::string, bool>> rewrites;
@@ -525,7 +492,10 @@ int main(int argc, char** argv) {
         auto& [filename, rule, after, accepted] = rw;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
-        print_patch(filename, before, post_process(before, after), {true, false, stdout});
+        auto patch = libgit::create_patch(filename, before, post_process(before, after));
+        for (auto line : prettify_patch(std::move(patch))) {
+            std::cout << line << std::endl;
+        }
         std::cout << std::endl;
         auto choice = multi_choice("What would you like to do?", {
             "Accept this rewrite",
@@ -568,8 +538,13 @@ int main(int argc, char** argv) {
                     auto* fp = popen("less -R", "w");
                     if (fp != NULL) {
                         for (auto [filename, after] : get_results(rewrites)) {
+                            fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = read_file(filename);
-                            print_patch(filename, before, after, {true, true, fp});
+                            auto patch = libgit::create_patch(filename, before, after);
+                            for (auto line : prettify_patch(patch)) {
+                                fputs(line.c_str(), fp);
+                                fputs("\n", fp);
+                            }
                         }
                         pclose(fp);
                     }
@@ -662,7 +637,10 @@ int main(int argc, char** argv) {
             f.close();
         } else if (options.patch) {
             std::string before = read_file(filename);
-            print_patch(filename, before, after, {false, true, stdout});
+            auto patch = libgit::create_patch(filename, before, after);
+            for (auto line : patch) {
+                std::cout << line << std::endl;
+            }
         }
     }
 
