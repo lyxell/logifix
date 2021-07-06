@@ -1,5 +1,5 @@
 #!/bin/bash
-regex="(S[0-9]+),.*/blob/[a-z0-9-]+/(.*),(.*)$"
+regex="([A-Za-z0-9_]+),.*/blob/[a-z0-9-]+/(.*),(.*)$"
 set -e
 set -o pipefail
 
@@ -15,6 +15,7 @@ tail +2 < "$csv" | while IFS= read -r f; do
         t1=$(mktemp)
         t2=$(mktemp)
         echo "$rule_number"
+        echo "$input"
         cp "$input" "$t1"
         # run the logifix tool on t1
         "$logifix_cli" --in-place --accept="$rule_number" "$t1"
@@ -24,7 +25,7 @@ tail +2 < "$csv" | while IFS= read -r f; do
         diff $diff_flags "$t1" "$t2"
         echo "$input passed"
     else
-        echo "$f doesn't match"
+        echo "$f doesn't match!"
         exit 1
     fi
 done
