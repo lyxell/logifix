@@ -19,6 +19,7 @@
 #include "rules/remove_unnecessary_calls_to_string_valueof/implementation.dl"
 #include "rules/remove_unnecessary_return/implementation.dl"
 #include "rules/remove_unnecessary_variable_declarations_before_return_statement/implementation.dl"
+#include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
 #include "rules/replace_lambda_with_method_reference/implementation.dl"
 #include "rules/simplify_boolean_expressions/implementation.dl"
@@ -66,6 +67,13 @@ starts_at([name, fn, A, B], A) :- ast_node([name, fn, A, B]).
 
 .decl ends_at(id: id, at: number)
 ends_at([name, fn, A, B], B) :- ast_node([name, fn, A, B]).
+
+/* Javadoc
+ ********************************/
+
+.decl javadoc_references(filename: symbol, class: symbol)
+.input javadoc_references
+.output javadoc_references(IO=stdout)
 
 /* AST node relations
  ********************************/

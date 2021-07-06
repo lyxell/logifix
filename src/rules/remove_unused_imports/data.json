@@ -1,0 +1,11 @@
+{
+    "description": "Remove unused imports",
+    "sonar": {
+        "id": "S1128",
+        "url": "https://rules.sonarsource.com/java/tag/unused/RSPEC-1128"
+    },
+    "pmd": {
+        "id": "UnnecessaryImport",
+        "url": "https://pmd.github.io/latest/pmd_rules_java_codestyle.html#unnecessaryimport"
+    }
+}
