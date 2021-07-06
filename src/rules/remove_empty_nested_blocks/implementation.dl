@@ -1,6 +1,6 @@
 /* Pre  {} */
 /* Post    */
-rewrite("S10003", filename, start, end, "") :-
+rewrite("remove_empty_nested_blocks", filename, start, end, "") :-
     block(_, stmts),
     list_contains(stmts, id),
     block(id, nil),

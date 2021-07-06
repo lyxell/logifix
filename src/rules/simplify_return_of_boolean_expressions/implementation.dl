@@ -14,7 +14,7 @@ does_nothing_but_return_false(id) :-
     block(id, [statement, nil]),
     does_nothing_but_return_false(statement).
 
-rewrite("S1126", filename, start, end, cat("return ", cond_str, ";")) :-
+rewrite("simplify_return_of_boolean_expressions", filename, start, end, cat("return ", cond_str, ";")) :-
     if_statement(id, cond, then, else),
         starts_at(id, start),
         ends_at(id, end),
@@ -25,7 +25,7 @@ rewrite("S1126", filename, start, end, cat("return ", cond_str, ";")) :-
     /* id is not the else-branch of an if-statement */
     ! if_statement(_, _, _, id).
 
-rewrite("S1126", filename, start, end, cat("return !(", cond_str, ");")) :-
+rewrite("simplify_return_of_boolean_expressions", filename, start, end, cat("return !(", cond_str, ");")) :-
     if_statement(id, cond, then, else),
         starts_at(id, start),
         ends_at(id, end),
