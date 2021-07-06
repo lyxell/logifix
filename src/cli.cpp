@@ -63,32 +63,48 @@ std::string replace_tabs_with_spaces(std::string str) {
 }
 
 std::vector<std::string> prettify_patch(std::vector<std::string> lines) {
-    std::vector<std::string> result;
-    // erase first line, git header
+    std::vector<std::pair<std::string, std::string>> columns;
+    // erase first line (git header)
     lines.erase(lines.begin());
     size_t line_number = 0;
-    size_t line_number_width = 1;
     bool seen_header_before = false;
-    // colorize
     for (auto& line : lines) {
-        line = replace_tabs_with_spaces(std::move(line));
-        if (line[0] == '+') {
-            result.emplace_back(fmt::format(fg(fmt::terminal_color::green), "{0:>{2}} {1}", line[0], line.substr(1), line_number_width));
-        } else if (line[0] == '-') {
-            result.emplace_back(fmt::format(fg(fmt::terminal_color::red), "{0:>{2}} {1}", line[0], line.substr(1), line_number_width));
+        auto marker = line[0];
+        auto content = replace_tabs_with_spaces(line.substr(1));
+        switch (marker) {
+        case '-':
+            columns.emplace_back("-", content);
             line_number++;
-        } else if (line[0] == '@') {
+            break;
+        case '+':
+            columns.emplace_back("+", content);
+            break;
+        case '@':
             if (seen_header_before) {
-                result.emplace_back(fmt::format("{0:>{1}}", "...", line_number_width));
+                columns.emplace_back("...", "");
             }
-            auto start = line.find('-') + 1;
-            auto end = line.find(',');
-            line_number = std::stoi(line.substr(start, end));
-            line_number_width = end - start + 2;
+            line_number = std::stoi(line.substr(line.find('-') + 1, line.find(',')));
             seen_header_before = true;
-        } else {
-            result.emplace_back(fmt::format("{0:>{2}} {1}", line_number, line.substr(1), line_number_width));
+            break;
+        default:
+            columns.emplace_back(std::to_string(line_number), content);
             line_number++;
+            break;
+        }
+    }
+    size_t left_column_size = 0;
+    for (const auto& [l, r] : columns) {
+        left_column_size = std::max(left_column_size, l.size());
+    }
+    std::vector<std::string> result;
+    auto format = "  {0:>{2}} {1}";
+    for (auto& [l, r] : columns) {
+        if (l == "+") {
+            result.emplace_back(fmt::format(fg(fmt::terminal_color::green), format, l, r, left_column_size));
+        } else if (l == "-") {
+            result.emplace_back(fmt::format(fg(fmt::terminal_color::red), format, l, r, left_column_size));
+        } else {
+            result.emplace_back(fmt::format(format, l, r, left_column_size));
         }
     }
     return result;
