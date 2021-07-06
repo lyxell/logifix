@@ -171,12 +171,12 @@ method_declaration(id, mods, header, body) :-
     parent_of_list(id, "modifiers", mods),
     parent_of(id, "body", body).
 
-.decl method_header(id: id, result: id, declarator: id, throws: id)
+.decl method_header(id: id, result: id, declarator: id, throws: id_list)
 method_header(id, result, declarator, throws) :-
     name_of(id, "method_header"),
     parent_of(id, "result", result),
     parent_of(id, "declarator", declarator),
-    parent_of(id, "throws", throws).
+    parent_of_list(id, "throws", throws).
 
 .decl field_access(id: id, subject: id, field: id)
 field_access(id, subject, field) :-
