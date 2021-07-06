@@ -9,7 +9,7 @@ synthesized into fast multi-threaded C++ code.
 
 ## Demo
 
-https://user-images.githubusercontent.com/4975941/124370679-9478d600-dc7a-11eb-83ae-68d7d818c547.mp4
+https://user-images.githubusercontent.com/4975941/124673993-2f132800-deba-11eb-9b09-22a8c6f0149d.mp4
 
 <ul> </ul>
 
