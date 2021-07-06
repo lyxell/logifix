@@ -1,4 +1,4 @@
-rewrite("S1128", filename, start, end, "") :-
+rewrite("remove_unused_imports", filename, start, end, "") :-
     import_declaration(id, specification),
         starts_at(id, start),
         ends_at(id, end),

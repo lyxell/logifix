@@ -12,7 +12,7 @@ last_node_before_finally(id, last_elem) :-
 
 /* Pre  try [:body] [:catches] finally {} */
 /* Post try [:body] [:catches]            */
-rewrite("S10002", filename, start, end, "") :-
+rewrite("remove_empty_finally_blocks", filename, start, end, "") :-
     try_statement(id, _, _, finally),
         filename_of(id, filename),
     last_node_before_finally(id, last_elem),
@@ -23,7 +23,7 @@ rewrite("S10002", filename, start, end, "") :-
 
 /* Pre  try ([:resources]) [:body] [:catches] finally {} */
 /* Post try ([:resources]) [:body] [:catches]            */
-rewrite("S10002", filename, start, end, "") :-
+rewrite("remove_empty_finally_blocks", filename, start, end, "") :-
     try_with_resources_statement(id, _, _, _, finally),
         filename_of(id, filename),
     last_node_before_finally(id, last_elem),

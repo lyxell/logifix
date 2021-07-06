@@ -1,6 +1,6 @@
 /* Pre   [:x] ? true : [:y] */
 /* Post  [:x] || [:y]        */
-rewrite("S1125", filename, start, end, cat(cond_str, " || ", other_expr_str)) :-
+rewrite("simplify_ternary_conditional_expressions", filename, start, end, cat(cond_str, " || ", other_expr_str)) :-
     conditional_expression(cond_expr, cond, true_expr, other_expr),
         filename_of(cond_expr, filename),
         starts_at(cond_expr, start),
@@ -11,7 +11,7 @@ rewrite("S1125", filename, start, end, cat(cond_str, " || ", other_expr_str)) :-
 
 /* Pre   [:x] ? false : [:y] */
 /* Post  ![:x] && [:y]        */
-rewrite("S1125", filename, start, end, cat("!", cond_str, " && ", other_expr_str)) :-
+rewrite("simplify_ternary_conditional_expressions", filename, start, end, cat("!", cond_str, " && ", other_expr_str)) :-
     conditional_expression(cond_expr, cond, false_expr, other_expr),
         filename_of(cond_expr, filename),
         starts_at(cond_expr, start),
@@ -22,7 +22,7 @@ rewrite("S1125", filename, start, end, cat("!", cond_str, " && ", other_expr_str
 
 /* Pre   [:x] ? [:y] : true */
 /* Post  ![:x] || [:y]        */
-rewrite("S1125", filename, start, end, cat("!", cond_str, " || ", other_expr_str)) :-
+rewrite("simplify_ternary_conditional_expressions", filename, start, end, cat("!", cond_str, " || ", other_expr_str)) :-
     conditional_expression(cond_expr, cond, other_expr, true_expr),
         filename_of(cond_expr, filename),
         starts_at(cond_expr, start),
@@ -33,7 +33,7 @@ rewrite("S1125", filename, start, end, cat("!", cond_str, " || ", other_expr_str
 
 /* Pre   [:x] ? [:y] : false */
 /* Post  [:x] && [:y]        */
-rewrite("S1125", filename, start, end, cat(cond_str, " && ", other_expr_str)) :-
+rewrite("simplify_ternary_conditional_expressions", filename, start, end, cat(cond_str, " && ", other_expr_str)) :-
     conditional_expression(cond_expr, cond, other_expr, false_expr),
         filename_of(cond_expr, filename),
         starts_at(cond_expr, start),

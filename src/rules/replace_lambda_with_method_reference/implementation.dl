@@ -1,6 +1,6 @@
 /* Pre  [:x] -> [:y].[:z]([:x]) */
 /* Post [:y]::[:z] */
-rewrite("S1612", filename, start, end, cat(subject_str, "::", method)) :-
+rewrite("replace_lambda_with_method_reference", filename, start, end, cat(subject_str, "::", method)) :-
     lambda_expression(lambda_expr, lambda_param, lambda_body),
         filename_of(lambda_expr, filename),
         starts_at(lambda_expr, start),

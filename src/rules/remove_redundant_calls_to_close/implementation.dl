@@ -1,6 +1,6 @@
 /* Pre  [:x].close() */
 /* Post              */
-rewrite("S4087", filename, start, end, "") :-
+rewrite("remove_redundant_calls_to_close", filename, start, end, "") :-
     try_with_resources_statement(id, resources, _, _, _),
         filename_of(id, filename),
     list_contains(resources, resource),
