@@ -1,5 +1,5 @@
 {
-    "description": "Replace lambda with method reference",
+    "description": "Simplify code using method references",
     "sonar": {
         "id": "S1612",
         "url": "https://rules.sonarsource.com/java/RSPEC-1612"
