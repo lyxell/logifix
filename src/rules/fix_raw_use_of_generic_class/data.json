@@ -1,5 +1,5 @@
 {
-    "description": "Provide parameterized types for generics",
+    "description": "Fix raw usage of generic class",
     "sonar": {
         "id": "S3740",
         "url": "https://rules.sonarsource.com/java/RSPEC-3740"

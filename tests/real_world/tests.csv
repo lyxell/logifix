@@ -8,10 +8,10 @@ fix_references_to_collections_empty_list_empty_map_and_empty_set,https://github.
 fix_references_to_collections_empty_list_empty_map_and_empty_set,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/lookup/cache/LookupCoordinatorManagerTest.java,
 fix_references_to_collections_empty_list_empty_map_and_empty_set,https://github.com/apache/druid/blob/2c384b61ff47f858a0adb6f8b389c84f2acc84d1/server/src/test/java/org/apache/druid/server/shard/NumberedShardSpecTest.java,
 fix_references_to_collections_empty_list_empty_map_and_empty_set,https://github.com/ronak-manglani/memoir/blob/825df2461004006b9d8139e9bbe702dcf5252d1e/RTEditor/src/main/java/com/onegravity/rteditor/utils/validator/UrlValidator.java,
-fix_resource_leaks,https://github.com/Konloch/bytecode-viewer/blob/db959d4704dfea3ad22c502997e1e2360dedec9e/src/main/java/the/bytecode/club/bytecodeviewer/decompilers/bytecode/InstructionPrinter.java,
-fix_resource_leaks,https://github.com/mdmyr/bytecodeviewer/blob/db959d4704dfea3ad22c502997e1e2360dedec9e/src/main/java/the/bytecode/club/bytecodeviewer/JarUtils.java,--ignore-blank-lines --ignore-space-change
-improve_precision_of_calls_to_bigdecimal,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java,
-improve_precision_of_calls_to_bigdecimal,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java,
+fix_potential_resource_leaks,https://github.com/Konloch/bytecode-viewer/blob/db959d4704dfea3ad22c502997e1e2360dedec9e/src/main/java/the/bytecode/club/bytecodeviewer/decompilers/bytecode/InstructionPrinter.java,
+fix_potential_resource_leaks,https://github.com/mdmyr/bytecodeviewer/blob/db959d4704dfea3ad22c502997e1e2360dedec9e/src/main/java/the/bytecode/club/bytecodeviewer/JarUtils.java,--ignore-blank-lines --ignore-space-change
+fix_imprecise_calls_to_bigdecimal,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java,
+fix_imprecise_calls_to_bigdecimal,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java,
 remove_unused_local_variables,https://github.com/Netflix/astyanax/blob/8daa973723a42d08196ae666bebeacdefe4ace19/astyanax-entity-mapper/src/main/java/com/netflix/astyanax/entitystore/CompositeEntityMapper.java,
 remove_unused_local_variables,https://github.com/Netflix/astyanax/blob/8daa973723a42d08196ae666bebeacdefe4ace19/astyanax-recipes/src/main/java/com/netflix/astyanax/recipes/storage/ObjectReader.java,
 remove_unused_local_variables,https://github.com/informatici/openhospital-api/blob/9cf75d34db764fc17352d2f3b7a0c54debc95732/src/test/java/org/isf/admission/rest/AdmissionControllerTest.java,
