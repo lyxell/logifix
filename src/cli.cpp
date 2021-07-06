@@ -462,7 +462,7 @@ int main(int argc, char** argv) {
     using std::chrono::milliseconds;
 #endif
 
-    std::cout << TTY_HIDE_CURSOR;
+    std::cerr << TTY_HIDE_CURSOR;
 
     for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
         thread_pool.emplace_back(
@@ -474,7 +474,8 @@ int main(int argc, char** argv) {
                         if (file_stack.empty()) return;
                         file = file_stack.back();
                         file_stack.pop_back();
-                        std::cerr << "\rAnalyzed " << options.files.size() - file_stack.size() << "/" <<  options.files.size() << " files";
+                        auto analyzed_files = options.files.size() - file_stack.size();
+                        fmt::print(stderr, "\rAnalyzed {}/{} files", analyzed_files, options.files.size());
                     }
 #ifdef PERF
                     std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
@@ -505,7 +506,7 @@ int main(int argc, char** argv) {
         f.join();
     }
 
-    std::cout << TTY_SHOW_CURSOR;
+    std::cerr << TTY_SHOW_CURSOR;
 
 #ifdef PERF
     std::sort(file_time.begin(), file_time.end());
@@ -514,7 +515,6 @@ int main(int argc, char** argv) {
         std::cerr << f << std::endl;
     }
 #endif
-
 
     /* Sort rewrites by filename */
     std::sort(rewrites.begin(), rewrites.end(), [](const auto& a, const auto& b) -> bool {
