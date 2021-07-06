@@ -1,6 +1,7 @@
 #include "logifix.h"
 #include <filesystem>
 #include <unordered_set>
+#include <regex>
 #include <iostream>
 
 using rewrite_t = std::tuple<std::string,std::string,size_t,size_t,std::string>;
@@ -22,6 +23,86 @@ static void replace_all(std::string& source, const std::string& from, const std:
 
 static const char* PROGRAM_NAME = "logifix";
 
+static const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) (.*?)\})");
+static const std::regex JAVADOC_SEE_REGEX(R"(@see (.*))");
+
+static std::vector<std::string> get_classes_from_javadoc_link(std::string s) {
+
+    std::vector<std::string> result;
+    std::string class_str;
+
+    // Parse class
+    size_t pos = 0;
+    while (pos < s.size() && s[pos] != '#' && s[pos] != '(' && s[pos] != ' ') {
+        pos++;
+    }
+    result.emplace_back(s.substr(0, pos));
+
+    // Parse method
+    if (pos == s.size()) return result;
+    s = s.substr(pos);
+    pos = 0;
+    if (s[pos] == '#') {
+        s = s.substr(1);
+        while (pos < s.size() && s[pos] != '(' && s[pos] != ' ') {
+            pos++;
+        }
+        if (pos == s.size()) return result;
+        s = s.substr(pos);
+        pos = 0;
+    }
+
+    // Parse parameters
+    if (s[pos] == '(') {
+        s = s.substr(1);
+        std::string curr;
+        while (pos < s.size() && s[pos] != ')') {
+            if (s[pos] == ',') {
+                result.emplace_back(curr);
+                curr = {};
+                pos++;
+                continue;
+            }
+            curr += s[pos];
+            pos++;
+        }
+        result.emplace_back(curr);
+    }
+
+    return result;
+}
+
+static std::set<std::string> get_classes_from_javadoc(std::string s) {
+    std::set<std::string> result;
+    {
+        auto words_begin = std::sregex_iterator(s.begin(), s.end(), JAVADOC_LINK_REGEX);
+        auto words_end = std::sregex_iterator();
+        for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+            std::smatch match = *i;
+            for (auto class_name : get_classes_from_javadoc_link(match[2])) {
+                class_name.erase(std::remove_if(class_name.begin(), class_name.end(), ::isspace), class_name.end());
+                if (!class_name.empty()) {
+                    result.emplace(class_name);
+                }
+            }
+        }
+    }
+    {
+        auto words_begin = std::sregex_iterator(s.begin(), s.end(), JAVADOC_SEE_REGEX);
+        auto words_end = std::sregex_iterator();
+        for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+            std::smatch match = *i;
+            for (auto class_name : get_classes_from_javadoc_link(match[1])) {
+                class_name.erase(std::remove_if(class_name.begin(), class_name.end(), ::isspace), class_name.end());
+                if (!class_name.empty()) {
+                    result.emplace(class_name);
+                }
+            }
+        }
+    }
+    return result;
+}
+
 namespace logifix {
 
 program::program() {
@@ -35,6 +116,18 @@ program::~program() {
 
 void program::add_string(const char* filename, const char* content) {
     files.emplace(filename, content);
+    auto lex_result = sjp::lex(filename, (const uint8_t*) content);
+    if (lex_result) {
+        auto comments = lex_result->second;
+        souffle::Relation* javadoc_references = prog->getRelation("javadoc_references");
+        for (auto comment : comments) { 
+            for (auto class_name : get_classes_from_javadoc(comment)) {
+                javadoc_references->insert(
+                    souffle::tuple(javadoc_references, {prog->getSymbolTable().encode(filename),
+                                              prog->getSymbolTable().encode(class_name)}));
+            }
+        }
+    }
     sjp::parse(prog, filename, content);
     assert(content != nullptr);
     souffle::Relation* relation = prog->getRelation("source_code");

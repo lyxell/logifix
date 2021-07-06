@@ -68,6 +68,13 @@ starts_at([name, fn, A, B], A) :- ast_node([name, fn, A, B]).
 .decl ends_at(id: id, at: number)
 ends_at([name, fn, A, B], B) :- ast_node([name, fn, A, B]).
 
+/* Javadoc
+ ********************************/
+
+.decl javadoc_references(filename: symbol, class: symbol)
+.input javadoc_references
+.output javadoc_references(IO=stdout)
+
 /* AST node relations
  ********************************/
 
