@@ -17,6 +17,7 @@
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_repeated_unary_operators/implementation.dl"
 #include "rules/remove_unnecessary_calls_to_string_valueof/implementation.dl"
+#include "rules/remove_unnecessary_null_check_before_string_equals_comparison/implementation.dl"
 #include "rules/remove_unnecessary_return/implementation.dl"
 #include "rules/remove_unnecessary_variable_declarations_before_return_statement/implementation.dl"
 #include "rules/remove_unused_imports/implementation.dl"
