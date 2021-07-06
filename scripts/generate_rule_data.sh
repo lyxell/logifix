@@ -3,20 +3,21 @@
 function generate {
     echo "#include <vector>"
     echo "#include <tuple>"
+    echo "#include <unordered_map>"
     echo "#include <string>"
     echo ""
-    echo "std::vector<std::tuple<std::string, std::string, std::string, std::string>> rule_data = {"
+    echo "std::unordered_map<std::string, std::tuple<std::string, std::string, std::string>> rule_data = {"
 
     for f in ../src/rules/*; do
         json_file="$f/data.json"
         name=$(basename "$f")
         if [ -f "$json_file" ]; then
 
-            printf "  {\"$name\","
+            printf "  {\"$name\",{"
 
             jq -c '.sonar.id, .pmd.id, .description' $json_file | tr '\n' ','
 
-            echo "},"
+            echo "}},"
             
         fi
     done

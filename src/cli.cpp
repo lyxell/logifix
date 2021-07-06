@@ -20,7 +20,7 @@ namespace fs = std::filesystem;
 
 using rewrite_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
-extern std::vector<std::tuple<std::string, std::string, std::string, std::string>> rule_data;
+extern std::unordered_map<std::string, std::tuple<std::string, std::string, std::string>> rule_data;
 
 struct options_t {
     bool accept_all;
@@ -592,27 +592,31 @@ int main(int argc, char** argv) {
                         rules[std::get<1>(rewrite)].emplace_back(rewrite);
                     }
                     std::vector<std::string> keys;
-                    std::vector<std::string> options;
+                    std::vector<std::tuple<std::string,std::string,std::string>> columns;
                     for (auto& [rule, rws] : rules) {
-                        size_t accepted = 0;
-                        for (auto rw : rws) {
-                            if (std::get<3>(rw)) accepted++;
-                        }
                         keys.emplace_back(rule);
-                        std::string description = rule;
-                        for (auto [id, squid, pmdid, desc] : rule_data) {
-                            if (id == rule) {
-                                description = fmt::format("{} • {}", desc, squid);
-                                break;
-                            }
-                        }
+                        auto description = std::get<2>(rule_data[rule]);
+                        size_t accepted = std::count_if(rws.begin(), rws.end(), [](auto rw) {
+                            return std::get<3>(rw);
+                        });
                         std::string status;
                         if (accepted > 0) {
-                            status = fmt::format(fg(fmt::terminal_color::green), " ({}/{})", accepted, rws.size());
+                            columns.emplace_back(description,
+                                    std::get<0>(rule_data[rule]),
+                                    fmt::format(fg(fmt::terminal_color::green), "{}/{}", accepted, rws.size()));
                         } else {
-                            status = fmt::format(" ({}/{})", accepted, rws.size());
+                            columns.emplace_back(description,
+                                    std::get<0>(rule_data[rule]),
+                                    fmt::format("{}/{}", accepted, rws.size()));
                         }
-                        options.emplace_back(description + status);
+                    }
+                    size_t left_column_width = 0;
+                    for (auto [l, m, r] : columns) {
+                        left_column_width = std::max(left_column_width, l.size());
+                    }
+                    std::vector<std::string> options;
+                    for (auto [l, m, r] : columns) {
+                        options.emplace_back(fmt::format("{0:<{3}}   {1:5}  {2}", l, m, r, left_column_width));
                     }
                     auto rule_selection = multi_choice("Which rule would you like to review?", options, true);
                     if (rule_selection == -1) break;
