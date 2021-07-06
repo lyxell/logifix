@@ -1,4 +1,3 @@
-#include "rules/provide_parameterized_type_for_generic/implementation.dl"
 #include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
 #include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
@@ -8,6 +7,7 @@
 #include "rules/fix_references_to_collections_empty_list_empty_map_and_empty_set/implementation.dl"
 #include "rules/fix_resource_leaks/implementation.dl"
 #include "rules/improve_precision_of_calls_to_bigdecimal/implementation.dl"
+#include "rules/provide_parameterized_types_for_generics/implementation.dl"
 #include "rules/remove_empty_declarations/implementation.dl"
 #include "rules/remove_empty_finally_blocks/implementation.dl"
 #include "rules/remove_empty_if_statements/implementation.dl"
@@ -33,6 +33,7 @@
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
 #include "rules/simplify_return_of_boolean_expressions/implementation.dl"
 #include "rules/simplify_ternary_conditional_expressions/implementation.dl"
+#include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
 #include "nodes.dl"
 

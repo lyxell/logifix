@@ -1,6 +1,6 @@
 /* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
 /* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
-rewrite("provide_parameterized_type_for_generic", filename, start, start, "<>") :-
+rewrite("provide_parameterized_types_for_generics", filename, start, start, "<>") :-
     field_declaration(_, _, left_type, declarators),
     is_collection_type(left_type),
     class_type(left_type, _, type_args, _),
@@ -16,7 +16,7 @@ rewrite("provide_parameterized_type_for_generic", filename, start, start, "<>") 
 
 /* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
 /* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
-rewrite("provide_parameterized_type_for_generic", filename, start, start, "<>") :-
+rewrite("provide_parameterized_types_for_generics", filename, start, start, "<>") :-
     local_variable_declaration(_, _, left_type, declarators),
     is_collection_type(left_type),
     class_type(left_type, _, type_args, _),
@@ -32,7 +32,7 @@ rewrite("provide_parameterized_type_for_generic", filename, start, start, "<>") 
 
 /* Pre  Iterator [:var] = [:coll].iterator(); */
 /* Post Iterator<[:type]> [:var] = [:coll].iterator(); */
-rewrite("provide_parameterized_type_for_generic", filename, start, start, type_args_str) :-
+rewrite("provide_parameterized_types_for_generics", filename, start, start, type_args_str) :-
     local_variable_declaration(id, _, left_type, [declarator, nil]),
         filename_of(id, filename),
     string_representation(left_type, "Iterator"),

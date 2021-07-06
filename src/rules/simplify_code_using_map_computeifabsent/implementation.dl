@@ -14,20 +14,6 @@
         });
 */
 
-rewrite("simplify_code_using_map_computeifabsent", filename, ident_start, ident_end, "k") :-
-    method_invocation(invocation, _, "computeIfAbsent", [key_var, [lambda, nil]]),
-        filename_of(invocation, filename),
-    starts_at(lambda, lambda_start),
-    ends_at(lambda, lambda_end),
-    identifier(ident),
-    point_of_declaration(ident, decl),
-        starts_at(ident, ident_start),
-        ends_at(ident, ident_end),
-        ident_start >= lambda_start,
-        ident_end <= lambda_end,
-    point_of_declaration(key_var, decl).
-
-
 rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
     "return ", map_var_str, ".computeIfAbsent(", key_var_str, ", k -> {\n",
         value_type_str, " ", value_var_str, " = ", value_initializer_str, ";\n",

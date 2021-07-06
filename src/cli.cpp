@@ -20,7 +20,7 @@ namespace fs = std::filesystem;
 
 using rewrite_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
-extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
+extern std::vector<std::tuple<std::string, std::string, std::string, std::string>> rule_data;
 
 struct options_t {
     bool accept_all;
@@ -609,8 +609,8 @@ int main(int argc, char** argv) {
                         }
                         keys.emplace_back(rule);
                         std::string description = rule;
-                        for (auto [squid, pmdid, desc] : rule_data) {
-                            if (squid == rule) {
+                        for (auto [id, squid, pmdid, desc] : rule_data) {
+                            if (id == rule) {
                                 description = fmt::format("{} • {}", desc, squid);
                                 break;
                             }

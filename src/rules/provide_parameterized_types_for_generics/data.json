@@ -1,5 +1,5 @@
 {
-    "description": "Provide parameterized type for generic",
+    "description": "Provide parameterized types for generics",
     "sonar": {
         "id": "S3740",
         "url": "https://rules.sonarsource.com/java/RSPEC-3740"
