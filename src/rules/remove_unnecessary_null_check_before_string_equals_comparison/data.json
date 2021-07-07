@@ -1,0 +1,9 @@
+{
+    "description": "Remove unnecessary null check before string equals comparison",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

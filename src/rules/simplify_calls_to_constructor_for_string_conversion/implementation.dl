@@ -1,6 +1,6 @@
 /* Pre  new Integer([:argument]).toString() */
 /* Post Integer.toString([:argument])       */
-rewrite("S2131", filename, start, end, cat("Integer.toString(", arg_str, ")")) :-
+rewrite("simplify_calls_to_constructor_for_string_conversion", filename, start, end, cat("Integer.toString(", arg_str, ")")) :-
     method_invocation(id, subject, "toString", nil),
     class_instance_creation_expression(subject, _, nil, type, [arg, nil], nil),
         filename_of(id, filename),

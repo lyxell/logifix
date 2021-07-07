@@ -1,5 +1,5 @@
 {
-    "description": "Simplify code using Collection.isEmpty",
+    "description": "Simplify code using Collection::isEmpty",
     "sonar": {
         "id": "S1155",
         "url": "https://rules.sonarsource.com/java/RSPEC-1155"

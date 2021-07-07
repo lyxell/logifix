@@ -1,6 +1,6 @@
 /* Pre  [:x].equals("[:y]") */
 /* Post "[:y]".equals([:x]) */
-rewrite("S1132", filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
+rewrite("fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison", filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
     method_invocation(invocation, subject, "equals", [arg, nil]),
         filename_of(invocation, filename),
         starts_at(invocation, start),
@@ -9,20 +9,3 @@ rewrite("S1132", filename, start, end, cat(arg_str, ".equals(", subject_str, ")"
     has_string_type(subject),
     string_representation(arg, arg_str),
     string_representation(subject, subject_str).
-
-/* Pre  [:x] != null && [:x].equals("[:y]") */
-/* Post "[:y]".equals([:x]) */
-rewrite("S1132", filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
-    conditional_and_expression(and_expr, noteqnull, invocation),
-        filename_of(and_expr, filename),
-        starts_at(and_expr, start),
-        ends_at(and_expr, end),
-    /* left side is a null check */
-    not_equals_expression_unordered(noteqnull, null, noteqnull_subject),
-    null_literal(null),
-    /* right side is a method invocation */
-    method_invocation(invocation, subject, "equals", [arg, nil]),
-    string_literal(arg),
-    string_representation(arg, arg_str),
-    string_representation(subject, subject_str),
-    string_representation(noteqnull_subject, subject_str).

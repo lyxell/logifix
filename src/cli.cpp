@@ -1,12 +1,14 @@
 #include "logifix.h"
 #include "tty.h"
 #include "config.h"
+#include "libgit.h"
 #include <filesystem>
+#include <csignal>
 #include <cstdio>
+#include <cstdlib>
 #include <thread>
 #include <stack>
 #include <cctype>
-#include <git2.h>
 #include <iostream>
 #include <set>
 #include <tuple>
@@ -20,7 +22,7 @@ namespace fs = std::filesystem;
 
 using rewrite_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
-extern std::vector<std::tuple<std::string, std::string, std::string>> rule_data;
+extern std::unordered_map<std::string, std::tuple<std::string, std::string, std::string>> rule_data;
 
 struct options_t {
     bool accept_all;
@@ -45,15 +47,71 @@ enum class key {
     unknown
 };
 
-static const char* COLOR_BOLD       = "\033[1m";
-static const char* COLOR_CYAN       = "\033[36m";
-static const char* COLOR_GREEN      = "\033[32m";
-static const char* COLOR_RED        = "\033[31m";
-static const char* COLOR_RESET      = "\033[m";
 static const char* TTY_CLEAR_TO_EOL = "\033[K";
 static const char* TTY_CURSOR_UP    = "\033[A";
 static const char* TTY_HIDE_CURSOR  = "\033[?25l";
 static const char* TTY_SHOW_CURSOR  = "\033[?25h";
+static const char* TTY_MOVE_TO_BOTTOM = "\033[9999;1H";
+
+std::string replace_tabs_with_spaces(std::string str) {
+    std::string result;
+    for (char c : str) {
+        if (c == '\t') {
+            result += "    ";
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> prettify_patch(std::vector<std::string> lines) {
+    std::vector<std::pair<std::string, std::string>> columns;
+    // erase first line (git header)
+    lines.erase(lines.begin());
+    size_t line_number = 0;
+    bool seen_header_before = false;
+    for (auto& line : lines) {
+        auto marker = line[0];
+        auto content = replace_tabs_with_spaces(line.substr(1));
+        switch (marker) {
+        case '-':
+            columns.emplace_back("-", content);
+            line_number++;
+            break;
+        case '+':
+            columns.emplace_back("+", content);
+            break;
+        case '@':
+            if (seen_header_before) {
+                columns.emplace_back("...", "");
+            }
+            line_number = std::stoi(line.substr(line.find('-') + 1, line.find(',')));
+            seen_header_before = true;
+            break;
+        default:
+            columns.emplace_back(std::to_string(line_number), content);
+            line_number++;
+            break;
+        }
+    }
+    size_t left_column_size = 0;
+    for (const auto& [l, r] : columns) {
+        left_column_size = std::max(left_column_size, l.size());
+    }
+    std::vector<std::string> result;
+    auto format = "  {0:>{2}} {1}";
+    for (auto& [l, r] : columns) {
+        if (l == "+") {
+            result.emplace_back(fmt::format(fg(fmt::terminal_color::green), format, l, r, left_column_size));
+        } else if (l == "-") {
+            result.emplace_back(fmt::format(fg(fmt::terminal_color::red), format, l, r, left_column_size));
+        } else {
+            result.emplace_back(fmt::format(format, l, r, left_column_size));
+        }
+    }
+    return result;
+}
 
 static std::string read_file(std::string_view path) {
     constexpr auto read_size = std::size_t {4096};
@@ -92,76 +150,6 @@ static key get_keypress() {
     default: break;
     }
     return key::unknown;
-}
-
-static int color_printer(const git_diff_delta* delta, const git_diff_hunk* hunk,
-                         const git_diff_line* line, void* data) {
-
-    (void)delta;
-    (void)hunk;
-
-    auto* opts = (printer_opts*) data;
-
-    if (!opts->print_file_header && (line->origin == GIT_DIFF_LINE_FILE_HDR || line->origin == GIT_DIFF_LINE_HUNK_HDR)) {
-        return 0;
-    }
-
-    if (opts->color) {
-        switch (line->origin) {
-            case GIT_DIFF_LINE_ADD_EOFNL:
-            case GIT_DIFF_LINE_ADDITION:
-                fprintf(opts->fp, COLOR_GREEN);
-                break;
-            case GIT_DIFF_LINE_DEL_EOFNL:
-            case GIT_DIFF_LINE_DELETION:
-                fprintf(opts->fp, COLOR_RED);
-                break;
-            case GIT_DIFF_LINE_FILE_HDR:
-                fprintf(opts->fp, COLOR_BOLD);
-                break;
-            case GIT_DIFF_LINE_HUNK_HDR:
-                fprintf(opts->fp, COLOR_CYAN);
-                break;
-            default:
-                break;
-        }
-    }
-
-    if (line->origin == GIT_DIFF_LINE_CONTEXT ||
-        line->origin == GIT_DIFF_LINE_ADDITION ||
-        line->origin == GIT_DIFF_LINE_DELETION) {
-        fprintf(opts->fp, "%c", line->origin);
-    }
-
-    size_t i = 0;
-
-    while (true) {
-        if (line->content[i] == '\0' || line->content[i] == '\n' || line->content[i] == '\r') break;
-        // render tab as four spaces
-        if (line->content[i] == '\t') {
-            fprintf(opts->fp, "    ");
-        } else {
-            fprintf(opts->fp, "%c", line->content[i]);
-        }
-        i++;
-    }
-
-    fprintf(opts->fp, "\n");
-
-    if (opts->color) {
-        fprintf(opts->fp, COLOR_RESET);
-    }
-
-    return 0;
-}
-
-static void print_patch(std::string filename, std::string before, std::string after, printer_opts opts) {
-    git_patch* patch = nullptr;
-    git_patch_from_buffers(&patch, before.c_str(), before.size(),
-                           filename.c_str(), after.c_str(),
-                           after.size(), filename.c_str(), nullptr);
-    git_patch_print(patch, color_printer, &opts);
-    git_patch_free(patch);
 }
 
 static options_t parse_options(int argc, char** argv) {
@@ -284,8 +272,7 @@ static options_t parse_options(int argc, char** argv) {
 }
 
 static int multi_choice(std::string question, std::vector<std::string> alternatives, bool exit_on_left = false) {
-    tty_enable_cbreak_mode();
-    std::cout << TTY_HIDE_CURSOR;
+    tty::enable_cbreak_mode();
     fmt::print(fg(fmt::terminal_color::green) | fmt::emphasis::bold, "?");
     fmt::print(fmt::emphasis::bold, " {} ", question);
     if (exit_on_left) {
@@ -314,8 +301,7 @@ static int multi_choice(std::string question, std::vector<std::string> alternati
         if (found) {
             std::cout << std::endl;
             std::cout << std::endl;
-            std::cout << TTY_SHOW_CURSOR;
-            tty_disable_cbreak_mode();
+            tty::disable_cbreak_mode();
             return cursor;
         }
         for (auto i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
@@ -443,11 +429,25 @@ std::map<std::string, std::string> get_results(const rewrite_collection& rewrite
     return results;
 }
 
+void at_signal(int signal) {
+    std::exit(1);
+}
+
+void at_exit() {
+    std::cerr << TTY_MOVE_TO_BOTTOM;
+    std::cerr << TTY_SHOW_CURSOR << std::endl;
+    tty::disable_cbreak_mode();
+}
+
 int main(int argc, char** argv) {
 
-    options_t options = parse_options(argc, argv);
+    setenv("SOUFFLE_ALLOW_SIGNALS","",1);
+    std::signal(SIGINT, at_signal);
+    std::atexit(at_exit);
 
-    git_libgit2_init();
+    std::cerr << TTY_HIDE_CURSOR;
+
+    options_t options = parse_options(argc, argv);
 
     std::mutex thread_mutex;
     std::vector<std::thread> thread_pool;
@@ -462,7 +462,6 @@ int main(int argc, char** argv) {
     using std::chrono::milliseconds;
 #endif
 
-    std::cout << TTY_HIDE_CURSOR;
 
     for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
         thread_pool.emplace_back(
@@ -474,7 +473,8 @@ int main(int argc, char** argv) {
                         if (file_stack.empty()) return;
                         file = file_stack.back();
                         file_stack.pop_back();
-                        std::cerr << "\rAnalyzed " << options.files.size() - file_stack.size() << "/" <<  options.files.size() << " files";
+                        auto analyzed_files = options.files.size() - file_stack.size();
+                        fmt::print(stderr, "\rAnalyzed {}/{} files", analyzed_files, options.files.size());
                     }
 #ifdef PERF
                     std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
@@ -505,7 +505,6 @@ int main(int argc, char** argv) {
         f.join();
     }
 
-    std::cout << TTY_SHOW_CURSOR;
 
 #ifdef PERF
     std::sort(file_time.begin(), file_time.end());
@@ -514,7 +513,6 @@ int main(int argc, char** argv) {
         std::cerr << f << std::endl;
     }
 #endif
-
 
     /* Sort rewrites by filename */
     std::sort(rewrites.begin(), rewrites.end(), [](const auto& a, const auto& b) -> bool {
@@ -525,7 +523,10 @@ int main(int argc, char** argv) {
         auto& [filename, rule, after, accepted] = rw;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
-        print_patch(filename, before, post_process(before, after), {true, false, stdout});
+        auto patch = libgit::create_patch(filename, before, post_process(before, after));
+        for (auto line : prettify_patch(std::move(patch))) {
+            std::cout << line << std::endl;
+        }
         std::cout << std::endl;
         auto choice = multi_choice("What would you like to do?", {
             "Accept this rewrite",
@@ -568,8 +569,13 @@ int main(int argc, char** argv) {
                     auto* fp = popen("less -R", "w");
                     if (fp != NULL) {
                         for (auto [filename, after] : get_results(rewrites)) {
+                            fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = read_file(filename);
-                            print_patch(filename, before, after, {true, true, fp});
+                            auto patch = libgit::create_patch(filename, before, after);
+                            for (auto line : prettify_patch(patch)) {
+                                fputs(line.c_str(), fp);
+                                fputs("\n", fp);
+                            }
                         }
                         pclose(fp);
                     }
@@ -601,27 +607,31 @@ int main(int argc, char** argv) {
                         rules[std::get<1>(rewrite)].emplace_back(rewrite);
                     }
                     std::vector<std::string> keys;
-                    std::vector<std::string> options;
+                    std::vector<std::tuple<std::string,std::string,std::string>> columns;
                     for (auto& [rule, rws] : rules) {
-                        size_t accepted = 0;
-                        for (auto rw : rws) {
-                            if (std::get<3>(rw)) accepted++;
-                        }
                         keys.emplace_back(rule);
-                        std::string description = rule;
-                        for (auto [squid, pmdid, desc] : rule_data) {
-                            if (squid == rule) {
-                                description = fmt::format("{} • {}", desc, squid);
-                                break;
-                            }
-                        }
+                        auto description = std::get<2>(rule_data[rule]);
+                        size_t accepted = std::count_if(rws.begin(), rws.end(), [](auto rw) {
+                            return std::get<3>(rw);
+                        });
                         std::string status;
                         if (accepted > 0) {
-                            status = fmt::format(fg(fmt::terminal_color::green), " ({}/{})", accepted, rws.size());
+                            columns.emplace_back(description,
+                                    std::get<0>(rule_data[rule]),
+                                    fmt::format(fg(fmt::terminal_color::green), "{}/{}", accepted, rws.size()));
                         } else {
-                            status = fmt::format(" ({}/{})", accepted, rws.size());
+                            columns.emplace_back(description,
+                                    std::get<0>(rule_data[rule]),
+                                    fmt::format("{}/{}", accepted, rws.size()));
                         }
-                        options.emplace_back(description + status);
+                    }
+                    size_t left_column_width = 0;
+                    for (auto [l, m, r] : columns) {
+                        left_column_width = std::max(left_column_width, l.size());
+                    }
+                    std::vector<std::string> options;
+                    for (auto [l, m, r] : columns) {
+                        options.emplace_back(fmt::format("{0:<{3}}   {1:5}  {2}", l, m, r, left_column_width));
                     }
                     auto rule_selection = multi_choice("Which rule would you like to review?", options, true);
                     if (rule_selection == -1) break;
@@ -662,7 +672,10 @@ int main(int argc, char** argv) {
             f.close();
         } else if (options.patch) {
             std::string before = read_file(filename);
-            print_patch(filename, before, after, {false, true, stdout});
+            auto patch = libgit::create_patch(filename, before, after);
+            for (auto line : patch) {
+                std::cout << line << std::endl;
+            }
         }
     }
 

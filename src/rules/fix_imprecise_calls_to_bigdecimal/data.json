@@ -1,5 +1,5 @@
 {
-    "description": "Improve precision of calls to BigDecimal",
+    "description": "Fix imprecise calls to BigDecimal",
     "sonar": {
         "id": "S2111",
         "url": "https://rules.sonarsource.com/java/RSPEC-2111"

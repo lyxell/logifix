@@ -1,6 +1,6 @@
 /* Pre  if ([:x]) {} */
 /* Post              */
-rewrite("EmptyIfStmt", filename, start, end, "") :-
+rewrite("remove_empty_if_statements", filename, start, end, "") :-
     if_statement(id, _, body, nil),
     block(body, nil),
         filename_of(id, filename),

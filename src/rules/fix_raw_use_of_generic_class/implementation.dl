@@ -1,6 +1,6 @@
 /* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
 /* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
-rewrite("S3740", filename, start, start, "<>") :-
+rewrite("fix_raw_use_of_generic_class", filename, start, start, "<>") :-
     field_declaration(_, _, left_type, declarators),
     is_collection_type(left_type),
     class_type(left_type, _, type_args, _),
@@ -16,7 +16,7 @@ rewrite("S3740", filename, start, start, "<>") :-
 
 /* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
 /* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
-rewrite("S3740", filename, start, start, "<>") :-
+rewrite("fix_raw_use_of_generic_class", filename, start, start, "<>") :-
     local_variable_declaration(_, _, left_type, declarators),
     is_collection_type(left_type),
     class_type(left_type, _, type_args, _),
@@ -32,7 +32,7 @@ rewrite("S3740", filename, start, start, "<>") :-
 
 /* Pre  Iterator [:var] = [:coll].iterator(); */
 /* Post Iterator<[:type]> [:var] = [:coll].iterator(); */
-rewrite("S3740", filename, start, start, type_args_str) :-
+rewrite("fix_raw_use_of_generic_class", filename, start, start, type_args_str) :-
     local_variable_declaration(id, _, left_type, [declarator, nil]),
         filename_of(id, filename),
     string_representation(left_type, "Iterator"),

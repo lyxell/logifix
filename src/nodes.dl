@@ -113,6 +113,17 @@ UNORDERED(equals_expression_unordered, equals_expression)
 UNORDERED(not_equals_expression_unordered, not_equals_expression)
 UNORDERED(conditional_and_expression_unordered, conditional_and_expression)
 
+.decl import_declaration(id: id, specification: id)
+import_declaration(id, specification) :-
+    name_of(id, "import_declaration"),
+    parent_of(id, "specification", specification).
+
+.decl import_specification(id: id, left_hand_side: id_list, import: id)
+import_specification(id, left_hand_side, import) :-
+    name_of(id, "import_specification"),
+    parent_of_list(id, "left_hand_side", left_hand_side),
+    parent_of(id, "import", import).
+
 .decl logical_complement_expression(id: id, expr: id)
 logical_complement_expression(id, expr) :-
     name_of(id, "logical_complement_expression"),
@@ -171,12 +182,12 @@ method_declaration(id, mods, header, body) :-
     parent_of_list(id, "modifiers", mods),
     parent_of(id, "body", body).
 
-.decl method_header(id: id, result: id, declarator: id, throws: id)
+.decl method_header(id: id, result: id, declarator: id, throws: id_list)
 method_header(id, result, declarator, throws) :-
     name_of(id, "method_header"),
     parent_of(id, "result", result),
     parent_of(id, "declarator", declarator),
-    parent_of(id, "throws", throws).
+    parent_of_list(id, "throws", throws).
 
 .decl field_access(id: id, subject: id, field: id)
 field_access(id, subject, field) :-

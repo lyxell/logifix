@@ -1,13 +1,13 @@
-#include "rules/avoid_raw_types/implementation.dl"
 #include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
 #include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
 #include "rules/fix_comparisons_of_objects_with_null/implementation.dl"
+#include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison/implementation.dl"
 #include "rules/fix_null_returns_in_tostring/implementation.dl"
-#include "rules/fix_references_to_collections_empty_list_empty_map_and_empty_set/implementation.dl"
-#include "rules/fix_resource_leaks/implementation.dl"
-#include "rules/improve_precision_of_calls_to_bigdecimal/implementation.dl"
+#include "rules/fix_potential_resource_leaks/implementation.dl"
+#include "rules/fix_raw_use_of_empty_collections/implementation.dl"
+#include "rules/fix_raw_use_of_generic_class/implementation.dl"
 #include "rules/remove_empty_declarations/implementation.dl"
 #include "rules/remove_empty_finally_blocks/implementation.dl"
 #include "rules/remove_empty_if_statements/implementation.dl"
@@ -17,11 +17,12 @@
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_repeated_unary_operators/implementation.dl"
 #include "rules/remove_unnecessary_calls_to_string_valueof/implementation.dl"
+#include "rules/remove_unnecessary_declarations_above_return_statements/implementation.dl"
+#include "rules/remove_unnecessary_null_check_before_string_equals_comparison/implementation.dl"
 #include "rules/remove_unnecessary_return/implementation.dl"
-#include "rules/remove_unnecessary_variable_declarations_before_return_statement/implementation.dl"
 #include "rules/remove_unused_assignments/implementation.dl"
+#include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
-#include "rules/replace_lambda_with_method_reference/implementation.dl"
 #include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
 #include "rules/simplify_calls_to_constructor_for_string_conversion/implementation.dl"
@@ -29,10 +30,12 @@
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
+#include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_inverted_boolean_expressions/implementation.dl"
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
 #include "rules/simplify_return_of_boolean_expressions/implementation.dl"
 #include "rules/simplify_ternary_conditional_expressions/implementation.dl"
+#include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
 #include "nodes.dl"
 
@@ -67,6 +70,13 @@ starts_at([name, fn, A, B], A) :- ast_node([name, fn, A, B]).
 
 .decl ends_at(id: id, at: number)
 ends_at([name, fn, A, B], B) :- ast_node([name, fn, A, B]).
+
+/* Javadoc
+ ********************************/
+
+.decl javadoc_references(filename: symbol, class: symbol)
+.input javadoc_references
+.output javadoc_references(IO=stdout)
 
 /* AST node relations
  ********************************/

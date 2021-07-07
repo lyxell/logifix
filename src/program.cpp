@@ -1,24 +1,11 @@
 #include "logifix.h"
+#include "javadoc.h"
 #include <filesystem>
 #include <unordered_set>
+#include <regex>
 #include <iostream>
 
 using rewrite_t = std::tuple<std::string,std::string,size_t,size_t,std::string>;
-
-static void replace_all(std::string& source, const std::string& from, const std::string& to)
-{
-    std::string new_string;
-    new_string.reserve(source.length());
-    std::string::size_type last_pos = 0;
-    std::string::size_type find_pos;
-    while (std::string::npos != (find_pos = source.find(from, last_pos))) {
-        new_string.append(source, last_pos, find_pos - last_pos);
-        new_string += to;
-        last_pos = find_pos + from.length();
-    }
-    new_string += source.substr(last_pos);
-    source.swap(new_string);
-}
 
 static const char* PROGRAM_NAME = "logifix";
 
@@ -35,6 +22,18 @@ program::~program() {
 
 void program::add_string(const char* filename, const char* content) {
     files.emplace(filename, content);
+    auto lex_result = sjp::lex(filename, (const uint8_t*) content);
+    if (lex_result) {
+        auto comments = lex_result->second;
+        souffle::Relation* javadoc_references = prog->getRelation("javadoc_references");
+        for (auto comment : comments) { 
+            for (auto class_name : javadoc::get_classes(comment)) {
+                javadoc_references->insert(
+                    souffle::tuple(javadoc_references, {prog->getSymbolTable().encode(filename),
+                                              prog->getSymbolTable().encode(class_name)}));
+            }
+        }
+    }
     sjp::parse(prog, filename, content);
     assert(content != nullptr);
     souffle::Relation* relation = prog->getRelation("source_code");

@@ -1,0 +1,9 @@
+{
+    "description": "Use lambda argument in Map.computeIfAbsent",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

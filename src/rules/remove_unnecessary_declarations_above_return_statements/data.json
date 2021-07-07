@@ -1,5 +1,5 @@
 {
-    "description": "Remove unnecessary variable declarations before return statements",
+    "description": "Remove unnecessary declarations above return statements",
     "sonar": {
         "id": "S1488",
         "url": "https://rules.sonarsource.com/java/RSPEC-1488"
