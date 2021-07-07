@@ -1,13 +1,17 @@
 #include "logifix.h"
 #include "javadoc.h"
+#include <nway.h>
+#include <queue>
 #include <filesystem>
+#include <vector>
 #include <unordered_set>
+#include <thread>
+#include <condition_variable>
 #include <regex>
+#include <mutex>
 #include <iostream>
 
 namespace logifix {
-
-    using node_id = size_t;
 
     std::unordered_map<std::string, node_id> file_to_node;
     std::unordered_map<node_id, std::string> node_to_file;
@@ -19,14 +23,44 @@ namespace logifix {
     std::queue<node_id> pending_nodes;
     std::mutex work_mutex;
     std::unordered_set<node_id> visited_nodes;
-    std::unordered_map<node_id, std::pair<rule_id, node_id>> parents;
-    std::unordered_map<node_id, std::pair<rule_id, node_id>> children;
+    std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> parents;
+    std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> children;
+    std::unordered_map<node_id, bool> has_continuation;
+    std::unordered_map<node_id, bool> is_real_node;
 
-    void add_file(std::string file) {
+    size_t string_to_node_id(std::string str) {
+        if (file_to_node.find(str) != file_to_node.end()) {
+            return file_to_node[str];
+        }
         auto node_id = file_to_node.size();
-        file_to_node.emplace(file, node_id);
-        node_to_file.emplace(node_id, file);
+        file_to_node.emplace(str, node_id);
+        node_to_file.emplace(node_id, str);
+        return node_id;
+    }
+
+    size_t add_file(std::string file) {
+        auto node_id = string_to_node_id(file);
         pending_nodes.emplace(node_id);
+        visited_nodes.emplace(node_id);
+        return node_id;
+    }
+
+    std::vector<std::string> get_rewrites_for_file(std::string file) {
+        std::vector<std::string> rewrites;
+        auto node = string_to_node_id(file);
+        std::queue<node_id> q;
+        q.emplace(node);
+        while (!q.empty()) {
+            auto i = q.front();
+            q.pop();
+            if (i != node && !has_continuation[i] && is_real_node[i]) {
+                rewrites.emplace_back(node_to_file[i]);
+            }
+            for (auto [j_rule, j] : children[i]) {
+                q.emplace(j);
+            }
+        }
+        return rewrites;
     }
 
     void run() {
@@ -40,36 +74,36 @@ namespace logifix {
                     /* acquire work */
                     {
                         std::unique_lock<std::mutex> lock(work_mutex);
-                        waiting_threads++;
-                        /* if all threads are waiting, there is no more work and we are finished */
-                        if (waiting_threads == concurrency) {
-                            finished = true;
-                            cv.notify_all();
-                        /* wait until there is work available */
-                        } else if (pending_nodes.empty()) {
-                            auto wakeup_when = [&](){ return !pending_nodes.empty() || finished; };
-                            cv.wait(lock, wakeup_when);
+                        if (pending_nodes.empty()) {
+                            waiting_threads++;
+                            if (waiting_threads == concurrency) {
+                                finished = true;
+                                cv.notify_all();
+                            } else {
+                                auto wakeup_when = [&](){ return !pending_nodes.empty() || finished; };
+                                cv.wait(lock, wakeup_when);
+                                waiting_threads--;
+                            }
                         }
                         /* if we get to this point there is either work available or we are finished */
                         if (finished) return;
-                        waiting_threads--;
                         current_node = pending_nodes.front();
-                        pending_nodes.pop_front();
+                        pending_nodes.pop();
                     }
 
                     std::vector<node_id> next_nodes;
 
                     /* perform expensive computation and store result */
                     {
-                        auto rewrites = get_rewrites(current_node);
-                        std::unique_lock<std::mutex> lock(work_mutex);
-                        for (auto [rule, next_node_src] : result) {
+                        auto rewrites = get_rewrites(node_to_file[current_node]);
+                        for (auto [rule, next_node_src] : rewrites) {
+                            std::unique_lock<std::mutex> lock(work_mutex);
                             node_id next_node = string_to_node_id(next_node_src);
-                            parents[next_node].emplace_back(rule, node);
-                            children[node].emplace_back(rule, node);
-                            if (!visited[node]) {
-                                visited[node] = true;
-                                next_nodes.emplace_back(node);
+                            parents[next_node].emplace(rule, current_node);
+                            children[current_node].emplace(rule, next_node);
+                            if (visited_nodes.find(next_node) == visited_nodes.end()) {
+                                visited_nodes.emplace(next_node);
+                                next_nodes.emplace_back(next_node);
                             }
                         }
                     }
@@ -78,7 +112,10 @@ namespace logifix {
                     std::vector<node_id> add_to_pending;
                     for (auto next_node : next_nodes) {
                         if (should_make_transition(current_node, next_node)) {
-                            pending_nodes.emplace_back(next_node);
+                            std::unique_lock<std::mutex> lock(work_mutex);
+                            is_real_node[next_node] = true;
+                            has_continuation[current_node] = true;
+                            add_to_pending.push_back(next_node);
                         }
                     }
 
@@ -86,7 +123,7 @@ namespace logifix {
                     if (!add_to_pending.empty()) {
                         std::unique_lock<std::mutex> lock(work_mutex);
                         for (auto id : add_to_pending) {
-                            pending_nodes.emplace_back(id);
+                            pending_nodes.emplace(id);
                         }
                     }
 
@@ -100,14 +137,15 @@ namespace logifix {
         for (auto& t : thread_pool) {
             t.join();
         }
+        std::cout << visited_nodes.size() << std::endl;
     }
 
 /**
  * We are in a scenario like the following
  *
- *      (O)─→(A)─→(B)
+ *      (O)──(A)──(B)
  *       │
- *       └─→(C)
+ *       └──(C)
  *
  * and we would like to know if there is some (C) that relates to (O) in
  * the way that (B) relates to (A), if that is the case, we do not want
@@ -115,41 +153,26 @@ namespace logifix {
  * other branches
  */
 bool should_make_transition(node_id a, node_id b) {
-    bool make_transition = true;
     std::vector<std::pair<node_id, node_id>> oc_pairs;
-    for (auto o : parents[a]) {
-        for (auto c : children[o]) {
+    for (const auto& [o_rule, o] : parents[a]) {
+        for (const auto& [c_rule, c] : children[o]) {
             oc_pairs.emplace_back(o, c);
         }
     }
-    for (auto [o, c] : oc_pairs) {
-        auto diff = nway::diff(node_to_string[o], {node_to_string[a], node_to_string[b], node_to_string[c]});
-        /* TODO use std::all_of */
-        /* loop through each hunk */
-        bool edit_scripts_have_same_effects = true;
-        for (auto [oi, candidates] : diff) {
-            auto [ai, bi, ci] = candidates;
-            /* positions where A_i == B_i are irrelevant */
-            if (ai == bi) continue;
-            /**
-             * Now, since A_i != B_i this change must
-             * have been introduced in (A_i → B_i)
-             * so we simply check if this change was
-             * also introduced in (O_i → C_i) */
-            if (bi == ci) continue;
-            /**
-             * Now we have a scenario where B_i has changed
-             * in (A_i → B_i) but not in (O_i → C_i)
-             * so these edit script do not have the same
-             * effects
-             */
-            edit_scripts_have_same_effects = false;
-            break;
-        }
-        if (edit_scripts_have_same_effects) {
-            return true;
+    for (const auto& [o, c] : oc_pairs) {
+        auto diff = nway::diff(node_to_file[o], {node_to_file[a], node_to_file[b], node_to_file[c]});
+        auto all_agree = std::all_of(diff.begin(), diff.end(), [](const auto& hunk) {
+            const auto& [oi, candidates] = hunk;
+            auto ai = candidates[0];
+            auto bi = candidates[1];
+            auto ci = candidates[2];
+            return ai == bi || bi == ci;
+        });
+        if (all_agree) {
+            return false;
         }
     }
+    return true;
 }
 
 /**
@@ -157,9 +180,7 @@ bool should_make_transition(node_id a, node_id b) {
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-std::vector<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
-
-    is_computed = true;
+std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
 
     const char* program_name = "logifix";
     const char* filename = "file";
@@ -167,7 +188,7 @@ std::vector<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
     auto* prog = souffle::ProgramFactory::newInstance(program_name);
 
     /* add javadoc info to prog */
-    auto lex_result = sjp::lex(filename, (const uint8_t*) content);
+    auto lex_result = sjp::lex(filename, (const uint8_t*) source.c_str());
     if (lex_result) {
         auto comments = lex_result->second;
         souffle::Relation* javadoc_references = prog->getRelation("javadoc_references");
@@ -181,20 +202,20 @@ std::vector<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
     }
 
     /* add ast info to prog */
-    sjp::parse(prog, file, content);
+    sjp::parse(prog, filename, source.c_str());
 
     /* add source_code info to prog */
-    souffle::Relation* relation = prog->getRelation("source_code");
-    relation->insert(
-        souffle::tuple(relation, {prog->getSymbolTable().encode(file),
-                                  prog->getSymbolTable().encode(content)}));
+    souffle::Relation* source_code_relation = prog->getRelation("source_code");
+    source_code_relation->insert(
+        souffle::tuple(source_code_relation, {prog->getSymbolTable().encode(filename),
+                                  prog->getSymbolTable().encode(source)}));
 
     /* run program */
     prog->run();
 
     /* extract rewrites */
     souffle::Relation* relation = prog->getRelation("rewrite");
-    std::vector<std::pair<std::string, std::string>> rewrites;
+    std::set<std::pair<std::string, std::string>> rewrites;
 
     for (souffle::tuple& output : *relation) {
 
@@ -206,7 +227,7 @@ std::vector<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
 
         output >> rule >> filename >> start >> end >> replacement;
 
-        rewrites.emplace_back(rule, source.substr(0, start) + replacement + source.substr(end));
+        rewrites.emplace(rule, source.substr(0, start) + replacement + source.substr(end));
 
     }
 
