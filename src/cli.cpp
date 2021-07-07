@@ -458,8 +458,8 @@ int main(int argc, char** argv) {
     logifix::run();
 
     for (const auto& file : options.files) {
-        for (auto result : logifix::get_rewrites_for_file(read_file(file))) {
-            rewrites.emplace_back(file, "remove_unused_imports", result, false);
+        for (auto [rule, result] : logifix::get_rewrites_for_file(read_file(file))) {
+            rewrites.emplace_back(file, rule, result, false);
         }
     }
 

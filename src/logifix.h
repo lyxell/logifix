@@ -42,6 +42,6 @@ bool should_make_transition(node_id a, node_id b, rule_id rule);
 
 std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source);
 
-std::vector<std::string> get_rewrites_for_file(std::string file);
+std::vector<std::pair<rule_id, std::string>> get_rewrites_for_file(std::string file);
 
 } // namespace logifix

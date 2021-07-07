@@ -45,20 +45,30 @@ namespace logifix {
         return node_id;
     }
 
-    std::vector<std::string> get_rewrites_for_file(std::string file) {
-        std::vector<std::string> rewrites;
+    std::vector<std::pair<rule_id, std::string>> get_rewrites_for_file(std::string file) {
+        std::vector<std::pair<rule_id, std::string>> rewrites;
         auto node = string_to_node_id(file);
-        std::queue<node_id> q;
-        q.emplace(node);
-        while (!q.empty()) {
-            auto i = q.front();
-            q.pop();
-            if (i != node && !has_continuation[i] && is_real_node[i]) {
-                rewrites.emplace_back(node_to_file[i]);
+        /* Go through the children of the node and collect all rewrites */
+        for (auto [rule, child] : children[node]) {
+            std::vector<std::string> to_be_merged;
+            std::queue<node_id> q;
+            q.emplace(child);
+            while (!q.empty()) {
+                auto i = q.front();
+                q.pop();
+                if (!has_continuation[i] && is_real_node[i]) {
+                    to_be_merged.emplace_back(node_to_file[i]);
+                }
+                for (auto [j_rule, j] : children[i]) {
+                    q.emplace(j);
+                }
             }
-            for (auto [j_rule, j] : children[i]) {
-                q.emplace(j);
+            auto diff = nway::diff(node_to_file[child], to_be_merged);
+            if (nway::has_conflict(diff)) {
+                std::cout << "Found a diff with conflicts" << std::endl;
+                exit(1);
             }
+            rewrites.emplace_back(rule, nway::merge(diff));
         }
         return rewrites;
     }
