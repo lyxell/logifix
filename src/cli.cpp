@@ -463,11 +463,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    /* Sort rewrites by filename */
-    //std::sort(rewrites.begin(), rewrites.end(), [](const auto& a, const auto& b) -> bool {
-    //    return std::get<0>(a) < std::get<0>(b);
-    //});
-
     auto review = [](auto& rw, size_t curr, size_t total) {
         auto& [filename, rule, after, accepted] = rw;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
