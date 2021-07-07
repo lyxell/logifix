@@ -8,6 +8,9 @@
 
 namespace logifix {
 
+using rule_id = std::string;
+using node_id = size_t;
+
 class program {
   private:
     souffle::SouffleProgram* prog;
@@ -30,5 +33,15 @@ class program {
     get_child_lists(int node);
     std::vector<int> get_point_of_declaration(int id);
 };
+
+node_id add_file(std::string file);
+
+void run();
+
+bool should_make_transition(node_id a, node_id b, rule_id rule);
+
+std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source);
+
+std::vector<std::pair<rule_id, std::string>> get_rewrites_for_file(std::string file);
 
 } // namespace logifix
