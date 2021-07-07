@@ -38,7 +38,7 @@ node_id add_file(std::string file);
 
 void run();
 
-bool should_make_transition(node_id a, node_id b);
+bool should_make_transition(node_id a, node_id b, rule_id rule);
 
 std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source);
 

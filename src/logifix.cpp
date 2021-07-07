@@ -91,7 +91,7 @@ namespace logifix {
                         pending_nodes.pop();
                     }
 
-                    std::vector<node_id> next_nodes;
+                    std::vector<std::pair<node_id, rule_id>> next_nodes;
 
                     /* perform expensive computation and store result */
                     {
@@ -103,15 +103,15 @@ namespace logifix {
                             children[current_node].emplace(rule, next_node);
                             if (visited_nodes.find(next_node) == visited_nodes.end()) {
                                 visited_nodes.emplace(next_node);
-                                next_nodes.emplace_back(next_node);
+                                next_nodes.emplace_back(next_node, rule);
                             }
                         }
                     }
 
                     /* find more work */
                     std::vector<node_id> add_to_pending;
-                    for (auto next_node : next_nodes) {
-                        if (should_make_transition(current_node, next_node)) {
+                    for (auto [next_node, rule] : next_nodes) {
+                        if (should_make_transition(current_node, next_node, rule)) {
                             std::unique_lock<std::mutex> lock(work_mutex);
                             is_real_node[next_node] = true;
                             has_continuation[current_node] = true;
@@ -152,20 +152,22 @@ namespace logifix {
  * to perform the transition, since these changes will be incorporated in
  * other branches
  */
-bool should_make_transition(node_id a, node_id b) {
+bool should_make_transition(node_id a, node_id b, rule_id rule) {
     std::vector<std::pair<node_id, node_id>> oc_pairs;
     for (const auto& [o_rule, o] : parents[a]) {
         for (const auto& [c_rule, c] : children[o]) {
-            oc_pairs.emplace_back(o, c);
+            if (rule == c_rule) {
+                oc_pairs.emplace_back(o, c);
+            }
         }
     }
     for (const auto& [o, c] : oc_pairs) {
         auto diff = nway::diff(node_to_file[o], {node_to_file[a], node_to_file[b], node_to_file[c]});
         auto all_agree = std::all_of(diff.begin(), diff.end(), [](const auto& hunk) {
             const auto& [oi, candidates] = hunk;
-            auto ai = candidates[0];
-            auto bi = candidates[1];
-            auto ci = candidates[2];
+            auto& ai = candidates[0];
+            auto& bi = candidates[1];
+            auto& ci = candidates[2];
             return ai == bi || bi == ci;
         });
         if (all_agree) {
