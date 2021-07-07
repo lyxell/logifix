@@ -55,8 +55,6 @@ namespace logifix {
                         waiting_threads--;
                         current_node = pending_nodes.front();
                         pending_nodes.pop_front();
-                        /* mark node as visited */
-                        visited_nodes.add(node);
                     }
 
                     std::vector<node_id> next_nodes;
