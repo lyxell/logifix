@@ -3,7 +3,9 @@
 #include "config.h"
 #include "libgit.h"
 #include <filesystem>
+#include <csignal>
 #include <cstdio>
+#include <cstdlib>
 #include <thread>
 #include <stack>
 #include <cctype>
@@ -49,6 +51,7 @@ static const char* TTY_CLEAR_TO_EOL = "\033[K";
 static const char* TTY_CURSOR_UP    = "\033[A";
 static const char* TTY_HIDE_CURSOR  = "\033[?25l";
 static const char* TTY_SHOW_CURSOR  = "\033[?25h";
+static const char* TTY_MOVE_TO_BOTTOM = "\033[9999;1H";
 
 std::string replace_tabs_with_spaces(std::string str) {
     std::string result;
@@ -269,8 +272,7 @@ static options_t parse_options(int argc, char** argv) {
 }
 
 static int multi_choice(std::string question, std::vector<std::string> alternatives, bool exit_on_left = false) {
-    tty_enable_cbreak_mode();
-    std::cout << TTY_HIDE_CURSOR;
+    tty::enable_cbreak_mode();
     fmt::print(fg(fmt::terminal_color::green) | fmt::emphasis::bold, "?");
     fmt::print(fmt::emphasis::bold, " {} ", question);
     if (exit_on_left) {
@@ -299,8 +301,7 @@ static int multi_choice(std::string question, std::vector<std::string> alternati
         if (found) {
             std::cout << std::endl;
             std::cout << std::endl;
-            std::cout << TTY_SHOW_CURSOR;
-            tty_disable_cbreak_mode();
+            tty::disable_cbreak_mode();
             return cursor;
         }
         for (auto i = scroll; i < std::min(alternatives.size(), scroll + height); i++) {
@@ -428,7 +429,23 @@ std::map<std::string, std::string> get_results(const rewrite_collection& rewrite
     return results;
 }
 
+void at_signal(int signal) {
+    std::exit(1);
+}
+
+void at_exit() {
+    std::cerr << TTY_MOVE_TO_BOTTOM;
+    std::cerr << TTY_SHOW_CURSOR << std::endl;
+    tty::disable_cbreak_mode();
+}
+
 int main(int argc, char** argv) {
+
+    setenv("SOUFFLE_ALLOW_SIGNALS","",1);
+    std::signal(SIGINT, at_signal);
+    std::atexit(at_exit);
+
+    std::cerr << TTY_HIDE_CURSOR;
 
     options_t options = parse_options(argc, argv);
 
@@ -445,7 +462,6 @@ int main(int argc, char** argv) {
     using std::chrono::milliseconds;
 #endif
 
-    std::cerr << TTY_HIDE_CURSOR;
 
     for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
         thread_pool.emplace_back(
@@ -489,7 +505,6 @@ int main(int argc, char** argv) {
         f.join();
     }
 
-    std::cerr << TTY_SHOW_CURSOR;
 
 #ifdef PERF
     std::sort(file_time.begin(), file_time.end());
