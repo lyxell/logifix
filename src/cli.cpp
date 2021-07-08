@@ -72,6 +72,7 @@ std::vector<std::string> prettify_patch(std::vector<std::string> lines) {
     size_t line_number = 0;
     bool seen_header_before = false;
     for (auto& line : lines) {
+        if (line.empty()) continue;
         auto marker = line[0];
         auto content = replace_tabs_with_spaces(line.substr(1));
         switch (marker) {
@@ -273,6 +274,9 @@ static options_t parse_options(int argc, char** argv) {
 
 static int multi_choice(std::string question, std::vector<std::string> alternatives, bool exit_on_left = false) {
     tty::enable_cbreak_mode();
+#ifndef NDEBUG
+    fmt::print(fg(fmt::terminal_color::red) | fmt::emphasis::bold, "DEBUG ");
+#endif
     fmt::print(fg(fmt::terminal_color::green) | fmt::emphasis::bold, "?");
     fmt::print(fmt::emphasis::bold, " {} ", question);
     if (exit_on_left) {

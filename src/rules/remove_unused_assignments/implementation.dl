@@ -32,7 +32,7 @@ inside_loop(other_id) :-
 
 /* Pre  [:x] = [:y] */
 /* Post             */
-rewrite("S1854", filename, start, end, "") :-
+rewrite("remove_unused_assignments", filename, start, end, "") :-
     assignment_expression(id, lhs, _),
         starts_at(id, start),
         ends_at(id, end),

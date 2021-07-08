@@ -38,7 +38,7 @@ node_id add_file(std::string file);
 
 void run();
 
-bool should_make_transition(node_id a, node_id b, rule_id rule);
+bool edit_scripts_are_equal(node_id o, node_id a, node_id b, node_id c);
 
 std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source);
 

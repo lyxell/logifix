@@ -1,5 +1,6 @@
 #include "logifix.h"
 #include "javadoc.h"
+#include "utils.h"
 #include <nway.h>
 #include <queue>
 #include <filesystem>
@@ -22,11 +23,9 @@ namespace logifix {
     size_t waiting_threads;
     std::queue<node_id> pending_nodes;
     std::mutex work_mutex;
-    std::unordered_set<node_id> visited_nodes;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> parents;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> children;
-    std::unordered_map<node_id, bool> has_continuation;
-    std::unordered_map<node_id, bool> is_real_node;
+    std::unordered_map<node_id, std::unordered_set<node_id>> taken_transitions;
 
     size_t string_to_node_id(std::string str) {
         if (file_to_node.find(str) != file_to_node.end()) {
@@ -41,7 +40,6 @@ namespace logifix {
     size_t add_file(std::string file) {
         auto node_id = string_to_node_id(file);
         pending_nodes.emplace(node_id);
-        visited_nodes.emplace(node_id);
         return node_id;
     }
 
@@ -56,19 +54,61 @@ namespace logifix {
             while (!q.empty()) {
                 auto i = q.front();
                 q.pop();
-                if (!has_continuation[i] && is_real_node[i]) {
+                if (taken_transitions[i].empty()) {
                     to_be_merged.emplace_back(node_to_file[i]);
                 }
-                for (auto [j_rule, j] : children[i]) {
+                for (auto j : taken_transitions[i]) {
                     q.emplace(j);
                 }
             }
+            auto string_has_only_whitespace = [](const auto& str) {
+                return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
+            };
             auto diff = nway::diff(node_to_file[child], to_be_merged);
+            /**
+             * Heuristic:
+             *
+             * If there is a hunk that conflicts where one of the
+             * candidates wants to remove the original string, pick
+             * this candidate.
+             */
             if (nway::has_conflict(diff)) {
-                std::cout << "Found a diff with conflicts" << std::endl;
-                exit(1);
+                for (auto& hunk : diff) {
+                    if (nway::hunk_has_conflict(hunk)) {
+                        auto& [org, candidates] = hunk;
+                        for (auto& c : candidates) {
+                            if (string_has_only_whitespace(c)) {
+                                for (auto& d : candidates) {
+                                    d = {};
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-            rewrites.emplace_back(rule, nway::merge(diff));
+            /**
+             * Still a conflict?
+             * We cant solve this.
+             */
+            if (nway::has_conflict(diff)) {
+#ifndef DNEBUG
+                std::cout << "--------------------" << std::endl;
+                std::cout << "ORIGINAL FILE" << std::endl;
+                std::cout << node_to_file[child] << std::endl;
+                for (auto cand : to_be_merged) {
+                    std::cout << "--------------------" << std::endl;
+                    std::cout << "CANDIDATE" << std::endl;
+                    std::cout << cand << std::endl;
+                }
+                std::cout << "--------------------" << std::endl;
+                std::cout << "Found a diff with conflicts" << std::endl;
+                utils::print_diff(diff);
+                exit(1);
+#endif
+            } else {
+                rewrites.emplace_back(rule, nway::merge(diff));
+            }
         }
         return rewrites;
     }
@@ -106,26 +146,34 @@ namespace logifix {
                     /* perform expensive computation and store result */
                     {
                         auto rewrites = get_rewrites(node_to_file[current_node]);
+                        std::unique_lock<std::mutex> lock(work_mutex);
                         for (auto [rule, next_node_src] : rewrites) {
-                            std::unique_lock<std::mutex> lock(work_mutex);
                             node_id next_node = string_to_node_id(next_node_src);
                             parents[next_node].emplace(rule, current_node);
                             children[current_node].emplace(rule, next_node);
-                            if (visited_nodes.find(next_node) == visited_nodes.end()) {
-                                visited_nodes.emplace(next_node);
-                                next_nodes.emplace_back(next_node, rule);
-                            }
+                            next_nodes.emplace_back(next_node, rule);
                         }
                     }
 
                     /* find more work */
                     std::vector<node_id> add_to_pending;
                     for (auto [next_node, rule] : next_nodes) {
-                        if (should_make_transition(current_node, next_node, rule)) {
+                        bool should_make_transition = true;
+                        for (auto [parent_rule, parent] : parents[current_node]) {
+                            for (auto [child_rule, child] : children[parent]) {
+                                if (edit_scripts_are_equal(parent, current_node, next_node, child)) {
+                                    should_make_transition = false;
+                                    break;
+                                }
+                            }
+                            if (should_make_transition) {
+                                break;
+                            }
+                        }
+                        if (should_make_transition) {
                             std::unique_lock<std::mutex> lock(work_mutex);
-                            is_real_node[next_node] = true;
-                            has_continuation[current_node] = true;
                             add_to_pending.push_back(next_node);
+                            taken_transitions[current_node].emplace(next_node);
                         }
                     }
 
@@ -147,11 +195,10 @@ namespace logifix {
         for (auto& t : thread_pool) {
             t.join();
         }
-        std::cout << visited_nodes.size() << std::endl;
     }
 
 /**
- * We are in a scenario like the following
+ * We are in the following scenario
  *
  *      (O)──(A)──(B)
  *       │
@@ -162,29 +209,15 @@ namespace logifix {
  * to perform the transition, since these changes will be incorporated in
  * other branches
  */
-bool should_make_transition(node_id a, node_id b, rule_id rule) {
-    std::vector<std::pair<node_id, node_id>> oc_pairs;
-    for (const auto& [o_rule, o] : parents[a]) {
-        for (const auto& [c_rule, c] : children[o]) {
-            if (rule == c_rule) {
-                oc_pairs.emplace_back(o, c);
-            }
-        }
-    }
-    for (const auto& [o, c] : oc_pairs) {
-        auto diff = nway::diff(node_to_file[o], {node_to_file[a], node_to_file[b], node_to_file[c]});
-        auto all_agree = std::all_of(diff.begin(), diff.end(), [](const auto& hunk) {
-            const auto& [oi, candidates] = hunk;
-            auto& ai = candidates[0];
-            auto& bi = candidates[1];
-            auto& ci = candidates[2];
-            return ai == bi || bi == ci;
-        });
-        if (all_agree) {
-            return false;
-        }
-    }
-    return true;
+bool edit_scripts_are_equal(node_id o, node_id a, node_id b, node_id c) {
+    auto diff = nway::diff(node_to_file[o], {node_to_file[a], node_to_file[b], node_to_file[c]});
+    return std::all_of(diff.begin(), diff.end(), [](const auto& hunk) {
+        const auto& [oi, candidates] = hunk;
+        auto& ai = candidates[0];
+        auto& bi = candidates[1];
+        auto& ci = candidates[2];
+        return ai == bi || bi == ci;
+    });
 }
 
 /**
