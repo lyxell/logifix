@@ -25,7 +25,7 @@ namespace logifix {
     std::mutex work_mutex;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> parents;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> children;
-    std::unordered_map<node_id, std::unordered_set<node_id>> taken_transitions;
+    std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
 
     size_t string_to_node_id(std::string str) {
         if (file_to_node.find(str) != file_to_node.end()) {
@@ -52,13 +52,13 @@ namespace logifix {
 
         /* Case 1: only one transition from node */
         if (taken_transitions[node].size() == 1) {
-            return get_recursive_merge_result_for_node(*taken_transitions[node].begin());
+            return get_recursive_merge_result_for_node(taken_transitions[node].begin()->second);
         }
 
         /* Case 2: Multiple transitions from node */
 
         std::vector<std::string> to_be_merged;
-        for (auto next_node : taken_transitions[node]) {
+        for (auto [rule, next_node] : taken_transitions[node]) {
             auto result = get_recursive_merge_result_for_node(next_node);
             if (result) {
                 to_be_merged.emplace_back(*result);
@@ -148,7 +148,7 @@ namespace logifix {
                         if (should_make_transition) {
                             std::unique_lock<std::mutex> lock(work_mutex);
                             add_to_pending.push_back(next_node);
-                            taken_transitions[current_node].emplace(next_node);
+                            taken_transitions[current_node].emplace(rule, next_node);
                         }
                     }
 

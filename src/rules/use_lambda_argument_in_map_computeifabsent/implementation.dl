@@ -1,6 +1,8 @@
 rewrite("use_lambda_argument_in_map_computeifabsent", filename, ident_start, ident_end, "k") :-
     method_invocation(invocation, _, "computeIfAbsent", [key_var, [lambda, nil]]),
         filename_of(invocation, filename),
+    lambda_expression(lambda, _, body),
+    ! block(body, _),
     starts_at(lambda, lambda_start),
     ends_at(lambda, lambda_end),
     identifier(ident),
