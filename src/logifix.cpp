@@ -3,7 +3,7 @@
 #include "utils.h"
 #include <fmt/core.h>
 #include <nway.h>
-#include <queue>
+#include <deque>
 #include <filesystem>
 #include <vector>
 #include <unordered_set>
@@ -52,7 +52,7 @@ namespace logifix {
 
     std::condition_variable cv;
     size_t waiting_threads;
-    std::queue<node_id> pending_nodes;
+    std::deque<node_id> pending_nodes;
     std::mutex work_mutex;
     std::unordered_map<node_id, std::pair<rule_id, node_id>> parent;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> children;
@@ -70,7 +70,7 @@ namespace logifix {
 
     size_t add_file(std::string file) {
         auto node_id = string_to_node_id(file);
-        pending_nodes.emplace(node_id);
+        pending_nodes.emplace_front(node_id);
         return node_id;
     }
 
@@ -120,7 +120,6 @@ namespace logifix {
     }
 
     void print_performance_metrics() { 
-        //std::sort(timer::events.begin(), timer::events.end());
         std::map<std::string, size_t> time_per_event_type;
         for (auto [time, data] : timer::events) {
             auto [type, node_id] = data;
@@ -131,7 +130,7 @@ namespace logifix {
         }
     }
 
-    void run() {
+    void run(std::function<void(node_id)> report_progress) {
         auto const concurrency = std::thread::hardware_concurrency();
         waiting_threads = 0;
         bool finished = false;
@@ -156,7 +155,7 @@ namespace logifix {
                         /* if we get to this point there is either work available or we are finished */
                         if (finished) return;
                         current_node = pending_nodes.front();
-                        pending_nodes.pop();
+                        pending_nodes.pop_front();
                     }
 
                     std::vector<std::tuple<node_id, rule_id, bool>> next_nodes;
@@ -194,9 +193,15 @@ namespace logifix {
                     for (auto [next_node, rule, should_take_transition] : next_nodes) {
                         if (should_take_transition) {
                             std::unique_lock<std::mutex> lock(work_mutex);
-                            pending_nodes.emplace(next_node);
+                            pending_nodes.emplace_back(next_node);
                             taken_transitions[current_node].emplace(rule, next_node);
                         }
+                    }
+
+                    std::unique_lock<std::mutex> lock(work_mutex);
+
+                    if (parent.find(current_node) == parent.end()) {
+                        report_progress(0);
                     }
 
                     /* notify all threads that there is more work available */
@@ -223,6 +228,9 @@ namespace logifix {
  * other branches
  */
 bool edit_scripts_are_equal(std::string_view o, std::string_view a, std::string_view b, std::string_view c) {
+    /**
+     * Heuristic: trim ends of all strings
+     */
     while (o.size() && a.size() && b.size() && c.size() && o.front() == a.front() && o.front() == b.front() && o.front() == c.front()) {
         o.remove_prefix(1);
         a.remove_prefix(1);

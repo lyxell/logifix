@@ -459,7 +459,14 @@ int main(int argc, char** argv) {
         logifix::add_file(read_file(file));
     }
 
-    logifix::run();
+    size_t count = 0;
+
+    logifix::run([&count, &options](size_t node) {
+        count++;
+        int progress = int((double(count) / double(options.files.size())) * 40);
+        int progress_full = 40;
+        fmt::print("\r[{2:=^{0}}{2: ^{1}}] {3}/{4}", progress, progress_full - progress, "", count, options.files.size());
+    });
 
     //logifix::print_performance_metrics();
 
