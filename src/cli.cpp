@@ -393,7 +393,7 @@ static std::string post_process(std::string before, std::string after) {
     auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
     std::string processed;
     for (size_t i = 0; i < after_lines.size(); i++) {
-        if (lcs.find(i) == lcs.end()) {
+        if (!lcs[i]) {
             if (string_has_only_whitespace(after_lines[i])) continue;
             // auto-indent
             if (i > 0 && find_first_non_space(after_lines[i]) == after_lines[i].begin()) {

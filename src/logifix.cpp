@@ -199,6 +199,7 @@ namespace logifix {
                         auto [parent_rule, parent_id] = parent[current_node];
                         for (auto& [next_node, rule, should_take_transition] : next_nodes) {
                             for (const auto& child : children[parent_id][rule]) {
+                                //fmt::print("({}, {}) ({}, {}) {}\n", current_node, next_node, parent_id, child, rule);
                                 if (child == current_node) continue;
                                 if (edit_scripts_are_equal(node_to_file[parent_id], node_to_file[current_node], node_to_file[next_node], node_to_file[child])) {
                                     should_take_transition = false;
@@ -243,22 +244,7 @@ namespace logifix {
  * to perform the transition, since these changes will be incorporated in
  * other branches
  */
-bool edit_scripts_are_equal(std::string_view o, std::string_view a, std::string_view b, std::string_view c) {
-    /**
-     * Heuristic: trim ends of all strings
-     */
-    while (o.size() && a.size() && b.size() && c.size() && o.front() == a.front() && o.front() == b.front() && o.front() == c.front()) {
-        o.remove_prefix(1);
-        a.remove_prefix(1);
-        b.remove_prefix(1);
-        c.remove_prefix(1);
-    }
-    while (o.size() && a.size() && b.size() && c.size() && o.back() == a.back() && o.back() == b.back() && o.back() == c.back()) {
-        o.remove_suffix(1);
-        a.remove_suffix(1);
-        b.remove_suffix(1);
-        c.remove_suffix(1);
-    }
+bool edit_scripts_are_equal(std::string o, std::string a, std::string b, std::string c) {
     auto diff = nway::diff(o, {a, b, c});
     auto ret = std::all_of(diff.begin(), diff.end(), [](const auto& hunk) {
         const auto& [oi, candidates] = hunk;
