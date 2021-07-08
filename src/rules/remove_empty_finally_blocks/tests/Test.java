@@ -13,5 +13,22 @@ public class Test {
         } finally {
             // do nothing
         }
+
+        try {
+            int x = 62 / 0;
+            System.out.println(x);
+        } catch (ArithmeticException e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+
+        try {
+            int x = 62 / 0;
+            System.out.println(x);
+        } finally {
+
+        }
+
     }
 }

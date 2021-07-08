@@ -1,33 +1,21 @@
-.decl last_node_before_finally(try_stmt: id, last_node: id)
-last_node_before_finally(id, body) :-
-    try_statement(id, body, nil, _).
-last_node_before_finally(id, last_elem) :-
-    try_statement(id, _, catches, _),
-    list_last_element(catches, last_elem).
-last_node_before_finally(id, body) :-
-    try_with_resources_statement(id, _, body, nil, _).
-last_node_before_finally(id, last_elem) :-
-    try_with_resources_statement(id, _, _, catches, _),
-    list_last_element(catches, last_elem).
-
 /* Pre  try [:body] [:catches] finally {} */
 /* Post try [:body] [:catches]            */
 rewrite("remove_empty_finally_blocks", filename, start, end, "") :-
-    try_statement(id, _, _, finally),
+    try_statement(id, _, catches, finally),
         filename_of(id, filename),
-    last_node_before_finally(id, last_elem),
-        ends_at(last_elem, start),
-    finally_block(finally, bl),
-    block(bl, nil),
+        list_last_element(catches, catch),
+        ends_at(catch, start),
+    finally_block(finally, block),
+    block(block, nil),
         ends_at(finally, end).
 
 /* Pre  try ([:resources]) [:body] [:catches] finally {} */
 /* Post try ([:resources]) [:body] [:catches]            */
 rewrite("remove_empty_finally_blocks", filename, start, end, "") :-
-    try_with_resources_statement(id, _, _, _, finally),
+    try_with_resources_statement(id, _, _, catches, finally),
+        list_last_element(catches, catch),
+        ends_at(catch, start),
         filename_of(id, filename),
-    last_node_before_finally(id, last_elem),
-        ends_at(last_elem, start),
-    finally_block(finally, bl),
-    block(bl, nil),
+    finally_block(finally, block),
+    block(block, nil),
         ends_at(finally, end).
