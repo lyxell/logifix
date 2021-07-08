@@ -52,10 +52,11 @@ namespace logifix {
 
     std::condition_variable cv;
     size_t waiting_threads;
-    std::deque<node_id> pending_nodes;
+    std::deque<node_id> pending_files;
+    std::deque<node_id> pending_strings;
     std::mutex work_mutex;
     std::unordered_map<node_id, std::pair<rule_id, node_id>> parent;
-    std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> children;
+    std::unordered_map<node_id, std::unordered_map<rule_id, std::unordered_set<node_id>>> children;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
 
     size_t string_to_node_id(std::string str) {
@@ -70,7 +71,7 @@ namespace logifix {
 
     size_t add_file(std::string file) {
         auto node_id = string_to_node_id(file);
-        pending_nodes.emplace_front(node_id);
+        pending_files.emplace_front(node_id);
         return node_id;
     }
 
@@ -110,10 +111,12 @@ namespace logifix {
         std::vector<std::pair<rule_id, std::string>> rewrites;
         auto node = string_to_node_id(file);
         /* Go through the children of the node and collect all rewrites */
-        for (auto [rule, child] : children[node]) {
-            auto result = get_recursive_merge_result_for_node(child);
-            if (result) {
-                rewrites.emplace_back(rule, *result);
+        for (auto [rule, rule_children] : children[node]) {
+            for (auto child : rule_children) {
+                auto result = get_recursive_merge_result_for_node(child);
+                if (result) {
+                    rewrites.emplace_back(rule, *result);
+                }
             }
         }
         return rewrites;
@@ -121,11 +124,23 @@ namespace logifix {
 
     void print_performance_metrics() { 
         std::map<std::string, size_t> time_per_event_type;
+        std::map<node_id, size_t> time_per_node_id;
         for (auto [time, data] : timer::events) {
             auto [type, node_id] = data;
             time_per_event_type[type] += time;
+            time_per_node_id[node_id] += time;
         }
+        fmt::print("\n");
         for (auto [e, tot] : time_per_event_type) {
+            fmt::print("{:20} {:20}\n", e, double(tot) / (1000.0 * 1000.0));
+        }
+        std::vector<std::pair<size_t, node_id>> node_data;
+        for (auto [e, tot] : time_per_node_id) {
+            node_data.emplace_back(tot, e);
+        }
+        std::sort(node_data.begin(), node_data.end());
+        for (int i = 0; i < std::min(10ul, node_data.size()); i++) {
+            auto [tot, e] = node_data[i];
             fmt::print("{:20} {:20}\n", e, double(tot) / (1000.0 * 1000.0));
         }
     }
@@ -141,21 +156,27 @@ namespace logifix {
                     /* acquire work */
                     {
                         std::unique_lock<std::mutex> lock(work_mutex);
-                        if (pending_nodes.empty()) {
+                        if (pending_strings.empty() && pending_files.empty()) {
                             waiting_threads++;
                             if (waiting_threads == concurrency) {
                                 finished = true;
                                 cv.notify_all();
                             } else {
-                                auto wakeup_when = [&](){ return !pending_nodes.empty() || finished; };
+                                auto wakeup_when = [&](){ return !pending_strings.empty() || finished; };
                                 cv.wait(lock, wakeup_when);
                                 waiting_threads--;
                             }
                         }
                         /* if we get to this point there is either work available or we are finished */
                         if (finished) return;
-                        current_node = pending_nodes.front();
-                        pending_nodes.pop_front();
+                        if (pending_strings.empty()) {
+                            current_node = pending_files.front();
+                            pending_files.pop_front();
+                            report_progress(0);
+                        } else {
+                            current_node = pending_strings.front();
+                            pending_strings.pop_front();
+                        }
                     }
 
                     std::vector<std::tuple<node_id, rule_id, bool>> next_nodes;
@@ -167,19 +188,18 @@ namespace logifix {
                         for (auto [rule, next_node_src] : rewrites) {
                             node_id next_node = string_to_node_id(next_node_src);
                             parent[next_node] = {rule, current_node};
-                            children[current_node].emplace(rule, next_node);
+                            children[current_node][rule].emplace(next_node);
                             next_nodes.emplace_back(next_node, rule, true);
                         }
                     }
 
                     /* find more work */
-                    auto transition_timer = timer::create("transition check", 0);
+                    auto transition_timer = timer::create("transition check", current_node);
                     if (parent.find(current_node) != parent.end()) {
                         auto [parent_rule, parent_id] = parent[current_node];
                         for (auto& [next_node, rule, should_take_transition] : next_nodes) {
-                            for (const auto& [child_rule, child] : children[parent_id]) {
+                            for (const auto& child : children[parent_id][rule]) {
                                 if (child == current_node) continue;
-                                if (child_rule != rule) continue;
                                 if (edit_scripts_are_equal(node_to_file[parent_id], node_to_file[current_node], node_to_file[next_node], node_to_file[child])) {
                                     should_take_transition = false;
                                     break;
@@ -193,16 +213,12 @@ namespace logifix {
                     for (auto [next_node, rule, should_take_transition] : next_nodes) {
                         if (should_take_transition) {
                             std::unique_lock<std::mutex> lock(work_mutex);
-                            pending_nodes.emplace_back(next_node);
+                            pending_strings.emplace_back(next_node);
                             taken_transitions[current_node].emplace(rule, next_node);
                         }
                     }
 
                     std::unique_lock<std::mutex> lock(work_mutex);
-
-                    if (parent.find(current_node) == parent.end()) {
-                        report_progress(0);
-                    }
 
                     /* notify all threads that there is more work available */
                     cv.notify_all();
