@@ -2,10 +2,10 @@
   <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix_logo.svg" alt="Logifix">
 </h1>
 
-Logifix uses static analysis to detect and automatically fix bugs
-and bad patterns in Java source code. Logifix is implemented in a
-high-performance Datalog dialect that is synthesized into fast
-multi-threaded C++ code.
+Logifix uses static analysis and deep rewriting strategies to
+detect and automatically fix bugs and bad patterns in Java source
+code. Logifix is implemented in a high-performance Datalog
+dialect that is synthesized into fast multi-threaded C++ code.
 
 ## Demo
 
