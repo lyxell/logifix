@@ -20,6 +20,7 @@
 #include "rules/remove_unnecessary_declarations_above_return_statements/implementation.dl"
 #include "rules/remove_unnecessary_null_check_before_string_equals_comparison/implementation.dl"
 #include "rules/remove_unnecessary_return/implementation.dl"
+#include "rules/remove_unused_assignments/implementation.dl"
 #include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
 #include "rules/simplify_boolean_expressions/implementation.dl"

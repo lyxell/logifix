@@ -1,0 +1,11 @@
+{
+    "description": "Remove unused assignments",
+    "sonar": {
+        "id": "S1854",
+        "url": "https://rules.sonarsource.com/java/RSPEC-1854"
+    },
+    "pmd": {
+        "id": "UnusedAssignment",
+        "url": "https://pmd.github.io/pmd-6.36.0/pmd_rules_java_bestpractices.html#unusedassignment"
+    }
+}

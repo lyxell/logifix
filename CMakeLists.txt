@@ -75,9 +75,9 @@ set_source_files_properties(logifix.cpp PROPERTIES COMPILE_FLAGS -D__EMBEDDED_SO
 option(LOGIFIX_BUILD_LIBRARY "Build logifix as a library" OFF)
 
 IF (LOGIFIX_BUILD_LIBRARY)
-    add_library(logifix OBJECT src/program.cpp logifix.cpp)
+    add_library(logifix OBJECT src/logifix.cpp logifix.cpp)
 ELSE ()
-    add_executable(logifix src/libgit.cpp src/cli.cpp src/tty.cpp src/javadoc.cpp src/program.cpp logifix.cpp rule_data.cpp)
+    add_executable(logifix src/libgit.cpp src/cli.cpp src/tty.cpp src/javadoc.cpp src/logifix.cpp logifix.cpp rule_data.cpp)
 ENDIF ()
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 target_include_directories(logifix PRIVATE vendor/libgit2/include)

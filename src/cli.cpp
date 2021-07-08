@@ -72,6 +72,7 @@ std::vector<std::string> prettify_patch(std::vector<std::string> lines) {
     size_t line_number = 0;
     bool seen_header_before = false;
     for (auto& line : lines) {
+        if (line.empty()) continue;
         auto marker = line[0];
         auto content = replace_tabs_with_spaces(line.substr(1));
         switch (marker) {
@@ -273,6 +274,9 @@ static options_t parse_options(int argc, char** argv) {
 
 static int multi_choice(std::string question, std::vector<std::string> alternatives, bool exit_on_left = false) {
     tty::enable_cbreak_mode();
+#ifndef NDEBUG
+    fmt::print(fg(fmt::terminal_color::red) | fmt::emphasis::bold, "DEBUG ");
+#endif
     fmt::print(fg(fmt::terminal_color::green) | fmt::emphasis::bold, "?");
     fmt::print(fmt::emphasis::bold, " {} ", question);
     if (exit_on_left) {
@@ -389,7 +393,7 @@ static std::string post_process(std::string before, std::string after) {
     auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
     std::string processed;
     for (size_t i = 0; i < after_lines.size(); i++) {
-        if (lcs.find(i) == lcs.end()) {
+        if (!lcs[i]) {
             if (string_has_only_whitespace(after_lines[i])) continue;
             // auto-indent
             if (i > 0 && find_first_non_space(after_lines[i]) == after_lines[i].begin()) {
@@ -449,83 +453,38 @@ int main(int argc, char** argv) {
 
     options_t options = parse_options(argc, argv);
 
-    std::mutex thread_mutex;
-    std::vector<std::thread> thread_pool;
     std::vector<std::tuple<std::string,std::string,std::string, bool>> rewrites;
 
-    std::vector<std::string> file_stack(options.files.begin(), options.files.end());
-
-#ifdef PERF
-    std::vector<std::pair<double, std::string>> file_time;
-    using std::chrono::high_resolution_clock;
-    using std::chrono::duration_cast;
-    using std::chrono::milliseconds;
-#endif
-
-
-    for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
-        thread_pool.emplace_back(
-            std::thread([&] {
-                while (true) {
-                    std::string file;
-                    {
-                        std::lock_guard<std::mutex> lock(thread_mutex);
-                        if (file_stack.empty()) return;
-                        file = file_stack.back();
-                        file_stack.pop_back();
-                        auto analyzed_files = options.files.size() - file_stack.size();
-                        fmt::print(stderr, "\rAnalyzed {}/{} files", analyzed_files, options.files.size());
-                    }
-#ifdef PERF
-                    std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
-#endif
-                    std::unique_ptr<logifix::program> program = std::make_unique<logifix::program>();
-                    std::string input = read_file(file);
-                    auto result = program->run(input, {});
-                    program = nullptr;
-#ifdef PERF
-                    std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
-                    auto diff = duration_cast<milliseconds>(end - start).count();
-#endif
-                    std::lock_guard<std::mutex> lock(thread_mutex);
-#ifdef PERF
-                    file_time.emplace_back(double(diff) / 1000.0f, file);
-#endif
-                    if (result.size() == 0) continue;
-                    for (auto [output, rule] : result) {
-                        if (output != input) {
-                            rewrites.emplace_back(file, rule, output, false);
-                        }
-                    }
-                }
-            }));
+    for (const auto& file : options.files) {
+        logifix::add_file(read_file(file));
     }
 
-    for (auto& f : thread_pool) {
-        f.join();
-    }
+    size_t count = 0;
 
-
-#ifdef PERF
-    std::sort(file_time.begin(), file_time.end());
-    for (auto [t, f] : file_time) {
-        printf("%.3f ", t);
-        std::cerr << f << std::endl;
-    }
-#endif
-
-    /* Sort rewrites by filename */
-    std::sort(rewrites.begin(), rewrites.end(), [](const auto& a, const auto& b) -> bool {
-        return std::get<0>(a) < std::get<0>(b);
+    logifix::run([&count, &options](size_t node) {
+        count++;
+        int progress = int((double(count) / double(options.files.size())) * 40);
+        int progress_full = 40;
+        fmt::print("\r[{2:=^{0}}{2: ^{1}}] {3}/{4}", progress, progress_full - progress, "", count, options.files.size());
     });
+
+    //logifix::print_performance_metrics();
+
+    for (const auto& file : options.files) {
+        for (auto [rule, result] : logifix::get_rewrites_for_file(read_file(file))) {
+            rewrites.emplace_back(file, rule, result, false);
+        }
+    }
 
     auto review = [](auto& rw, size_t curr, size_t total) {
         auto& [filename, rule, after, accepted] = rw;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
         auto patch = libgit::create_patch(filename, before, post_process(before, after));
-        for (auto line : prettify_patch(std::move(patch))) {
+        if (patch.size()) {
+        for (auto line : prettify_patch(patch)) {
             std::cout << line << std::endl;
+        }
         }
         std::cout << std::endl;
         auto choice = multi_choice("What would you like to do?", {
