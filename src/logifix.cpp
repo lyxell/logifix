@@ -65,10 +65,6 @@ namespace logifix {
             }
         }
 
-        auto string_has_only_whitespace = [](const auto& str) {
-            return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
-        };
-
         auto diff = nway::diff(node_to_file[node], to_be_merged);
 
         /* Return empty optional if merging failed */
