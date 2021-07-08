@@ -9,7 +9,7 @@ multi-threaded C++ code.
 
 ## Demo
 
-https://user-images.githubusercontent.com/4975941/124673993-2f132800-deba-11eb-9b09-22a8c6f0149d.mp4
+https://user-images.githubusercontent.com/4975941/124917726-73a2de80-dff4-11eb-9e8c-0b0ff423bcbf.mp4
 
 <ul> </ul>
 
