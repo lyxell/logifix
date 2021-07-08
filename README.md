@@ -3,9 +3,9 @@
 </h1>
 
 Logifix uses static analysis to detect and automatically fix bugs
-and suspicious patterns in Java source code. Logifix is
-implemented in a high-performance Datalog dialect that is
-synthesized into fast multi-threaded C++ code.
+and bad patterns in Java source code. Logifix is implemented in a
+high-performance Datalog dialect that is synthesized into fast
+multi-threaded C++ code.
 
 ## Demo
 
