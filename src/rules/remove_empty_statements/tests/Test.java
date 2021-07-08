@@ -29,5 +29,8 @@ public class Test {
         // keep
         do ; while (y);
 
+        // keep
+        if (true) {} else ;
+
     }
 }

@@ -4,6 +4,7 @@ rewrite("remove_empty_statements", filename, start, end, "") :-
         starts_at(id, start),
         ends_at(id, end),
     ! if_statement(_, _, id, _),
+    ! if_statement(_, _, _, id),
     ! for_statement(_, _, _, _, id),
     ! while_statement(_, _, id),
     ! do_statement(_, _, id),
