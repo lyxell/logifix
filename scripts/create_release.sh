@@ -9,9 +9,9 @@ current_version=$(git describe --tags --abbrev=0)
 [[ $current_version =~ $pattern ]]
 
 if [[ "$1" = "major" ]]; then
-    next_version="v$((BASH_REMATCH[1]+1)).${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+    next_version="v$((BASH_REMATCH[1]+1)).0.0"
 elif [[ "$1" = "minor" ]]; then
-    next_version="v${BASH_REMATCH[1]}.$((BASH_REMATCH[2]+1)).${BASH_REMATCH[3]}"
+    next_version="v${BASH_REMATCH[1]}.$((BASH_REMATCH[2]+1)).0"
 elif [[ "$1" = "patch" ]]; then
     next_version="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3]+1))"
 fi
