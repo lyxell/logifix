@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 function generate {
     echo "#include <vector>"
     echo "#include <tuple>"
@@ -8,7 +10,7 @@ function generate {
     echo ""
     echo "std::unordered_map<std::string, std::tuple<std::string, std::string, std::string>> rule_data = {"
 
-    for f in ../src/rules/*; do
+    for f in $SCRIPT_DIR/../src/rules/*; do
         json_file="$f/data.json"
         name=$(basename "$f")
         if [ -f "$json_file" ]; then
