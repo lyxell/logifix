@@ -43,71 +43,50 @@ namespace logifix {
         return node_id;
     }
 
+    std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
+
+        /* Base case: no transitions from node */
+        if (taken_transitions[node].empty()) {
+            return node_to_file[node];
+        }
+
+        /* Case 1: only one transition from node */
+        if (taken_transitions[node].size() == 1) {
+            return get_recursive_merge_result_for_node(*taken_transitions[node].begin());
+        }
+
+        /* Case 2: Multiple transitions from node */
+
+        std::vector<std::string> to_be_merged;
+        for (auto next_node : taken_transitions[node]) {
+            auto result = get_recursive_merge_result_for_node(next_node);
+            if (result) {
+                to_be_merged.emplace_back(*result);
+            }
+        }
+
+        auto string_has_only_whitespace = [](const auto& str) {
+            return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
+        };
+
+        auto diff = nway::diff(node_to_file[node], to_be_merged);
+
+        /* Return empty optional if merging failed */
+        if (nway::has_conflict(diff)) {
+            return {};
+        }
+
+        return nway::merge(diff);
+    }
+
     std::vector<std::pair<rule_id, std::string>> get_rewrites_for_file(std::string file) {
         std::vector<std::pair<rule_id, std::string>> rewrites;
         auto node = string_to_node_id(file);
         /* Go through the children of the node and collect all rewrites */
         for (auto [rule, child] : children[node]) {
-            std::vector<std::string> to_be_merged;
-            std::queue<node_id> q;
-            q.emplace(child);
-            while (!q.empty()) {
-                auto i = q.front();
-                q.pop();
-                if (taken_transitions[i].empty()) {
-                    to_be_merged.emplace_back(node_to_file[i]);
-                }
-                for (auto j : taken_transitions[i]) {
-                    q.emplace(j);
-                }
-            }
-            auto string_has_only_whitespace = [](const auto& str) {
-                return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
-            };
-            auto diff = nway::diff(node_to_file[child], to_be_merged);
-            /**
-             * Heuristic:
-             *
-             * If there is a hunk that conflicts where one of the
-             * candidates wants to remove the original string, pick
-             * this candidate.
-             */
-            if (nway::has_conflict(diff)) {
-                for (auto& hunk : diff) {
-                    if (nway::hunk_has_conflict(hunk)) {
-                        auto& [org, candidates] = hunk;
-                        for (auto& c : candidates) {
-                            if (string_has_only_whitespace(c)) {
-                                for (auto& d : candidates) {
-                                    d = {};
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            /**
-             * Still a conflict?
-             * We cant solve this.
-             */
-            if (nway::has_conflict(diff)) {
-#ifndef DNEBUG
-                std::cout << "--------------------" << std::endl;
-                std::cout << "ORIGINAL FILE" << std::endl;
-                std::cout << node_to_file[child] << std::endl;
-                for (auto cand : to_be_merged) {
-                    std::cout << "--------------------" << std::endl;
-                    std::cout << "CANDIDATE" << std::endl;
-                    std::cout << cand << std::endl;
-                }
-                std::cout << "--------------------" << std::endl;
-                std::cout << "Found a diff with conflicts" << std::endl;
-                utils::print_diff(diff);
-                exit(1);
-#endif
-            } else {
-                rewrites.emplace_back(rule, nway::merge(diff));
+            auto result = get_recursive_merge_result_for_node(child);
+            if (result) {
+                rewrites.emplace_back(rule, *result);
             }
         }
         return rewrites;
