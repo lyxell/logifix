@@ -461,6 +461,8 @@ int main(int argc, char** argv) {
 
     logifix::run();
 
+    //logifix::print_performance_metrics();
+
     for (const auto& file : options.files) {
         for (auto [rule, result] : logifix::get_rewrites_for_file(read_file(file))) {
             rewrites.emplace_back(file, rule, result, false);

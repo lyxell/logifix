@@ -38,10 +38,12 @@ node_id add_file(std::string file);
 
 void run();
 
-bool edit_scripts_are_equal(node_id o, node_id a, node_id b, node_id c);
+bool edit_scripts_are_equal(std::string_view o, std::string_view a, std::string_view b, std::string_view c);
 
-std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source);
+std::set<std::pair<rule_id,std::string>> get_rewrites(size_t);
 
 std::vector<std::pair<rule_id, std::string>> get_rewrites_for_file(std::string file);
+
+void print_performance_metrics();
 
 } // namespace logifix
