@@ -4,6 +4,7 @@ rewrite("remove_unused_imports", filename, start, end, "") :-
         ends_at(id, end),
         filename_of(id, filename),
     import_specification(specification, _, import),
+    import_str != "*",
     string_representation(import, import_str),
     ! javadoc_references(filename, import_str),
     count : { ast_node(other_id), filename_of(other_id, filename), string_representation(other_id, import_str) } = 1.   
