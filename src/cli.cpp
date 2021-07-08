@@ -546,7 +546,8 @@ int main(int argc, char** argv) {
                 if (selection == 3) break;
             } else {
                 fmt::print(fmt::emphasis::bold,
-                    "\nFound {} rewrites\n\n",
+                    "\n\nAnalyzed {} files and found {} rewrites\n\n",
+                    options.files.size(),
                     rewrites.size());
 
                 if (rewrites.size() == 0) break;
