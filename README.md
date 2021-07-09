@@ -4,8 +4,9 @@
 
 Logifix uses static analysis and deep rewriting strategies to
 detect and automatically fix bugs and bad patterns in Java source
-code. Logifix is implemented in a high-performance Datalog
-dialect that is synthesized into fast multi-threaded C++ code.
+code. Logifix is implemented in [a high-performance Datalog
+dialect](https://github.com/souffle-lang/souffle) and is
+synthesized into fast multi-threaded C++ code.
 
 ## Demo
 
@@ -28,7 +29,10 @@ https://user-images.githubusercontent.com/4975941/124917726-73a2de80-dff4-11eb-9
 
 ## How does it work?
 
-Logifix performs deep search and rewrite of code. Given the code below:
+Logifix performs deep search and rewrite using an ensemble of
+transformations that can all work on code in parallel.
+
+Given the code below:
 
 ```java
   private static Pattern getPattern(String groupRegexp) {
@@ -41,7 +45,7 @@ Logifix performs deep search and rewrite of code. Given the code below:
   }
 ```
 
-Logifix finds and performs a rewrite in four steps, where each version of the code gets incrementally better:
+Logifix finds and performs a rewrite using four transformations:
 
 ```diff
    private static Pattern getPattern(String groupRegexp) {
@@ -102,9 +106,28 @@ The diff that is presented by Logifix is the following:
  }
 ```
 
-Thanks to the [fast Datalog engine Soufflé](https://github.com/souffle-lang/souffle) and [fast diff/merge algorithms](https://github.com/lyxell/nway) this rewrite is found in a fraction of a second.
+In parallel, it finds the following rewrite in the same file:
 
-This rewrite was incorporated in the pull request https://github.com/cbeust/testng/pull/2610
+```diff
+   private static Boolean isMatch(Pattern pattern, String group) {
+     Pair<String, String> cacheKey = Pair.create(pattern.pattern(), group);
+-    Boolean match = MATCH_CACHE.get(cacheKey);
+-    if (match == null) {
+-      match = pattern.matcher(group).matches();
+-      MATCH_CACHE.put(cacheKey, match);
+-    }
+-    return match;
++    return MATCH_CACHE.computeIfAbsent(cacheKey, k -> pattern.matcher(group).matches());
+   }
+```
+
+Thanks to the [fast Datalog engine
+Soufflé](https://github.com/souffle-lang/souffle) and [fast
+diff/merge algorithms](https://github.com/lyxell/nway) these
+rewrites are found in a fraction of a second.
+
+These rewrites were incorporated in pull request
+https://github.com/cbeust/testng/pull/2610
 
 <ul> </ul>
 
