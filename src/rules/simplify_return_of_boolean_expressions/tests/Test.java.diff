@@ -1,8 +1,7 @@
 diff --git a/Test.java b/Test.java
-@@ -1,28 +1,18 @@
+@@ -1,39 +1,24 @@
  class Test {
-     boolean test1() {
-         int x = 20;
+     boolean test1(int x) {
 -        if (x == 20) {
 -            return true;
 -        } else {
@@ -10,14 +9,12 @@ diff --git a/Test.java b/Test.java
 -        }
 +        return x == 20;
      }
-     boolean test2() {
-         int x = 20;
+     boolean test2(int x) {
 -        if (x == 20) return true;
 -        else return false;
 +        return x == 20;
      }
-     boolean test3() {
-         int x = 20;
+     boolean test3(int x) {
 -        if (x == 20) {
 -            return false;
 -        } else {
@@ -25,10 +22,27 @@ diff --git a/Test.java b/Test.java
 -        }
 +        return x != 20;
      }
-     boolean test4() {
-         int x = 20;
+     boolean test4(int x) {
 -        if (x == 20) return false;
 -        else return true;
++        return x != 20;
+     }
+     boolean test5(int x) {
+-        if (x == 20) return false;
+-        else return true;
++        return x != 20;
+     }
+     boolean test6(int x) {
+-        if (x == 20) return ( false );
+-        else return (  true  );
++        return x != 20;
+     }
+ 
+     boolean test6(int x) {
+-        if    (x == 20)
+-                return  ( false );
+-        else
+-                return   ( ( (true) ) );
 +        return x != 20;
      }
  }
