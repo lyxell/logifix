@@ -5,6 +5,8 @@ project(logifix HOMEPAGE_URL "https://github.com/lyxell/logifix")
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_CXX_STANDARD 17)
 
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
+
 ### DEPENDENCIES
 
 add_subdirectory(vendor/fmt)

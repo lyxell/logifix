@@ -153,6 +153,7 @@ namespace logifix {
             thread_pool.emplace_back(std::thread([&] {
                 while (true) {
                     node_id current_node;
+                    std::string current_node_source;
                     /* acquire work */
                     {
                         std::unique_lock<std::mutex> lock(work_mutex);
@@ -177,41 +178,48 @@ namespace logifix {
                             current_node = pending_strings.front();
                             pending_strings.pop_front();
                         }
+                        current_node_source = node_to_file[current_node];
                     }
 
-                    std::vector<std::tuple<node_id, rule_id, bool>> next_nodes;
+                    std::vector<std::tuple<node_id, rule_id>> next_nodes;
 
                     /* perform expensive computation and store result */
                     {
-                        auto rewrites = get_rewrites(current_node);
+                        auto rewrites = get_rewrites(current_node_source);
                         std::unique_lock<std::mutex> lock(work_mutex);
                         for (auto [rule, next_node_src] : rewrites) {
                             node_id next_node = string_to_node_id(next_node_src);
                             parent[next_node] = {rule, current_node};
                             children[current_node][rule].emplace(next_node);
-                            next_nodes.emplace_back(next_node, rule, true);
+                            next_nodes.emplace_back(next_node, rule);
                         }
                     }
 
                     /* find more work */
-                    auto transition_timer = timer::create("transition check", current_node);
-                    if (parent.find(current_node) != parent.end()) {
-                        auto [parent_rule, parent_id] = parent[current_node];
-                        for (auto& [next_node, rule, should_take_transition] : next_nodes) {
-                            for (const auto& child : children[parent_id][rule]) {
-                                //fmt::print("({}, {}) ({}, {}) {}\n", current_node, next_node, parent_id, child, rule);
-                                if (child == current_node) continue;
-                                if (edit_scripts_are_equal(node_to_file[parent_id], node_to_file[current_node], node_to_file[next_node], node_to_file[child])) {
-                                    should_take_transition = false;
-                                    break;
+                    std::unordered_map<node_id, std::vector<std::tuple<std::string, std::string, std::string, std::string>>> edit_scripts;
+                    {
+                        std::unique_lock<std::mutex> lock(work_mutex);
+                        if (parent.find(current_node) != parent.end()) {
+                            auto [parent_rule, parent_id] = parent[current_node];
+                            for (auto& [next_node, rule] : next_nodes) {
+                                for (const auto& child : children[parent_id][rule]) {
+                                    if (child == current_node) continue;
+                                    edit_scripts[next_node].emplace_back(node_to_file[parent_id],
+                                                          node_to_file[current_node],
+                                                          node_to_file[next_node],
+                                                          node_to_file[child]);
                                 }
                             }
                         }
                     }
-                    timer::stop(transition_timer);
-
                     /* add work to the queue */
-                    for (auto [next_node, rule, should_take_transition] : next_nodes) {
+                    for (auto [next_node, rule] : next_nodes) {
+                        auto edit_script_timer = timer::create("edit script comparison", current_node);
+                        auto should_take_transition = std::none_of(edit_scripts[next_node].begin(), edit_scripts[next_node].end(), [](auto& tuple) {
+                            auto& [o, a, b, c] = tuple;
+                            return edit_scripts_are_equal(o, a, b, c);
+                        });
+                        timer::stop(edit_script_timer);
                         if (should_take_transition) {
                             std::unique_lock<std::mutex> lock(work_mutex);
                             pending_strings.emplace_back(next_node);
@@ -261,19 +269,16 @@ bool edit_scripts_are_equal(std::string o, std::string a, std::string b, std::st
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-std::set<std::pair<rule_id,std::string>> get_rewrites(size_t node_id) {
-
-    const auto& source = node_to_file[node_id];
+std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
 
     const char* program_name = "logifix";
     const char* filename = "file";
 
-    auto creation_timer = timer::create("program create", node_id);
+    //auto creation_timer = timer::create("program create", node_id);
     auto* prog = souffle::ProgramFactory::newInstance(program_name);
-    timer::stop(creation_timer);
+    //timer::stop(creation_timer);
 
     /* add javadoc info to prog */
-    auto lex_timer = timer::create("program lex", node_id);
     auto lex_result = sjp::lex(filename, (const uint8_t*) source.c_str());
     if (lex_result) {
         auto comments = lex_result->second;
@@ -286,13 +291,10 @@ std::set<std::pair<rule_id,std::string>> get_rewrites(size_t node_id) {
             }
         }
     }
-    timer::stop(creation_timer);
 
 
     /* add ast info to prog */
-    auto parse_timer = timer::create("program parse", node_id);
     sjp::parse(prog, filename, source.c_str());
-    timer::stop(parse_timer);
 
     /* add source_code info to prog */
     souffle::Relation* source_code_relation = prog->getRelation("source_code");
@@ -301,9 +303,7 @@ std::set<std::pair<rule_id,std::string>> get_rewrites(size_t node_id) {
                                   prog->getSymbolTable().encode(source)}));
 
     /* run program */
-    auto run_timer = timer::create("program run", node_id);
     prog->run();
-    timer::stop(run_timer);
 
     /* extract rewrites */
     souffle::Relation* relation = prog->getRelation("rewrite");
