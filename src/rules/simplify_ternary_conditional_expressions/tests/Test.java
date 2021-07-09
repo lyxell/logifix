@@ -24,4 +24,7 @@ class Test1 {
     boolean test6(boolean x) {
         return x ? false : true;
     }
+    boolean test7(boolean x) {
+        return x   ?   (false) :  ( (  true) );
+    }
 }
