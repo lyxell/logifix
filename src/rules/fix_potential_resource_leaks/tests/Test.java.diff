@@ -1,4 +1,4 @@
-diff --git a/../tests/local/2095_close_resources/Test.java b/../tests/local/2095_close_resources/Test.java
+diff --git a/Test.java b/Test.java
 @@ -5,11 +5,9 @@ import java.util.Arrays;
  
  public class Test {

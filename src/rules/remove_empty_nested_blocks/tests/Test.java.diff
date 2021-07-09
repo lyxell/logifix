@@ -1,4 +1,4 @@
-diff --git a/tests/Test.java b/tests/Test.java
+diff --git a/Test.java b/Test.java
 @@ -2,8 +2,8 @@ public class Test {
      public static void main(String[] args) {
          if (true) {

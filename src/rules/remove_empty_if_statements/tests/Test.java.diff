@@ -1,4 +1,4 @@
-diff --git a/tests/Test.java b/tests/Test.java
+diff --git a/Test.java b/Test.java
 @@ -1,13 +1,8 @@
  public class Test {
      public void test(boolean x, boolean y, boolean z, boolean w) {

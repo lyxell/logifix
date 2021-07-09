@@ -1,4 +1,4 @@
-diff --git a/../src/rules/avoid_raw_types/tests/Test.java b/../src/rules/avoid_raw_types/tests/Test.java
+diff --git a/TestFieldDeclaration.java b/TestFieldDeclaration.java
 @@ -2,5 +2,5 @@ import java.util.Deque;
  import java.util.ArrayDeque;
  

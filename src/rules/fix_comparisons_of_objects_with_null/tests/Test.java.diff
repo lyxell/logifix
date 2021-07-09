@@ -1,4 +1,4 @@
-diff --git a/2159_fix_silly_equality_checks/Test.java b/2159_fix_silly_equality_checks/Test.java
+diff --git a/Test.java b/Test.java
 @@ -1,5 +1,5 @@
  class Test {
      void test(Object x) {

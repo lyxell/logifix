@@ -8,5 +8,7 @@ logifix_cli="$1"
 
 for f in $(find $BASEDIR/../src -iname '*.java'); do
     echo "$f"
-    diff <("$1" --patch --accept-all "$f" | tail -n +2) <(tail -n +2 $f.diff)
+    cd $(dirname $f)
+    diff <($logifix_cli --patch --accept-all "$(basename $f)") "$(basename $f).diff"
+    cd -
 done
