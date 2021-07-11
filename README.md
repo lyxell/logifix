@@ -29,8 +29,19 @@ https://user-images.githubusercontent.com/4975941/124917726-73a2de80-dff4-11eb-9
 
 ## How does it work?
 
-Logifix performs deep search and rewrite using an ensemble of
-transformations that can all work on code in parallel.
+Logifix starts by finding a set of problems in a source code
+file. Each problem is then analyzed in parallel to find an
+appropriate rewrite that will fix the problem. There are three
+categories of problems: code that contains bugs, code that can be
+simplified and code that can be removed.
+
+After fixes have been found they are categorized by problem
+and then presented to the user. The user gets to choose which
+rewrites to apply. If the user chooses multiple rewrites in the
+same file the result is produced using [an n-way merging
+algorithm](https://github.com/lyxell/nway).
+
+### Example
 
 Given the code below:
 
@@ -121,13 +132,13 @@ In parallel, it finds the following rewrite in the same file:
    }
 ```
 
+These rewrites were incorporated in pull request
+https://github.com/cbeust/testng/pull/2610
+
 Thanks to the [fast Datalog engine
 Soufflé](https://github.com/souffle-lang/souffle) and [fast
 diff/merge algorithms](https://github.com/lyxell/nway) these
 rewrites are found in a fraction of a second.
-
-These rewrites were incorporated in pull request
-https://github.com/cbeust/testng/pull/2610
 
 <ul> </ul>
 
