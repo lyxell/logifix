@@ -7,5 +7,6 @@ rewrite("fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_strin
         ends_at(invocation, end),
     string_literal(arg),
     has_string_type(subject),
+    ! string_literal(subject),
     string_representation(arg, arg_str),
     string_representation(subject, subject_str).
