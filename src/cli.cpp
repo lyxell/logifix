@@ -476,6 +476,27 @@ int main(int argc, char** argv) {
         }
     }
 
+    /**
+     * Sort rewrites first by filename and then by the length of the prefix
+     * that they share with the original file
+     */
+    std::sort(rewrites.begin(), rewrites.end(), [](auto a, auto b) {
+        auto& [a_file, a_rule, a_result, a_status] = a;
+        auto& [b_file, b_rule, b_result, b_status] = b;
+        if (a_file == b_file) {
+            auto before = read_file(a_file);
+            for (size_t i = 0; i < std::min({before.size(), a_result.size(), b_result.size()}); i++) {
+                if (before[i] != a_result[i]) {
+                    return true;
+                } else if (before[i] != b_result[i]) {
+                    return false;
+                }
+            }
+            return false;
+        }
+        return a_file < b_file;
+    });
+
     auto review = [](auto& rw, size_t curr, size_t total) {
         auto& [filename, rule, after, accepted] = rw;
         fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
