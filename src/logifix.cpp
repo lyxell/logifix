@@ -195,33 +195,41 @@ namespace logifix {
                         }
                     }
 
-                    /* find more work */
-                    std::unordered_map<node_id, std::vector<std::tuple<std::string_view, std::string_view, std::string_view, std::string_view>>> edit_scripts;
-                    {
+                    for (const auto& [next_node, rule] : next_nodes) {
                         std::unique_lock<std::mutex> lock(work_mutex);
+                        bool take_transition = true;
                         if (parent.find(current_node) != parent.end()) {
                             auto [parent_rule, parent_id] = parent[current_node];
-                            for (auto& [next_node, rule] : next_nodes) {
-                                for (const auto& child : children[parent_id][rule]) {
-                                    if (child == current_node) continue;
-                                    edit_scripts[next_node].emplace_back(node_to_file[parent_id],
-                                                          node_to_file[current_node],
-                                                          node_to_file[next_node],
-                                                          node_to_file[child]);
+
+                            auto parent_src = node_to_file[parent_id];
+                            auto curr_src = node_to_file[current_node];
+                            auto next_src = node_to_file[next_node];
+
+                            auto diff = nway::diff(*sjp::lex(parent_src), {*sjp::lex(curr_src), *sjp::lex(next_src)});
+
+                            std::string result;
+                            for (auto& [o, cands] : diff) {
+                                const auto& a = cands[0];
+                                const auto& b = cands[1];
+                                if (a == b) {
+                                    for (auto& [type, content] : o) {
+                                        result += content;
+                                    }
+                                } else {
+                                    for (auto& [type, content] : b) {
+                                        result += content;
+                                    }
                                 }
                             }
+
+                            auto id = string_to_node_id(result);
+
+                            if (children[parent_id][rule].find(id) != children[parent_id][rule].end()) {
+                                take_transition = false;
+                            }
+
                         }
-                    }
-                    /* add work to the queue */
-                    for (auto [next_node, rule] : next_nodes) {
-                        auto edit_script_timer = timer::create("edit script comparison", current_node);
-                        auto should_take_transition = std::none_of(edit_scripts[next_node].begin(), edit_scripts[next_node].end(), [](auto& tuple) {
-                            auto& [o, a, b, c] = tuple;
-                            return edit_scripts_are_equal(o, a, b, c);
-                        });
-                        timer::stop(edit_script_timer);
-                        if (should_take_transition) {
-                            std::unique_lock<std::mutex> lock(work_mutex);
+                        if (take_transition) {
                             pending_strings.emplace_back(next_node);
                             taken_transitions[current_node].emplace(rule, next_node);
                         }
