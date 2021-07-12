@@ -279,12 +279,12 @@ std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
     //timer::stop(creation_timer);
 
     /* add javadoc info to prog */
-    auto lex_result = sjp::lex(filename, (const uint8_t*) source.c_str());
-    if (lex_result) {
-        auto comments = lex_result->second;
+    auto tokens = sjp::lex(filename, source);
+    if (tokens) {
         souffle::Relation* javadoc_references = prog->getRelation("javadoc_references");
-        for (auto comment : comments) { 
-            for (auto class_name : javadoc::get_classes(comment)) {
+        for (auto token : *tokens) { 
+            if (std::get<0>(token) != sjp::token_type::multi_line_comment) continue;
+            for (auto class_name : javadoc::get_classes(std::string(std::get<1>(token)))) {
                 javadoc_references->insert(
                     souffle::tuple(javadoc_references, {prog->getSymbolTable().encode(filename),
                                               prog->getSymbolTable().encode(class_name)}));
