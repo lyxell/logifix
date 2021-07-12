@@ -196,7 +196,7 @@ namespace logifix {
                     }
 
                     /* find more work */
-                    std::unordered_map<node_id, std::vector<std::tuple<std::string, std::string, std::string, std::string>>> edit_scripts;
+                    std::unordered_map<node_id, std::vector<std::tuple<std::string_view, std::string_view, std::string_view, std::string_view>>> edit_scripts;
                     {
                         std::unique_lock<std::mutex> lock(work_mutex);
                         if (parent.find(current_node) != parent.end()) {
@@ -252,8 +252,8 @@ namespace logifix {
  * to perform the transition, since these changes will be incorporated in
  * other branches
  */
-bool edit_scripts_are_equal(std::string o, std::string a, std::string b, std::string c) {
-    auto diff = nway::diff(o, {a, b, c});
+bool edit_scripts_are_equal(std::string_view o, std::string_view a, std::string_view b, std::string_view c) {
+    auto diff = nway::diff(*sjp::lex(o), {*sjp::lex(a), *sjp::lex(b), *sjp::lex(c)});
     auto ret = std::all_of(diff.begin(), diff.end(), [](const auto& hunk) {
         const auto& [oi, candidates] = hunk;
         const auto& ai = candidates[0];
@@ -279,7 +279,7 @@ std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
     //timer::stop(creation_timer);
 
     /* add javadoc info to prog */
-    auto tokens = sjp::lex(filename, source);
+    auto tokens = sjp::lex(source);
     if (tokens) {
         souffle::Relation* javadoc_references = prog->getRelation("javadoc_references");
         for (auto token : *tokens) { 
