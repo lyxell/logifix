@@ -227,8 +227,6 @@ namespace logifix {
                         }
                     }
 
-                    std::unique_lock<std::mutex> lock(work_mutex);
-
                     /* notify all threads that there is more work available */
                     cv.notify_all();
 
