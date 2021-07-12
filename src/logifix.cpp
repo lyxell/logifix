@@ -204,9 +204,8 @@ namespace logifix {
                             auto parent_src = node_to_file[parent_id];
                             auto curr_src = node_to_file[current_node];
                             auto next_src = node_to_file[next_node];
-
+                            lock.unlock();
                             auto diff = nway::diff(*sjp::lex(parent_src), {*sjp::lex(curr_src), *sjp::lex(next_src)});
-
                             std::string result;
                             for (auto& [o, cands] : diff) {
                                 const auto& a = cands[0];
@@ -221,6 +220,7 @@ namespace logifix {
                                     }
                                 }
                             }
+                            lock.lock();
 
                             auto id = string_to_node_id(result);
 
