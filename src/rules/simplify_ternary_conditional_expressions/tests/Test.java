@@ -27,4 +27,10 @@ class Test1 {
     boolean test7(boolean x) {
         return x   ?   (false) :  ( (  true) );
     }
+    boolean test8(Object x, boolean y) {
+        return x == null  ?   (y) :  ( (  true) );
+    }
+    boolean test9(Object x, boolean y) {
+        return ((x == null))  ?   (y) :  ( (  true) );
+    }
 }
