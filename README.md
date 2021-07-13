@@ -5,7 +5,7 @@
 Logifix uses static analysis and deep rewriting strategies to
 detect and automatically fix bugs and bad patterns in Java source
 code. Logifix is implemented in [a high-performance Datalog
-dialect](https://github.com/souffle-lang/souffle) and is
+dialect](https://github.com/souffle-lang/souffle) that is
 synthesized into fast multi-threaded C++ code.
 
 ## Demo
@@ -56,7 +56,7 @@ Given the code below:
   }
 ```
 
-Logifix finds and performs a rewrite using four transformations:
+Logifix finds and performs a rewrite in four steps:
 
 ```diff
    private static Pattern getPattern(String groupRegexp) {
