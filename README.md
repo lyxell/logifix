@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix_logo.svg" alt="Logifix">
+  <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-optimized.svg" alt="Logifix">
 </h1>
 
 Logifix uses static analysis and deep rewriting strategies to
