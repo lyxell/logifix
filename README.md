@@ -2,13 +2,10 @@
   <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-optimized.svg" alt="Logifix">
 </h1>
 
-Logifix uses static analysis and deep rewriting strategies to
-detect and automatically fix bugs and bad patterns in Java source
-code. Logifix is implemented in [a high-performance Datalog
+Logifix is a static analysis tool for Java that fixes violations
+automatically. Logifix is implemented in [a high-performance Datalog
 dialect](https://github.com/souffle-lang/souffle) that is
 synthesized into fast multi-threaded C++ code.
-
-## Demo
 
 https://user-images.githubusercontent.com/4975941/124917726-73a2de80-dff4-11eb-9e8c-0b0ff423bcbf.mp4
 
@@ -29,15 +26,19 @@ https://user-images.githubusercontent.com/4975941/124917726-73a2de80-dff4-11eb-9
 
 ## How does it work?
 
-Logifix starts by finding a set of problems in a source code
+Logifix uses static analysis and deep rewriting strategies to
+detect and automatically fix bugs and bad patterns in Java source
+code. 
+
+Logifix starts by finding a set of problems in each source code
 file. Each problem is then analyzed in parallel to find an
 appropriate rewrite that will fix the problem. There are three
 categories of problems: code that contains bugs, code that can be
 simplified and code that can be removed.
 
-After fixes have been found they are categorized by problem
-and then presented to the user. The user gets to choose which
-rewrites to apply. If the user chooses multiple rewrites in the
+After fixes have been found they are categorized by problem type
+and then presented to the user. The user may choose which fixes
+to apply in each file. If the user chooses multiple fixes in the
 same file the result is produced using [an n-way merging
 algorithm](https://github.com/lyxell/nway).
 
