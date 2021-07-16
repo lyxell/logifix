@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-optimized.svg" alt="Logifix">
+  <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix">
 </h1>
 
 Logifix is a static analysis tool for Java that fixes violations
