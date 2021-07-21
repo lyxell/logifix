@@ -78,33 +78,30 @@ Logifix finds and performs a rewrite in four steps:
 
 ```diff
    private static Pattern getPattern(String groupRegexp) {
-     return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
--      Pattern groupPattern = Pattern.compile(k);
--      return groupPattern;
+-    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
+-    if (groupPattern == null) {
+-      groupPattern = Pattern.compile(groupRegexp);
+-      PATTERN_CACHE.put(groupRegexp, groupPattern);
+-    }
+-    return groupPattern;
++    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
 +      return Pattern.compile(k);
-     });
++    });
    }
  }
 ```
 
 ```diff
    private static Pattern getPattern(String groupRegexp) {
--    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
--      return Pattern.compile(k);
--    });
+-    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
+-    if (groupPattern == null) {
+-      groupPattern = Pattern.compile(groupRegexp);
+-      PATTERN_CACHE.put(groupRegexp, groupPattern);
+-    }
+-    return groupPattern;
 +    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> Pattern.compile(k));
    }
 ```
-
-```diff
-   private static Pattern getPattern(String groupRegexp) {
--    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> Pattern.compile(k));
-+    return PATTERN_CACHE.computeIfAbsent(groupRegexp, Pattern::compile);
-   }
- }
-```
-
-The diff that is presented by Logifix is the following:
 
 ```diff
    private static Pattern getPattern(String groupRegexp) {
