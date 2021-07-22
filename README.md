@@ -8,7 +8,7 @@ high-performance Datalog
 dialect](https://github.com/souffle-lang/souffle) that is
 synthesized into multi-threaded C++ code.
 
-https://user-images.githubusercontent.com/4975941/124917726-73a2de80-dff4-11eb-9e8c-0b0ff423bcbf.mp4
+https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9752-fe988c5e0367.mp4
 
 <ul> </ul>
 
