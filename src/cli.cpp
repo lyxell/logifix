@@ -20,7 +20,7 @@
 using namespace std::string_literals;
 namespace fs = std::filesystem;
 
-using rewrite_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
+using patch_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
 extern std::unordered_map<std::string, std::tuple<std::string, std::string, std::string>> rule_data;
 
@@ -199,7 +199,7 @@ static options_t parse_options(int argc, char** argv) {
     };
 
     opts = {
-        {"--accept-all",      [&](std::string str) { options.accept_all = true; },   "Accept all rewrites without asking"},
+        {"--accept-all",      [&](std::string str) { options.accept_all = true; },   "Accept all patches without asking"},
         {"--accept=<rules>",  [&](std::string str) { parse_accepted(str);  },        "Comma-separated list of rules to accept"},
         {"--in-place",        [&](std::string str) { options.in_place = true; },        "Disable interaction, rewrite files on disk"},
         {"--patch",           [&](std::string str) { options.patch = true; },        "Disable interaction, output a patch to stdout"},
@@ -416,17 +416,17 @@ static std::string post_process(std::string before, std::string after) {
     return processed;
 }
 
-std::map<std::string, std::string> get_results(const rewrite_collection& rewrites) {
+std::map<std::string, std::string> get_results(const patch_collection& patches) {
     std::map<std::string, std::string> results;
-    std::map<std::string, std::vector<std::string>> rewrites_per_file;
-    for (auto& [filename, rule, after, is_accepted] : rewrites) {
+    std::map<std::string, std::vector<std::string>> patches_per_file;
+    for (auto& [filename, rule, after, is_accepted] : patches) {
         if (is_accepted) {
-            rewrites_per_file[filename].emplace_back(after);
+            patches_per_file[filename].emplace_back(after);
         }
     }
-    for (auto [filename, rewrites] : rewrites_per_file) {
+    for (auto [filename, patches] : patches_per_file) {
         std::string before = read_file(filename);
-        auto diff = nway::diff(before, rewrites);
+        auto diff = nway::diff(before, patches);
         assert(!nway::has_conflict(diff));
         results[filename] = post_process(before, nway::merge(diff));
     }
@@ -454,10 +454,10 @@ int main(int argc, char** argv) {
     options_t options = parse_options(argc, argv);
 
     /**
-     * Sort rewrites first by filename and then by the length of the prefix
+     * Sort patches first by filename and then by the length of the prefix
      * that they share with the original file
      */
-    auto rewrite_cmp = [](const auto& a, const auto& b) {
+    auto patch_cmp = [](const auto& a, const auto& b) {
         const auto& [a_file, a_rule, a_result] = a;
         const auto& [b_file, b_rule, b_result] = b;
         if (a_file != b_file) {
@@ -482,7 +482,7 @@ int main(int argc, char** argv) {
         }
         return a_pos < b_pos;
     };
-    std::set<std::tuple<std::string,std::string,std::string>, decltype(rewrite_cmp)> rewrite_set(rewrite_cmp);
+    std::set<std::tuple<std::string,std::string,std::string>, decltype(patch_cmp)> patch_set(patch_cmp);
 
     for (const auto& file : options.files) {
         logifix::add_file(read_file(file));
@@ -500,22 +500,22 @@ int main(int argc, char** argv) {
     //logifix::print_performance_metrics();
 
     for (const auto& file : options.files) {
-        for (auto [rule, result] : logifix::get_rewrites_for_file(read_file(file))) {
-            rewrite_set.emplace(file, rule, result);
+        for (auto [rule, result] : logifix::get_patches_for_file(read_file(file))) {
+            patch_set.emplace(file, rule, result);
         }
     }
 
-    std::vector<std::tuple<std::string,std::string,std::string, bool>> rewrites;
+    std::vector<std::tuple<std::string,std::string,std::string, bool>> patches;
 
-    for (const auto& [file, rule, result] : rewrite_set) {
-        rewrites.emplace_back(file, rule, result, false);
+    for (const auto& [file, rule, result] : patch_set) {
+        patches.emplace_back(file, rule, result, false);
     }
 
-    //std::sort(rewrites.begin(), rewrites.end());
+    //std::sort(patches.begin(), patches.end());
 
     auto review = [](auto& rw, size_t curr, size_t total) {
         auto& [filename, rule, after, accepted] = rw;
-        fmt::print(fmt::emphasis::bold, "\nRewrite {}/{} • {}\n\n", curr, total, filename);
+        fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
         auto patch = libgit::create_patch(filename, before, post_process(before, after));
         if (patch.size()) {
@@ -525,8 +525,8 @@ int main(int argc, char** argv) {
         }
         std::cout << std::endl;
         auto choice = multi_choice("What would you like to do?", {
-            "Accept this rewrite",
-            "Reject this rewrite"
+            "Accept this patch",
+            "Reject this patch"
         }, true);
         if (choice == -1) {
             return false;
@@ -542,20 +542,20 @@ int main(int argc, char** argv) {
 
         while (true) {
 
-            size_t selected_rewrites = std::count_if(rewrites.begin(), rewrites.end(), [](const auto& rewrite) {
-                return std::get<3>(rewrite);
+            size_t selected_patches = std::count_if(patches.begin(), patches.end(), [](const auto& patch) {
+                return std::get<3>(patch);
             });
 
             int selection;
 
-            if (selected_rewrites > 0) {
+            if (selected_patches > 0) {
                 fmt::print(fmt::emphasis::bold,
-                    "\nSelected {}/{} rewrites\n\n",
-                    selected_rewrites,
-                    rewrites.size());
+                    "\nSelected {}/{} patches\n\n",
+                    selected_patches,
+                    patches.size());
                 selection = multi_choice("What would you like to do?",
                 {
-                    "Review rewrites by rule",
+                    "Review patches by rule",
                     "Show a diff of the current changes",
                     "Apply changes to files on disk and exit",
                     "Discard changes and exit",
@@ -564,7 +564,7 @@ int main(int argc, char** argv) {
                 if (selection == 1) {
                     auto* fp = popen("less -R", "w");
                     if (fp != NULL) {
-                        for (auto [filename, after] : get_results(rewrites)) {
+                        for (auto [filename, after] : get_results(patches)) {
                             fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = read_file(filename);
                             auto patch = libgit::create_patch(filename, before, after);
@@ -583,14 +583,14 @@ int main(int argc, char** argv) {
                 if (selection == 3) break;
             } else {
                 fmt::print(fmt::emphasis::bold,
-                    "\n\nAnalyzed {} files and found {} rewrites\n\n",
+                    "\n\nAnalyzed {} files and found {} patches\n\n",
                     options.files.size(),
-                    rewrites.size());
+                    patches.size());
 
-                if (rewrites.size() == 0) break;
+                if (patches.size() == 0) break;
 
                 selection = multi_choice("What would you like to do?", {
-                    "Review rewrites by rule",
+                    "Review patches by rule",
                     "Exit without doing anything",
                 });
                 if (selection == 1) break;
@@ -599,9 +599,9 @@ int main(int argc, char** argv) {
             while (true) {
 
                 if (selection == 0) {
-                    std::map<std::string, decltype(rewrites)> rules;
-                    for (auto& rewrite : rewrites) {
-                        rules[std::get<1>(rewrite)].emplace_back(rewrite);
+                    std::map<std::string, decltype(patches)> rules;
+                    for (auto& patch : patches) {
+                        rules[std::get<1>(patch)].emplace_back(patch);
                     }
                     std::vector<std::string> keys;
                     std::vector<std::tuple<std::string,std::string,std::string>> columns;
@@ -635,7 +635,7 @@ int main(int argc, char** argv) {
                     auto rule = keys[rule_selection];
                     auto curr = 1;
                     auto total = rules[rule].size();
-                    for (auto& rw : rewrites) {
+                    for (auto& rw : patches) {
                         if (std::get<1>(rw) == rule) {
                             if (!review(rw, curr, total)) break;
                             curr++;
@@ -650,11 +650,11 @@ int main(int argc, char** argv) {
 
     } else {
         if (options.accept_all) {
-            for (auto& [filename, rule, after, accepted] : rewrites) {
+            for (auto& [filename, rule, after, accepted] : patches) {
                 accepted = true;
             }
         } else if (!options.accepted.empty()) {
-            for (auto& [filename, rule, after, accepted] : rewrites) {
+            for (auto& [filename, rule, after, accepted] : patches) {
                 if (options.accepted.find(rule) != options.accepted.end()) {
                     accepted = true;
                 }
@@ -662,7 +662,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    for (auto [filename, after] : get_results(rewrites)) {
+    for (auto [filename, after] : get_results(patches)) {
         if (options.in_place) {
             std::ofstream f(filename);
             f << after;

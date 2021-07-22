@@ -107,7 +107,7 @@ namespace logifix {
         return nway::merge(diff);
     }
 
-    std::vector<std::pair<rule_id, std::string>> get_rewrites_for_file(std::string file) {
+    std::vector<std::pair<rule_id, std::string>> get_patches_for_file(std::string file) {
         std::vector<std::pair<rule_id, std::string>> rewrites;
         auto node = string_to_node_id(file);
         /* Go through the children of the node and collect all rewrites */
@@ -185,7 +185,7 @@ namespace logifix {
 
                     /* perform expensive computation and store result */
                     {
-                        auto rewrites = get_rewrites(current_node_source);
+                        auto rewrites = get_patches(current_node_source);
                         std::unique_lock<std::mutex> lock(work_mutex);
                         for (auto [rule, next_node_src] : rewrites) {
                             node_id next_node = string_to_node_id(next_node_src);
@@ -275,7 +275,7 @@ bool edit_scripts_are_equal(std::string_view o, std::string_view a, std::string_
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-std::set<std::pair<rule_id,std::string>> get_rewrites(std::string source) {
+std::set<std::pair<rule_id,std::string>> get_patches(std::string source) {
 
     const char* program_name = "logifix";
     const char* filename = "file";

@@ -33,7 +33,7 @@ code.
 
 Logifix starts by finding a set of problems in each source code
 file. Each problem is then analyzed in parallel to find an
-appropriate rewrite that will fix the problem. There are three
+appropriate patch that will fix the problem. There are three
 categories of problems: code that contains bugs, code that can be
 simplified and code that can be removed.
 
@@ -58,7 +58,7 @@ Given the code below:
   }
 ```
 
-Logifix finds and performs a rewrite in four steps:
+Logifix finds a patch in four steps:
 
 ```diff
    private static Pattern getPattern(String groupRegexp) {
@@ -116,7 +116,7 @@ Logifix finds and performs a rewrite in four steps:
  }
 ```
 
-In parallel, it finds the following rewrite in the same file:
+In parallel, it finds the following patch in the same file:
 
 ```diff
    private static Boolean isMatch(Pattern pattern, String group) {
@@ -131,13 +131,13 @@ In parallel, it finds the following rewrite in the same file:
    }
 ```
 
-These rewrites were incorporated in pull request
+These patches were incorporated in pull request
 https://github.com/cbeust/testng/pull/2610
 
 Thanks to the [fast Datalog engine
 Soufflé](https://github.com/souffle-lang/souffle) and [fast
 diff/merge algorithms](https://github.com/lyxell/nway) these
-rewrites are found in a fraction of a second.
+patches are found in a fraction of a second.
 
 <ul> </ul>
 
