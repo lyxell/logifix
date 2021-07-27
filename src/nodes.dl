@@ -203,6 +203,14 @@ method_invocation(id, subject, method_str, arguments) :-
     parent_of_list(id, "arguments", arguments),
     string_representation(method, method_str).
 
+.decl method_reference(id: id, subject: id, type_arguments: id, method: symbol)
+method_reference(id, subject, type_arguments, method_str) :-
+    name_of(id, "method_reference"),
+    parent_of(id, "subject", subject),
+    parent_of(id, "type_arguments", type_arguments),
+    parent_of(id, "method", method),
+    string_representation(method, method_str).
+
 .decl method_declarator(id: id, name: id, params: id_list)
 method_declarator(id, name, params) :-
     name_of(id, "method_declarator"),

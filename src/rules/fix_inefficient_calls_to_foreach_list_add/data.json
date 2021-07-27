@@ -1,0 +1,10 @@
+{
+    "description": "Fix inefficient calls to forEach(list::add)",
+    "sonar": {
+        "id": "S2203",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2203"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

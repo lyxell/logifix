@@ -1,0 +1,12 @@
+rewrite("fix_inefficient_calls_to_foreach_list_add", filename, start, end, cat(
+        ref_subject_str, ".addAll(", inv_subject_str, ".collect(java.util.stream.Collectors.toList()))"
+)) :-
+    expression_statement(stmt, inv),
+        filename_of(stmt, filename),
+    has_stream_type(inv_subject),
+    method_invocation(inv, inv_subject, "forEach", [ref, nil]),
+        starts_at(inv, start),
+        ends_at(inv, end),
+    method_reference(ref, ref_subject, nil, "add"),
+    string_representation(inv_subject, inv_subject_str),
+    string_representation(ref_subject, ref_subject_str).
