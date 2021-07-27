@@ -28,6 +28,7 @@ struct options_t {
     bool accept_all;
     bool in_place;
     bool patch;
+    bool verbose;
     std::set<std::string> files;
     std::set<std::string> accepted;
 };
@@ -159,6 +160,7 @@ static options_t parse_options(int argc, char** argv) {
         .accept_all     = false,
         .in_place       = false,
         .patch          = false,
+        .verbose        = false,
         .files          = {},
         .accepted       = {},
     };
@@ -204,6 +206,7 @@ static options_t parse_options(int argc, char** argv) {
         {"--in-place",        [&](std::string str) { options.in_place = true; },        "Disable interaction, rewrite files on disk"},
         {"--patch",           [&](std::string str) { options.patch = true; },        "Disable interaction, output a patch to stdout"},
         {"--help",            [&](std::string str) { print_usage(); print_flags(); print_examples(); std::exit(0); },     "Print this information and exit"},
+        {"--verbose",         [&](std::string str) { options.verbose = true; },    "Print debugging information"},
         {"--version",         [&](std::string str) { print_version_and_exit(); },    "Print version information and exit"},
     };
 
@@ -326,7 +329,7 @@ static int multi_choice(std::string question, std::vector<std::string> alternati
     return 0;
 }
 
-static std::string post_process(std::string before, std::string after) {
+static std::string post_process(std::string before, std::string after, const options_t& options) {
     auto find_first_non_space = [](const std::string& str) {
         return std::find_if(str.begin(), str.end(), [](char c) { return std::isspace(c) == 0; });
     };
@@ -357,19 +360,28 @@ static std::string post_process(std::string before, std::string after) {
             auto first_non_space_at = find_first_non_space(line);
             if (first_non_space_at == line.end() || first_non_space_at == line.begin()) continue;
             auto indent = line.substr(0, first_non_space_at - line.begin());
+            /* Check that indentation has only one type of char */
             if (std::any_of(indent.begin(), indent.end(), [indent](char c) { return c != indent[0]; })) {
+                continue;
+            }
+            if (indentations.size() && indentations.back() == indent) {
                 continue;
             }
             indentations.push_back(indent);
         }
-        std::map<std::string, size_t> candidates;
+        std::map<std::string, double> multiplier = {
+            {"  ", 0.5},
+            {"    ", 0.25},
+            {"\t", 0.5}
+        };
+        std::map<std::string, double> candidates;
         for (size_t i = 1; i < indentations.size(); i++) {
             auto a = indentations[i-1];
             auto b = indentations[i];
-            if (a == b) continue;
-            if (a > b) std::swap(a, b);
+            if (a.size() > b.size()) std::swap(a, b);
             if (b.find(a) != 0) continue;
-            candidates[b.substr(a.size())]++;
+            auto candidate = b.substr(a.size());
+            candidates[candidate] += 1 + multiplier[candidate];
         }
         std::string best_candidate = "    ";
         size_t best_result = 0;
@@ -383,6 +395,13 @@ static std::string post_process(std::string before, std::string after) {
     };
 
     auto indentation = detect_indentation(before);
+
+    if (options.verbose) {
+        std::cerr << "Detected indentation ";
+        std::cerr << indentation.size() << " ";
+        std::cerr << (indentation[0] == ' ' ? "space" : "tab");
+        std::cerr << std::endl;
+    }
 
     auto string_has_only_whitespace = [](const auto& str) {
         return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
@@ -416,7 +435,7 @@ static std::string post_process(std::string before, std::string after) {
     return processed;
 }
 
-std::map<std::string, std::string> get_results(const patch_collection& patches) {
+std::map<std::string, std::string> get_results(const patch_collection& patches, const options_t& options) {
     std::map<std::string, std::string> results;
     std::map<std::string, std::vector<std::string>> patches_per_file;
     for (auto& [filename, rule, after, is_accepted] : patches) {
@@ -428,7 +447,7 @@ std::map<std::string, std::string> get_results(const patch_collection& patches) 
         std::string before = read_file(filename);
         auto diff = nway::diff(before, patches);
         assert(!nway::has_conflict(diff));
-        results[filename] = post_process(before, nway::merge(diff));
+        results[filename] = post_process(before, nway::merge(diff), options);
     }
     return results;
 }
@@ -513,11 +532,11 @@ int main(int argc, char** argv) {
 
     //std::sort(patches.begin(), patches.end());
 
-    auto review = [](auto& rw, size_t curr, size_t total) {
+    auto review = [&options](auto& rw, size_t curr, size_t total) {
         auto& [filename, rule, after, accepted] = rw;
         fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
-        auto patch = libgit::create_patch(filename, before, post_process(before, after));
+        auto patch = libgit::create_patch(filename, before, post_process(before, after, options));
         if (patch.size()) {
         for (auto line : prettify_patch(patch)) {
             std::cout << line << std::endl;
@@ -553,8 +572,7 @@ int main(int argc, char** argv) {
                     "\nSelected {}/{} patches\n\n",
                     selected_patches,
                     patches.size());
-                selection = multi_choice("What would you like to do?",
-                {
+                selection = multi_choice("What would you like to do?", {
                     "Review patches by rule",
                     "Show a diff of the current changes",
                     "Apply changes to files on disk and exit",
@@ -564,7 +582,7 @@ int main(int argc, char** argv) {
                 if (selection == 1) {
                     auto* fp = popen("less -R", "w");
                     if (fp != NULL) {
-                        for (auto [filename, after] : get_results(patches)) {
+                        for (auto [filename, after] : get_results(patches, options)) {
                             fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = read_file(filename);
                             auto patch = libgit::create_patch(filename, before, after);
@@ -662,7 +680,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    for (auto [filename, after] : get_results(patches)) {
+    for (auto [filename, after] : get_results(patches, options)) {
         if (options.in_place) {
             std::ofstream f(filename);
             f << after;
