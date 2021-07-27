@@ -12,7 +12,7 @@ diff --git a/Test.java b/Test.java
 -        if ((x == 3) == false) System.out.println("false");
 -        if ((x == 3 || x == 4) == false) System.out.println("false");
 +        if (x != 3) System.out.println("false");
-+        if (!(x == 3 || x == 4)) System.out.println("false");
++        if (x != 3 && x != 4) System.out.println("false");
      }
      void test4() {
          Inner obj = new Inner();
