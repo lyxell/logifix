@@ -628,7 +628,7 @@ int main(int argc, char** argv) {
                     }
                     std::vector<std::string> options;
                     for (auto [l, m, r] : columns) {
-                        options.emplace_back(fmt::format("{0:<{3}}   {1:5}  {2}", l, m, r, left_column_width));
+                        options.emplace_back(fmt::format("{0:<{2}}    {1}", l, r, left_column_width));
                     }
                     auto rule_selection = multi_choice("Which rule would you like to review?", options, true);
                     if (rule_selection == -1) break;
