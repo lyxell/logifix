@@ -37,9 +37,9 @@ appropriate patch that will fix the problem. There are three
 categories of problems: code that contains bugs, code that can be
 simplified and code that can be removed.
 
-After fixes have been found they are categorized by problem type
-and then presented to the user. The user may choose which fixes
-to apply in each file. If the user chooses multiple fixes in the
+After patches have been found they are categorized by problem type
+and then presented to the user. The user may choose which patches
+to apply in each file. If the user chooses multiple patches in the
 same file the result is produced using [an n-way merging
 algorithm](https://github.com/lyxell/nway).
 
