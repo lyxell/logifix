@@ -1,0 +1,14 @@
+diff --git a/Test.java b/Test.java
+@@ -2,9 +2,10 @@ import java.util.Map;
+ 
+ public class Test {
+     public static void run(Map<Integer,String> map) {
+-        for (Integer key : map.keySet()) {
++        for (Map.Entry<Integer,String> entry : map.entrySet()) {
++            Integer key = entry.getKey();
+             System.out.println(key);
+-            System.out.println(map.get(key));
++            System.out.println(entry.getValue());
+         }
+     }
+ }
