@@ -1,6 +1,8 @@
 rule,commit,extra_diff_flags
 fix_imprecise_calls_to_bigdecimal,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java,
 fix_imprecise_calls_to_bigdecimal,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java,
+fix_inefficient_map_access,https://github.com/payara/Payara/blob/8e76681d1f330b9f048f623d7b2d24cc83edf0c2/appserver/deployment/dol/src/main/java/com/sun/enterprise/deployment/util/ApplicationValidator.java,
+fix_inefficient_map_access,https://github.com/payara/Payara/blob/8e76681d1f330b9f048f623d7b2d24cc83edf0c2/appserver/ejb/ejb-container/src/main/java/org/glassfish/ejb/deployment/descriptor/EjbDescriptor.java,
 fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison,https://github.com/hibernate/hibernate-validator/blob/e2c659c039bf822c064df948395735df090cda04/test-utils/src/main/java/org/hibernate/validator/testutil/ValidationXmlTestHelper.java,--ignore-all-space
 fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison,https://github.com/spring-projects/spring-data-mongodb/blob/550b62b070880f5bdb499ac3387c229f2ac6b931/spring-data-mongodb/src/main/java/org/springframework/data/mongodb/core/convert/QueryMapper.java,
 fix_potential_resource_leaks,https://github.com/Konloch/bytecode-viewer/blob/db959d4704dfea3ad22c502997e1e2360dedec9e/src/main/java/the/bytecode/club/bytecodeviewer/decompilers/bytecode/InstructionPrinter.java,

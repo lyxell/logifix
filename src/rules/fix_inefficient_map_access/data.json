@@ -1,0 +1,10 @@
+{
+    "description": "Fix inefficient map access",
+    "sonar": {
+        "id": "S2864",
+        "url": "https://rules.sonarsource.com/java/RSPEC-2864"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}
