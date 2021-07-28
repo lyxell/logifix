@@ -2,8 +2,9 @@
   <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix">
 </h1>
 
-Logifix is a fast static analysis tool for Java that fixes
-violations automatically. Logifix is implemented in [a
+Logifix is a static analysis tool for Java that creates
+ready-to-merge patches for static analysis violations. Logifix is
+fast and easy to extend thanks to being implemented in [a
 high-performance Datalog
 dialect](https://github.com/souffle-lang/souffle) that is
 synthesized into multi-threaded C++ code.
