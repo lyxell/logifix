@@ -1,11 +1,11 @@
 #pragma once
 
 #include "sjp.h"
-#include <set>
-#include <map>
-#include <functional>
-#include <optional>
 #include <algorithm>
+#include <functional>
+#include <map>
+#include <optional>
+#include <set>
 
 namespace logifix {
 
@@ -16,11 +16,13 @@ node_id add_file(std::string file);
 
 void run(std::function<void(node_id)> report_progress);
 
-bool edit_scripts_are_equal(std::string_view o, std::string_view a, std::string_view b, std::string_view c);
+bool edit_scripts_are_equal(std::string_view o, std::string_view a,
+                            std::string_view b, std::string_view c);
 
-std::set<std::pair<rule_id,std::string>> get_patches(std::string);
+std::set<std::pair<rule_id, std::string>> get_patches(std::string);
 
-std::vector<std::pair<rule_id, std::string>> get_patches_for_file(std::string file);
+std::vector<std::pair<rule_id, std::string>>
+get_patches_for_file(std::string file);
 
 void print_performance_metrics();
 

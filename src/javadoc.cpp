@@ -2,9 +2,9 @@
 #include <set>
 
 namespace {
-    const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) (.*?)\})");
-    const std::regex JAVADOC_SEE_REGEX(R"(@see (.*))");
-}
+const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) (.*?)\})");
+const std::regex JAVADOC_SEE_REGEX(R"(@see (.*))");
+} // namespace
 
 namespace javadoc {
 
@@ -24,7 +24,8 @@ std::vector<std::string> get_classes_from_link(std::string s) {
     result.emplace_back(s.substr(0, pos));
 
     // Parse method
-    if (pos == s.size()) return result;
+    if (pos == s.size())
+        return result;
     s = s.substr(pos);
     pos = 0;
     if (s[pos] == '#') {
@@ -32,7 +33,8 @@ std::vector<std::string> get_classes_from_link(std::string s) {
         while (pos < s.size() && s[pos] != '(' && s[pos] != ' ') {
             pos++;
         }
-        if (pos == s.size()) return result;
+        if (pos == s.size())
+            return result;
         s = s.substr(pos);
         pos = 0;
     }
@@ -62,13 +64,16 @@ std::vector<std::string> get_classes_from_link(std::string s) {
  */
 std::set<std::string> get_classes(std::string s) {
     std::set<std::string> result;
-    for (auto [idx, regex] : {std::pair(2, JAVADOC_LINK_REGEX), std::pair(1, JAVADOC_SEE_REGEX)}) {
+    for (auto [idx, regex] :
+         {std::pair(2, JAVADOC_LINK_REGEX), std::pair(1, JAVADOC_SEE_REGEX)}) {
         auto words_begin = std::sregex_iterator(s.begin(), s.end(), regex);
         auto words_end = std::sregex_iterator();
         for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
             std::smatch match = *i;
             for (auto class_name : get_classes_from_link(match[idx])) {
-                class_name.erase(std::remove_if(class_name.begin(), class_name.end(), ::isspace), class_name.end());
+                class_name.erase(std::remove_if(class_name.begin(),
+                                                class_name.end(), ::isspace),
+                                 class_name.end());
                 if (!class_name.empty()) {
                     result.emplace(class_name);
                 }
@@ -78,4 +83,4 @@ std::set<std::string> get_classes(std::string s) {
     return result;
 }
 
-}
+} // namespace javadoc
