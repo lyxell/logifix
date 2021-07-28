@@ -4,8 +4,7 @@
 
 Logifix is a static analysis tool for Java that creates
 ready-to-merge patches for static analysis violations. Logifix is
-fast and easy to extend thanks to being implemented in [a
-high-performance Datalog
+implemented in [a high-performance Datalog
 dialect](https://github.com/souffle-lang/souffle) that is
 synthesized into multi-threaded C++ code.
 
