@@ -29,6 +29,8 @@ jobs:
           cmake -DSOUFFLE_USE_SQLITE=OFF -DSOUFFLE_USE_ZLIB=OFF -DSOUFFLE_FAST_RELEASE=OFF -DSOUFFLE_FAST_DEBUG=OFF -B${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    - name: Test
+      run: cd ${{github.workspace}}/build && ctest -j4
     - name: Move file
       run: mv ${{github.workspace}}/build/logifix "${{github.workspace}}/build/logifix-$(git describe --tags --dirty --match 'v*')-macos-x86_64"
     - uses: actions/upload-artifact@v2
