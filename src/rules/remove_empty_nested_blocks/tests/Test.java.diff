@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -2,8 +2,8 @@ public class Test {
+@@ -2,8 +2,8 @@
      public static void main(String[] args) {
          if (true) {
              System.out.println("hello");

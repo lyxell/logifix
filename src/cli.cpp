@@ -1,7 +1,6 @@
 #include "logifix.h"
 #include "tty.h"
 #include "config.h"
-#include "libgit.h"
 #include <filesystem>
 #include <csignal>
 #include <cstdio>
@@ -62,6 +61,113 @@ std::string replace_tabs_with_spaces(std::string str) {
         } else {
             result += c;
         }
+    }
+    return result;
+}
+
+static void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](auto c) { return !std::isspace(c); }).base(), s.end());
+}
+
+std::vector<std::string> line_split(std::string str) {
+    std::vector<std::string> result;
+    while (!str.empty()) {
+        size_t i;
+        for (i = 0; i < str.size() - 1; i++) {
+            if (str[i] == '\n') break;
+        }
+        result.emplace_back(str.substr(0, i + 1));
+        str = str.substr(i + 1);
+    }
+    return result;
+};
+
+std::vector<std::string> create_patch(std::string filename, std::string before, std::string after) {
+    auto a = line_split(before);
+    auto b = line_split(after);
+    for (auto& x : a) {
+        rtrim(x);
+    }
+    for (auto& x : b) {
+        rtrim(x);
+    }
+    std::vector<std::tuple<bool, char, std::string>> changes;
+    std::vector<std::optional<size_t>> lcs = nway::longest_common_subsequence(a, b);
+    size_t a_pos = 0;
+    size_t b_pos = 0;
+    while (a_pos < a.size() || b_pos < b.size()) {
+        /* a and b agree */
+        while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] == b_pos) {
+            changes.emplace_back(false, ' ', a[a_pos]);
+            a_pos++;
+            b_pos++;
+        }
+        /* a has no matching position */
+        while (a_pos < a.size() && !lcs[a_pos]) {
+            changes.emplace_back(false, '-', a[a_pos]);
+            a_pos++;
+        }
+        /* a has matching position but it is not that of b_pos */
+        while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] != b_pos) {
+            changes.emplace_back(false, '+', b[b_pos]);
+            b_pos++;
+        }
+    }
+    /* 3 lines of context */
+    int context = 3;
+    for (int i = 0; i < changes.size(); i++) {
+        auto& [keep, marker, line] = changes[i];
+        for (int j = std::max(0, i - context); j < std::min(int(changes.size()), i + context + 1); j++) {
+            if (std::get<1>(changes[j]) != ' ') {
+                keep = true;
+            }
+        }
+    }
+    /* create patch output */
+    std::vector<std::string> result;
+    result.emplace_back(fmt::format("diff --git a/{} b/{}", filename, filename));
+    size_t a_pos_output = 1;
+    size_t b_pos_output = 1;
+    for (int i = 0; i < changes.size(); i++) {
+        auto& [keep, marker, line] = changes[i];
+        if (!keep) {
+            a_pos_output++;
+            b_pos_output++;
+            continue;
+        }
+        size_t a_start = a_pos_output;
+        size_t b_start = b_pos_output;
+        size_t a_lines = 0;
+        size_t b_lines = 0;
+        size_t hunk_end = i;
+        while (hunk_end < changes.size() && std::get<0>(changes[hunk_end])) {
+            switch (std::get<1>(changes[hunk_end])) {
+                case ' ':
+                    a_pos_output++;
+                    b_pos_output++;
+                    a_lines++;
+                    b_lines++;
+                break;
+                case '-':
+                    a_pos_output++;
+                    a_lines++;
+                break;
+                case '+':
+                    b_pos_output++;
+                    b_lines++;
+                break;
+                default:
+                break;
+            }
+            hunk_end++;
+        }
+        /* output header */
+        result.emplace_back(fmt::format("@@ -{},{} +{},{} @@", a_start, a_lines, b_start, b_lines));
+        while (i < changes.size() && std::get<0>(changes[i])) {
+            result.emplace_back(fmt::format("{}{}", std::get<1>(changes[i]), std::get<2>(changes[i])));
+            i++;
+        }
+        i--;
     }
     return result;
 }
@@ -333,18 +439,6 @@ static std::string post_process(std::string before, std::string after, const opt
     auto find_first_non_space = [](const std::string& str) {
         return std::find_if(str.begin(), str.end(), [](char c) { return std::isspace(c) == 0; });
     };
-    auto line_split = [](std::string str) -> std::vector<std::string> {
-        std::vector<std::string> result;
-        while (!str.empty()) {
-            size_t i;
-            for (i = 0; i < str.size() - 1; i++) {
-                if (str[i] == '\n') break;
-            }
-            result.emplace_back(str.substr(0, i + 1));
-            str = str.substr(i + 1);
-        }
-        return result;
-    };
     auto bracket_balance = [](const std::string& str) {
         int result = 0;
         for (char c : str) {
@@ -353,7 +447,7 @@ static std::string post_process(std::string before, std::string after, const opt
         }
         return result;
     };
-    auto detect_indentation = [line_split, find_first_non_space](std::string str) {
+    auto detect_indentation = [find_first_non_space](std::string str) {
         auto lines = line_split(str);
         std::vector<std::string> indentations;
         for (auto line : lines) {
@@ -536,7 +630,7 @@ int main(int argc, char** argv) {
         auto& [filename, rule, after, accepted] = rw;
         fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total, filename);
         std::string before = read_file(filename);
-        auto patch = libgit::create_patch(filename, before, post_process(before, after, options));
+        auto patch = create_patch(filename, before, post_process(before, after, options));
         if (patch.size()) {
         for (auto line : prettify_patch(patch)) {
             std::cout << line << std::endl;
@@ -585,7 +679,7 @@ int main(int argc, char** argv) {
                         for (auto [filename, after] : get_results(patches, options)) {
                             fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = read_file(filename);
-                            auto patch = libgit::create_patch(filename, before, after);
+                            auto patch = create_patch(filename, before, after);
                             for (auto line : prettify_patch(patch)) {
                                 fputs(line.c_str(), fp);
                                 fputs("\n", fp);
@@ -687,7 +781,7 @@ int main(int argc, char** argv) {
             f.close();
         } else if (options.patch) {
             std::string before = read_file(filename);
-            auto patch = libgit::create_patch(filename, before, after);
+            auto patch = create_patch(filename, before, after);
             for (auto line : patch) {
                 std::cout << line << std::endl;
             }

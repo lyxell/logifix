@@ -13,7 +13,7 @@ diff --git a/Test.java b/Test.java
          }
  
          if (x || y) {
-@@ -18,8 +13,7 @@ public class Test {
+@@ -18,8 +13,7 @@
              System.out.println("hello");
          }
  

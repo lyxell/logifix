@@ -1,5 +1,5 @@
 diff --git a/TestMethodReference.java b/TestMethodReference.java
-@@ -9,7 +9,6 @@ public class TestMethodReference {
+@@ -9,7 +9,6 @@
          list.add(1);
          list.add(2);
          TestMethodReference t1 = new TestMethodReference();

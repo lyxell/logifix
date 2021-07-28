@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -5,11 +5,9 @@ import java.util.Arrays;
+@@ -5,11 +5,9 @@
  
  public class Test {
      public static void main(String[] args) {

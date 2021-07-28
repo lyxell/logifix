@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -2,19 +2,19 @@ class Test {
+@@ -2,19 +2,19 @@
      void test1() {
          String s = "hello ";
          float val = 2.0f;

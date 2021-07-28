@@ -13,15 +13,6 @@ add_subdirectory(vendor/fmt)
 
 add_subdirectory(vendor/nway)
 
-set(BUILD_SHARED_LIBS OFF)
-set(BUILD_CLAR OFF)
-set(USE_BUNDLED_ZLIB ON)
-set(USE_HTTPS OFF)
-set(USE_SSH OFF)
-set(USE_NTLMCLIENT OFF)
-set(REGEX_BACKEND "builtin" CACHE STRING "")
-add_subdirectory(vendor/libgit2)
-
 set(SOUFFLE_USE_CURSES OFF)
 add_subdirectory(vendor/souffle)
 set_target_properties(souffleprof PROPERTIES EXCLUDE_FROM_ALL 1)
@@ -79,14 +70,13 @@ option(LOGIFIX_BUILD_LIBRARY "Build logifix as a library" OFF)
 IF (LOGIFIX_BUILD_LIBRARY)
     add_library(logifix OBJECT src/logifix.cpp logifix.cpp)
 ELSE ()
-    add_executable(logifix src/libgit.cpp src/cli.cpp src/tty.cpp src/javadoc.cpp src/logifix.cpp logifix.cpp rule_data.cpp)
+    add_executable(logifix src/cli.cpp src/tty.cpp src/javadoc.cpp src/logifix.cpp logifix.cpp rule_data.cpp)
 ENDIF ()
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
-target_include_directories(logifix PRIVATE vendor/libgit2/include)
 
 target_include_directories(logifix PRIVATE vendor/fmt/include)
 
-target_link_libraries(logifix git2 sjp nway fmt)
+target_link_libraries(logifix pthread sjp nway fmt)
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(logifix -static-libgcc -static-libstdc++)

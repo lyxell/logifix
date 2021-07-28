@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -10,8 +10,6 @@ public class Test {
+@@ -10,8 +10,6 @@
              System.out.println(Arrays.toString(bytes));
          } catch (IOException e) {
              e.printStackTrace();
@@ -8,7 +8,7 @@ diff --git a/Test.java b/Test.java
          }
  
          try {
-@@ -19,8 +17,6 @@ public class Test {
+@@ -19,8 +17,6 @@
              System.out.println(x);
          } catch (ArithmeticException e) {
              e.printStackTrace();

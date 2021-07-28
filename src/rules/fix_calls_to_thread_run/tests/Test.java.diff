@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -3,7 +3,7 @@ public class Test {
+@@ -3,7 +3,7 @@
          Runnable runnable = null;
  
          Thread myThread = new Thread(runnable);

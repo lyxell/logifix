@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -2,9 +2,10 @@ import java.util.Map;
+@@ -2,9 +2,10 @@
  
  public class Test {
      public static void run(Map<Integer,String> map) {

@@ -1,5 +1,5 @@
 diff --git a/TestCollectionIterator.java b/TestCollectionIterator.java
-@@ -7,7 +7,7 @@ public class TestCollectionIterator {
+@@ -7,7 +7,7 @@
          Collection<Integer> coll = new ArrayList<>();
          coll.add(1);
          coll.add(2);

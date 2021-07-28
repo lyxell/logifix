@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -6,16 +6,16 @@ class Test {
+@@ -6,16 +6,16 @@
      void test1() {
          AtomicBoolean a = new AtomicBoolean(true);
          AtomicBoolean b = new AtomicBoolean(false);

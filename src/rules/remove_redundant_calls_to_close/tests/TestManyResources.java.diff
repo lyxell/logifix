@@ -1,5 +1,5 @@
 diff --git a/TestManyResources.java b/TestManyResources.java
-@@ -9,12 +9,6 @@ class Test {
+@@ -9,12 +9,6 @@
                  FileInputStream is2 = new FileInputStream(new File("foo"))) {
              byte[] bytes1 = is1.readAllBytes();
              byte[] bytes2 = is2.readAllBytes();

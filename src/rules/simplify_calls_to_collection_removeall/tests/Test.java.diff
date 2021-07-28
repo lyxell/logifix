@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -7,7 +7,7 @@ public class Test {
+@@ -7,7 +7,7 @@
          list.add(3);
          list.add(9);
          System.out.println(list);

@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -6,7 +6,7 @@ public class Test {
+@@ -6,7 +6,7 @@
          list.add(1);
          list.add(2);
          list.add(3);

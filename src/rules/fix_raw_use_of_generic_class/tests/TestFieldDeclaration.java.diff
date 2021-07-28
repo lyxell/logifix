@@ -1,5 +1,5 @@
 diff --git a/TestFieldDeclaration.java b/TestFieldDeclaration.java
-@@ -2,5 +2,5 @@ import java.util.Deque;
+@@ -2,5 +2,5 @@
  import java.util.ArrayDeque;
  
  public class TestFieldDeclaration {
