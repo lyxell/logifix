@@ -1,10 +1,10 @@
-diff --git a/Test.java b/Test.java
-@@ -3,7 +3,7 @@ class ThreadRunInvocation {
-     Runnable runnable = null;
+diff --git a/tests/Test.java b/tests/Test.java
+@@ -3,7 +3,7 @@ public class Test {
+         Runnable runnable = null;
  
-     Thread myThread = new Thread(runnable);
--    myThread.run(); // Noncompliant
-+    myThread.start(); // Noncompliant
+         Thread myThread = new Thread(runnable);
+-        myThread.run();
++        myThread.start();
  
-     Thread myThread2 = new Thread(runnable);
-     myThread2.start();
+         Thread myThread2 = new Thread(runnable);
+         myThread2.start();
