@@ -9,6 +9,9 @@ set (CMAKE_CXX_FLAGS_THREADSANITIZER "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-p
 
 ### DEPENDENCIES
 
+set(RE2C_BUILD_RE2GO OFF)
+add_subdirectory(vendor/re2c)
+
 add_subdirectory(vendor/fmt)
 
 add_subdirectory(vendor/nway)
