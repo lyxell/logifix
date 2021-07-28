@@ -1,4 +1,4 @@
-diff --git a/tests/TestLogicalOr.java b/tests/TestLogicalOr.java
+diff --git a/TestLogicalOr.java b/TestLogicalOr.java
 @@ -1,6 +1,6 @@
  public class TestLogicalOr {
      public static void main(String[] args) {
