@@ -1,3 +1,12 @@
+file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/../src/rules/*.java)
+set(counter 1)
+foreach(test_file IN LISTS test_files)
+    add_test(NAME "logifix.test.${counter}"
+             COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/run_test.sh ${PROJECT_BINARY_DIR}/logifix "${test_file}" "${test_file}.diff")
+    math(EXPR counter "${counter}+1")
+endforeach()
+
+
 set(regression_test_data 
     "fix_imprecise_calls_to_bigdecimal,https://github.com/apache/kafka/blob/179be72e3003183b0472a888f5f2396423bb031d/connect/api/src/main/java/org/apache/kafka/connect/data/Values.java,"
     "fix_imprecise_calls_to_bigdecimal,https://github.com/apache/pdfbox/blob/cf39f61d4d054bdcfbce81196f8887f41d67eae7/pdfbox/src/main/java/org/apache/pdfbox/rendering/TilingPaint.java,"
@@ -114,7 +123,7 @@ set(regression_test_data
 
 set(counter 1)
 foreach(regression_test IN LISTS regression_test_data)
-        add_test(NAME "logifix.regression_test.${counter}"
-            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/download_and_run_tests.sh ${PROJECT_BINARY_DIR}/logifix "${regression_test}")
+    add_test(NAME "logifix.regression_test.${counter}"
+             COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/download_and_run_tests.sh ${PROJECT_BINARY_DIR}/logifix "${regression_test}")
     math(EXPR counter "${counter}+1")
 endforeach()

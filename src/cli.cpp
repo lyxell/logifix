@@ -695,7 +695,7 @@ int main(int argc, char** argv) {
     std::vector<std::tuple<std::string, std::string, std::string, bool>>
         patches;
 
-    patches.resize(patch_set.size());
+    patches.reserve(patch_set.size());
 
     for (const auto& [file, rule, result] : patch_set) {
         patches.emplace_back(file, rule, result, false);
@@ -830,7 +830,7 @@ int main(int argc, char** argv) {
                             std::max(left_column_width, l.size());
                     }
                     std::vector<std::string> options;
-                    options.resize(columns.size());
+                    options.reserve(columns.size());
                     for (auto [l, m, r] : columns) {
                         options.emplace_back(fmt::format("{0:<{2}}    {1}", l,
                                                          r, left_column_width));
@@ -871,7 +871,9 @@ int main(int argc, char** argv) {
         }
     }
 
+    size_t i = 0;
     for (auto [filename, after] : get_results(patches, options)) {
+        std::cerr << i++ << " " << filename << std::endl;
         if (options.in_place) {
             std::ofstream f(filename);
             f << after;

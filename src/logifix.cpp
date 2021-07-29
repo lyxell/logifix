@@ -142,7 +142,7 @@ void print_performance_metrics() {
         fmt::print("{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
     }
     std::vector<std::pair<size_t, node_id>> node_data;
-    node_data.resize(time_per_node_id.size());
+    node_data.reserve(time_per_node_id.size());
     for (auto [e, tot] : time_per_node_id) {
         node_data.emplace_back(tot, e);
     }
