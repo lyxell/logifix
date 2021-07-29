@@ -24,8 +24,9 @@ std::vector<std::string> get_classes_from_link(std::string s) {
     result.emplace_back(s.substr(0, pos));
 
     // Parse method
-    if (pos == s.size())
+    if (pos == s.size()) {
         return result;
+    }
     s = s.substr(pos);
     pos = 0;
     if (s[pos] == '#') {
@@ -33,8 +34,9 @@ std::vector<std::string> get_classes_from_link(std::string s) {
         while (pos < s.size() && s[pos] != '(' && s[pos] != ' ') {
             pos++;
         }
-        if (pos == s.size())
+        if (pos == s.size()) {
             return result;
+        }
         s = s.substr(pos);
         pos = 0;
     }

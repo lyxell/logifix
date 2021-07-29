@@ -62,7 +62,7 @@ std::unordered_map<node_id,
 std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>>
     taken_transitions;
 
-size_t string_to_node_id(std::string str) {
+size_t string_to_node_id(const std::string& str) {
     if (file_to_node.find(str) != file_to_node.end()) {
         return file_to_node[str];
     }
@@ -72,7 +72,7 @@ size_t string_to_node_id(std::string str) {
     return node_id;
 }
 
-size_t add_file(std::string file) {
+size_t add_file(const std::string& file) {
     auto node_id = string_to_node_id(file);
     pending_files.emplace_front(node_id);
     return node_id;
@@ -112,7 +112,7 @@ std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
 }
 
 std::vector<std::pair<rule_id, std::string>>
-get_patches_for_file(std::string file) {
+get_patches_for_file(const std::string& file) {
     std::vector<std::pair<rule_id, std::string>> rewrites;
     auto node = string_to_node_id(file);
     /* Go through the children of the node and collect all rewrites */
@@ -128,6 +128,8 @@ get_patches_for_file(std::string file) {
 }
 
 void print_performance_metrics() {
+    constexpr auto MAX_FILES_SHOWN = size_t {10};
+    constexpr auto MICROSECONDS_PER_SECOND = 1000.0 * 1000.0;
     std::map<std::string, size_t> time_per_event_type;
     std::map<node_id, size_t> time_per_node_id;
     for (auto [time, data] : timer::events) {
@@ -136,17 +138,18 @@ void print_performance_metrics() {
         time_per_node_id[node_id] += time;
     }
     fmt::print("\n");
-    for (auto [e, tot] : time_per_event_type) {
-        fmt::print("{:20} {:20}\n", e, double(tot) / (1000.0 * 1000.0));
+    for (const auto& [e, tot] : time_per_event_type) {
+        fmt::print("{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
     }
     std::vector<std::pair<size_t, node_id>> node_data;
+    node_data.resize(time_per_node_id.size());
     for (auto [e, tot] : time_per_node_id) {
         node_data.emplace_back(tot, e);
     }
     std::sort(node_data.begin(), node_data.end());
-    for (int i = 0; i < std::min(10ul, node_data.size()); i++) {
+    for (int i = 0; i < std::min(MAX_FILES_SHOWN, node_data.size()); i++) {
         auto [tot, e] = node_data[i];
-        fmt::print("{:20} {:20}\n", e, double(tot) / (1000.0 * 1000.0));
+        fmt::print("{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
     }
 }
 
@@ -177,8 +180,9 @@ void run(std::function<void(node_id)> report_progress) {
                     }
                     /* if we get to this point there is either work available or
                      * we are finished */
-                    if (finished)
+                    if (finished) {
                         return;
+                    }
                     if (pending_strings.empty()) {
                         current_node = pending_files.front();
                         pending_files.pop_front();
@@ -222,11 +226,11 @@ void run(std::function<void(node_id)> report_progress) {
                             const auto& a = cands[0];
                             const auto& b = cands[1];
                             if (a == b) {
-                                for (auto& [type, content] : o) {
+                                for (const auto& [type, content] : o) {
                                     result += content;
                                 }
                             } else {
-                                for (auto& [type, content] : b) {
+                                for (const auto& [type, content] : b) {
                                     result += content;
                                 }
                             }
@@ -262,7 +266,7 @@ void run(std::function<void(node_id)> report_progress) {
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-std::set<std::pair<rule_id, std::string>> get_patches(std::string source) {
+std::set<std::pair<rule_id, std::string>> get_patches(const std::string& source) {
 
     const char* program_name = "logifix";
     const char* filename = "file";
@@ -277,9 +281,10 @@ std::set<std::pair<rule_id, std::string>> get_patches(std::string source) {
         souffle::Relation* javadoc_references =
             prog->getRelation("javadoc_references");
         for (auto token : *tokens) {
-            if (std::get<0>(token) != sjp::token_type::multi_line_comment)
+            if (std::get<0>(token) != sjp::token_type::multi_line_comment) {
                 continue;
-            for (auto class_name :
+            }
+            for (const auto& class_name :
                  javadoc::get_classes(std::string(std::get<1>(token)))) {
                 javadoc_references->insert(souffle::tuple(
                     javadoc_references,

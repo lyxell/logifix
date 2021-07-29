@@ -68,13 +68,14 @@ static void rtrim(std::string& s) {
             s.end());
 }
 
-std::vector<std::string> line_split(std::string str) {
+std::vector<std::string> line_split(std::string_view str) {
     std::vector<std::string> result;
     while (!str.empty()) {
         size_t i;
         for (i = 0; i < str.size() - 1; i++) {
-            if (str[i] == '\n')
+            if (str[i] == '\n') {
                 break;
+            }
         }
         result.emplace_back(str.substr(0, i + 1));
         str = str.substr(i + 1);
@@ -82,8 +83,8 @@ std::vector<std::string> line_split(std::string str) {
     return result;
 };
 
-std::vector<std::string> create_patch(const std::string& filename, std::string before,
-                                      std::string after) {
+std::vector<std::string> create_patch(const std::string& filename, const std::string& before,
+                                      const std::string& after) {
     auto a = line_split(before);
     auto b = line_split(after);
     for (auto& x : a) {
@@ -178,15 +179,16 @@ std::vector<std::string> create_patch(const std::string& filename, std::string b
     return result;
 }
 
-std::vector<std::string> prettify_patch(std::vector<std::string> lines) {
+std::vector<std::string> prettify_patch(const std::vector<std::string>& lines) {
     std::vector<std::pair<std::string, std::string>> columns;
-    // erase first line (git header)
-    lines.erase(lines.begin());
     size_t line_number = 0;
     bool seen_header_before = false;
-    for (auto& line : lines) {
-        if (line.empty())
+    // Skip first line (git header)
+    for (size_t i = 1; i < lines.size(); i++) {
+        const auto& line = lines[i];
+        if (line.empty()) {
             continue;
+        }
         auto marker = line[0];
         auto content = replace_tabs_with_spaces(line.substr(1));
         switch (marker) {
@@ -362,14 +364,15 @@ static options_t parse_options(int argc, char** argv) {
     }
     std::reverse(arguments.begin(), arguments.end());
 
-    while (arguments.size()) {
+    while (!arguments.empty()) {
         auto argument = arguments.back();
-        if (argument.size() < 2 || argument.substr(0, 2) != "--")
+        if (argument.size() < 2 || argument.substr(0, 2) != "--") {
             break;
+        }
         auto found = false;
-        for (const auto [option, fn, description] : opts) {
-            if (option.find("=") != std::string::npos) {
-                auto opt_part = option.substr(0, option.find("=") + 1);
+        for (const auto& [option, fn, description] : opts) {
+            if (option.find('=') != std::string::npos) {
+                auto opt_part = option.substr(0, option.find('=') + 1);
                 if (argument.size() >= opt_part.size() &&
                     argument.substr(0, opt_part.size()) == opt_part) {
                     fn(argument.substr(opt_part.size()));
@@ -400,7 +403,7 @@ static options_t parse_options(int argc, char** argv) {
         std::exit(0);
     }
 
-    while (arguments.size()) {
+    while (!arguments.empty()) {
         auto argument = arguments.back();
         if (!fs::exists(argument)) {
             fmt::print("Error: Path '{}' does not exist\n\n", argument);
@@ -410,10 +413,12 @@ static options_t parse_options(int argc, char** argv) {
         if (fs::is_directory(argument)) {
             for (const auto& entry :
                  fs::recursive_directory_iterator(argument)) {
-                if (!entry.is_regular_file())
+                if (!entry.is_regular_file()) {
                     continue;
-                if (entry.path().extension() != ".java")
+                }
+                if (entry.path().extension() != ".java") {
                     continue;
+                }
                 std::string s = entry.path().lexically_normal();
                 options.files.emplace(entry.path().lexically_normal());
             }
@@ -427,8 +432,8 @@ static options_t parse_options(int argc, char** argv) {
     return options;
 }
 
-static int multi_choice(std::string question,
-                        std::vector<std::string> alternatives,
+static int multi_choice(const std::string& question,
+                        const std::vector<std::string>& alternatives,
                         bool exit_on_left = false) {
     tty::enable_cbreak_mode();
 #ifndef NDEBUG
@@ -441,18 +446,18 @@ static int multi_choice(std::string question,
     } else {
         fmt::print("[Use arrows to move]");
     }
-    int cursor = 0;
-    size_t scroll = 0;
-    size_t height = 15;
-    bool found = false;
+    constexpr auto HEIGHT = size_t {15};
+    auto cursor = 0;
+    auto scroll = 0;
+    auto found = false;
     while (true) {
         if (cursor != -1 && cursor < scroll) {
             scroll = cursor;
-        } else if (cursor != -1 && cursor == scroll + height) {
-            scroll = cursor - height + 1;
+        } else if (cursor != -1 && cursor == scroll + HEIGHT) {
+            scroll = cursor - HEIGHT + 1;
         }
         for (auto i = scroll;
-             i < std::min(alternatives.size(), scroll + height); i++) {
+             i < std::min(alternatives.size(), scroll + HEIGHT); i++) {
             if (cursor == i) {
                 fmt::print("\n> {}", alternatives[i]);
             } else {
@@ -467,7 +472,7 @@ static int multi_choice(std::string question,
             return cursor;
         }
         for (auto i = scroll;
-             i < std::min(alternatives.size(), scroll + height); i++) {
+             i < std::min(alternatives.size(), scroll + HEIGHT); i++) {
             std::cout << TTY_CURSOR_UP;
         }
         auto key_press = get_keypress();
@@ -502,7 +507,7 @@ static std::string post_process(std::string before, std::string after,
         }
         return result;
     };
-    auto detect_indentation = [find_first_non_space](std::string str) {
+    auto detect_indentation = [find_first_non_space](const std::string& str) {
         auto lines = line_split(str);
         std::vector<std::string> indentations;
         for (auto line : lines) {
@@ -562,8 +567,8 @@ static std::string post_process(std::string before, std::string after,
                            [](char c) { return std::isspace(c) != 0; });
     };
 
-    auto after_lines = line_split(std::move(after));
-    auto before_lines = line_split(std::move(before));
+    auto after_lines = line_split(after);
+    auto before_lines = line_split(before);
     auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
     std::string processed;
     for (size_t i = 0; i < after_lines.size(); i++) {
