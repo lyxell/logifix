@@ -873,9 +873,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    size_t i = 0;
     for (auto [filename, after] : get_results(patches, options)) {
-        std::cerr << i++ << " " << filename << std::endl;
         if (options.in_place) {
             std::ofstream f(filename);
             f << after;
