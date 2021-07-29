@@ -57,6 +57,9 @@ std::unordered_map<node_id, std::pair<rule_id, node_id>> parent;
 std::unordered_map<node_id,
                    std::unordered_map<rule_id, std::unordered_set<node_id>>>
     children;
+std::unordered_map<node_id,
+                   std::unordered_map<rule_id, std::unordered_set<std::string>>>
+    children_strs;
 std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>>
     taken_transitions;
 
@@ -124,7 +127,7 @@ get_patches_for_file(node_id node) {
 }
 
 void print_performance_metrics() {
-    constexpr auto MAX_FILES_SHOWN = size_t {10};
+    constexpr auto MAX_FILES_SHOWN = size_t{10};
     constexpr auto MICROSECONDS_PER_SECOND = 1000.0 * 1000.0;
     std::map<std::string, size_t> time_per_event_type;
     std::map<node_id, size_t> time_per_node_id;
@@ -200,6 +203,8 @@ void run(std::function<void(node_id)> report_progress) {
                         auto next_node = create_id(next_node_src);
                         parent[next_node] = {rule, current_node};
                         children[current_node][rule].emplace(next_node);
+                        children_strs[current_node][rule].emplace(
+                            next_node_src);
                         next_nodes.emplace_back(next_node, rule);
                     }
                 }
@@ -213,26 +218,23 @@ void run(std::function<void(node_id)> report_progress) {
                         auto curr_str = nodes[current_node];
                         auto next_str = nodes[next_node];
                         lock.unlock();
-                        auto diff = nway::diff(
-                            *sjp::lex(parent_str),
-                            {*sjp::lex(curr_str), *sjp::lex(next_str)});
+                        auto diff =
+                            nway::diff(parent_str, {curr_str, next_str});
+                        std::string result;
                         std::vector<sjp::token> tokens;
                         for (const auto& [o, candidates] : diff) {
                             const auto& a = candidates[0];
                             const auto& b = candidates[1];
                             if (a == b) {
-                                tokens.insert(tokens.end(), o.begin(), o.end());
+                                result += o;
                             } else {
-                                tokens.insert(tokens.end(), b.begin(), b.end());
+                                result += b;
                             }
                         }
-                        auto result = sjp::tokens_to_string(tokens);
                         lock.lock();
-                        for (auto child : children[parent_id][rule]) {
-                            if (result == nodes[child]) {
-                                take_transition = false;
-                                break;
-                            }
+                        if (children_strs[parent_id][rule].find(result) !=
+                            children_strs[parent_id][rule].end()) {
+                            take_transition = false;
                         }
                     }
                     if (take_transition) {
@@ -257,7 +259,8 @@ void run(std::function<void(node_id)> report_progress) {
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-std::set<std::pair<rule_id, std::string>> get_patches(const std::string& source) {
+std::set<std::pair<rule_id, std::string>>
+get_patches(const std::string& source) {
 
     const char* program_name = "logifix";
     const char* filename = "file";
