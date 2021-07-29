@@ -45,7 +45,7 @@ fi
 if [[ $data =~ $regex ]]; then
     rule_number="${BASH_REMATCH[1]}"
     file="${BASH_REMATCH[2]}"
-    diff_flags="--color=always --unified ${BASH_REMATCH[3]}"
+    diff_flags="--unified ${BASH_REMATCH[3]}"
     echo "$diff_flags"
     input="${rule_number}/${file}"
     t1=$(mktemp)
