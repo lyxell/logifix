@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 set -o pipefail
 
@@ -9,7 +10,8 @@ logifix_cli="$1"
 data="$2"
 
 if ! [ -x "$(command -v filterdiff)" ]; then
-    echo "run sudo apt install -y patchutils"
+    echo "Patchutils needed to produce test output"
+    echo "please run sudo apt install -y patchutils"
     exit 1
 fi
 
@@ -27,17 +29,18 @@ if [[ $data =~ $test_regex ]]; then
         pushd "$dir/$path"
         raw="https://raw.githubusercontent.com/$user/$repo/$hash/$location"
         diff="https://github.com/$user/$repo/commit/$hash.diff"
-        curl "$raw" > "$filename"
-        curl "$diff" | filterdiff --include="$location" --addprefix="$dir/" --clean --strip-match=1 --strip=1 | tail +3 > "$filename.diff"
+        curl --retry 3 "$raw" > "$filename"
+        curl --retry 3 "$diff" | filterdiff --include="$location" --addprefix="$dir/" --clean --strip-match=1 --strip=1 | tail +3 > "$filename.diff"
         patch --reverse < "$filename.diff"
         # assert that the diff is not empty
         if ! [ -s "$filename.diff" ];then
+            echo "diff is empty, exiting"
             exit 1
         fi
         popd
     fi
 else
-    echo "$f doesn't match" >&2
+    echo "$f doesn't match $test_regex"
     exit 1
 fi
 
@@ -46,7 +49,6 @@ if [[ $data =~ $regex ]]; then
     rule_number="${BASH_REMATCH[1]}"
     file="${BASH_REMATCH[2]}"
     diff_flags="--unified ${BASH_REMATCH[3]}"
-    echo "$diff_flags"
     input="${rule_number}/${file}"
     t1=$(mktemp)
     t2=$(mktemp)
@@ -59,8 +61,7 @@ if [[ $data =~ $regex ]]; then
     patch -p0 --input="$input.diff" --output="$t2"
     # compare the diffs
     diff $diff_flags "$t1" "$t2"
-    echo "$input passed"
 else
-    echo "$f doesn't match!"
+    echo "$f doesn't match $regex"
     exit 1
 fi
