@@ -1,0 +1,10 @@
+diff --git a/TestExpressionName.java b/TestExpressionName.java
+@@ -1,7 +1,7 @@
+ public class TestExpressionName {
+     void test(boolean isEmpty) {
+         // redundant parentheses around isEmpty
+-        if (!(isEmpty)) {
++        if (!isEmpty) {
+             System.out.println("is empty");
+         }
+     }
