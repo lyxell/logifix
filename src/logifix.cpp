@@ -152,7 +152,7 @@ void print_performance_metrics() {
 void run(std::function<void(node_id)> report_progress) {
     auto const concurrency = std::thread::hardware_concurrency();
     waiting_threads = 0;
-    bool finished = false;
+    bool done = false;
     for (size_t i = 0; i < concurrency; i++) {
         thread_pool.emplace_back(std::thread([&] {
             while (true) {
@@ -164,19 +164,19 @@ void run(std::function<void(node_id)> report_progress) {
                     if (pending_strings.empty() && pending_files.empty()) {
                         waiting_threads++;
                         if (waiting_threads == concurrency) {
-                            finished = true;
+                            done = true;
                             cv.notify_all();
                         } else {
                             auto wakeup_when = [&]() {
-                                return !pending_strings.empty() || finished;
+                                return !pending_strings.empty() || done;
                             };
                             cv.wait(lock, wakeup_when);
                             waiting_threads--;
                         }
                     }
                     /* if we get to this point there is either work available or
-                     * we are finished */
-                    if (finished) {
+                     * we are done */
+                    if (done) {
                         return;
                     }
                     if (pending_strings.empty()) {
@@ -209,27 +209,24 @@ void run(std::function<void(node_id)> report_progress) {
                     bool take_transition = true;
                     if (parent.find(current_node) != parent.end()) {
                         auto [parent_rule, parent_id] = parent[current_node];
-                        auto parent_src = nodes[parent_id];
-                        auto curr_src = nodes[current_node];
-                        auto next_src = nodes[next_node];
+                        auto parent_str = nodes[parent_id];
+                        auto curr_str = nodes[current_node];
+                        auto next_str = nodes[next_node];
                         lock.unlock();
                         auto diff = nway::diff(
-                            *sjp::lex(parent_src),
-                            {*sjp::lex(curr_src), *sjp::lex(next_src)});
-                        std::string result;
-                        for (auto& [o, cands] : diff) {
-                            const auto& a = cands[0];
-                            const auto& b = cands[1];
+                            *sjp::lex(parent_str),
+                            {*sjp::lex(curr_str), *sjp::lex(next_str)});
+                        std::vector<sjp::token> tokens;
+                        for (const auto& [o, candidates] : diff) {
+                            const auto& a = candidates[0];
+                            const auto& b = candidates[1];
                             if (a == b) {
-                                for (const auto& [type, content] : o) {
-                                    result += content;
-                                }
+                                tokens.insert(tokens.end(), o.begin(), o.end());
                             } else {
-                                for (const auto& [type, content] : b) {
-                                    result += content;
-                                }
+                                tokens.insert(tokens.end(), b.begin(), b.end());
                             }
                         }
+                        auto result = sjp::tokens_to_string(tokens);
                         lock.lock();
                         for (auto child : children[parent_id][rule]) {
                             if (result == nodes[child]) {
