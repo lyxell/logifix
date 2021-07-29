@@ -19,7 +19,7 @@ diff --git a/Test.java b/Test.java
  
 -        if (x && y) {
 -        } else {
-+        if (!(x) || !(y)) {
++        if (!x || !y) {
              System.out.println("hello");
          }
  

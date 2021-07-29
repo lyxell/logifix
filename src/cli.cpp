@@ -669,8 +669,10 @@ int main(int argc, char** argv) {
              decltype(patch_cmp)>
         patch_set(patch_cmp);
 
+    std::unordered_map<std::string, size_t> node_ids;
+
     for (const auto& file : options.files) {
-        logifix::add_file(read_file(file));
+        node_ids[file] = logifix::add_file(read_file(file));
     }
 
     size_t count = 0;
@@ -687,7 +689,7 @@ int main(int argc, char** argv) {
 
     for (const auto& file : options.files) {
         for (auto [rule, result] :
-             logifix::get_patches_for_file(read_file(file))) {
+             logifix::get_patches_for_file(node_ids[file])) {
             patch_set.emplace(file, rule, result);
         }
     }

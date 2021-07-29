@@ -45,9 +45,6 @@ void stop(size_t id) {
 
 } // namespace timer
 
-std::unordered_map<std::string, node_id> file_to_node;
-std::unordered_map<node_id, std::string> node_to_file;
-
 std::vector<std::thread> thread_pool;
 
 std::condition_variable cv;
@@ -55,6 +52,7 @@ size_t waiting_threads;
 std::deque<node_id> pending_files;
 std::deque<node_id> pending_strings;
 std::mutex work_mutex;
+size_t id_counter = 0;
 std::unordered_map<node_id, std::pair<rule_id, node_id>> parent;
 std::unordered_map<node_id,
                    std::unordered_map<rule_id, std::unordered_set<node_id>>>
@@ -62,18 +60,16 @@ std::unordered_map<node_id,
 std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>>
     taken_transitions;
 
-size_t string_to_node_id(const std::string& str) {
-    if (file_to_node.find(str) != file_to_node.end()) {
-        return file_to_node[str];
-    }
-    auto node_id = file_to_node.size();
-    file_to_node.emplace(str, node_id);
-    node_to_file.emplace(node_id, str);
-    return node_id;
+std::vector<std::string> nodes;
+
+size_t create_id(const std::string& str) {
+    auto id = nodes.size();
+    nodes.emplace_back(str);
+    return id;
 }
 
 size_t add_file(const std::string& file) {
-    auto node_id = string_to_node_id(file);
+    auto node_id = create_id(file);
     pending_files.emplace_front(node_id);
     return node_id;
 }
@@ -82,7 +78,7 @@ std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
 
     /* Base case: no transitions from node */
     if (taken_transitions[node].empty()) {
-        return node_to_file[node];
+        return nodes[node];
     }
 
     /* Case 1: only one transition from node */
@@ -101,10 +97,11 @@ std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
         }
     }
 
-    auto diff = nway::diff(node_to_file[node], to_be_merged);
+    auto diff = nway::diff(nodes[node], to_be_merged);
 
     /* Return empty optional if merging failed */
     if (nway::has_conflict(diff)) {
+        std::cerr << "merging failed" << std::endl;
         return {};
     }
 
@@ -112,9 +109,8 @@ std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
 }
 
 std::vector<std::pair<rule_id, std::string>>
-get_patches_for_file(const std::string& file) {
+get_patches_for_file(node_id node) {
     std::vector<std::pair<rule_id, std::string>> rewrites;
-    auto node = string_to_node_id(file);
     /* Go through the children of the node and collect all rewrites */
     for (auto [rule, rule_children] : children[node]) {
         for (auto child : rule_children) {
@@ -191,7 +187,7 @@ void run(std::function<void(node_id)> report_progress) {
                         current_node = pending_strings.front();
                         pending_strings.pop_front();
                     }
-                    current_node_source = node_to_file[current_node];
+                    current_node_source = nodes[current_node];
                 }
 
                 std::vector<std::tuple<node_id, rule_id>> next_nodes;
@@ -201,7 +197,7 @@ void run(std::function<void(node_id)> report_progress) {
                     auto rewrites = get_patches(current_node_source);
                     std::unique_lock<std::mutex> lock(work_mutex);
                     for (auto [rule, next_node_src] : rewrites) {
-                        node_id next_node = string_to_node_id(next_node_src);
+                        auto next_node = create_id(next_node_src);
                         parent[next_node] = {rule, current_node};
                         children[current_node][rule].emplace(next_node);
                         next_nodes.emplace_back(next_node, rule);
@@ -213,10 +209,9 @@ void run(std::function<void(node_id)> report_progress) {
                     bool take_transition = true;
                     if (parent.find(current_node) != parent.end()) {
                         auto [parent_rule, parent_id] = parent[current_node];
-
-                        auto parent_src = node_to_file[parent_id];
-                        auto curr_src = node_to_file[current_node];
-                        auto next_src = node_to_file[next_node];
+                        auto parent_src = nodes[parent_id];
+                        auto curr_src = nodes[current_node];
+                        auto next_src = nodes[next_node];
                         lock.unlock();
                         auto diff = nway::diff(
                             *sjp::lex(parent_src),
@@ -236,12 +231,11 @@ void run(std::function<void(node_id)> report_progress) {
                             }
                         }
                         lock.lock();
-
-                        auto id = string_to_node_id(result);
-
-                        if (children[parent_id][rule].find(id) !=
-                            children[parent_id][rule].end()) {
-                            take_transition = false;
+                        for (auto child : children[parent_id][rule]) {
+                            if (result == nodes[child]) {
+                                take_transition = false;
+                                break;
+                            }
                         }
                     }
                     if (take_transition) {
