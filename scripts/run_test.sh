@@ -9,5 +9,6 @@ logifix_cli="$1"
 test_file="$2"
 diff_file="$3"
 
+echo $test_file
 cd $(dirname $test_file)
 diff <($logifix_cli --patch --accept-all "$(basename $test_file)") "$(basename $diff_file)"

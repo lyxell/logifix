@@ -1,7 +1,7 @@
 .decl does_nothing_but_return_true(id: id)
 does_nothing_but_return_true(id) :-
     return_statement(id, ret),
-    string_representation(ret, "true").
+    content_string_representation(ret, "true").
 does_nothing_but_return_true(id) :-
     block(id, [statement, nil]),
     does_nothing_but_return_true(statement).
@@ -9,7 +9,7 @@ does_nothing_but_return_true(id) :-
 .decl does_nothing_but_return_false(id: id)
 does_nothing_but_return_false(id) :-
     return_statement(id, ret),
-    string_representation(ret, "false").
+    content_string_representation(ret, "false").
 does_nothing_but_return_false(id) :-
     block(id, [statement, nil]),
     does_nothing_but_return_false(statement).

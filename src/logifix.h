@@ -22,7 +22,7 @@ bool edit_scripts_are_equal(std::string_view o, std::string_view a,
 std::set<std::pair<rule_id, std::string>> get_patches(const std::string&);
 
 std::vector<std::pair<rule_id, std::string>>
-get_patches_for_file(const std::string& file);
+get_patches_for_file(node_id file);
 
 void print_performance_metrics();
 
