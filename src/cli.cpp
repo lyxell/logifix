@@ -95,7 +95,7 @@ std::vector<std::string> create_patch(const std::string& filename, const std::st
     }
     std::vector<std::tuple<bool, char, std::string>> changes;
     std::vector<std::optional<size_t>> lcs =
-        nway::longest_common_subsequence(a, b);
+        nway::lcs(a, b);
     size_t a_pos = 0;
     size_t b_pos = 0;
     while (a_pos < a.size() || b_pos < b.size()) {
@@ -569,7 +569,7 @@ static std::string post_process(std::string before, std::string after,
 
     auto after_lines = line_split(after);
     auto before_lines = line_split(before);
-    auto lcs = nway::longest_common_subsequence(after_lines, before_lines);
+    auto lcs = nway::lcs(after_lines, before_lines);
     std::string processed;
     for (size_t i = 0; i < after_lines.size(); i++) {
         if (!lcs[i]) {
