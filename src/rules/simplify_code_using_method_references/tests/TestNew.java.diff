@@ -1,0 +1,15 @@
+diff --git a/tests/TestNew.java b/tests/TestNew.java
+@@ -9,12 +9,12 @@
+             this.y = y;
+         }
+         public String toString() {
+             return "this is " + y;
+         }
+     }
+ 	public static void main(String[] args) {
+         List<Integer> x = Arrays.asList(1, 2, 3, 4);
+-        List<Inner> result = x.stream().map(n -> new Inner(n)).collect(Collectors.toList());
++        List<Inner> result = x.stream().map(Inner::new).collect(Collectors.toList());
+         System.out.println(result);
+ 	}
+ }
