@@ -177,8 +177,6 @@ void run(std::function<void(node_id)> report_progress) {
                             waiting_threads--;
                         }
                     }
-                    /* if we get to this point there is either work available or
-                     * we are done */
                     if (done) {
                         return;
                     }
@@ -195,11 +193,10 @@ void run(std::function<void(node_id)> report_progress) {
 
                 std::vector<std::tuple<node_id, rule_id>> next_nodes;
 
-                /* perform expensive computation and store result */
                 {
                     auto rewrites = get_patches(current_node_source);
                     std::unique_lock<std::mutex> lock(work_mutex);
-                    for (auto [rule, next_node_src] : rewrites) {
+                    for (const auto& [rule, next_node_src] : rewrites) {
                         auto next_node = create_id(next_node_src);
                         parent[next_node] = {rule, current_node};
                         children[current_node][rule].emplace(next_node);
