@@ -49,6 +49,7 @@ std::vector<std::thread> thread_pool;
 
 std::condition_variable cv;
 size_t waiting_threads;
+std::unordered_set<rule_id> disabled_rules;
 std::deque<node_id> pending_files;
 std::deque<node_id> pending_strings;
 std::mutex work_mutex;
@@ -77,7 +78,12 @@ size_t add_file(const std::string& file) {
     return node_id;
 }
 
+void disable_rule(const rule_id& rule) {
+   disabled_rules.emplace(rule); 
+}
+
 std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
+
 
     /* Base case: no transitions from node */
     if (taken_transitions[node].empty()) {
@@ -104,7 +110,6 @@ std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
 
     /* Return empty optional if merging failed */
     if (nway::has_conflict(diff)) {
-        std::cerr << "merging failed" << std::endl;
         return {};
     }
 
@@ -115,12 +120,10 @@ std::vector<std::pair<rule_id, std::string>>
 get_patches_for_file(node_id node) {
     std::vector<std::pair<rule_id, std::string>> rewrites;
     /* Go through the children of the node and collect all rewrites */
-    for (auto [rule, rule_children] : children[node]) {
-        for (auto child : rule_children) {
-            auto result = get_recursive_merge_result_for_node(child);
-            if (result) {
-                rewrites.emplace_back(rule, *result);
-            }
+    for (auto [rule_id, node_id] : taken_transitions[node]) {
+        auto result = get_recursive_merge_result_for_node(node_id);
+        if (result) {
+            rewrites.emplace_back(rule_id, *result);
         }
     }
     return rewrites;
@@ -209,7 +212,8 @@ void run(std::function<void(node_id)> report_progress) {
                 for (const auto& [next_node, rule] : next_nodes) {
                     std::unique_lock<std::mutex> lock(work_mutex);
                     bool take_transition = true;
-                    if (parent.find(current_node) != parent.end()) {
+                    bool current_has_parent = parent.find(current_node) != parent.end();
+                    if (current_has_parent) {
                         auto [parent_rule, parent_id] = parent[current_node];
                         auto parent_str = nodes[parent_id];
                         auto curr_str = nodes[current_node];
@@ -233,6 +237,9 @@ void run(std::function<void(node_id)> report_progress) {
                             children_strs[parent_id][rule].end()) {
                             take_transition = false;
                         }
+                    }
+                    if (!current_has_parent && disabled_rules.find(rule) != disabled_rules.end()) {
+                        take_transition = false;
                     }
                     if (take_transition) {
                         pending_strings.emplace_back(next_node);

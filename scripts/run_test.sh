@@ -11,4 +11,4 @@ diff_file="$3"
 
 echo $test_file
 cd $(dirname $test_file)
-diff <($logifix_cli --patch --accept-all "$(basename $test_file)") "$(basename $diff_file)"
+diff <($logifix_cli --patch --accept-all --enable-all "$(basename $test_file)") "$(basename $diff_file)"

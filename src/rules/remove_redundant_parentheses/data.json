@@ -1,5 +1,6 @@
 {
     "description": "Remove redundant parentheses",
+    "disabled_by_default": true,
     "sonar": {
         "id": "N/A"
     },

@@ -15,3 +15,12 @@ rewrite("remove_redundant_parentheses", filename, start, end, content_str) :-
     content_string_representation(id, content_str),
     string_representation(id, str),
     str != content_str.
+
+rewrite("remove_redundant_parentheses", filename, start, end, content_str) :-
+    return_statement(_, id),
+        starts_at(id, start),
+        ends_at(id, end),
+        filename_of(id, filename),
+    content_string_representation(id, content_str),
+    string_representation(id, str),
+    str != content_str.

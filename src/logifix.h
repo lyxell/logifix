@@ -22,4 +22,6 @@ std::vector<std::pair<rule_id, std::string>> get_patches_for_file(node_id file);
 
 void print_performance_metrics();
 
+void disable_rule(const rule_id&);
+
 } // namespace logifix

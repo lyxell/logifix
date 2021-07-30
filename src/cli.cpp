@@ -23,7 +23,7 @@ using patch_collection =
     std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
 extern std::unordered_map<std::string,
-                          std::tuple<std::string, std::string, std::string>>
+                          std::tuple<std::string, std::string, std::string, bool>>
     rule_data;
 
 struct options_t {
@@ -31,6 +31,7 @@ struct options_t {
     bool in_place;
     bool patch;
     bool verbose;
+    bool enable_all;
     std::set<std::string> files;
     std::set<std::string> accepted;
 };
@@ -291,6 +292,7 @@ static options_t parse_options(int argc, char** argv) {
         .in_place = false,
         .patch = false,
         .verbose = false,
+        .enable_all = false,
         .files = {},
         .accepted = {},
     };
@@ -340,6 +342,8 @@ static options_t parse_options(int argc, char** argv) {
          "Accept all patches without asking"},
         {"--accept=<rules>", [&](std::string str) { parse_accepted(str); },
          "Comma-separated list of rules to accept"},
+        {"--enable-all", [&](std::string str) { options.enable_all = true; },
+         "Enable rules that are disabled by default"},
         {"--in-place", [&](std::string str) { options.in_place = true; },
          "Disable interaction, rewrite files on disk"},
         {"--patch", [&](std::string str) { options.patch = true; },
@@ -603,17 +607,30 @@ static std::string post_process(std::string before, std::string after,
 std::map<std::string, std::string> get_results(const patch_collection& patches,
                                                const options_t& options) {
     std::map<std::string, std::string> results;
-    std::map<std::string, std::vector<std::string>> patches_per_file;
+    std::map<std::string, std::vector<std::pair<std::string, bool>>> patches_per_file;
     for (const auto& [filename, rule, after, is_accepted] : patches) {
         if (is_accepted) {
-            patches_per_file[filename].emplace_back(after);
+            patches_per_file[filename].emplace_back(after, std::get<3>(rule_data[rule]));
         }
     }
     for (auto [filename, patches] : patches_per_file) {
         std::string before = read_file(filename);
-        auto diff = nway::diff(before, patches);
-        assert(!nway::has_conflict(diff));
-        results[filename] = post_process(before, nway::merge(diff), options);
+        std::vector<std::string> patch_data;
+        for (auto [p, b] : patches) {
+            patch_data.emplace_back(p);
+        }
+        auto diff = nway::diff(before, patch_data);
+        if (nway::has_conflict(diff)) {
+            std::vector<std::string> new_patch_data;
+            for (auto [p, b] : patches) {
+                if (!b) {
+                    new_patch_data.emplace_back(p);
+                }
+            }
+            results[filename] = post_process(before, nway::merge(nway::diff(before, new_patch_data)), options);
+        } else {
+            results[filename] = post_process(before, nway::merge(diff), options);
+        }
     }
     return results;
 }
@@ -673,6 +690,14 @@ int main(int argc, char** argv) {
 
     for (const auto& file : options.files) {
         node_ids[file] = logifix::add_file(read_file(file));
+    }
+
+    if (!options.enable_all) {
+        for (const auto& [rule, data] : rule_data) {
+            if (std::get<3>(data)) {
+                logifix::disable_rule(rule);
+            }
+        }
     }
 
     size_t count = 0;

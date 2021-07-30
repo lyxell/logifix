@@ -1,5 +1,6 @@
 {
     "description": "Fix null pointer exceptions by inverting string comparison",
+    "disabled_by_default": true,
     "sonar": {
         "id": "S1132",
         "url": "https://rules.sonarsource.com/java/RSPEC-1132"

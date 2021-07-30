@@ -6,7 +6,7 @@ rewrite("simplify_boolean_expressions", filename, start, end, other_expr_str) :-
         starts_at(eq_expr, start),
         ends_at(eq_expr, end),
     evaluates_to_boolean_value(true_expr, 1),
-    string_representation_with_parentheses(other_expr, other_expr_str).
+    string_representation(other_expr, other_expr_str).
 
 /* Pre  [:x] == false */
 /* Post ![:x]         */
@@ -16,7 +16,7 @@ rewrite("simplify_boolean_expressions", filename, start, end, cat("!", other_exp
         starts_at(eq_expr, start),
         ends_at(eq_expr, end),
     evaluates_to_boolean_value(false_expr, 0),
-    string_representation_with_parentheses(other_expr, other_expr_str).
+    string_representation(other_expr, other_expr_str).
 
 /* Pre  [:x] || false */
 /* Post [:x]         */
@@ -26,7 +26,7 @@ rewrite("simplify_boolean_expressions", filename, start, end, other_expr_str) :-
         starts_at(id, start),
         ends_at(id, end),
     evaluates_to_boolean_value(false_expr, 0),
-    string_representation_with_parentheses(other_expr, other_expr_str).
+    string_representation(other_expr, other_expr_str).
 
 /* Pre  [:x] && true */
 /* Post [:x]         */
@@ -36,4 +36,4 @@ rewrite("simplify_boolean_expressions", filename, start, end, other_expr_str) :-
         starts_at(id, start),
         ends_at(id, end),
     evaluates_to_boolean_value(true_expr, 1),
-    string_representation_with_parentheses(other_expr, other_expr_str).
+    string_representation(other_expr, other_expr_str).

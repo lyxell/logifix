@@ -10,7 +10,7 @@ function generate {
     echo "#include <unordered_map>"
     echo "#include <string>"
     echo ""
-    echo "std::unordered_map<std::string, std::tuple<std::string, std::string, std::string>> rule_data = {"
+    echo "std::unordered_map<std::string, std::tuple<std::string, std::string, std::string, bool>> rule_data = {"
 
     for f in $SCRIPT_DIR/../src/rules/*; do
         json_file="$f/data.json"
@@ -19,7 +19,7 @@ function generate {
 
             printf "  {\"$name\",{"
 
-            jq -c '.sonar.id, .pmd.id, .description' $json_file | tr '\n' ','
+            jq -c '.sonar.id, .pmd.id, .description, .disabled_by_default // false' $json_file | tr '\n' ','
 
             echo "}},"
             
