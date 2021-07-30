@@ -1,6 +1,7 @@
 #include "config.h"
 #include "logifix.h"
 #include "tty.h"
+#include "utils.h"
 #include <cctype>
 #include <csignal>
 #include <cstdio>
@@ -69,25 +70,10 @@ static void rtrim(std::string& s) {
             s.end());
 }
 
-std::vector<std::string> line_split(std::string_view str) {
-    std::vector<std::string> result;
-    while (!str.empty()) {
-        size_t i;
-        for (i = 0; i < str.size() - 1; i++) {
-            if (str[i] == '\n') {
-                break;
-            }
-        }
-        result.emplace_back(str.substr(0, i + 1));
-        str = str.substr(i + 1);
-    }
-    return result;
-};
-
 std::vector<std::string> create_patch(const std::string& filename, const std::string& before,
                                       const std::string& after) {
-    auto a = line_split(before);
-    auto b = line_split(after);
+    auto a = utils::line_split(before);
+    auto b = utils::line_split(after);
     for (auto& x : a) {
         rtrim(x);
     }
@@ -512,7 +498,7 @@ static std::string post_process(std::string before, std::string after,
         return result;
     };
     auto detect_indentation = [find_first_non_space](const std::string& str) {
-        auto lines = line_split(str);
+        auto lines = utils::line_split(str);
         std::vector<std::string> indentations;
         for (auto line : lines) {
             auto first_non_space_at = find_first_non_space(line);
@@ -571,8 +557,8 @@ static std::string post_process(std::string before, std::string after,
                            [](char c) { return std::isspace(c) != 0; });
     };
 
-    auto after_lines = line_split(after);
-    auto before_lines = line_split(before);
+    auto after_lines = utils::line_split(after);
+    auto before_lines = utils::line_split(before);
     auto lcs = nway::lcs(after_lines, before_lines);
     std::string processed;
     for (size_t i = 0; i < after_lines.size(); i++) {

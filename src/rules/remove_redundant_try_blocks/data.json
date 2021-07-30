@@ -1,0 +1,9 @@
+{
+    "description": "Remove redundant try blocks",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

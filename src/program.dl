@@ -17,6 +17,7 @@
 #include "rules/remove_empty_try_blocks/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_redundant_parentheses/implementation.dl"
+#include "rules/remove_redundant_try_blocks/implementation.dl"
 #include "rules/remove_repeated_unary_operators/implementation.dl"
 #include "rules/remove_unnecessary_calls_to_string_valueof/implementation.dl"
 #include "rules/remove_unnecessary_declarations_above_return_statements/implementation.dl"
@@ -41,6 +42,10 @@
 
 #include "nodes.dl"
 
+/* Functors
+ ********************************/
+
+.functor decrease_indentation(symbol):symbol stateful
 
 /* Types
  ********************************/

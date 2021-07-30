@@ -23,12 +23,5 @@ public class Test {
 
         }
 
-        try {
-            int x = 62 / 0;
-            System.out.println(x);
-        } finally {
-
-        }
-
     }
 }
