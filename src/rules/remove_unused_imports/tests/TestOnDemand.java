@@ -1,7 +1,7 @@
 import java.util.*;
 
-public class Test {
-    public static void main(String[] args) {
+public class TestOnDemand {
+    void test() {
         ArrayList<Integer> list = new ArrayList<>();
         System.out.println(list.size());
     }

@@ -7,7 +7,7 @@ public class Test {
         list.add(3);
         list.add(9);
         System.out.println(list);
-        list.removeAll(list); // Noncompliant
+        list.removeAll(list);
         System.out.println(list);
     }
 }

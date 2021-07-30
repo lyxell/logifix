@@ -38,7 +38,7 @@ diff --git a/Test.java b/Test.java
 +        return x != 20;
      }
  
-     boolean test6(int x) {
+     boolean test7(int x) {
 -        if    (x == 20)
 -                return  ( false );
 -        else

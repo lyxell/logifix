@@ -6,7 +6,7 @@ import java.util.Arrays;
 public class Test {
     public static void main(String[] args) {
         try {
-            FileInputStream is = new FileInputStream(new File("Test.java")); // Noncompliant
+            FileInputStream is = new FileInputStream(new File("Test.java"));
             byte[] bytes = is.readAllBytes();
             System.out.println(Arrays.toString(bytes));
             is.close();

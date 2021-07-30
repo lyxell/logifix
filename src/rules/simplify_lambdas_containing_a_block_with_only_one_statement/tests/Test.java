@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
-public class TestLambda {
-    public static void main(String[] args) {
+public class Test {
+    void test() {
         ArrayList<Integer> numbers = new ArrayList<Integer>();
         numbers.add(1);
         numbers.add(2);

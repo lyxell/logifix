@@ -3,8 +3,8 @@ diff --git a/Test.java b/Test.java
          list.add(3);
          list.add(9);
          System.out.println(list);
--        list.removeAll(list); // Noncompliant
-+        list.clear(); // Noncompliant
+-        list.removeAll(list);
++        list.clear();
          System.out.println(list);
      }
  }

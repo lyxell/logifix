@@ -6,7 +6,8 @@ public class Test {
         list.add(1);
         list.add(2);
         list.add(3);
-        list.forEach(n -> System.out.println(n)); // Noncompliant
+        list.forEach(n -> System.out.println(n));
+        // ok
         list.forEach(System.out::println);
     }
 }

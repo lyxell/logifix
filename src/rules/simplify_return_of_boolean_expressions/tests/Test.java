@@ -30,7 +30,7 @@ class Test {
         else return (  true  );
     }
 
-    boolean test6(int x) {
+    boolean test7(int x) {
         if    (x == 20)
                 return  ( false );
         else
