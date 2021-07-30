@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -7,16 +7,16 @@
+@@ -7,25 +7,25 @@
          }
      }
      void test1(boolean x) {
@@ -20,5 +20,20 @@ diff --git a/Test.java b/Test.java
 -        if (obj.run() == true) System.out.println("true");
 +        if (!obj.run()) System.out.println("false");
 +        if (obj.run()) System.out.println("true");
+     }
+     void test5() {
+         Object obj = (Object) new Inner();
+-        if (obj instanceof Object == false) System.out.println("false");
+-        if ((obj instanceof Object) == false) System.out.println("false");
+-        if (((obj instanceof Object)) == false) System.out.println("false");
+-        if (obj instanceof Object == true) System.out.println("true");
+-        if ((obj instanceof Object) == true) System.out.println("true");
+-        if (((obj instanceof Object)) == true) System.out.println("true");
++        if (!(obj instanceof Object)) System.out.println("false");
++        if (!(obj instanceof Object)) System.out.println("false");
++        if (!(obj instanceof Object)) System.out.println("false");
++        if (obj instanceof Object) System.out.println("true");
++        if (obj instanceof Object) System.out.println("true");
++        if (obj instanceof Object) System.out.println("true");
      }
  }

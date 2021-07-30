@@ -10,7 +10,7 @@ rewrite("simplify_boolean_expressions", filename, start, end, other_expr_str) :-
 
 /* Pre  [:x] == false */
 /* Post ![:x]         */
-rewrite("simplify_boolean_expressions", filename, start, end, cat("!", other_expr_str)) :-
+rewrite("simplify_boolean_expressions", filename, start, end, cat("!(", other_expr_str, ")")) :-
     equals_expression_unordered(eq_expr, false_expr, other_expr),
         filename_of(eq_expr, filename),
         starts_at(eq_expr, start),

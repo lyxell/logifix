@@ -19,4 +19,13 @@ class Test1 {
         if (obj.run() == false) System.out.println("false");
         if (obj.run() == true) System.out.println("true");
     }
+    void test5() {
+        Object obj = (Object) new Inner();
+        if (obj instanceof Object == false) System.out.println("false");
+        if ((obj instanceof Object) == false) System.out.println("false");
+        if (((obj instanceof Object)) == false) System.out.println("false");
+        if (obj instanceof Object == true) System.out.println("true");
+        if ((obj instanceof Object) == true) System.out.println("true");
+        if (((obj instanceof Object)) == true) System.out.println("true");
+    }
 }

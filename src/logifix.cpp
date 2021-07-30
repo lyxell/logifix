@@ -216,26 +216,31 @@ void run(std::function<void(node_id)> report_progress) {
                     if (current_has_parent) {
                         auto [parent_rule, parent_id] = parent[current_node];
                         auto parent_str = nodes[parent_id];
-                        auto curr_str = nodes[current_node];
                         auto next_str = nodes[next_node];
-                        lock.unlock();
-                        auto diff =
-                            nway::diff(parent_str, {curr_str, next_str});
-                        std::string result;
-                        std::vector<sjp::token> tokens;
-                        for (const auto& [o, candidates] : diff) {
-                            const auto& a = candidates[0];
-                            const auto& b = candidates[1];
-                            if (a == b) {
-                                result += o;
-                            } else {
-                                result += b;
-                            }
-                        }
-                        lock.lock();
-                        if (children_strs[parent_id][rule].find(result) !=
+                        auto curr_str = nodes[current_node];
+                        /* If the next_node is _exactly_ matching a child node
+                         * of the parent we want to take the transition */
+                        if (children_strs[parent_id][rule].find(next_str) ==
                             children_strs[parent_id][rule].end()) {
-                            take_transition = false;
+                            lock.unlock();
+                            auto diff =
+                                nway::diff(parent_str, {curr_str, next_str});
+                            std::string result;
+                            std::vector<sjp::token> tokens;
+                            for (const auto& [o, candidates] : diff) {
+                                const auto& a = candidates[0];
+                                const auto& b = candidates[1];
+                                if (a == b) {
+                                    result += o;
+                                } else {
+                                    result += b;
+                                }
+                            }
+                            lock.lock();
+                            if (children_strs[parent_id][rule].find(result) !=
+                                children_strs[parent_id][rule].end()) {
+                                take_transition = false;
+                            }
                         }
                     }
                     if (!current_has_parent && disabled_rules.find(rule) != disabled_rules.end()) {
