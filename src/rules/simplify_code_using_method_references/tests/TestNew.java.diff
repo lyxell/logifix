@@ -1,10 +1,5 @@
-diff --git a/tests/TestNew.java b/tests/TestNew.java
-@@ -9,12 +9,12 @@
-             this.y = y;
-         }
-         public String toString() {
-             return "this is " + y;
-         }
+diff --git a/TestNew.java b/TestNew.java
+@@ -14,7 +14,7 @@
      }
  	public static void main(String[] args) {
          List<Integer> x = Arrays.asList(1, 2, 3, 4);
