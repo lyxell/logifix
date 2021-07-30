@@ -1,5 +1,6 @@
 {
     "description": "Use lambda argument in Map.computeIfAbsent",
+    "disabled_by_default": true,
     "sonar": {
         "id": "N/A"
     },
