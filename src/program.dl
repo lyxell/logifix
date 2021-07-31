@@ -15,7 +15,7 @@
 #include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"
-#include "rules/remove_redundant_call_to_collection_addall/implementation.dl"
+#include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_redundant_collection_copies/implementation.dl"
 #include "rules/remove_redundant_parentheses/implementation.dl"
