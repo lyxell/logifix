@@ -72,4 +72,5 @@ jobs:
     - run: cd initializr && mvn compile
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all initializr/
+    - run: cd initializr && mvn spring-javaformat:apply
     - run: cd initializr && mvn compile
