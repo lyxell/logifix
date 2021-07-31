@@ -55,7 +55,7 @@ jobs:
       with:
         name: logifix-ubuntu
     - run: git clone --depth 1 https://github.com/primefaces/primefaces.git
-    - run: cd primefaces && mvn compile
+    - run: cd primefaces && mvn compile -Dcheckstyle.skip
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all primefaces/
-    - run: cd primefaces && mvn compile
+    - run: cd primefaces && mvn compile -Dcheckstyle.skip
