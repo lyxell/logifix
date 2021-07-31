@@ -1,0 +1,11 @@
+diff --git a/Test.java b/Test.java
+@@ -4,8 +4,7 @@
+ class Test {
+     void test() {
+         List<Integer> a = List.of(1, 2, 3);
+-        List<Integer> b = new ArrayList<>();
+-        b.addAll(a);
++        List<Integer> b = new ArrayList<>(a);
+         a.add(4);
+         /* Should print 1, 2, 3 */
+         System.out.println(b);
