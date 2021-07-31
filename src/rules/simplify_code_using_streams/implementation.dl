@@ -23,7 +23,7 @@ rewrite("simplify_code_using_streams", filename, start, end, cat(
     block(then, [expr_stmt, nil]),
     expression_statement(expr_stmt, invocation),
     method_invocation(invocation, subject, "add", [x, nil]),
-    // TODO: check that subject has collection type
+    has_collection_type(subject),
     point_of_declaration(x, param),
     string_representation(cond, cond_str),
     string_representation(subject, subject_str),

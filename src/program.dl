@@ -574,7 +574,8 @@ is_collection_type(id) :-
 is_list_type(id) :-
     class_type(id, "List", _, _),
     import_declaration(_, spec),
-    string_representation(spec, "java.util.List").
+    (string_representation(spec, "java.util.List")
+    ;string_representation(spec, "java.util.*")).
 
 .decl is_map_type(id: id)
 is_map_type(id) :-
@@ -636,6 +637,9 @@ has_string_or_boxed_type(id) :- has_string_type(id).
 
 .decl has_collection_type(id: id)
 has_collection_type(id) :- has_type(id, type), is_collection_type(type).
+
+.decl has_list_type(id: id)
+has_list_type(id) :- has_type(id, type), is_list_type(type).
 
 .decl has_atomic_class_type(id: id)
 has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
