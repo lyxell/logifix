@@ -1,0 +1,9 @@
+{
+    "description": "Simplify code using streams",
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

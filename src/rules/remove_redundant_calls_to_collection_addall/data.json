@@ -1,0 +1,10 @@
+{
+    "description": "Remove redundant calls to Collection::addAll",
+    "disabled_by_default": true,
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}
