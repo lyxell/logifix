@@ -8,8 +8,7 @@ rewrite("fix_null_returns_in_tostring", filename, start, end, "\"\"") :-
         filename_of(method_decl, filename),
     /* Check that the method name is toString */
     method_header(method_head, _, declarator, _),
-    method_declarator(declarator, name, nil),
-    string_representation(name, "toString"),
+    method_declarator(declarator, "toString", nil),
     /* Check the values of the return statements */
     ancestor_of(method_body, return_stmt),
     return_statement(return_stmt, expr),

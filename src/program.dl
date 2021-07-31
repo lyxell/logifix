@@ -17,6 +17,7 @@
 #include "rules/remove_empty_try_blocks/implementation.dl"
 #include "rules/remove_redundant_call_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
+#include "rules/remove_redundant_collection_copies/implementation.dl"
 #include "rules/remove_redundant_parentheses/implementation.dl"
 #include "rules/remove_redundant_try_blocks/implementation.dl"
 #include "rules/remove_repeated_unary_operators/implementation.dl"
@@ -410,6 +411,15 @@ point_of_declaration(id, decl) :-
 has_type(id, type) :-
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", type).
+
+/* Types of method invocations
+ ********************************/
+
+has_type(id, result) :-
+    method_invocation(id, nil, meth, nil),
+    method_declaration(_, _, meth_header, _),
+    method_header(meth_header, result, declarator, _),
+    method_declarator(declarator, meth, nil).
 
 /* Type checking
  ********************************/

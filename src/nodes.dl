@@ -211,10 +211,11 @@ method_reference(id, subject, type_arguments, method_str) :-
     parent_of(id, "method", method),
     string_representation(method, method_str).
 
-.decl method_declarator(id: id, name: id, params: id_list)
-method_declarator(id, name, params) :-
+.decl method_declarator(id: id, name: symbol, params: id_list)
+method_declarator(id, name_str, params) :-
     name_of(id, "method_declarator"),
     parent_of(id, "name", name),
+    string_representation(name, name_str),
     parent_of_list(id, "params", params).
 
 .decl formal_parameter(id: id, modifiers: id_list, type: id, declarator_id: id)
