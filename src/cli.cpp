@@ -497,6 +497,23 @@ static std::string post_process(std::string before, std::string after,
         }
         return result;
     };
+    auto detect_line_terminator = [](const std::string& str) {
+        auto lines = utils::line_split(str);
+        size_t lf = 0;
+        size_t crlf = 0;
+        for (const auto& line : lines) {
+            if (utils::ends_with(line, "\r\n")) {
+                crlf++;
+            } else {
+                lf++;
+            }
+        }
+        if (crlf > lf) {
+            return "\r\n";
+        } else {
+            return "\n";
+        }
+    };
     auto detect_indentation = [find_first_non_space](const std::string& str) {
         auto lines = utils::line_split(str);
         std::vector<std::string> indentations;
@@ -560,11 +577,20 @@ static std::string post_process(std::string before, std::string after,
     auto after_lines = utils::line_split(after);
     auto before_lines = utils::line_split(before);
     auto lcs = nway::lcs(after_lines, before_lines);
+    auto line_terminator = detect_line_terminator(before);
     std::string processed;
     for (size_t i = 0; i < after_lines.size(); i++) {
         if (!lcs[i]) {
             if (string_has_only_whitespace(after_lines[i])) {
                 continue;
+            }
+            if (line_terminator == "\r\n") {
+                if (!utils::ends_with(after_lines[i], "\r\n")) {
+                    // remove newline
+                    after_lines[i].pop_back();
+                    // add crlf
+                    after_lines[i] += "\r\n";
+                }
             }
             // auto-indent
             if (i > 0 && find_first_non_space(after_lines[i]) ==

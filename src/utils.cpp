@@ -19,7 +19,11 @@ std::vector<std::string> line_split(const std::string& str) {
 }
 
 bool starts_with(const std::string& str, const std::string& prefix) {
-    return str.rfind("    ", 0) == 0;
+    return str.rfind(prefix, 0) == 0;
+}
+
+bool ends_with(const std::string& str, const std::string& suffix) {
+    return str.size() >= suffix.size() && str.substr(str.size() - suffix.size()) == suffix;
 }
 
 }
