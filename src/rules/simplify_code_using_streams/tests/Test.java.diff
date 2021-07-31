@@ -1,0 +1,15 @@
+diff --git a/Test.java b/Test.java
+@@ -8,12 +8,7 @@
+         original.add(2);
+         original.add(3);
+         original.add(4);
+-        List<Integer> result = new ArrayList<>();
+-        for (Integer x : original) {
+-            if (x > 1) {
+-                result.add(x);
+-            }
+-        }
++        List<Integer> result = original.stream().filter(x -> x > 1).collect(java.util.stream.Collectors.toList());
+         System.out.println(result);
+     }
+ }

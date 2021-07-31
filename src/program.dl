@@ -15,6 +15,7 @@
 #include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"
+#include "rules/remove_redundant_call_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_redundant_parentheses/implementation.dl"
 #include "rules/remove_redundant_try_blocks/implementation.dl"
@@ -34,6 +35,7 @@
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
+#include "rules/simplify_code_using_streams/implementation.dl"
 #include "rules/simplify_inverted_boolean_expressions/implementation.dl"
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
 #include "rules/simplify_return_of_boolean_expressions/implementation.dl"
@@ -565,30 +567,31 @@ autocloseable_type_name("ZipOutputStream").
 .decl is_collection_type(id: id)
 is_collection_type(id) :-
     // TODO: Should take imports into consideration?
-    class_type(id, name, _, _),
-    string_representation(name, name_str),
+    class_type(id, name_str, _, _),
     collection_type_name(name_str).
+
+.decl is_list_type(id: id)
+is_list_type(id) :-
+    class_type(id, "List", _, _),
+    import_declaration(_, spec),
+    string_representation(spec, "java.util.List").
 
 .decl is_map_type(id: id)
 is_map_type(id) :-
-    class_type(id, name, _, _),
-    string_representation(name, "Map").
+    class_type(id, "Map", _, _).
 
 .decl is_string_type(id: id)
 is_string_type(id) :-
-    class_type(id, name, _, _),
-    string_representation(name, "String").
+    class_type(id, "String", _, _).
 
 .decl is_boxed_type(id: id)
 is_boxed_type(id) :-
-    class_type(id, name, _, _),
-    string_representation(name, name_str),
+    class_type(id, name_str, _, _),
     boxed_type_name(name_str).
 
 .decl is_autocloseable_type(id: id)
 is_autocloseable_type(id) :-
-    class_type(id, name, _, _),
-    string_representation(name, name_str),
+    class_type(id, name_str, _, _),
     autocloseable_type_name(name_str).
 
 .decl is_floating_point_type(id: id)
@@ -599,14 +602,12 @@ is_floating_point_type(id) :-
 
 .decl is_atomic_class_type(id: id)
 is_atomic_class_type(id) :-
-    class_type(id, name, _, _),
-    string_representation(name, name_str),
+    class_type(id, name_str, _, _),
     atomic_class_type_name(name_str).
 
 .decl is_thread_type(id: id)
 is_thread_type(id) :-
-    class_type(id, name, _, _),
-    string_representation(name, "Thread").
+    class_type(id, "Thread", _, _).
 
 .decl has_floating_point_type(id: id)
 has_floating_point_type(id) :- floating_point_literal(id).
