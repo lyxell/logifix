@@ -115,4 +115,5 @@ jobs:
     - run: cd testng && ./gradlew build -x test
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all testng/
+    - run: cd testng && ./gradlew autostyleApply
     - run: cd testng && ./gradlew build -x test
