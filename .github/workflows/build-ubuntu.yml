@@ -84,10 +84,10 @@ jobs:
       with:
         name: logifix-ubuntu
     - run: git clone --depth 1 https://github.com/spring-projects/spring-framework.git
-    - run: cd spring-framework && gradle assemble
+    - run: cd spring-framework && ./gradlew build -x test
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all spring-framework/
-    - run: cd spring-framework && gradle assemble
+    - run: cd spring-framework && ./gradlew build -x test
 
   compile-pitest:
     needs: build
