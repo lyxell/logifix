@@ -60,6 +60,21 @@ jobs:
     - run: ./logifix --in-place --accept-all primefaces/
     - run: cd primefaces && mvn compile -Dcheckstyle.skip
 
+  compile-initializr:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/spring-io/initializr.git
+    - run: cd initializr && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all initializr/
+    - run: cd initializr && mvn spring-javaformat:apply
+    - run: cd initializr && mvn compile
+
   compile-pitest:
     needs: build
     runs-on: ubuntu-latest
