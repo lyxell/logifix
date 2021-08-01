@@ -591,6 +591,10 @@ is_list_type(id) :-
 is_map_type(id) :-
     class_type(id, "Map", _, _).
 
+.decl is_hashmap_type(id: id)
+is_hashmap_type(id) :-
+    class_type(id, "HashMap", _, _).
+
 .decl is_string_type(id: id)
 is_string_type(id) :-
     class_type(id, "String", _, _).
@@ -640,6 +644,9 @@ has_string_type(id) :- has_type(id, type), is_string_type(type).
 
 .decl has_map_type(id: id)
 has_map_type(id) :- has_type(id, type), is_map_type(type).
+
+.decl has_hashmap_type(id: id)
+has_hashmap_type(id) :- has_type(id, type), is_hashmap_type(type).
 
 .decl has_string_or_boxed_type(id: id)
 has_string_or_boxed_type(id) :- has_type(id, type), is_boxed_type(type).
