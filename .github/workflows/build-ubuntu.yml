@@ -46,6 +46,20 @@ jobs:
     - run: ./logifix --in-place --accept-all spoon/src/main
     - run: cd spoon && mvn compile
 
+  compile-bytecodeviewer:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/Konloch/bytecode-viewer.git
+    - run: cd bytecode-viewer && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all bytecode-viewer/
+    - run: cd bytecode-viewer && mvn compile
+
   compile-primefaces:
     needs: build
     runs-on: ubuntu-latest
