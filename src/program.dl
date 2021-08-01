@@ -276,11 +276,12 @@ in_scope(start, end, filename, identifier_str, param) :-
 
 /* Make field declarations in scope in their class */
 in_scope(start, end, filename, identifier_str, field) :-
-    parent_of_list(id, "body", body),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
-    list_contains(body, field),
+    class_declaration(_, _, _, _, _, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
+    class_body(body, decls),
+    list_contains(decls, field),
     field_declaration(field, _, _, declarators),
     list_contains(declarators, declarator),
     variable_declarator(declarator, declarator_id, _),
