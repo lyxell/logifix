@@ -55,10 +55,10 @@ jobs:
       with:
         name: logifix-ubuntu
     - run: git clone --depth 1 https://github.com/Konloch/bytecode-viewer.git
-    - run: cd bytecodeviewer && mvn compile
+    - run: cd bytecode-viewer && mvn compile
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all bytecodeviewer/
-    - run: cd bytecodeviewer && mvn compile
+    - run: ./logifix --in-place --accept-all bytecode-viewer/
+    - run: cd bytecode-viewer && mvn compile
 
   compile-primefaces:
     needs: build
