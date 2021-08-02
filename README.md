@@ -60,7 +60,7 @@ To download and build the project, perform the following steps:
 
 <ul> </ul>
 
-## Available transformations
+## Available rules
 
-See [transformations.md](./transformations.md).
+See [rules](./rules.md).
 
