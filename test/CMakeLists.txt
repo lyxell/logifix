@@ -114,6 +114,8 @@ set(regression_test_data
     "simplify_code_using_collection_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/dexlib2/src/main/java/org/jf/dexlib2/builder/MutableMethodImplementation.java,"
     "simplify_code_using_collection_isempty,https://github.com/testwhat/SmaliEx/blob/35accbf392aa673354f26d5044a0ab67319a5cf3/util/src/main/java/org/jf/util/ImmutableConverter.java,"
     "simplify_code_using_map_computeifabsent,https://github.com/cbeust/testng/blob/9ea649f6c66ab6165813af7a6c28cbde13c0b685/testng-core/src/main/java/org/testng/internal/MethodGroupsHelper.java,"
+    "simplify_code_using_map_computeifabsent,https://github.com/lyxell/spoon/blob/2a2d3d63e62ff7b7081cd9cac572d6ee85def1b1/src/main/java/spoon/pattern/PatternParameterConfigurator.java,"
+    "simplify_code_using_map_computeifabsent,https://github.com/spring-projects/spring-framework/blob/01c8de0111806d8f9346f332b22ece9dd9fef618/spring-aop/src/main/java/org/springframework/aop/framework/autoproxy/target/AbstractBeanFactoryBasedTargetSourceCreator.java,"
 )
 
 set(counter 1)
