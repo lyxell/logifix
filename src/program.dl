@@ -606,8 +606,7 @@ is_predicate_type(id) :-
 
 .decl is_runnable_type(id: id)
 is_runnable_type(id) :-
-    class_type(id, "Runnable", _, _),
-    import_declaration(_, spec).
+    class_type(id, "Runnable", _, _).
 
 .decl is_map_type(id: id)
 is_map_type(id) :-
