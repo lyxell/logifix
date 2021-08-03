@@ -722,7 +722,7 @@ int main(int argc, char** argv) {
                    progress_full - progress, "", count, options.files.size());
     });
 
-    // logifix::print_performance_metrics();
+    logifix::print_performance_metrics();
 
     for (const auto& file : options.files) {
         for (auto [rule, result] :
