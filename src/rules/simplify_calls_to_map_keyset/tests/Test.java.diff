@@ -1,9 +1,0 @@
-diff --git a/Test.java b/Test.java
-@@ -3,6 +3,6 @@
- 
- class Test {
-     Set<Object> test() {
--        return Collections.emptyMap().keySet();
-+        return Collections.emptySet();
-     }
- }

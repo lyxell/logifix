@@ -1,6 +1,0 @@
-rewrite("simplify_calls_to_map_keyset", filename, start, end, "Collections.emptySet()") :-
-    method_invocation(inv, subject, "keySet", nil),
-        starts_at(inv, start),
-        ends_at(inv, end),
-        filename_of(inv, filename),
-    string_representation(subject, "Collections.emptyMap()").

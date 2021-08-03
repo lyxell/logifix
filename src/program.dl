@@ -31,7 +31,6 @@
 #include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
 #include "rules/simplify_calls_to_constructor_for_string_conversion/implementation.dl"
-#include "rules/simplify_calls_to_map_keyset/implementation.dl"
 #include "rules/simplify_calls_to_string_substring/implementation.dl"
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
