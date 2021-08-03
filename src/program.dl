@@ -410,11 +410,12 @@ point_of_declaration(id, decl) :-
  ********************************/
 
 .decl has_type(id: id, type: id)
+.output has_type(IO=stdout)
 has_type(id, type) :-
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", type).
 
-/* Types of method invocations
+/* Types of method invocations in same class
  ********************************/
 
 has_type(id, result) :-
@@ -422,6 +423,22 @@ has_type(id, result) :-
     method_declaration(_, _, meth_header, _),
     method_header(meth_header, result, declarator, _),
     method_declarator(declarator, meth, nil).
+
+/* Types of streams
+ ********************************/
+
+/* If the stream is produced from Coll<Type> then the lambda argument has type Type */
+has_type(param, type_arg) :-
+    has_collection_type(subject),
+    has_type(subject, type),
+    class_type(type, _, type_args, _),
+    type_arguments(type_args, [type_arg, nil]),
+    method_invocation(stream_invocation, subject, "stream", nil),
+    method_invocation(_, stream_invocation, "map", [lambda, nil]),
+    lambda_expression(lambda, lambda_params, _),
+    lambda_params(lambda_params, [param, nil]),
+    identifier(param).
+    
 
 /* Type checking
  ********************************/
