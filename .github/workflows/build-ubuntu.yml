@@ -101,7 +101,7 @@ jobs:
     - run: cd dolphinscheduler && mvn compile
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all dolphinscheduler/
-    - run: cd dolphinscheduler && mvn compile
+    - run: cd dolphinscheduler && mvn clean compile
 
   compile-pitest:
     needs: build
