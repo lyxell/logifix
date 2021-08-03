@@ -136,11 +136,16 @@ conditional_expression(id, cond, then, else) :-
     parent_of(id, "then", then),
     parent_of(id, "else", else).
 
-.decl lambda_expression(id: id, parameters: id, body: id)
-lambda_expression(id, parameters, body) :-
+.decl lambda_expression(id: id, params: id, body: id)
+lambda_expression(id, params, body) :-
     name_of(id, "lambda_expression"),
-    parent_of(id, "parameters", parameters),
+    parent_of(id, "params", params),
     parent_of(id, "body", body).
+
+.decl lambda_params(id: id, params: id_list)
+lambda_params(id, params) :-
+    name_of(id, "lambda_params"),
+    parent_of_list(id, "params", params).
 
 .decl class_body(id: id, declarations: id_list)
 class_body(id, declarations) :-
