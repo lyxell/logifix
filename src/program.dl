@@ -427,6 +427,10 @@ has_type(id, result) :-
 /* Types of streams
  ********************************/
 
+.decl type_preserving_stream_action(s: symbol)
+type_preserving_stream_action("map").
+type_preserving_stream_action("filter").
+
 /* If the stream is produced from Coll<Type> then the lambda argument has type Type */
 has_type(param, type_arg) :-
     has_collection_type(subject),
@@ -434,7 +438,8 @@ has_type(param, type_arg) :-
     class_type(type, _, type_args, _),
     type_arguments(type_args, [type_arg, nil]),
     method_invocation(stream_invocation, subject, "stream", nil),
-    method_invocation(_, stream_invocation, "map", [lambda, nil]),
+    method_invocation(_, stream_invocation, action, [lambda, nil]),
+    type_preserving_stream_action(action),
     lambda_expression(lambda, lambda_params, _),
     lambda_params(lambda_params, [param, nil]),
     identifier(param).
