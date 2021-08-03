@@ -1,14 +1,9 @@
-rewrite("use_lambda_argument_in_map_computeifabsent", filename, ident_start, ident_end, "k") :-
+rewrite("use_lambda_argument_in_map_computeifabsent", filename, ancestor_start, ancestor_end, "k") :-
     method_invocation(invocation, _, "computeIfAbsent", [key_var, [lambda, nil]]),
         filename_of(invocation, filename),
     lambda_expression(lambda, _, body),
-    ! block(body, _),
-    starts_at(lambda, lambda_start),
-    ends_at(lambda, lambda_end),
-    identifier(ident),
-    point_of_declaration(ident, decl),
-        starts_at(ident, ident_start),
-        ends_at(ident, ident_end),
-        ident_start >= lambda_start,
-        ident_end <= lambda_end,
+    ancestor_of(body, ancestor),
+        starts_at(ancestor, ancestor_start),
+        ends_at(ancestor, ancestor_end),
+    point_of_declaration(ancestor, decl),
     point_of_declaration(key_var, decl).

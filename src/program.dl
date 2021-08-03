@@ -35,6 +35,7 @@
 #include "rules/simplify_calls_to_string_substring/implementation.dl"
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
+#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_code_using_streams/implementation.dl"
@@ -276,11 +277,12 @@ in_scope(start, end, filename, identifier_str, param) :-
 
 /* Make field declarations in scope in their class */
 in_scope(start, end, filename, identifier_str, field) :-
-    parent_of_list(id, "body", body),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
-    list_contains(body, field),
+    class_declaration(_, _, _, _, _, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
+    class_body(body, decls),
+    list_contains(decls, field),
     field_declaration(field, _, _, declarators),
     list_contains(declarators, declarator),
     variable_declarator(declarator, declarator_id, _),
@@ -409,11 +411,12 @@ point_of_declaration(id, decl) :-
  ********************************/
 
 .decl has_type(id: id, type: id)
+.output has_type(IO=stdout)
 has_type(id, type) :-
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", type).
 
-/* Types of method invocations
+/* Types of method invocations in same class
  ********************************/
 
 has_type(id, result) :-
@@ -421,6 +424,27 @@ has_type(id, result) :-
     method_declaration(_, _, meth_header, _),
     method_header(meth_header, result, declarator, _),
     method_declarator(declarator, meth, nil).
+
+/* Types of streams
+ ********************************/
+
+.decl type_preserving_stream_action(s: symbol)
+type_preserving_stream_action("map").
+type_preserving_stream_action("filter").
+
+/* If the stream is produced from Coll<Type> then the lambda argument has type Type */
+has_type(param, type_arg) :-
+    has_collection_type(subject),
+    has_type(subject, type),
+    class_type(type, _, type_args, _),
+    type_arguments(type_args, [type_arg, nil]),
+    method_invocation(stream_invocation, subject, "stream", nil),
+    method_invocation(_, stream_invocation, action, [lambda, nil]),
+    type_preserving_stream_action(action),
+    lambda_expression(lambda, lambda_params, _),
+    lambda_params(lambda_params, [param, nil]),
+    identifier(param).
+    
 
 /* Type checking
  ********************************/
@@ -573,7 +597,8 @@ autocloseable_type_name("ZipFile").
 autocloseable_type_name("ZipInputStream").
 autocloseable_type_name("ZipOutputStream").
 
-/* Is type */
+/* Is type
+ ********************************/
 
 .decl is_collection_type(id: id)
 is_collection_type(id) :-
@@ -588,9 +613,31 @@ is_list_type(id) :-
     (string_representation(spec, "java.util.List")
     ;string_representation(spec, "java.util.*")).
 
+.decl is_comparator_type(id: id)
+is_comparator_type(id) :-
+    class_type(id, "Comparator", _, _),
+    import_declaration(_, spec),
+    (string_representation(spec, "java.util.Comparator")
+    ;string_representation(spec, "java.util.*")).
+
+.decl is_predicate_type(id: id)
+is_predicate_type(id) :-
+    class_type(id, "Predicate", _, _),
+    import_declaration(_, spec),
+    (string_representation(spec, "java.util.function.Predicate")
+    ;string_representation(spec, "java.util.function.*")).
+
+.decl is_runnable_type(id: id)
+is_runnable_type(id) :-
+    class_type(id, "Runnable", _, _).
+
 .decl is_map_type(id: id)
 is_map_type(id) :-
     class_type(id, "Map", _, _).
+
+.decl is_hashmap_type(id: id)
+is_hashmap_type(id) :-
+    class_type(id, "HashMap", _, _).
 
 .decl is_string_type(id: id)
 is_string_type(id) :-
@@ -621,6 +668,17 @@ is_atomic_class_type(id) :-
 is_thread_type(id) :-
     class_type(id, "Thread", _, _).
 
+.decl is_functional_interface_type(id: id)
+is_functional_interface_type(id) :-
+    is_comparator_type(id).
+is_functional_interface_type(id) :-
+    is_predicate_type(id).
+is_functional_interface_type(id) :-
+    is_runnable_type(id).
+
+/* Has type
+ ********************************/
+
 .decl has_floating_point_type(id: id)
 has_floating_point_type(id) :- floating_point_literal(id).
 has_floating_point_type(id) :- has_type(id, type), is_floating_point_type(type).
@@ -642,6 +700,9 @@ has_string_type(id) :- has_type(id, type), is_string_type(type).
 .decl has_map_type(id: id)
 has_map_type(id) :- has_type(id, type), is_map_type(type).
 
+.decl has_hashmap_type(id: id)
+has_hashmap_type(id) :- has_type(id, type), is_hashmap_type(type).
+
 .decl has_string_or_boxed_type(id: id)
 has_string_or_boxed_type(id) :- has_type(id, type), is_boxed_type(type).
 has_string_or_boxed_type(id) :- has_string_type(id).
@@ -657,7 +718,6 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 
 .decl has_stream_type(id: id)
 has_stream_type(id) :- method_invocation(id, subject, "stream", nil), has_collection_type(subject).
-
 has_stream_type(id) :- method_invocation(id, subject, "distinct", _), has_stream_type(subject).
 has_stream_type(id) :- method_invocation(id, subject, "filter", _), has_stream_type(subject).
 has_stream_type(id) :- method_invocation(id, subject, "limit", _), has_stream_type(subject).

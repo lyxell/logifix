@@ -7,7 +7,7 @@
 -            requestFileDeleteMap.put(request, list);
 -        }
 -        return list;
-+        return requestFileDeleteMap.computeIfAbsent(request, k -> new ArrayList<HttpData>());
++        return requestFileDeleteMap.computeIfAbsent(request, ArrayList::new);
      }
 
      @Override

@@ -1,3 +1,4 @@
+## Rules
 
 ### Fix broken null checks
 
@@ -75,25 +76,6 @@
 <ul> </ul>
 
 
-### Fix null pointer exceptions by inverting string comparison
-
-* PMD ID: [LiteralsFirstInComparison](https://pmd.github.io/latest/pmd_rules_java_bestpractices.html#literalsfirstincomparisons)
-* SonarSource ID: [S1132](https://rules.sonarsource.com/java/RSPEC-1132)
-
-#### Examples
-```diff
- 	 * @return boolean true is input wildcard, false otherwise
- 	 */
- 	private boolean isWildCard(String name) {
--		return name.equals("?");
-+		return "?".equals(name);
- 	}
- }
-```
-
-<ul> </ul>
-
-
 ### Fix null returns in toString methods
 
 * PMD ID: N/A
@@ -120,19 +102,29 @@
 
 #### Examples
 ```diff
-     public static Object unwrapResp(URL url, TripleWrapper.TripleResponseWrapper wrap,
-                                     MultipleSerialization serialization) {
-         String serializeType = convertHessianFromWrapper(wrap.getSerializeType());
+         checkSize(newsize);
+         RandomAccessFile accessFile = new RandomAccessFile(file, "r");
+         ByteBuffer byteBuffer;
 -        try {
--            final ByteArrayInputStream bais = new ByteArrayInputStream(wrap.getData().toByteArray());
--            final Object ret = serialization.deserialize(url, serializeType, wrap.getType(), bais);
--            bais.close();
--            return ret;
-+        try (final ByteArrayInputStream bais = new ByteArrayInputStream(wrap.getData().toByteArray())) {
-+            return serialization.deserialize(url, serializeType, wrap.getType(), bais);
-         } catch (Exception e) {
-             throw new RuntimeException("Failed to unwrap resp", e);
-         }
+-            FileChannel fileChannel = accessFile.getChannel();
+-            try {
+-                byte[] array = new byte[(int) newsize];
+-                byteBuffer = ByteBuffer.wrap(array);
+-                int read = 0;
+-                while (read < newsize) {
+-                    read += fileChannel.read(byteBuffer);
+-                }
+-            } finally {
+-                fileChannel.close();
++        try (FileChannel fileChannel = accessFile.getChannel()) {
++            byte[] array = new byte[(int) newsize];
++            byteBuffer = ByteBuffer.wrap(array);
++            int read = 0;
++            while (read < newsize) {
++                read += fileChannel.read(byteBuffer);
+             }
+         } finally {
+             accessFile.close();
 ```
 
 <ul> </ul>
@@ -282,25 +274,7 @@
 <ul> </ul>
 
 
-### Remove redundant calls to Collection::addAll
-
-* PMD ID: N/A
-* SonarSource ID: N/A
-
-
-<ul> </ul>
-
-
 ### Remove redundant collection copies
-
-* PMD ID: N/A
-* SonarSource ID: N/A
-
-
-<ul> </ul>
-
-
-### Remove redundant parentheses
 
 * PMD ID: N/A
 * SonarSource ID: N/A
@@ -419,13 +393,23 @@
 
 #### Examples
 ```diff
- 			}
- 		}
- 		if (comment instanceof CtJavaDoc) {
--			List<CtJavaDocTag> tags = null;
- 			Collection<CtJavaDocTag> javaDocTags = ((CtJavaDoc) comment).getTags();
- 			if (javaDocTags != null && javaDocTags.isEmpty() == false) {
- 				printer.write(transfo.apply("")).writeln();
+ import spoon.reflect.declaration.CtCompilationUnit;
+ import spoon.reflect.declaration.CtElement;
+ import spoon.reflect.declaration.CtNamedElement;
+-import spoon.reflect.declaration.CtShadowable;
+ import spoon.reflect.declaration.CtType;
+ import spoon.reflect.declaration.ParentNotInitializedException;
+ import spoon.reflect.factory.Factory;
+@@ -170,9 +169,6 @@ public boolean equals(Object o) {
+ 
+ 	@Override
+ 	public List<CtAnnotation<? extends Annotation>> getAnnotations() {
+-		if (this instanceof CtShadowable) {
+-			CtShadowable shadowable = (CtShadowable) this;
+-		}
+ 		return unmodifiableList(annotations);
+ 	}
+ 
 ```
 
 <ul> </ul>
@@ -555,7 +539,7 @@
 -            requestFileDeleteMap.put(request, list);
 -        }
 -        return list;
-+        return requestFileDeleteMap.computeIfAbsent(request, k -> new ArrayList<HttpData>());
++        return requestFileDeleteMap.computeIfAbsent(request, ArrayList::new);
      }
 
      @Override
@@ -590,6 +574,17 @@
 * PMD ID: N/A
 * SonarSource ID: [S1612](https://rules.sonarsource.com/java/RSPEC-1612)
 
+#### Examples
+```diff
+                int off = getStart();
+                ElementSourceFragment child = getFirstChild();
+                while (child != null) {
+-                       forEachConstantFragment(off, child.getStart(), cf -> children.add(cf));
++                       forEachConstantFragment(off, child.getStart(), children::add);
+                        children.add(child);
+                        off = child.getEnd();
+                        child = child.getNextSibling();
+```
 
 <ul> </ul>
 
@@ -599,6 +594,19 @@
 * PMD ID: N/A
 * SonarSource ID: N/A
 
+#### Examples
+```diff
+        private List<FlashMap> getExpiredFlashMaps(List<FlashMap> allMaps) {
+-               List<FlashMap> result = new ArrayList<>();
+-               for (FlashMap map : allMaps) {
+-                       if (map.isExpired()) {
+-                               result.add(map);
+-                       }
+-               }
+-               return result;
++               return allMaps.stream().filter(FlashMap::isExpired).collect(Collectors.toList());
+        }
+```
 
 <ul> </ul>
 
@@ -630,16 +638,14 @@
 
 #### Examples
 ```diff
- 	 * @param conflictMode
- 	 */
- 	void setNodeOfElement(CtElement element, RootNode node, ConflictResolutionMode conflictMode) {
--		modifyNodeOfElement(element, conflictMode, oldNode -> {
--			return node;
--		});
-+		modifyNodeOfElement(element, conflictMode, oldNode -> node);
- 	}
-
- 	/**
+                        break;
+                default:
+                        // per line suffix
+-                       printCommentContent(printer, comment, s -> { return (" * " + s).replaceAll(" *$", ""); });
++                       printCommentContent(printer, comment, s -> (" * " + s).replaceAll(" *$", ""));
+        }
+        // suffix
+        switch (commentType) {
 ```
 
 <ul> </ul>
@@ -685,15 +691,6 @@
 
  		@Override
 ```
-
-<ul> </ul>
-
-
-### Use lambda argument in Map.computeIfAbsent
-
-* PMD ID: N/A
-* SonarSource ID: N/A
-
 
 <ul> </ul>
 

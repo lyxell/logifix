@@ -46,6 +46,20 @@ jobs:
     - run: ./logifix --in-place --accept-all spoon/src/main
     - run: cd spoon && mvn compile
 
+  compile-bytecodeviewer:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/Konloch/bytecode-viewer.git
+    - run: cd bytecode-viewer && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all bytecode-viewer/
+    - run: cd bytecode-viewer && mvn compile
+
   compile-primefaces:
     needs: build
     runs-on: ubuntu-latest
@@ -88,3 +102,46 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all dolphinscheduler/
     - run: cd dolphinscheduler && mvn compile
+
+  compile-pitest:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/hcoles/pitest.git
+    - run: cd pitest && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all pitest/
+    - run: cd pitest && mvn compile
+
+  compile-caffeine:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/ben-manes/caffeine.git
+    - run: cd caffeine && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all caffeine/
+    - run: cd caffeine && ./gradlew build -x test
+
+  compile-testng:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/cbeust/testng.git
+    - run: cd testng && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all testng/
+    - run: cd testng && ./gradlew autostyleApply
+    - run: cd testng && ./gradlew build -x test

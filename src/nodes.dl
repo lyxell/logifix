@@ -136,20 +136,30 @@ conditional_expression(id, cond, then, else) :-
     parent_of(id, "then", then),
     parent_of(id, "else", else).
 
-.decl lambda_expression(id: id, parameters: id, body: id)
-lambda_expression(id, parameters, body) :-
+.decl lambda_expression(id: id, params: id, body: id)
+lambda_expression(id, params, body) :-
     name_of(id, "lambda_expression"),
-    parent_of(id, "parameters", parameters),
+    parent_of(id, "params", params),
     parent_of(id, "body", body).
 
-.decl class_declaration(id: id, modifiers: id_list, name: id, superclass: id, superinterfaces: id_list, body: id_list)
+.decl lambda_params(id: id, params: id_list)
+lambda_params(id, params) :-
+    name_of(id, "lambda_params"),
+    parent_of_list(id, "params", params).
+
+.decl class_body(id: id, declarations: id_list)
+class_body(id, declarations) :-
+    name_of(id, "class_body"),
+    parent_of_list(id, "declarations", declarations).
+
+.decl class_declaration(id: id, modifiers: id_list, name: id, superclass: id, superinterfaces: id_list, body: id)
 class_declaration(id, mods, name, superclass, superinterfaces, body) :-
     name_of(id, "class_declaration"),
     parent_of_list(id, "modifiers", mods),
     parent_of(id, "name", name),
     parent_of(id, "superclass", superclass),
     parent_of_list(id, "superinterfaces", superinterfaces),
-    parent_of_list(id, "body", body).
+    parent_of(id, "body", body).
 
 .decl static_initializer(id: id, block: id)
 static_initializer(id, block) :-
@@ -249,14 +259,14 @@ variable_declarator_id(id, name, dims) :-
     parent_of(id, "name", name),
     parent_of_list(id, "dims", dims).
 
-.decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id, type: id, arguments: id_list, body: id_list)
+.decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id, type: id, arguments: id_list, body: id)
 class_instance_creation_expression(id, qualifier, type_arguments, type, arguments, body) :-
     name_of(id, "class_instance_creation_expression"),
     parent_of(id, "qualifier", qualifier),
     parent_of(id, "type_arguments", type_arguments),
     parent_of(id, "type", type),
     parent_of_list(id, "arguments", arguments),
-    parent_of_list(id, "body", body).
+    parent_of(id, "body", body).
 
 .decl class_type(id: id, name: symbol, type_arguments: id, annotations: id_list)
 class_type(id, name_str, type_arguments, annotations) :-
