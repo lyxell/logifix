@@ -10,6 +10,8 @@ extern "C" {
     for (const auto& line : lines) {
         if (utils::starts_with(line, "    ")) {
             result += line.substr(4);
+        } else if (utils::starts_with(line, "\t")) {
+            result += line.substr(1);
         } else {
             result += line;
         }

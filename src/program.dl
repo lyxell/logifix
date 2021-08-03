@@ -15,8 +15,8 @@
 #include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"
-#include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
+#include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_collection_copies/implementation.dl"
 #include "rules/remove_redundant_parentheses/implementation.dl"
 #include "rules/remove_redundant_try_blocks/implementation.dl"
@@ -34,6 +34,7 @@
 #include "rules/simplify_calls_to_string_substring/implementation.dl"
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
+#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_code_using_streams/implementation.dl"
@@ -275,11 +276,12 @@ in_scope(start, end, filename, identifier_str, param) :-
 
 /* Make field declarations in scope in their class */
 in_scope(start, end, filename, identifier_str, field) :-
-    parent_of_list(id, "body", body),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
-    list_contains(body, field),
+    class_declaration(_, _, _, _, _, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
+    class_body(body, decls),
+    list_contains(decls, field),
     field_declaration(field, _, _, declarators),
     list_contains(declarators, declarator),
     variable_declarator(declarator, declarator_id, _),
@@ -572,7 +574,8 @@ autocloseable_type_name("ZipFile").
 autocloseable_type_name("ZipInputStream").
 autocloseable_type_name("ZipOutputStream").
 
-/* Is type */
+/* Is type
+ ********************************/
 
 .decl is_collection_type(id: id)
 is_collection_type(id) :-
@@ -586,6 +589,24 @@ is_list_type(id) :-
     import_declaration(_, spec),
     (string_representation(spec, "java.util.List")
     ;string_representation(spec, "java.util.*")).
+
+.decl is_comparator_type(id: id)
+is_comparator_type(id) :-
+    class_type(id, "Comparator", _, _),
+    import_declaration(_, spec),
+    (string_representation(spec, "java.util.Comparator")
+    ;string_representation(spec, "java.util.*")).
+
+.decl is_predicate_type(id: id)
+is_predicate_type(id) :-
+    class_type(id, "Predicate", _, _),
+    import_declaration(_, spec),
+    (string_representation(spec, "java.util.function.Predicate")
+    ;string_representation(spec, "java.util.function.*")).
+
+.decl is_runnable_type(id: id)
+is_runnable_type(id) :-
+    class_type(id, "Runnable", _, _).
 
 .decl is_map_type(id: id)
 is_map_type(id) :-
@@ -623,6 +644,17 @@ is_atomic_class_type(id) :-
 .decl is_thread_type(id: id)
 is_thread_type(id) :-
     class_type(id, "Thread", _, _).
+
+.decl is_functional_interface_type(id: id)
+is_functional_interface_type(id) :-
+    is_comparator_type(id).
+is_functional_interface_type(id) :-
+    is_predicate_type(id).
+is_functional_interface_type(id) :-
+    is_runnable_type(id).
+
+/* Has type
+ ********************************/
 
 .decl has_floating_point_type(id: id)
 has_floating_point_type(id) :- floating_point_literal(id).
@@ -663,7 +695,6 @@ has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
 
 .decl has_stream_type(id: id)
 has_stream_type(id) :- method_invocation(id, subject, "stream", nil), has_collection_type(subject).
-
 has_stream_type(id) :- method_invocation(id, subject, "distinct", _), has_stream_type(subject).
 has_stream_type(id) :- method_invocation(id, subject, "filter", _), has_stream_type(subject).
 has_stream_type(id) :- method_invocation(id, subject, "limit", _), has_stream_type(subject).
