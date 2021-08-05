@@ -19,7 +19,7 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 ### Intelligent equational reasoning
 
-Logifix is more than a search-replace system. It achieves intelligent equational reasoning
+Logifix is more than a search-and-replace system. It achieves intelligent equational reasoning
 through the use of articulation points in the rewrite graph.
 
 ### Speed
