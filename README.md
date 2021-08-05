@@ -25,6 +25,8 @@ dialect](https://github.com/souffle-lang/souffle) that is
 synthesized into multi-threaded C++ code. It is heavily parallelized even
 when working on a single file and usually analyzes
 large projects of thousands of files in a few seconds on modern hardware.
+If your project is slow to analyze it is considered a bug and you should
+[file a bug report](https://github.com/lyxell/logifix/issues/new).
 
 ### Mergeability
 
