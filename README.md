@@ -63,7 +63,7 @@ simplified and code that can be removed.
 After patches have been found they are categorized by problem type
 and then presented to the user. The user may choose which patches
 to apply in each file. If the user chooses multiple patches in the
-same file the result is produced by using a merge-algorithm similar
+same file the result is produced by using a merge algorithm similar
 to that of Git.
 
 <ul> </ul>
