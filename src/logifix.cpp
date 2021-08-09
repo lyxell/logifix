@@ -155,9 +155,9 @@ void print_performance_metrics() {
         time_per_event_type[type] += time;
         time_per_node_id[node_id] += time;
     }
-    fmt::print("\n");
+    fmt::print(stderr, "\n");
     for (const auto& [e, tot] : time_per_event_type) {
-        fmt::print("{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
+        fmt::print(stderr, "{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
     }
     std::vector<std::pair<size_t, node_id>> node_data;
     node_data.reserve(time_per_node_id.size());
@@ -167,7 +167,7 @@ void print_performance_metrics() {
     std::sort(node_data.begin(), node_data.end());
     for (int i = 0; i < std::min(MAX_FILES_SHOWN, node_data.size()); i++) {
         auto [tot, e] = node_data[i];
-        fmt::print("{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
+        fmt::print(stderr, "{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
     }
 }
 
