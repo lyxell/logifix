@@ -6,6 +6,7 @@
 #include <fmt/core.h>
 #include <iostream>
 #include <mutex>
+#include <utility>
 #include <nway.h>
 #include <regex>
 #include <thread>
@@ -94,6 +95,37 @@ bool segments_overlap(std::pair<T, T> a, std::pair<T, T> b) {
 std::string apply_rewrite(const std::string& original, const std::tuple<size_t, size_t, std::string>& rewrite) {
     const auto& [start, end, replacement] = rewrite;
     return original.substr(0, start) + replacement + original.substr(end);
+}
+
+std::vector<std::tuple<size_t, size_t, std::string>> split_rewrite(const std::string& original, const std::tuple<size_t, size_t, std::string>& rewrite) {
+    std::vector<std::tuple<size_t, size_t, std::string>> result;
+    auto [start, end, replacement] = rewrite;
+    auto before = original.substr(start, end);
+    auto after = replacement;
+    auto lcs = nway::lcs(before, after);
+    size_t a_pos = 0;
+    size_t b_pos = 0;
+    while (a_pos < a.size() || b_pos < b.size()) {
+        /* a and b agree */
+        while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] == b_pos) {
+            a_pos++;
+            b_pos++;
+        }
+        size_t a_start = a_pos;
+        size_t b_start = b_pos;
+        /* a has no matching position */
+        while (a_pos < a.size() && !lcs[a_pos]) {
+            a_pos++;
+        }
+        /* a has matching position but it is not that of b_pos */
+        while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] != b_pos) {
+            b_pos++;
+        }
+        if (a_start != a_pos || b_start != b_pos) {
+            result.emplace_back(start + a_start, start + a_pos, after.substr(b_start, b_pos));
+        }
+    }
+    return result;
 }
 
 std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
@@ -249,7 +281,34 @@ void run(std::function<void(node_id)> report_progress) {
 
                         const auto& [curr_start, curr_end, curr_replacement] = curr_rewrite;
                         const auto& [next_start, next_end, next_replacement] = next_rewrite;
-                        if (!segments_overlap(std::pair(curr_start, curr_end), std::pair(next_start, next_end))) {
+
+                        /* If segments overlap we try to split them into smaller pieces */
+                        if (segments_overlap<size_t>({curr_start, curr_end}, {next_start, next_end})) {
+                            auto curr_split = split_rewrite(curr_pstr, apply_rewrite(curr_pstr, curr_rewrite));
+                            auto next_split = split_rewrite(curr_pstr, apply_rewrite(curr_pstr, next_rewrite));
+                            bool overlap = false;
+                            for (auto x : curr_split) {
+                                for (auto y : next_split) {
+                                    if (segments_overlap<size_t>({std::get<0>(x), std::get<1>(x)}, 
+                                                                 {std::get<0>(y), std::get<1>(y)})) {
+                                        overlap = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!overlap) {
+                                for (auto& y : next_split) {
+                                    for (auto& x : prev_split) {
+                                        if (std::get<0>(y) < std::get<0>(x)) {
+                                            auto diff = size_t(std::get<2>(y).size() - int(std::get<1>(y) - std::get<0>(y)));
+                                            std::get<0>(x) -= diff;
+                                            std::get<1>(x) -= diff;
+                                        }
+                                    }
+                                }
+                                /* apply split rewrite */
+                            }
+                        } else {
                             std::string candidate_string;
                             /**
                              * Is the next_rewrite before the curr_rewrite?
@@ -273,25 +332,6 @@ void run(std::function<void(node_id)> report_progress) {
                             }
                             goto done;
                         }
-
-                        auto diff =
-                            nway::diff(curr_pstr, {next_pstr, next_str});
-                        std::string result;
-                        std::vector<sjp::token> tokens;
-                        for (const auto& [o, candidates] : diff) {
-                            const auto& a = candidates[0];
-                            const auto& b = candidates[1];
-                            if (a == b) {
-                                result += o;
-                            } else {
-                                result += b;
-                            }
-                        }
-                        if (children_strs[parent_id][rule].find(result) != children_strs[parent_id][rule].end()) {
-                            take_transition = false;
-                        }
-
-                        lock.lock();
 
                     }
 done:
