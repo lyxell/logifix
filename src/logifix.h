@@ -12,6 +12,8 @@ namespace logifix {
 using rule_id = std::string;
 using node_id = size_t;
 
+using rewrite_collection = std::vector<std::tuple<size_t,size_t,std::string>>;
+
 node_id add_file(const std::string& file);
 
 void run(std::function<void(node_id)> report_progress);
