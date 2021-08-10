@@ -374,7 +374,6 @@ void run(std::function<void(node_id)> report_progress) {
                             if (children_strs[parent_id][rule].find(candidate_string) != children_strs[parent_id][rule].end()) {
                                 take_transition = false;
                             }
-                            goto done;
                         }
 
                     }
