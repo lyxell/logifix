@@ -215,7 +215,7 @@ std::string post_process(std::string original, std::string changed) {
         if (rule != "remove_redundant_parentheses") continue;
         auto [a_start, a_end, a_replacement] = rewrite;
         for (auto [b_start, b_end, b_replacement] : rewrites) {
-            if ((a_start >= int(b_start) -1 && a_start <= b_end + 1) || (a_end >= int(b_start) - 1 && a_end <= b_end + 1)) {
+            if ((a_start >= int(b_start) - 1 && a_start <= b_end + 1) || (a_end >= int(b_start) - 1 && a_end <= b_end + 1)) {
                 std::cerr << a_start << " " << a_end << " " << a_replacement << std::endl;
                 result.emplace_back(rewrite);
                 break;
