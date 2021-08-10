@@ -63,22 +63,15 @@ std::string replace_tabs_with_spaces(const std::string& str) {
     return result;
 }
 
-static void rtrim(std::string& s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(),
-                         [](auto c) { return !std::isspace(c); })
-                .base(),
-            s.end());
-}
-
 std::vector<std::string> create_patch(const std::string& filename, const std::string& before,
                                       const std::string& after) {
     auto a = utils::line_split(before);
     auto b = utils::line_split(after);
     for (auto& x : a) {
-        rtrim(x);
+        x = utils::rtrim(x);
     }
     for (auto& x : b) {
-        rtrim(x);
+        x = utils::rtrim(x);
     }
     std::vector<std::tuple<bool, char, std::string>> changes;
     std::vector<std::optional<size_t>> lcs =
@@ -480,12 +473,36 @@ static int multi_choice(const std::string& question,
     return 0;
 }
 
-static std::string post_process(std::string before, std::string after,
-                                const options_t& options) {
-    auto find_first_non_space = [](const std::string& str) {
-        return std::find_if(str.begin(), str.end(),
-                            [](char c) { return std::isspace(c) == 0; });
-    };
+static std::string post_process_remove_introduced_empty_lines(std::string before, std::string after) {
+    auto before_lines = utils::line_split(before);
+    auto after_lines = utils::line_split(after);
+    auto lcs = nway::lcs(after_lines, before_lines);
+    std::string result;
+    for (size_t i = 0; i < after_lines.size(); i++) {
+        if (!lcs[i] && utils::string_has_only_whitespace(after_lines[i])) {
+            continue;
+        }
+        result += after_lines[i];
+    }
+    return result;
+}
+
+static std::string post_process_harmonize_line_terminators(std::string before, std::string after) {
+    auto line_terminator = utils::detect_line_terminator(before);
+    std::string result;
+    for (auto line : utils::line_split(after)) {
+        if (line_terminator == "\r\n") {
+            if (!utils::ends_with(line, "\r\n")) {
+                line.pop_back();
+                line += "\r\n";
+            }
+        }
+        result += line;
+    }
+    return result;
+}
+
+static std::string post_process_auto_indent(std::string before, std::string after) {
     auto bracket_balance = [](const std::string& str) {
         int result = 0;
         for (char c : str) {
@@ -497,123 +514,80 @@ static std::string post_process(std::string before, std::string after,
         }
         return result;
     };
-    auto detect_line_terminator = [](const std::string& str) {
-        auto lines = utils::line_split(str);
-        size_t lf = 0;
-        size_t crlf = 0;
-        for (const auto& line : lines) {
-            if (utils::ends_with(line, "\r\n")) {
-                crlf++;
-            } else {
-                lf++;
-            }
-        }
-        if (crlf > lf) {
-            return "\r\n";
-        } else {
-            return "\n";
-        }
-    };
-    auto detect_indentation = [find_first_non_space](const std::string& str) {
-        auto lines = utils::line_split(str);
-        std::vector<std::string> indentations;
-        for (auto line : lines) {
-            auto first_non_space_at = find_first_non_space(line);
-            if (first_non_space_at == line.end() ||
-                first_non_space_at == line.begin()) {
-                continue;
-            }
-            auto indent = line.substr(0, first_non_space_at - line.begin());
-            /* Check that indentation has only one type of char */
-            if (std::any_of(indent.begin(), indent.end(),
-                            [indent](char c) { return c != indent[0]; })) {
-                continue;
-            }
-            if (!indentations.empty() && indentations.back() == indent) {
-                continue;
-            }
-            indentations.push_back(indent);
-        }
-        std::map<std::string, double> multiplier = {
-            {"  ", 0.5}, {"    ", 0.25}, {"\t", 0.5}};
-        std::map<std::string, double> candidates;
-        for (size_t i = 1; i < indentations.size(); i++) {
-            auto a = indentations[i - 1];
-            auto b = indentations[i];
-            if (a.size() > b.size()) {
-                std::swap(a, b);
-            }
-            if (b.find(a) != 0) {
-                continue;
-            }
-            auto candidate = b.substr(a.size());
-            candidates[candidate] += 1 + multiplier[candidate];
-        }
-        std::string best_candidate = "    ";
-        size_t best_result = 0;
-        for (auto [k, v] : candidates) {
-            if (v > best_result) {
-                best_result = v;
-                best_candidate = k;
-            }
-        }
-        return best_candidate;
-    };
-
-    auto indentation = detect_indentation(before);
-
-    if (options.verbose) {
-        std::cerr << "Detected indentation ";
-        std::cerr << indentation.size() << " ";
-        std::cerr << (indentation[0] == ' ' ? "space" : "tab");
-        std::cerr << std::endl;
-    }
-
-    auto string_has_only_whitespace = [](const auto& str) {
-        return std::all_of(str.begin(), str.end(),
-                           [](char c) { return std::isspace(c) != 0; });
-    };
-
-    auto after_lines = utils::line_split(after);
     auto before_lines = utils::line_split(before);
+    auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
-    auto line_terminator = detect_line_terminator(before);
-    std::string processed;
+    auto indentation = utils::detect_indentation(before);
+    std::string result;
     for (size_t i = 0; i < after_lines.size(); i++) {
-        if (!lcs[i]) {
-            if (string_has_only_whitespace(after_lines[i])) {
-                continue;
+        auto& line = after_lines[i];
+        if (i > 0 && !lcs[i] && utils::find_first_non_space(line) == line.begin()) {
+            auto prev_line = after_lines[i - 1];
+            // get indent from previous line
+            auto new_indent = prev_line.substr(0, utils::find_first_non_space(prev_line) - prev_line.begin());
+            // increase indent if previous line has an open bracket
+            if (bracket_balance(prev_line) > 0) {
+                new_indent += indentation;
             }
-            if (line_terminator == "\r\n") {
-                if (!utils::ends_with(after_lines[i], "\r\n")) {
-                    // remove newline
-                    after_lines[i].pop_back();
-                    // add crlf
-                    after_lines[i] += "\r\n";
-                }
+            // decrease indent if we have closing bracket
+            if (bracket_balance(after_lines[i]) < 0) {
+                new_indent = new_indent.substr(
+                    std::min(indentation.size(), new_indent.size()));
             }
-            // auto-indent
-            if (i > 0 && find_first_non_space(after_lines[i]) ==
-                             after_lines[i].begin()) {
-                auto prev_line = after_lines[i - 1];
-                // get indent from previous line
-                auto new_indent = prev_line.substr(
-                    0, find_first_non_space(prev_line) - prev_line.begin());
-                // increase indent if previous line has an open bracket
-                if (bracket_balance(prev_line) > 0) {
-                    new_indent += indentation;
-                }
-                // decrease indent if we have closing bracket
-                if (bracket_balance(after_lines[i]) < 0) {
-                    new_indent = new_indent.substr(
-                        std::min(indentation.size(), new_indent.size()));
-                }
-                after_lines[i] = new_indent + after_lines[i];
+            line = new_indent + line;
+        }
+        result += line;
+    }
+    return result;
+}
+
+static std::string post_process_sort_imports(std::string before, std::string after) {
+    auto before_lines = utils::line_split(before);
+    auto after_lines = utils::line_split(after);
+    auto lcs = nway::lcs(after_lines, before_lines);
+    std::vector<std::string> result;
+    std::vector<std::string> imports;
+    bool other_imports = false;
+    size_t last_import_at = 0;
+    for (size_t i = 0; i < after_lines.size(); i++) {
+        if (!lcs[i] && utils::starts_with(after_lines[i], "import")) {
+            imports.emplace_back(after_lines[i]);
+        } else {
+            if (utils::starts_with(after_lines[i], "import")) {
+                other_imports = true;
+                last_import_at = i - imports.size();
+            }
+            result.emplace_back(after_lines[i]);
+        }
+    }
+    if (!other_imports) {
+        return after;
+    }
+    std::sort(imports.begin(), imports.end());
+    for (auto import : imports) {
+        for (size_t i = 0; i < result.size(); i++) {
+            if (utils::starts_with(result[i], "import") && import < result[i]) {
+                result.insert(result.begin() + i, import);
+                break;
+            }
+            if (i > 0 && utils::starts_with(result[i-1], "import") && !utils::starts_with(result[i], "import") && import > result[i]) {
+                result.insert(result.begin() + i, import);
+                break;
             }
         }
-        processed += after_lines[i];
     }
-    return processed;
+    std::string result_str;
+    for (auto x : result) result_str += x;
+    return result_str;
+}
+
+static std::string post_process(std::string before, std::string after,
+                                const options_t& options) {
+    after = post_process_remove_introduced_empty_lines(before, after);
+    after = post_process_harmonize_line_terminators(before, after);
+    after = post_process_auto_indent(before, after);
+    after = post_process_sort_imports(before, after);
+    return after;
 }
 
 std::map<std::string, std::string> get_results(const patch_collection& patches,
