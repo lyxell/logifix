@@ -100,12 +100,16 @@ std::string apply_rewrite(const std::string& original, const std::tuple<size_t, 
 std::vector<std::tuple<size_t, size_t, std::string>> split_rewrite(const std::string& original, const std::tuple<size_t, size_t, std::string>& rewrite) {
     std::vector<std::tuple<size_t, size_t, std::string>> result;
     auto [start, end, replacement] = rewrite;
-    auto before = original.substr(start, end);
-    auto after = replacement;
-    auto lcs = nway::lcs(before, after);
+    auto a = original.substr(start, end - start);
+    auto b = replacement;
+    std::cerr << "LCS" << std::endl;
+    std::cerr << a.size() << " " << b.size() << std::endl;
+    auto lcs = nway::lcs(a, b);
+    std::cerr << "LCS DONE" << std::endl;
     size_t a_pos = 0;
     size_t b_pos = 0;
     while (a_pos < a.size() || b_pos < b.size()) {
+        std::cerr << "LOOPING" << std::endl;
         /* a and b agree */
         while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] == b_pos) {
             a_pos++;
@@ -118,18 +122,17 @@ std::vector<std::tuple<size_t, size_t, std::string>> split_rewrite(const std::st
             a_pos++;
         }
         /* a has matching position but it is not that of b_pos */
-        while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] != b_pos) {
+        while ((a_pos == a.size() && b_pos < b.size()) || (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] != b_pos)) {
             b_pos++;
         }
         if (a_start != a_pos || b_start != b_pos) {
-            result.emplace_back(start + a_start, start + a_pos, after.substr(b_start, b_pos));
+            result.emplace_back(start + a_start, start + a_pos, b.substr(b_start, b_pos - b_start));
         }
     }
     return result;
 }
 
 std::optional<std::string> get_recursive_merge_result_for_node(node_id node) {
-
 
     /* Base case: no transitions from node */
     if (taken_transitions[node].empty()) {
@@ -204,18 +207,20 @@ void print_performance_metrics() {
 }
 
 void run(std::function<void(node_id)> report_progress) {
-    auto const concurrency = std::thread::hardware_concurrency();
+    auto const concurrency = 1;
     waiting_threads = 0;
     bool done = false;
     for (size_t i = 0; i < concurrency; i++) {
         thread_pool.emplace_back(std::thread([&] {
             while (true) {
+                std::cerr << "NEW NODE" << std::endl;
                 node_id current_node;
                 std::string current_node_source;
                 /* acquire work */
                 {
                     std::unique_lock<std::mutex> lock(work_mutex);
                     if (pending_strings.empty() && pending_files.empty()) {
+                        std::cerr << "WAITING" << std::endl;
                         waiting_threads++;
                         if (waiting_threads == concurrency) {
                             done = true;
@@ -227,6 +232,7 @@ void run(std::function<void(node_id)> report_progress) {
                             cv.wait(lock, wakeup_when);
                             waiting_threads--;
                         }
+                        std::cerr << "DONE WAITING" << std::endl;
                     }
                     if (done) {
                         return;
@@ -246,7 +252,9 @@ void run(std::function<void(node_id)> report_progress) {
                 std::vector<std::tuple<node_id, rule_id>> next_nodes;
 
                 {
+                    std::cerr << "GET PATCH" << std::endl;
                     auto rewrites = get_patches(current_node_source);
+                    std::cerr << "GOT PATCH" << std::endl;
                     std::unique_lock<std::mutex> lock(work_mutex);
                     for (const auto& [rule, rewrite] : rewrites) {
                         auto next_node = create_id(current_node_source, rewrite);
@@ -277,15 +285,18 @@ void run(std::function<void(node_id)> report_progress) {
                             goto done;
                         }
 
-                        lock.unlock();
-
                         const auto& [curr_start, curr_end, curr_replacement] = curr_rewrite;
                         const auto& [next_start, next_end, next_replacement] = next_rewrite;
 
                         /* If segments overlap we try to split them into smaller pieces */
                         if (segments_overlap<size_t>({curr_start, curr_end}, {next_start, next_end})) {
-                            auto curr_split = split_rewrite(curr_pstr, apply_rewrite(curr_pstr, curr_rewrite));
-                            auto next_split = split_rewrite(curr_pstr, apply_rewrite(curr_pstr, next_rewrite));
+                            std::cerr << "SPLITTING" << std::endl;
+                            std::cerr << "START " << curr_start << std::endl;
+                            std::cerr << "END " << curr_end << std::endl;
+                            std::cerr << "REPLACEMENT " << curr_replacement << std::endl;
+                            auto curr_split = split_rewrite(curr_pstr, curr_rewrite);
+                            auto next_split = split_rewrite(next_pstr, next_rewrite);
+                            std::cerr << "SPLITTING PROC. DONE" << std::endl;
                             bool overlap = false;
                             for (auto x : curr_split) {
                                 for (auto y : next_split) {
@@ -296,19 +307,49 @@ void run(std::function<void(node_id)> report_progress) {
                                     }
                                 }
                             }
+                            /* If there is still overlap, we need to take the transition */
                             if (!overlap) {
-                                for (auto& y : next_split) {
-                                    for (auto& x : prev_split) {
+                                std::cerr << "SPLITTING WORKED" << std::endl;
+                                std::cerr << "BEFORE" << std::endl;
+                                std::cerr << curr_start << " " << curr_end << " " << curr_replacement.size() << " " << curr_replacement << std::endl;
+                                std::cerr << "AFTER" << std::endl;
+                                for (auto x : curr_split) {
+                                    std::cerr << std::get<0>(x) << " " << std::get<1>(x) << " " << std::get<2>(x) << std::endl;
+                                }
+                                std::cerr << "------" << std::endl;
+                                std::cerr << "BEFORE" << std::endl;
+                                std::cerr << next_start << " " << next_end << " " << next_replacement << std::endl;
+                                std::cerr << "AFTER" << std::endl;
+                                for (auto x : next_split) {
+                                    std::cerr << std::get<0>(x) << " " << std::get<1>(x) << " " << std::get<2>(x) << std::endl;
+                                }
+                                /* Adjust rewrites of curr_rewrite */
+                                for (auto& x : curr_split) {
+                                    int diff = 0;
+                                    for (const auto& y : next_split) {
+                                        /* If rewrite y starts before rewrite x we need to adjust x */
                                         if (std::get<0>(y) < std::get<0>(x)) {
-                                            auto diff = size_t(std::get<2>(y).size() - int(std::get<1>(y) - std::get<0>(y)));
-                                            std::get<0>(x) -= diff;
-                                            std::get<1>(x) -= diff;
+                                            diff += std::get<2>(y).size() - int(std::get<1>(y) - std::get<0>(y));
                                         }
                                     }
+                                    std::get<0>(x) -= diff;
+                                    std::get<1>(x) -= diff;
                                 }
-                                /* apply split rewrite */
+                                /* sort rewrites in reverse so we can apply them one by one */
+                                std::sort(curr_split.begin(), curr_split.end(), [](const auto& a, const auto& b) {
+                                    return std::get<0>(a) > std::get<0>(b);
+                                });
+                                auto candidate_string = curr_pstr;
+                                for (const auto& x : next_split) {
+                                    std::cerr << "APPLYING REWRITE" << std::endl;
+                                    candidate_string = apply_rewrite(curr_pstr, x);
+                                }
+                                if (children_strs[parent_id][rule].find(candidate_string) != children_strs[parent_id][rule].end()) {
+                                    take_transition = false;
+                                }
                             }
                         } else {
+                            std::cerr << "NO NEED FOR SPLITTING" << std::endl;
                             std::string candidate_string;
                             /**
                              * Is the next_rewrite before the curr_rewrite?
@@ -316,8 +357,12 @@ void run(std::function<void(node_id)> report_progress) {
                              * to be made.
                              */
                             if (next_end < curr_start) {
+                                std::cerr << "NO ADJUSTMENT" << std::endl;
                                 candidate_string = apply_rewrite(curr_pstr, next_rewrite);
+                                auto [a, b, repl] = next_rewrite;
+                                std::cerr << repl << std::endl;
                             } else {
+                                std::cerr << "ADJUSTMENT" << std::endl;
                                 /**
                                  * In this branch next_rewrite occurs after curr_rewrite.
                                  * We need to adjust its positions.
@@ -326,7 +371,6 @@ void run(std::function<void(node_id)> report_progress) {
                                 candidate_string = apply_rewrite(curr_pstr, {next_start - diff, next_end - diff, next_replacement});
                             }
 
-                            lock.lock();
                             if (children_strs[parent_id][rule].find(candidate_string) != children_strs[parent_id][rule].end()) {
                                 take_transition = false;
                             }
@@ -335,6 +379,7 @@ void run(std::function<void(node_id)> report_progress) {
 
                     }
 done:
+                    std::cerr << "DONE" << std::endl;
                     if (!current_has_parent && disabled_rules.find(rule) != disabled_rules.end()) {
                         take_transition = false;
                     }
@@ -346,6 +391,7 @@ done:
                     }
                     timer::stop(creation_timer);
                 }
+                std::cerr << "DONE WITH NODE" << std::endl;
 
                 /* notify all threads that there is more work available */
                 cv.notify_all();
