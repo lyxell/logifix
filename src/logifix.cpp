@@ -207,7 +207,7 @@ void print_performance_metrics() {
 }
 
 void run(std::function<void(node_id)> report_progress) {
-    auto const concurrency = 1;
+    auto const concurrency = std::thread::hardware_concurrency();
     waiting_threads = 0;
     bool done = false;
     for (size_t i = 0; i < concurrency; i++) {
