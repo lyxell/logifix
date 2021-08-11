@@ -281,17 +281,26 @@ std::vector<patch_id> get_patches_for_rule(rule_id rule) {
     return result;
 }
 
+std::tuple<rule_id, node_id, std::string> get_patch_data(patch_id patch) {
+    auto [r, p] = parent[patch];
+    return {r, p, get_recursive_merge_result_for_node(patch)};
+}
+
 std::string get_result(node_id parent, std::vector<patch_id> patches) {
     auto [parent_pstr, parent_rewrites] = nodes[parent];
     auto parent_source = apply_rewrites(parent_pstr, parent_rewrites);
     rewrite_collection all_rewrites;
     for (auto patch : patches) {
+        auto data = get_patch_data(patch);
+        std::cerr << std::get<0>(data) << std::endl;
         auto result = get_recursive_merge_result_for_node(patch);
         auto rewrites = split_rewrite(
             parent_source, std::tuple(0ul, parent_source.size(), result));
         all_rewrites.insert(all_rewrites.end(), rewrites.begin(),
                             rewrites.end());
     }
+    std::sort(all_rewrites.begin(), all_rewrites.end());
+    all_rewrites.erase(std::unique( all_rewrites.begin(), all_rewrites.end() ), all_rewrites.end());
     if (rewrite_collection_overlap(all_rewrites)) {
         std::cerr << "MERGING FAILED" << std::endl;
         std::sort(all_rewrites.begin(), all_rewrites.end());
@@ -302,11 +311,6 @@ std::string get_result(node_id parent, std::vector<patch_id> patches) {
     }
     return post_process(parent_source,
                         apply_rewrites(parent_source, all_rewrites));
-}
-
-std::tuple<rule_id, node_id, std::string> get_patch_data(patch_id patch) {
-    auto [r, p] = parent[patch];
-    return {r, p, get_recursive_merge_result_for_node(patch)};
 }
 
 std::vector<patch_id> get_all_patches() {
