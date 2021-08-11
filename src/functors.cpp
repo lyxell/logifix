@@ -3,8 +3,7 @@
 
 extern "C" {
 souffle::RamDomain decrease_indentation(souffle::SymbolTable* symbolTable,
-                                        souffle::RecordTable* recordTable,
-                                        souffle::RamDomain arg) {
+                                        souffle::RecordTable* recordTable, souffle::RamDomain arg) {
     const std::string& str = symbolTable->decode(arg);
     auto lines = utils::line_split(str);
     std::string result;

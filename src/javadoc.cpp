@@ -66,15 +66,14 @@ std::vector<std::string> get_classes_from_link(std::string s) {
  */
 std::set<std::string> get_classes(std::string s) {
     std::set<std::string> result;
-    for (auto [idx, regex] : {std::pair(2, JAVADOC_LINK_REGEX),
-                              std::pair(2, JAVADOC_SEE_THROWS_REGEX)}) {
+    for (auto [idx, regex] :
+         {std::pair(2, JAVADOC_LINK_REGEX), std::pair(2, JAVADOC_SEE_THROWS_REGEX)}) {
         auto words_begin = std::sregex_iterator(s.begin(), s.end(), regex);
         auto words_end = std::sregex_iterator();
         for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
             std::smatch match = *i;
             for (auto class_name : get_classes_from_link(match[idx])) {
-                class_name.erase(std::remove_if(class_name.begin(),
-                                                class_name.end(), ::isspace),
+                class_name.erase(std::remove_if(class_name.begin(), class_name.end(), ::isspace),
                                  class_name.end());
                 if (!class_name.empty()) {
                     result.emplace(class_name);

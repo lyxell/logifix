@@ -14,11 +14,12 @@
 #include <nway.h>
 #include <set>
 #include <stack>
+#include <string>
 #include <thread>
 #include <tuple>
+#include <unordered_map>
 
-extern std::unordered_map<
-    std::string, std::tuple<std::string, std::string, std::string, bool>>
+extern std::unordered_map<std::string, std::tuple<std::string, std::string, std::string, bool>>
     rule_data;
 
 namespace cli {
@@ -26,8 +27,7 @@ namespace cli {
 using namespace std::string_literals;
 namespace fs = std::filesystem;
 
-using patch_collection =
-    std::vector<std::tuple<std::string, std::string, std::string, bool>>;
+using patch_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
 struct options {
     bool accept_all;
@@ -41,11 +41,11 @@ struct options {
 
 enum class key { down, left, ret, right, up, unknown };
 
-const char* TTY_CLEAR_TO_EOL = "\033[K";
-const char* TTY_CURSOR_UP = "\033[A";
-const char* TTY_HIDE_CURSOR = "\033[?25l";
-const char* TTY_SHOW_CURSOR = "\033[?25h";
-const char* TTY_MOVE_TO_BOTTOM = "\033[9999;1H";
+const std::string TTY_CLEAR_TO_EOL = "\033[K";
+const std::string TTY_CURSOR_UP = "\033[A";
+const std::string TTY_HIDE_CURSOR = "\033[?25l";
+const std::string TTY_SHOW_CURSOR = "\033[?25h";
+const std::string TTY_MOVE_TO_BOTTOM = "\033[9999;1H";
 
 std::string replace_tabs_with_spaces(const std::string& str) {
     std::string result;
@@ -59,8 +59,7 @@ std::string replace_tabs_with_spaces(const std::string& str) {
     return result;
 }
 
-std::vector<std::string> create_patch(const std::string& filename,
-                                      const std::string& before,
+std::vector<std::string> create_patch(const std::string& filename, const std::string& before,
                                       const std::string& after) {
     auto a = utils::line_split(before);
     auto b = utils::line_split(after);
@@ -96,8 +95,8 @@ std::vector<std::string> create_patch(const std::string& filename,
     int context = 3;
     for (int i = 0; i < changes.size(); i++) {
         auto& [keep, marker, line] = changes[i];
-        for (int j = std::max(0, i - context);
-             j < std::min(int(changes.size()), i + context + 1); j++) {
+        for (int j = std::max(0, i - context); j < std::min(int(changes.size()), i + context + 1);
+             j++) {
             if (std::get<1>(changes[j]) != ' ') {
                 keep = true;
             }
@@ -105,8 +104,7 @@ std::vector<std::string> create_patch(const std::string& filename,
     }
     /* create patch output */
     std::vector<std::string> result;
-    result.emplace_back(
-        fmt::format("diff --git a/{} b/{}", filename, filename));
+    result.emplace_back(fmt::format("diff --git a/{} b/{}", filename, filename));
     size_t a_pos_output = 1;
     size_t b_pos_output = 1;
     for (int i = 0; i < changes.size(); i++) {
@@ -143,11 +141,10 @@ std::vector<std::string> create_patch(const std::string& filename,
             hunk_end++;
         }
         /* output header */
-        result.emplace_back(fmt::format("@@ -{},{} +{},{} @@", a_start, a_lines,
-                                        b_start, b_lines));
+        result.emplace_back(fmt::format("@@ -{},{} +{},{} @@", a_start, a_lines, b_start, b_lines));
         while (i < changes.size() && std::get<0>(changes[i])) {
-            result.emplace_back(fmt::format("{}{}", std::get<1>(changes[i]),
-                                            std::get<2>(changes[i])));
+            result.emplace_back(
+                fmt::format("{}{}", std::get<1>(changes[i]), std::get<2>(changes[i])));
             i++;
         }
         i--;
@@ -179,8 +176,7 @@ std::vector<std::string> prettify_patch(const std::vector<std::string>& lines) {
             if (seen_header_before) {
                 columns.emplace_back("...", "");
             }
-            line_number =
-                std::stoi(line.substr(line.find('-') + 1, line.find(',')));
+            line_number = std::stoi(line.substr(line.find('-') + 1, line.find(',')));
             seen_header_before = true;
             break;
         default:
@@ -197,11 +193,11 @@ std::vector<std::string> prettify_patch(const std::vector<std::string>& lines) {
     const auto* format = "  {0:>{2}} {1}";
     for (auto& [l, r] : columns) {
         if (l == "+") {
-            result.emplace_back(fmt::format(fg(fmt::terminal_color::green),
-                                            format, l, r, left_column_size));
+            result.emplace_back(
+                fmt::format(fg(fmt::terminal_color::green), format, l, r, left_column_size));
         } else if (l == "-") {
-            result.emplace_back(fmt::format(fg(fmt::terminal_color::red),
-                                            format, l, r, left_column_size));
+            result.emplace_back(
+                fmt::format(fg(fmt::terminal_color::red), format, l, r, left_column_size));
         } else {
             result.emplace_back(fmt::format(format, l, r, left_column_size));
         }
@@ -272,8 +268,7 @@ options parse_options(int argc, char** argv) {
         .accepted = {},
     };
 
-    std::vector<std::tuple<std::string, std::function<void(const std::string&)>,
-                           std::string>>
+    std::vector<std::tuple<std::string, std::function<void(const std::string&)>, std::string>>
         flags;
 
     auto print_version_and_exit = []() {
@@ -289,8 +284,7 @@ options parse_options(int argc, char** argv) {
     auto print_flags = [&flags]() {
         fmt::print(fmt::emphasis::bold, "FLAGS\n");
         for (const auto& [option, _, description] : flags) {
-            std::cout << " " << std::setw(19) << std::left << option
-                      << description << std::endl;
+            std::cout << " " << std::setw(19) << std::left << option << description << std::endl;
         }
         std::cout << std::endl;
     };
@@ -298,9 +292,7 @@ options parse_options(int argc, char** argv) {
     auto print_examples = []() {
         fmt::print(fmt::emphasis::bold, "EXAMPLES\n\n");
         fmt::print("  {} src/main src/test\n\n", PROJECT_NAME);
-        fmt::print(
-            "  {} src/main --in-place --accept=S1125,S1155 Test.java\n\n",
-            PROJECT_NAME);
+        fmt::print("  {} src/main --in-place --accept=S1125,S1155 Test.java\n\n", PROJECT_NAME);
     };
 
     auto parse_accepted = [&](const std::string& str) {
@@ -313,14 +305,11 @@ options parse_options(int argc, char** argv) {
     };
 
     flags = {
-        {"--accept-all",
-         [&](const std::string& str) { opts.accept_all = true; },
+        {"--accept-all", [&](const std::string& str) { opts.accept_all = true; },
          "Accept all patches without asking"},
-        {"--accept=<rules>",
-         [&](const std::string& str) { parse_accepted(str); },
+        {"--accept=<rules>", [&](const std::string& str) { parse_accepted(str); },
          "Comma-separated list of rules to accept"},
-        {"--enable-all",
-         [&](const std::string& str) { opts.enable_all = true; },
+        {"--enable-all", [&](const std::string& str) { opts.enable_all = true; },
          "Enable rules that are disabled by default"},
         {"--in-place", [&](const std::string& str) { opts.in_place = true; },
          "Disable interaction, rewrite files on disk"},
@@ -393,8 +382,7 @@ options parse_options(int argc, char** argv) {
             std::exit(1);
         }
         if (fs::is_directory(argument)) {
-            for (const auto& entry :
-                 fs::recursive_directory_iterator(argument)) {
+            for (const auto& entry : fs::recursive_directory_iterator(argument)) {
                 if (!entry.is_regular_file()) {
                     continue;
                 }
@@ -405,8 +393,7 @@ options parse_options(int argc, char** argv) {
                 opts.files.emplace(entry.path().lexically_normal());
             }
         } else {
-            opts.files.emplace(
-                fs::path(std::move(argument)).lexically_normal());
+            opts.files.emplace(fs::path(std::move(argument)).lexically_normal());
         }
         arguments.pop_back();
     }
@@ -414,8 +401,7 @@ options parse_options(int argc, char** argv) {
     return opts;
 }
 
-int multi_choice(const std::string& question,
-                 const std::vector<std::string>& alternatives,
+int multi_choice(const std::string& question, const std::vector<std::string>& alternatives,
                  bool exit_on_left = false) {
     tty::enable_cbreak_mode();
 #ifndef NDEBUG
@@ -438,8 +424,7 @@ int multi_choice(const std::string& question,
         } else if (cursor != -1 && cursor == scroll + HEIGHT) {
             scroll = cursor - HEIGHT + 1;
         }
-        for (auto i = scroll;
-             i < std::min(alternatives.size(), scroll + HEIGHT); i++) {
+        for (auto i = scroll; i < std::min(alternatives.size(), scroll + HEIGHT); i++) {
             if (cursor == i) {
                 fmt::print("\n> {}", alternatives[i]);
             } else {
@@ -453,8 +438,7 @@ int multi_choice(const std::string& question,
             tty::disable_cbreak_mode();
             return cursor;
         }
-        for (auto i = scroll;
-             i < std::min(alternatives.size(), scroll + HEIGHT); i++) {
+        for (auto i = scroll; i < std::min(alternatives.size(), scroll + HEIGHT); i++) {
             std::cout << TTY_CURSOR_UP;
         }
         auto key_press = get_keypress();
@@ -472,8 +456,8 @@ int multi_choice(const std::string& question,
     return 0;
 }
 
-std::string post_process_remove_introduced_empty_lines(std::string before,
-                                                       std::string after) {
+std::string post_process_remove_introduced_empty_lines(const std::string& before,
+                                                       const std::string& after) {
     auto before_lines = utils::line_split(before);
     auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
@@ -493,8 +477,7 @@ std::string post_process_harmonize_line_terminators(const std::string& before,
     std::string result;
     for (auto line : utils::line_split(after)) {
         if (line_terminator == "\r\n") {
-            if (utils::ends_with(line, "\n") &&
-                !utils::ends_with(line, "\r\n")) {
+            if (utils::ends_with(line, "\n") && !utils::ends_with(line, "\r\n")) {
                 line.pop_back();
                 line += "\r\n";
             }
@@ -504,8 +487,7 @@ std::string post_process_harmonize_line_terminators(const std::string& before,
     return result;
 }
 
-std::string post_process_auto_indent(std::string before,
-                                     const std::string& after) {
+std::string post_process_auto_indent(const std::string& before, const std::string& after) {
     auto bracket_balance = [](const std::string& str) {
         int result = 0;
         for (char c : str) {
@@ -524,20 +506,18 @@ std::string post_process_auto_indent(std::string before,
     std::string result;
     for (size_t i = 0; i < after_lines.size(); i++) {
         auto& line = after_lines[i];
-        if (i > 0 && !lcs[i] &&
-            utils::find_first_non_space(line) == line.begin()) {
+        if (i > 0 && !lcs[i] && utils::find_first_non_space(line) == line.begin()) {
             auto prev_line = after_lines[i - 1];
             // get indent from previous line
-            auto new_indent = prev_line.substr(
-                0, utils::find_first_non_space(prev_line) - prev_line.begin());
+            auto new_indent =
+                prev_line.substr(0, utils::find_first_non_space(prev_line) - prev_line.begin());
             // increase indent if previous line has an open bracket
             if (bracket_balance(prev_line) > 0) {
                 new_indent += indentation;
             }
             // decrease indent if we have closing bracket
             if (bracket_balance(after_lines[i]) < 0) {
-                new_indent = new_indent.substr(
-                    std::min(indentation.size(), new_indent.size()));
+                new_indent = new_indent.substr(std::min(indentation.size(), new_indent.size()));
             }
             line = new_indent + line;
         }
@@ -546,7 +526,7 @@ std::string post_process_auto_indent(std::string before,
     return result;
 }
 
-std::string post_process_sort_imports(std::string before, std::string after) {
+std::string post_process_sort_imports(const std::string& before, std::string after) {
     auto before_lines = utils::line_split(before);
     auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
@@ -576,8 +556,7 @@ std::string post_process_sort_imports(std::string before, std::string after) {
                 break;
             }
             if (i > 0 && utils::starts_with(result[i - 1], "import") &&
-                !utils::starts_with(result[i], "import") &&
-                import > result[i]) {
+                !utils::starts_with(result[i], "import") && import > result[i]) {
                 result.insert(result.begin() + i, import);
                 break;
             }
@@ -598,9 +577,9 @@ std::string post_process(const std::string& before, std::string after) {
     return after;
 }
 
-std::map<std::string, std::string> get_results(
-    const std::set<logifix::patch_id>& accepted_patches,
-    const std::unordered_map<logifix::node_id, std::string>& filename_of_node) {
+std::map<std::string, std::string>
+get_results(const std::set<logifix::patch_id>& accepted_patches,
+            const std::unordered_map<logifix::node_id, std::string>& filename_of_node) {
     std::map<std::string, std::string> results;
     for (auto [id, filename] : filename_of_node) {
         std::vector<logifix::patch_id> accepted_patches_for_file;
@@ -661,31 +640,28 @@ int main(int argc, char** argv) {
         count++;
         int progress = int((double(count) / double(options.files.size())) * 40);
         int progress_full = 40;
-        fmt::print(stderr, "\r[{2:=^{0}}{2: ^{1}}] {3}/{4}", progress,
-                   progress_full - progress, "", count, options.files.size());
+        fmt::print(stderr, "\r[{2:=^{0}}{2: ^{1}}] {3}/{4}", progress, progress_full - progress, "",
+                   count, options.files.size());
     });
 
     // logifix::print_performance_metrics();
 
-    auto review = [&options, &accepted_patches, &filename_of_node](
-                      logifix::patch_id patch, size_t curr, size_t total) {
+    auto review = [&options, &accepted_patches, &filename_of_node](logifix::patch_id patch,
+                                                                   size_t curr, size_t total) {
         // auto& [filename, rule, after, accepted] = rw;
         auto [rule, node_id, after] = logifix::get_patch_data(patch);
         auto filename = filename_of_node[node_id];
-        fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total,
-                   filename);
+        fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total, filename);
         std::string before = cli::read_file(filename);
-        auto diff = cli::create_patch(filename, before,
-                                      cli::post_process(before, after));
+        auto diff = cli::create_patch(filename, before, cli::post_process(before, after));
         if (!diff.empty()) {
             for (const auto& line : cli::prettify_patch(diff)) {
                 std::cout << line << std::endl;
             }
         }
         std::cout << std::endl;
-        auto choice =
-            cli::multi_choice("What would you like to do?",
-                              {"Accept this patch", "Reject this patch"}, true);
+        auto choice = cli::multi_choice("What would you like to do?",
+                                        {"Accept this patch", "Reject this patch"}, true);
         if (choice == -1) {
             return false;
         }
@@ -701,32 +677,28 @@ int main(int argc, char** argv) {
 
         while (true) {
 
-            int selection;
+            int selection{};
 
             if (!accepted_patches.empty()) {
                 fmt::print(fmt::emphasis::bold, "\nSelected {}/{} patches\n\n",
-                           accepted_patches.size(),
-                           logifix::get_all_patches().size());
-                selection = cli::multi_choice(
-                    "What would you like to do?",
-                    {
-                        "Review patches by rule",
-                        "Show a diff of the current changes",
-                        "Apply changes to files on disk and exit",
-                        "Discard changes and exit",
-                    });
+                           accepted_patches.size(), logifix::get_all_patches().size());
+                selection = cli::multi_choice("What would you like to do?",
+                                              {
+                                                  "Review patches by rule",
+                                                  "Show a diff of the current changes",
+                                                  "Apply changes to files on disk and exit",
+                                                  "Discard changes and exit",
+                                              });
 
                 if (selection == 1) {
                     auto* fp = popen("less -R", "w");
                     if (fp != nullptr) {
-                        for (auto [filename, after] : cli::get_results(
-                                 accepted_patches, filename_of_node)) {
+                        for (auto [filename, after] :
+                             cli::get_results(accepted_patches, filename_of_node)) {
                             fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = cli::read_file(filename);
-                            auto patch =
-                                cli::create_patch(filename, before, after);
-                            for (const auto& line :
-                                 cli::prettify_patch(patch)) {
+                            auto patch = cli::create_patch(filename, before, after);
+                            for (const auto& line : cli::prettify_patch(patch)) {
                                 fputs(line.c_str(), fp);
                                 fputs("\n", fp);
                             }
@@ -742,10 +714,8 @@ int main(int argc, char** argv) {
                     break;
                 }
             } else {
-                fmt::print(fmt::emphasis::bold,
-                           "\n\nAnalyzed {} files and found {} patches\n\n",
-                           options.files.size(),
-                           logifix::get_all_patches().size());
+                fmt::print(fmt::emphasis::bold, "\n\nAnalyzed {} files and found {} patches\n\n",
+                           options.files.size(), logifix::get_all_patches().size());
 
                 if (logifix::get_all_patches().empty()) {
                     break;
@@ -763,9 +733,7 @@ int main(int argc, char** argv) {
 
             while (true) {
                 if (selection == 0) {
-                    std::vector<
-                        std::tuple<std::string, std::string, std::string>>
-                        columns;
+                    std::vector<std::tuple<std::string, std::string, std::string>> columns;
                     for (auto [rule, data] : rule_data) {
                         auto [sqid, pmdid, description, disabled] = data;
                         std::vector<logifix::patch_id> patches =
@@ -776,35 +744,31 @@ int main(int argc, char** argv) {
                         size_t accepted_count = std::count_if(
                             patches.begin(), patches.end(),
                             [&accepted_patches](logifix::patch_id patch) {
-                                return accepted_patches.find(patch) !=
-                                       accepted_patches.end();
+                                return accepted_patches.find(patch) != accepted_patches.end();
                             });
                         if (accepted_count > 0) {
+                            columns.emplace_back(rule, description,
+                                                 fmt::format(fg(fmt::terminal_color::green),
+                                                             "{}/{}", accepted_count,
+                                                             patches.size()));
+                        } else {
                             columns.emplace_back(
                                 rule, description,
-                                fmt::format(fg(fmt::terminal_color::green),
-                                            "{}/{}", accepted_count,
-                                            patches.size()));
-                        } else {
-                            columns.emplace_back(rule, description,
-                                                 fmt::format("{}/{}",
-                                                             accepted_count,
-                                                             patches.size()));
+                                fmt::format("{}/{}", accepted_count, patches.size()));
                         }
                     }
                     size_t left_column_width = 0;
                     for (auto [rule, l, r] : columns) {
-                        left_column_width =
-                            std::max(left_column_width, l.size());
+                        left_column_width = std::max(left_column_width, l.size());
                     }
                     std::vector<std::string> options;
                     options.reserve(columns.size());
                     for (auto [rule, l, r] : columns) {
-                        options.emplace_back(fmt::format("{0:<{2}}    {1}", l,
-                                                         r, left_column_width));
+                        options.emplace_back(
+                            fmt::format("{0:<{2}}    {1}", l, r, left_column_width));
                     }
-                    auto rule_selection = cli::multi_choice(
-                        "Which rule would you like to review?", options, true);
+                    auto rule_selection =
+                        cli::multi_choice("Which rule would you like to review?", options, true);
                     if (rule_selection == -1) {
                         break;
                     }
@@ -827,7 +791,7 @@ int main(int argc, char** argv) {
                 accepted_patches.insert(patch);
             }
         } else if (!options.accepted.empty()) {
-            for (auto& rule : options.accepted) {
+            for (const auto& rule : options.accepted) {
                 for (auto patch : logifix::get_patches_for_rule(rule)) {
                     accepted_patches.insert(patch);
                 }
@@ -835,8 +799,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    for (auto [filename, after] :
-         cli::get_results(accepted_patches, filename_of_node)) {
+    for (auto [filename, after] : cli::get_results(accepted_patches, filename_of_node)) {
         if (options.in_place) {
             std::ofstream f(filename);
             f << after;

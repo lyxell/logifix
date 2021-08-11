@@ -8,11 +8,12 @@ std::vector<std::string> line_split(const std::string& str) {
     auto view = std::string_view{str};
     std::vector<std::string> result;
     while (!view.empty()) {
-        size_t i;
-        for (i = 0; i < view.size() - 1; i++) {
+        size_t i = 0;
+        while (i < view.size() - 1) {
             if (view[i] == '\n') {
                 break;
             }
+            i++;
         }
         result.emplace_back(view.substr(0, i + 1));
         view = view.substr(i + 1);
@@ -25,35 +26,32 @@ bool starts_with(const std::string& str, const std::string& prefix) {
 }
 
 bool ends_with(const std::string& str, const std::string& suffix) {
-    return str.size() >= suffix.size() &&
-           str.substr(str.size() - suffix.size()) == suffix;
+    return str.size() >= suffix.size() && str.substr(str.size() - suffix.size()) == suffix;
 }
 
 std::string rtrim(std::string s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(),
-                         [](auto c) { return !std::isspace(c); })
-                .base(),
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](auto c) { return !std::isspace(c); }).base(),
             s.end());
     return s;
 }
 
 bool string_has_only_whitespace(const std::string& str) {
-    return std::all_of(str.begin(), str.end(),
-                       [](char c) { return std::isspace(c) != 0; });
+    return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
 }
 
 std::string::const_iterator find_first_non_space(const std::string& str) {
-    return std::find_if(str.begin(), str.end(),
-                        [](char c) { return std::isspace(c) == 0; });
+    return std::find_if(str.begin(), str.end(), [](char c) { return std::isspace(c) == 0; });
 }
 
 std::string detect_indentation(const std::string& str) {
+    const auto TWO_SPACE_MULTIPLIER = 0.5;
+    const auto FOUR_SPACE_MULTIPLIER = 0.25;
+    const auto TAB_MULTIPLIER = 0.5;
     auto lines = utils::line_split(str);
     std::vector<std::string> indentations;
     for (auto line : lines) {
         auto first_non_space_at = utils::find_first_non_space(line);
-        if (first_non_space_at == line.end() ||
-            first_non_space_at == line.begin()) {
+        if (first_non_space_at == line.end() || first_non_space_at == line.begin()) {
             continue;
         }
         auto indent = line.substr(0, first_non_space_at - line.begin());
@@ -68,7 +66,7 @@ std::string detect_indentation(const std::string& str) {
         indentations.push_back(indent);
     }
     std::map<std::string, double> multiplier = {
-        {"  ", 0.5}, {"    ", 0.25}, {"\t", 0.5}};
+        {"  ", TWO_SPACE_MULTIPLIER}, {"    ", FOUR_SPACE_MULTIPLIER}, {"\t", TAB_MULTIPLIER}};
     std::map<std::string, double> candidates;
     for (size_t i = 1; i < indentations.size(); i++) {
         auto a = indentations[i - 1];
@@ -106,9 +104,8 @@ std::string detect_line_terminator(const std::string& str) {
     }
     if (crlf > lf) {
         return "\r\n";
-    } else {
-        return "\n";
     }
+    return "\n";
 }
 
 } // namespace utils
