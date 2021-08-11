@@ -613,7 +613,13 @@ std::map<std::string, std::string> get_results(const patch_collection& patches,
                     new_patch_data.emplace_back(p);
                 }
             }
-            results[filename] = post_process(before, nway::merge(nway::diff(before, new_patch_data)), options);
+            auto new_diff = nway::diff(before, new_patch_data);
+            if (nway::has_conflict(diff)) {
+                std::cerr << "Can't solve conflict" << std::endl;
+                std::exit(1);
+            }
+            std::cerr << "Solved conflict" << std::endl;
+            results[filename] = post_process(before, nway::merge(new_diff), options);
         } else {
             results[filename] = post_process(before, nway::merge(diff), options);
         }
