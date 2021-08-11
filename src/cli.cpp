@@ -493,7 +493,8 @@ std::string post_process_harmonize_line_terminators(const std::string& before,
     std::string result;
     for (auto line : utils::line_split(after)) {
         if (line_terminator == "\r\n") {
-            if (utils::ends_with(line, "\n") && !utils::ends_with(line, "\r\n")) {
+            if (utils::ends_with(line, "\n") &&
+                !utils::ends_with(line, "\r\n")) {
                 line.pop_back();
                 line += "\r\n";
             }
@@ -656,15 +657,15 @@ int main(int argc, char** argv) {
 
     size_t count = 0;
 
-    logifix::run([&count, &options, &filename_of_node](size_t node) {
+    logifix::run([&count, &options](size_t node) {
         count++;
         int progress = int((double(count) / double(options.files.size())) * 40);
         int progress_full = 40;
-        fmt::print(stderr, "\r[{2:=^{0}}{2: ^{1}}] {3}/{4} {5}", progress,
-                   progress_full - progress, "", count, options.files.size(), filename_of_node[node]);
+        fmt::print(stderr, "\r[{2:=^{0}}{2: ^{1}}] {3}/{4}", progress,
+                   progress_full - progress, "", count, options.files.size());
     });
 
-    logifix::print_performance_metrics();
+    // logifix::print_performance_metrics();
 
     auto review = [&options, &accepted_patches, &filename_of_node](
                       logifix::patch_id patch, size_t curr, size_t total) {

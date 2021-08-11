@@ -234,7 +234,6 @@ std::string get_recursive_merge_result_for_node(node_id node) {
 }
 
 std::string post_process(std::string original, std::string changed) {
-    std::cerr << "POSTPROCESSING" << std::endl;
     auto rewrites = rewrites_invert(
         original,
         split_rewrite(original, std::tuple(0ul, original.size(), changed)));
@@ -247,8 +246,6 @@ std::string post_process(std::string original, std::string changed) {
         for (auto [b_start, b_end, b_replacement] : rewrites) {
             if ((a_start >= int(b_start) - 1 && a_start <= b_end + 1) ||
                 (a_end >= int(b_start) - 1 && a_end <= b_end + 1)) {
-                std::cerr << a_start << " " << a_end << " " << a_replacement
-                          << std::endl;
                 result.emplace_back(rewrite);
                 break;
             }
@@ -292,7 +289,6 @@ std::string get_result(node_id parent, std::vector<patch_id> patches) {
     rewrite_collection all_rewrites;
     for (auto patch : patches) {
         auto data = get_patch_data(patch);
-        std::cerr << std::get<0>(data) << std::endl;
         auto result = get_recursive_merge_result_for_node(patch);
         auto rewrites = split_rewrite(
             parent_source, std::tuple(0ul, parent_source.size(), result));
@@ -300,7 +296,8 @@ std::string get_result(node_id parent, std::vector<patch_id> patches) {
                             rewrites.end());
     }
     std::sort(all_rewrites.begin(), all_rewrites.end());
-    all_rewrites.erase(std::unique( all_rewrites.begin(), all_rewrites.end() ), all_rewrites.end());
+    all_rewrites.erase(std::unique(all_rewrites.begin(), all_rewrites.end()),
+                       all_rewrites.end());
     if (rewrite_collection_overlap(all_rewrites)) {
         std::cerr << "MERGING FAILED" << std::endl;
         std::sort(all_rewrites.begin(), all_rewrites.end());
@@ -432,51 +429,7 @@ void run(std::function<void(node_id)> report_progress) {
                             if (children_strs[parent_id][rule].find(
                                     candidate_string) !=
                                 children_strs[parent_id][rule].end()) {
-                                std::cerr << "ALREADY APPLIED" << std::endl;
                                 take_transition = false;
-                            } else {
-                                std::cerr << "NO MATCH" << std::endl;
-                                std::cerr << "ORIGINAL" << std::endl;
-                                for (auto [s, e, repl] : next_rewrites) {
-                                    std::cerr << s << " " << e << " " << repl
-                                              << " " << repl.size() << " "
-                                              << next_pstr.substr(s, e - s)
-                                              << std::endl;
-                                }
-                                std::cerr << "ORIGINAL OF ADJUSTED WITH"
-                                          << std::endl;
-                                for (auto [s, e, repl] : curr_rewrites) {
-                                    std::cerr << s << " " << e << std::endl;
-                                    std::cerr << s << " " << e << " " << repl
-                                              << " " << repl.size() << " "
-                                              << curr_pstr.substr(s, e - s)
-                                              << std::endl;
-                                }
-                                std::cerr << "ADJUSTED WITH" << std::endl;
-                                for (auto [s, e, repl] : inverted) {
-                                    std::cerr << s << " " << e << std::endl;
-                                    std::cerr << s << " " << e << " " << repl
-                                              << " " << repl.size() << " "
-                                              << next_pstr.substr(s, e - s)
-                                              << std::endl;
-                                }
-                                std::cerr << "RETROFITTED" << std::endl;
-                                for (auto [s, e, repl] : adjusted) {
-                                    std::cerr << s << " " << e << " " << repl
-                                              << " " << repl.size() << " "
-                                              << curr_pstr.substr(s, e - s)
-                                              << std::endl;
-                                }
-                                std::cerr << "---- parent" << std::endl;
-                                std::cerr << curr_pstr << std::endl;
-                                std::cerr << "---- curr" << std::endl;
-                                std::cerr << next_pstr << std::endl;
-                                std::cerr << "---- curr result" << std::endl;
-                                std::cerr
-                                    << apply_rewrites(next_pstr, next_rewrites)
-                                    << std::endl;
-                                std::cerr << "---- parent result" << std::endl;
-                                std::cerr << candidate_string << std::endl;
                             }
                         }
                     } else if (disabled_rules.find(rule) !=
@@ -496,7 +449,6 @@ void run(std::function<void(node_id)> report_progress) {
                     for (const auto& [next_node, rule, take_transition] :
                          next_nodes) {
                         if (take_transition) {
-                            std::cerr << rule << std::endl;
                             auto [next_pstr, next_rewrites] = nodes[next_node];
                             rewrites.insert(rewrites.end(),
                                             next_rewrites.begin(),
@@ -505,7 +457,7 @@ void run(std::function<void(node_id)> report_progress) {
                     }
                     if (!rewrites.empty()) {
                         if (rewrite_collection_overlap(rewrites)) {
-                            std::cerr << "NOPE OVERLAP" << std::endl;
+                            std::cerr << "UNEXPECTED OVERLAP" << std::endl;
                             std::sort(rewrites.begin(), rewrites.end());
                             for (auto [s, e, repl] : rewrites) {
                                 std::cerr << s << " " << e << " " << repl << " "
