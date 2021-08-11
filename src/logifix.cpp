@@ -174,29 +174,44 @@ split_rewrite(const std::string& original,
     auto [start, end, replacement] = rewrite;
     auto a = original.substr(start, end - start);
     auto b = replacement;
-    auto lcs = nway::lcs(a, b);
+    auto a_tokens = *sjp::lex(a);
+    auto b_tokens = *sjp::lex(b);
+    auto lcs = nway::lcs(a_tokens, b_tokens);
     size_t a_pos = 0;
     size_t b_pos = 0;
-    while (a_pos < a.size() || b_pos < b.size()) {
+
+    auto tokens_len_sum = [](sjp::token_collection tokens,
+                             size_t num) -> size_t {
+        auto slice =
+            sjp::token_collection(tokens.begin(), tokens.begin() + num);
+        return sjp::token_collection_to_string(slice).size();
+    };
+
+    while (a_pos < a_tokens.size() || b_pos < b_tokens.size()) {
         /* a and b agree */
-        while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] == b_pos) {
+        while (a_pos < a_tokens.size() && lcs[a_pos] && *lcs[a_pos] == b_pos) {
             a_pos++;
             b_pos++;
         }
         size_t a_start = a_pos;
         size_t b_start = b_pos;
         /* a has no matching position */
-        while (a_pos < a.size() && !lcs[a_pos]) {
+        while (a_pos < a_tokens.size() && !lcs[a_pos]) {
             a_pos++;
         }
         /* a has matching position but it is not that of b_pos */
-        while ((a_pos == a.size() && b_pos < b.size()) ||
-               (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] != b_pos)) {
+        while (
+            (a_pos == a_tokens.size() && b_pos < b_tokens.size()) ||
+            (a_pos < a_tokens.size() && lcs[a_pos] && *lcs[a_pos] != b_pos)) {
             b_pos++;
         }
         if (a_start != a_pos || b_start != b_pos) {
-            result.emplace_back(start + a_start, start + a_pos,
-                                b.substr(b_start, b_pos - b_start));
+            result.emplace_back(
+                start + tokens_len_sum(a_tokens, a_start),
+                start + tokens_len_sum(a_tokens, a_pos),
+                b.substr(tokens_len_sum(b_tokens, b_start),
+                         tokens_len_sum(b_tokens, b_pos) -
+                             tokens_len_sum(b_tokens, b_start)));
         }
     }
     return result;
@@ -363,7 +378,7 @@ void run(std::function<void(node_id)> report_progress) {
                     if (pending_strings.empty()) {
                         current_node = pending_files.front();
                         pending_files.pop_front();
-                        report_progress(0);
+                        report_progress(current_node);
                     } else {
                         current_node = pending_strings.front();
                         pending_strings.pop_front();
@@ -417,7 +432,6 @@ void run(std::function<void(node_id)> report_progress) {
                                 take_transition = false;
                             } else {
                                 std::cerr << "NO MATCH" << std::endl;
-                                /*
                                 std::cerr << "ORIGINAL" << std::endl;
                                 for (auto [s, e, repl] : next_rewrites) {
                                     std::cerr << s << " " << e << " " << repl
@@ -459,7 +473,6 @@ void run(std::function<void(node_id)> report_progress) {
                                     << std::endl;
                                 std::cerr << "---- parent result" << std::endl;
                                 std::cerr << candidate_string << std::endl;
-                                */
                             }
                         }
                     } else if (disabled_rules.find(rule) !=
@@ -479,6 +492,7 @@ void run(std::function<void(node_id)> report_progress) {
                     for (const auto& [next_node, rule, take_transition] :
                          next_nodes) {
                         if (take_transition) {
+                            std::cerr << rule << std::endl;
                             auto [next_pstr, next_rewrites] = nodes[next_node];
                             rewrites.insert(rewrites.end(),
                                             next_rewrites.begin(),
