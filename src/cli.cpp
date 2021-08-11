@@ -589,8 +589,7 @@ std::string post_process_sort_imports(std::string before, std::string after) {
     return result_str;
 }
 
-std::string post_process(const std::string& before, std::string after,
-                         const options& opts) {
+std::string post_process(const std::string& before, std::string after) {
     after = post_process_remove_introduced_empty_lines(before, after);
     after = post_process_harmonize_line_terminators(before, after);
     after = post_process_auto_indent(before, after);
@@ -598,45 +597,21 @@ std::string post_process(const std::string& before, std::string after,
     return after;
 }
 
-std::map<std::string, std::string> get_results(const patch_collection& patches,
-                                               const options& opts) {
+std::map<std::string, std::string> get_results(
+    const std::set<logifix::patch_id>& accepted_patches,
+    const std::unordered_map<logifix::node_id, std::string>& filename_of_node) {
     std::map<std::string, std::string> results;
-    std::map<std::string, std::vector<std::pair<std::string, bool>>>
-        patches_per_file;
-    for (const auto& [filename, rule, after, is_accepted] : patches) {
-        if (is_accepted) {
-            patches_per_file[filename].emplace_back(
-                after, std::get<3>(rule_data[rule]));
-        }
-    }
-    for (auto [filename, patches] : patches_per_file) {
-        std::string before = cli::read_file(filename);
-        std::vector<std::string> patch_data;
-        for (auto [p, b] : patches) {
-            patch_data.emplace_back(p);
-        }
-        auto diff = nway::diff(before, patch_data);
-        if (nway::has_conflict(diff)) {
-            std::vector<std::string> new_patch_data;
-            for (auto [p, b] : patches) {
-                if (!b) {
-                    new_patch_data.emplace_back(p);
-                }
+    for (auto [id, filename] : filename_of_node) {
+        std::vector<logifix::patch_id> accepted_patches_for_file;
+        for (auto patch : logifix::get_patches_for_file(id)) {
+            if (accepted_patches.find(patch) != accepted_patches.end()) {
+                accepted_patches_for_file.emplace_back(patch);
             }
-            auto new_diff = nway::diff(before, new_patch_data);
-            if (nway::has_conflict(diff)) {
-                std::cerr << "Can't solve conflict" << std::endl;
-                for (auto x : new_patch_data) {
-                    std::cerr << "--------------" << std::endl;
-                    std::cerr << x << std::endl;
-                }
-                std::exit(1);
-            }
-            std::cerr << "Solved conflict" << std::endl;
-            results[filename] =
-                post_process(before, nway::merge(new_diff), opts);
-        } else {
-            results[filename] = post_process(before, nway::merge(diff), opts);
+        }
+        if (!accepted_patches_for_file.empty()) {
+            auto before = cli::read_file(filename);
+            auto after = logifix::get_result(id, accepted_patches_for_file);
+            results.emplace(filename, post_process(before, after));
         }
     }
     return results;
@@ -662,43 +637,13 @@ int main(int argc, char** argv) {
 
     cli::options options = cli::parse_options(argc, argv);
 
-    /**
-     * Sort patches first by filename and then by the length of the prefix
-     * that they share with the original file
-     */
-    auto patch_cmp = [](const auto& a, const auto& b) {
-        const auto& [a_file, a_rule, a_result] = a;
-        const auto& [b_file, b_rule, b_result] = b;
-        if (a_file != b_file) {
-            return a_file < b_file;
-        }
-        if (a_rule != b_rule) {
-            return a_rule < b_rule;
-        }
-        auto before = cli::read_file(a_file);
-        size_t a_pos = std::numeric_limits<size_t>::max();
-        size_t b_pos = std::numeric_limits<size_t>::max();
-        for (size_t i = 0; i < before.size(); i++) {
-            if (i < a_result.size() && before[i] != a_result[i]) {
-                a_pos = std::min(a_pos, i);
-            }
-            if (i < b_result.size() && before[i] != b_result[i]) {
-                b_pos = std::min(b_pos, i);
-            }
-        }
-        if (a_pos == b_pos) {
-            return a_result < b_result;
-        }
-        return a_pos < b_pos;
-    };
-    std::set<std::tuple<std::string, std::string, std::string>,
-             decltype(patch_cmp)>
-        patch_set(patch_cmp);
+    std::set<logifix::patch_id> accepted_patches;
 
-    std::unordered_map<std::string, size_t> node_ids;
+    std::unordered_map<logifix::node_id, std::string> filename_of_node;
 
     for (const auto& file : options.files) {
-        node_ids[file] = logifix::add_file(cli::read_file(file));
+        auto node_id = logifix::add_file(cli::read_file(file));
+        filename_of_node[node_id] = file;
     }
 
     if (!options.enable_all) {
@@ -721,33 +666,18 @@ int main(int argc, char** argv) {
 
     logifix::print_performance_metrics();
 
-    for (const auto& file : options.files) {
-        for (auto [rule, result] :
-             logifix::get_patches_for_file(node_ids[file])) {
-            patch_set.emplace(file, rule, result);
-        }
-    }
-
-    std::vector<std::tuple<std::string, std::string, std::string, bool>>
-        patches;
-
-    patches.reserve(patch_set.size());
-
-    for (const auto& [file, rule, result] : patch_set) {
-        patches.emplace_back(file, rule, result, false);
-    }
-
-    // std::sort(patches.begin(), patches.end());
-
-    auto review = [&options](auto& rw, size_t curr, size_t total) {
-        auto& [filename, rule, after, accepted] = rw;
+    auto review = [&options, &accepted_patches, &filename_of_node](
+                      logifix::patch_id patch, size_t curr, size_t total) {
+        // auto& [filename, rule, after, accepted] = rw;
+        auto [rule, node_id, after] = logifix::get_patch_data(patch);
+        auto filename = filename_of_node[node_id];
         fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total,
                    filename);
         std::string before = cli::read_file(filename);
-        auto patch = cli::create_patch(
-            filename, before, cli::post_process(before, after, options));
-        if (!patch.empty()) {
-            for (const auto& line : cli::prettify_patch(patch)) {
+        auto diff = cli::create_patch(filename, before,
+                                      cli::post_process(before, after));
+        if (!diff.empty()) {
+            for (const auto& line : cli::prettify_patch(diff)) {
                 std::cout << line << std::endl;
             }
         }
@@ -759,9 +689,9 @@ int main(int argc, char** argv) {
             return false;
         }
         if (choice == 0) {
-            accepted = true;
+            accepted_patches.insert(patch);
         } else if (choice == 1) {
-            accepted = false;
+            accepted_patches.erase(patch);
         }
         return true;
     };
@@ -770,15 +700,12 @@ int main(int argc, char** argv) {
 
         while (true) {
 
-            size_t selected_patches = std::count_if(
-                patches.begin(), patches.end(),
-                [](const auto& patch) { return std::get<3>(patch); });
-
             int selection;
 
-            if (selected_patches > 0) {
+            if (!accepted_patches.empty()) {
                 fmt::print(fmt::emphasis::bold, "\nSelected {}/{} patches\n\n",
-                           selected_patches, patches.size());
+                           accepted_patches.size(),
+                           logifix::get_all_patches().size());
                 selection = cli::multi_choice(
                     "What would you like to do?",
                     {
@@ -791,8 +718,8 @@ int main(int argc, char** argv) {
                 if (selection == 1) {
                     auto* fp = popen("less -R", "w");
                     if (fp != nullptr) {
-                        for (auto [filename, after] :
-                             cli::get_results(patches, options)) {
+                        for (auto [filename, after] : cli::get_results(
+                                 accepted_patches, filename_of_node)) {
                             fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = cli::read_file(filename);
                             auto patch =
@@ -816,9 +743,10 @@ int main(int argc, char** argv) {
             } else {
                 fmt::print(fmt::emphasis::bold,
                            "\n\nAnalyzed {} files and found {} patches\n\n",
-                           options.files.size(), patches.size());
+                           options.files.size(),
+                           logifix::get_all_patches().size());
 
-                if (patches.empty()) {
+                if (logifix::get_all_patches().empty()) {
                     break;
                 }
 
@@ -833,43 +761,44 @@ int main(int argc, char** argv) {
             }
 
             while (true) {
-
                 if (selection == 0) {
-                    std::map<std::string, decltype(patches)> rules;
-                    for (auto& patch : patches) {
-                        rules[std::get<1>(patch)].emplace_back(patch);
-                    }
-                    std::vector<std::string> keys;
                     std::vector<
                         std::tuple<std::string, std::string, std::string>>
                         columns;
-                    for (auto& [rule, rws] : rules) {
-                        keys.emplace_back(rule);
-                        auto description = std::get<2>(rule_data[rule]);
-                        size_t accepted =
-                            std::count_if(rws.begin(), rws.end(), [](auto rw) {
-                                return std::get<3>(rw);
+                    for (auto [rule, data] : rule_data) {
+                        auto [sqid, pmdid, description, disabled] = data;
+                        std::vector<logifix::patch_id> patches =
+                            logifix::get_patches_for_rule(rule);
+                        if (patches.empty()) {
+                            continue;
+                        }
+                        size_t accepted_count = std::count_if(
+                            patches.begin(), patches.end(),
+                            [&accepted_patches](logifix::patch_id patch) {
+                                return accepted_patches.find(patch) !=
+                                       accepted_patches.end();
                             });
-                        std::string status;
-                        if (accepted > 0) {
+                        if (accepted_count > 0) {
                             columns.emplace_back(
-                                description, std::get<0>(rule_data[rule]),
+                                rule, description,
                                 fmt::format(fg(fmt::terminal_color::green),
-                                            "{}/{}", accepted, rws.size()));
+                                            "{}/{}", accepted_count,
+                                            patches.size()));
                         } else {
-                            columns.emplace_back(
-                                description, std::get<0>(rule_data[rule]),
-                                fmt::format("{}/{}", accepted, rws.size()));
+                            columns.emplace_back(rule, description,
+                                                 fmt::format("{}/{}",
+                                                             accepted_count,
+                                                             patches.size()));
                         }
                     }
                     size_t left_column_width = 0;
-                    for (auto [l, m, r] : columns) {
+                    for (auto [rule, l, r] : columns) {
                         left_column_width =
                             std::max(left_column_width, l.size());
                     }
                     std::vector<std::string> options;
                     options.reserve(columns.size());
-                    for (auto [l, m, r] : columns) {
+                    for (auto [rule, l, r] : columns) {
                         options.emplace_back(fmt::format("{0:<{2}}    {1}", l,
                                                          r, left_column_width));
                     }
@@ -878,15 +807,11 @@ int main(int argc, char** argv) {
                     if (rule_selection == -1) {
                         break;
                     }
-                    auto rule = keys[rule_selection];
-                    auto curr = 1;
-                    auto total = rules[rule].size();
-                    for (auto& rw : patches) {
-                        if (std::get<1>(rw) == rule) {
-                            if (!review(rw, curr, total)) {
-                                break;
-                            }
-                            curr++;
+                    auto rule = std::get<0>(columns[rule_selection]);
+                    auto patches = logifix::get_patches_for_rule(rule);
+                    for (size_t i = 0; i < patches.size(); i++) {
+                        if (!review(patches[i], i + 1, patches.size())) {
+                            break;
                         }
                     }
                 } else {
@@ -897,19 +822,20 @@ int main(int argc, char** argv) {
 
     } else {
         if (options.accept_all) {
-            for (auto& [filename, rule, after, accepted] : patches) {
-                accepted = true;
+            for (auto patch : logifix::get_all_patches()) {
+                accepted_patches.insert(patch);
             }
         } else if (!options.accepted.empty()) {
-            for (auto& [filename, rule, after, accepted] : patches) {
-                if (options.accepted.find(rule) != options.accepted.end()) {
-                    accepted = true;
+            for (auto& rule : options.accepted) {
+                for (auto patch : logifix::get_patches_for_rule(rule)) {
+                    accepted_patches.insert(patch);
                 }
             }
         }
     }
 
-    for (auto [filename, after] : get_results(patches, options)) {
+    for (auto [filename, after] :
+         cli::get_results(accepted_patches, filename_of_node)) {
         if (options.in_place) {
             std::ofstream f(filename);
             f << after;
