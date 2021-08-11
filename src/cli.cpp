@@ -493,7 +493,7 @@ std::string post_process_harmonize_line_terminators(const std::string& before,
     std::string result;
     for (auto line : utils::line_split(after)) {
         if (line_terminator == "\r\n") {
-            if (!utils::ends_with(line, "\r\n")) {
+            if (utils::ends_with(line, "\n") && !utils::ends_with(line, "\r\n")) {
                 line.pop_back();
                 line += "\r\n";
             }
