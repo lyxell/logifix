@@ -23,8 +23,8 @@ namespace fs = std::filesystem;
 using patch_collection =
     std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
-extern std::unordered_map<std::string,
-                          std::tuple<std::string, std::string, std::string, bool>>
+extern std::unordered_map<
+    std::string, std::tuple<std::string, std::string, std::string, bool>>
     rule_data;
 
 struct options_t {
@@ -63,7 +63,8 @@ std::string replace_tabs_with_spaces(const std::string& str) {
     return result;
 }
 
-std::vector<std::string> create_patch(const std::string& filename, const std::string& before,
+std::vector<std::string> create_patch(const std::string& filename,
+                                      const std::string& before,
                                       const std::string& after) {
     auto a = utils::line_split(before);
     auto b = utils::line_split(after);
@@ -74,8 +75,7 @@ std::vector<std::string> create_patch(const std::string& filename, const std::st
         x = utils::rtrim(x);
     }
     std::vector<std::tuple<bool, char, std::string>> changes;
-    std::vector<std::optional<size_t>> lcs =
-        nway::lcs(a, b);
+    std::vector<std::optional<size_t>> lcs = nway::lcs(a, b);
     size_t a_pos = 0;
     size_t b_pos = 0;
     while (a_pos < a.size() || b_pos < b.size()) {
@@ -429,7 +429,7 @@ static int multi_choice(const std::string& question,
     } else {
         fmt::print("[Use arrows to move]");
     }
-    constexpr auto HEIGHT = size_t {15};
+    constexpr auto HEIGHT = size_t{15};
     auto cursor = 0;
     auto scroll = 0;
     auto found = false;
@@ -473,7 +473,9 @@ static int multi_choice(const std::string& question,
     return 0;
 }
 
-static std::string post_process_remove_introduced_empty_lines(std::string before, std::string after) {
+static std::string
+post_process_remove_introduced_empty_lines(std::string before,
+                                           std::string after) {
     auto before_lines = utils::line_split(before);
     auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
@@ -487,7 +489,8 @@ static std::string post_process_remove_introduced_empty_lines(std::string before
     return result;
 }
 
-static std::string post_process_harmonize_line_terminators(std::string before, std::string after) {
+static std::string post_process_harmonize_line_terminators(std::string before,
+                                                           std::string after) {
     auto line_terminator = utils::detect_line_terminator(before);
     std::string result;
     for (auto line : utils::line_split(after)) {
@@ -502,7 +505,8 @@ static std::string post_process_harmonize_line_terminators(std::string before, s
     return result;
 }
 
-static std::string post_process_auto_indent(std::string before, std::string after) {
+static std::string post_process_auto_indent(std::string before,
+                                            std::string after) {
     auto bracket_balance = [](const std::string& str) {
         int result = 0;
         for (char c : str) {
@@ -521,10 +525,12 @@ static std::string post_process_auto_indent(std::string before, std::string afte
     std::string result;
     for (size_t i = 0; i < after_lines.size(); i++) {
         auto& line = after_lines[i];
-        if (i > 0 && !lcs[i] && utils::find_first_non_space(line) == line.begin()) {
+        if (i > 0 && !lcs[i] &&
+            utils::find_first_non_space(line) == line.begin()) {
             auto prev_line = after_lines[i - 1];
             // get indent from previous line
-            auto new_indent = prev_line.substr(0, utils::find_first_non_space(prev_line) - prev_line.begin());
+            auto new_indent = prev_line.substr(
+                0, utils::find_first_non_space(prev_line) - prev_line.begin());
             // increase indent if previous line has an open bracket
             if (bracket_balance(prev_line) > 0) {
                 new_indent += indentation;
@@ -541,7 +547,8 @@ static std::string post_process_auto_indent(std::string before, std::string afte
     return result;
 }
 
-static std::string post_process_sort_imports(std::string before, std::string after) {
+static std::string post_process_sort_imports(std::string before,
+                                             std::string after) {
     auto before_lines = utils::line_split(before);
     auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
@@ -570,14 +577,17 @@ static std::string post_process_sort_imports(std::string before, std::string aft
                 result.insert(result.begin() + i, import);
                 break;
             }
-            if (i > 0 && utils::starts_with(result[i-1], "import") && !utils::starts_with(result[i], "import") && import > result[i]) {
+            if (i > 0 && utils::starts_with(result[i - 1], "import") &&
+                !utils::starts_with(result[i], "import") &&
+                import > result[i]) {
                 result.insert(result.begin() + i, import);
                 break;
             }
         }
     }
     std::string result_str;
-    for (auto x : result) result_str += x;
+    for (auto x : result)
+        result_str += x;
     return result_str;
 }
 
@@ -593,10 +603,12 @@ static std::string post_process(std::string before, std::string after,
 std::map<std::string, std::string> get_results(const patch_collection& patches,
                                                const options_t& options) {
     std::map<std::string, std::string> results;
-    std::map<std::string, std::vector<std::pair<std::string, bool>>> patches_per_file;
+    std::map<std::string, std::vector<std::pair<std::string, bool>>>
+        patches_per_file;
     for (const auto& [filename, rule, after, is_accepted] : patches) {
         if (is_accepted) {
-            patches_per_file[filename].emplace_back(after, std::get<3>(rule_data[rule]));
+            patches_per_file[filename].emplace_back(
+                after, std::get<3>(rule_data[rule]));
         }
     }
     for (auto [filename, patches] : patches_per_file) {
@@ -616,12 +628,18 @@ std::map<std::string, std::string> get_results(const patch_collection& patches,
             auto new_diff = nway::diff(before, new_patch_data);
             if (nway::has_conflict(diff)) {
                 std::cerr << "Can't solve conflict" << std::endl;
+                for (auto x : new_patch_data) {
+                    std::cerr << "--------------" << std::endl;
+                    std::cerr << x << std::endl;
+                }
                 std::exit(1);
             }
             std::cerr << "Solved conflict" << std::endl;
-            results[filename] = post_process(before, nway::merge(new_diff), options);
+            results[filename] =
+                post_process(before, nway::merge(new_diff), options);
         } else {
-            results[filename] = post_process(before, nway::merge(diff), options);
+            results[filename] =
+                post_process(before, nway::merge(diff), options);
         }
     }
     return results;

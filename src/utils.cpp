@@ -25,20 +25,26 @@ bool starts_with(const std::string& str, const std::string& prefix) {
 }
 
 bool ends_with(const std::string& str, const std::string& suffix) {
-    return str.size() >= suffix.size() && str.substr(str.size() - suffix.size()) == suffix;
+    return str.size() >= suffix.size() &&
+           str.substr(str.size() - suffix.size()) == suffix;
 }
 
 std::string rtrim(std::string s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](auto c) { return !std::isspace(c); }).base(), s.end());
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+                         [](auto c) { return !std::isspace(c); })
+                .base(),
+            s.end());
     return s;
 }
 
 bool string_has_only_whitespace(const std::string& str) {
-    return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) != 0; });
+    return std::all_of(str.begin(), str.end(),
+                       [](char c) { return std::isspace(c) != 0; });
 }
 
 std::string::const_iterator find_first_non_space(const std::string& str) {
-    return std::find_if(str.begin(), str.end(), [](char c) { return std::isspace(c) == 0; });
+    return std::find_if(str.begin(), str.end(),
+                        [](char c) { return std::isspace(c) == 0; });
 }
 
 std::string detect_indentation(const std::string& str) {
@@ -105,4 +111,4 @@ std::string detect_line_terminator(const std::string& str) {
     }
 }
 
-}
+} // namespace utils
