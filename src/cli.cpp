@@ -25,9 +25,6 @@ extern std::unordered_map<std::string, std::tuple<std::string, std::string, std:
 namespace cli {
 
 using namespace std::string_literals;
-namespace fs = std::filesystem;
-
-using patch_collection = std::vector<std::tuple<std::string, std::string, std::string, bool>>;
 
 struct options {
     bool accept_all;
@@ -41,15 +38,15 @@ struct options {
 
 enum class key { down, left, ret, right, up, unknown };
 
-const std::string TTY_CLEAR_TO_EOL = "\033[K";
-const std::string TTY_CURSOR_UP = "\033[A";
-const std::string TTY_HIDE_CURSOR = "\033[?25l";
-const std::string TTY_SHOW_CURSOR = "\033[?25h";
-const std::string TTY_MOVE_TO_BOTTOM = "\033[9999;1H";
+const auto TTY_CLEAR_TO_EOL = std::string{"\033[K"};
+const auto TTY_CURSOR_UP = std::string{"\033[A"};
+const auto TTY_HIDE_CURSOR = std::string{"\033[?25l"};
+const auto TTY_SHOW_CURSOR = std::string{"\033[?25h"};
+const auto TTY_MOVE_TO_BOTTOM = std::string{"\033[9999;1H"};
 
-std::string replace_tabs_with_spaces(const std::string& str) {
-    std::string result;
-    for (char c : str) {
+auto replace_tabs_with_spaces(const std::string& str) -> std::string {
+    auto result = std::string{};
+    for (auto c : str) {
         if (c == '\t') {
             result += "    ";
         } else {
@@ -59,8 +56,9 @@ std::string replace_tabs_with_spaces(const std::string& str) {
     return result;
 }
 
-std::vector<std::string> create_patch(const std::string& filename, const std::string& before,
-                                      const std::string& after) {
+auto create_patch(const std::string& filename, const std::string& before, const std::string& after)
+    -> std::vector<std::string> {
+    constexpr auto LINES_OF_CONTEXT = std::size_t{3};
     auto a = utils::line_split(before);
     auto b = utils::line_split(after);
     for (auto& x : a) {
@@ -69,10 +67,10 @@ std::vector<std::string> create_patch(const std::string& filename, const std::st
     for (auto& x : b) {
         x = utils::rtrim(x);
     }
-    std::vector<std::tuple<bool, char, std::string>> changes;
-    std::vector<std::optional<size_t>> lcs = nway::lcs(a, b);
-    size_t a_pos = 0;
-    size_t b_pos = 0;
+    auto changes = std::vector<std::tuple<bool, char, std::string>>{};
+    auto lcs = nway::lcs(a, b);
+    auto a_pos = std::size_t{};
+    auto b_pos = std::size_t{};
     while (a_pos < a.size() || b_pos < b.size()) {
         /* a and b agree */
         while (a_pos < a.size() && lcs[a_pos] && *lcs[a_pos] == b_pos) {
@@ -92,33 +90,33 @@ std::vector<std::string> create_patch(const std::string& filename, const std::st
         }
     }
     /* 3 lines of context */
-    int context = 3;
-    for (int i = 0; i < changes.size(); i++) {
+    for (auto i = 0; i < changes.size(); i++) {
         auto& [keep, marker, line] = changes[i];
-        for (int j = std::max(0, i - context); j < std::min(int(changes.size()), i + context + 1);
-             j++) {
+        auto start = std::max(0, i - int(LINES_OF_CONTEXT));
+        auto stop = std::min(int(changes.size()), i + int(LINES_OF_CONTEXT) + 1);
+        for (auto j = start; j < stop; j++) {
             if (std::get<1>(changes[j]) != ' ') {
                 keep = true;
             }
         }
     }
     /* create patch output */
-    std::vector<std::string> result;
+    auto result = std::vector<std::string>{};
     result.emplace_back(fmt::format("diff --git a/{} b/{}", filename, filename));
-    size_t a_pos_output = 1;
-    size_t b_pos_output = 1;
-    for (int i = 0; i < changes.size(); i++) {
+    auto a_pos_output = std::size_t{1};
+    auto b_pos_output = std::size_t{1};
+    for (auto i = std::size_t{}; i < changes.size(); i++) {
         auto& [keep, marker, line] = changes[i];
         if (!keep) {
             a_pos_output++;
             b_pos_output++;
             continue;
         }
-        size_t a_start = a_pos_output;
-        size_t b_start = b_pos_output;
-        size_t a_lines = 0;
-        size_t b_lines = 0;
-        size_t hunk_end = i;
+        auto a_start = a_pos_output;
+        auto b_start = b_pos_output;
+        auto a_lines = std::size_t{};
+        auto b_lines = std::size_t{};
+        auto hunk_end = i;
         while (hunk_end < changes.size() && std::get<0>(changes[hunk_end])) {
             switch (std::get<1>(changes[hunk_end])) {
             case ' ':
@@ -152,13 +150,16 @@ std::vector<std::string> create_patch(const std::string& filename, const std::st
     return result;
 }
 
-std::vector<std::string> prettify_patch(const std::vector<std::string>& lines) {
-    std::vector<std::pair<std::string, std::string>> columns;
-    size_t line_number = 0;
-    bool seen_header_before = false;
+auto prettify_patch(const std::vector<std::string>& lines) -> std::vector<std::string> {
+    auto columns = std::vector<std::pair<std::string, std::string>>{};
+    if (lines.empty()) {
+        return {};
+    }
+    auto line_number = std::size_t{};
+    auto seen_header_before = false;
     // Skip first line (git header)
-    for (size_t i = 1; i < lines.size(); i++) {
-        const auto& line = lines[i];
+    for (auto it = std::next(lines.begin()); it < lines.end(); it++) {
+        const auto& line = *it;
         if (line.empty()) {
             continue;
         }
@@ -185,11 +186,11 @@ std::vector<std::string> prettify_patch(const std::vector<std::string>& lines) {
             break;
         }
     }
-    size_t left_column_size = 0;
+    auto left_column_size = std::size_t{};
     for (const auto& [l, r] : columns) {
         left_column_size = std::max(left_column_size, l.size());
     }
-    std::vector<std::string> result;
+    auto result = std::vector<std::string>{};
     const auto* format = "  {0:>{2}} {1}";
     for (auto& [l, r] : columns) {
         if (l == "+") {
@@ -205,7 +206,7 @@ std::vector<std::string> prettify_patch(const std::vector<std::string>& lines) {
     return result;
 }
 
-std::string read_file(std::string_view path) {
+auto read_file(std::string_view path) -> std::string {
     constexpr auto read_size = std::size_t{4096};
     auto stream = std::ifstream{path.data()};
     stream.exceptions(std::ios_base::badbit);
@@ -218,7 +219,7 @@ std::string read_file(std::string_view path) {
     return out;
 }
 
-key get_keypress() {
+auto get_keypress() -> key {
     switch (getchar()) {
     case 0x0d:
         return key::ret;
@@ -256,9 +257,9 @@ key get_keypress() {
     return key::unknown;
 }
 
-options parse_options(int argc, char** argv) {
+auto parse_options(int argc, char** argv) -> options {
 
-    options opts = {
+    auto opts = options{
         .accept_all = false,
         .in_place = false,
         .patch = false,
@@ -268,8 +269,8 @@ options parse_options(int argc, char** argv) {
         .accepted = {},
     };
 
-    std::vector<std::tuple<std::string, std::function<void(const std::string&)>, std::string>>
-        flags;
+    auto flags = std::vector<
+        std::tuple<std::string, std::function<void(const std::string&)>, std::string>>{};
 
     auto print_version_and_exit = []() {
         std::cout << PROJECT_VERSION << std::endl;
@@ -296,7 +297,7 @@ options parse_options(int argc, char** argv) {
     };
 
     auto parse_accepted = [&](const std::string& str) {
-        std::stringstream ss(str);
+        auto ss = std::stringstream(str);
         while (ss.good()) {
             std::string substr;
             std::getline(ss, substr, ',');
@@ -329,10 +330,12 @@ options parse_options(int argc, char** argv) {
          "Print version information and exit"},
     };
 
-    std::vector<std::string> arguments;
+    auto arguments = std::vector<std::string>{};
+
     for (auto i = 1; i < argc; i++) {
         arguments.emplace_back(argv[i]);
     }
+
     std::reverse(arguments.begin(), arguments.end());
 
     while (!arguments.empty()) {
@@ -376,13 +379,13 @@ options parse_options(int argc, char** argv) {
 
     while (!arguments.empty()) {
         auto argument = arguments.back();
-        if (!fs::exists(argument)) {
+        if (!std::filesystem::exists(argument)) {
             fmt::print("Error: Path '{}' does not exist\n\n", argument);
             print_usage();
             std::exit(1);
         }
-        if (fs::is_directory(argument)) {
-            for (const auto& entry : fs::recursive_directory_iterator(argument)) {
+        if (std::filesystem::is_directory(argument)) {
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(argument)) {
                 if (!entry.is_regular_file()) {
                     continue;
                 }
@@ -393,7 +396,7 @@ options parse_options(int argc, char** argv) {
                 opts.files.emplace(entry.path().lexically_normal());
             }
         } else {
-            opts.files.emplace(fs::path(std::move(argument)).lexically_normal());
+            opts.files.emplace(std::filesystem::path(std::move(argument)).lexically_normal());
         }
         arguments.pop_back();
     }
@@ -401,8 +404,8 @@ options parse_options(int argc, char** argv) {
     return opts;
 }
 
-int multi_choice(const std::string& question, const std::vector<std::string>& alternatives,
-                 bool exit_on_left = false) {
+auto multi_choice(const std::string& question, const std::vector<std::string>& alternatives,
+                  bool exit_on_left = false) -> int {
     tty::enable_cbreak_mode();
 #ifndef NDEBUG
     fmt::print(fg(fmt::terminal_color::red) | fmt::emphasis::bold, "DEBUG ");
@@ -414,7 +417,7 @@ int multi_choice(const std::string& question, const std::vector<std::string>& al
     } else {
         fmt::print("[Use arrows to move]");
     }
-    constexpr auto HEIGHT = size_t{15};
+    constexpr auto HEIGHT = std::size_t{15};
     auto cursor = 0;
     auto scroll = 0;
     auto found = false;
@@ -456,13 +459,13 @@ int multi_choice(const std::string& question, const std::vector<std::string>& al
     return 0;
 }
 
-std::string post_process_remove_introduced_empty_lines(const std::string& before,
-                                                       const std::string& after) {
+auto post_process_remove_introduced_empty_lines(const std::string& before, const std::string& after)
+    -> std::string {
     auto before_lines = utils::line_split(before);
     auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
-    std::string result;
-    for (size_t i = 0; i < after_lines.size(); i++) {
+    auto result = std::string{};
+    for (auto i = std::size_t{}; i < after_lines.size(); i++) {
         if (!lcs[i] && utils::string_has_only_whitespace(after_lines[i])) {
             continue;
         }
@@ -471,10 +474,10 @@ std::string post_process_remove_introduced_empty_lines(const std::string& before
     return result;
 }
 
-std::string post_process_harmonize_line_terminators(const std::string& before,
-                                                    const std::string& after) {
+auto post_process_harmonize_line_terminators(const std::string& before, const std::string& after)
+    -> std::string {
     auto line_terminator = utils::detect_line_terminator(before);
-    std::string result;
+    auto result = std::string{};
     for (auto line : utils::line_split(after)) {
         if (line_terminator == "\r\n") {
             if (utils::ends_with(line, "\n") && !utils::ends_with(line, "\r\n")) {
@@ -487,10 +490,10 @@ std::string post_process_harmonize_line_terminators(const std::string& before,
     return result;
 }
 
-std::string post_process_auto_indent(const std::string& before, const std::string& after) {
+auto post_process_auto_indent(const std::string& before, const std::string& after) -> std::string {
     auto bracket_balance = [](const std::string& str) {
-        int result = 0;
-        for (char c : str) {
+        auto result = 0;
+        for (auto c : str) {
             if (c == '(' || c == '{') {
                 result++;
             } else if (c == ')' || c == '}') {
@@ -503,8 +506,8 @@ std::string post_process_auto_indent(const std::string& before, const std::strin
     auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
     auto indentation = utils::detect_indentation(before);
-    std::string result;
-    for (size_t i = 0; i < after_lines.size(); i++) {
+    auto result = std::string{};
+    for (auto i = std::size_t{}; i < after_lines.size(); i++) {
         auto& line = after_lines[i];
         if (i > 0 && !lcs[i] && utils::find_first_non_space(line) == line.begin()) {
             auto prev_line = after_lines[i - 1];
@@ -526,15 +529,15 @@ std::string post_process_auto_indent(const std::string& before, const std::strin
     return result;
 }
 
-std::string post_process_sort_imports(const std::string& before, std::string after) {
+auto post_process_sort_imports(const std::string& before, std::string after) -> std::string {
     auto before_lines = utils::line_split(before);
     auto after_lines = utils::line_split(after);
     auto lcs = nway::lcs(after_lines, before_lines);
-    std::vector<std::string> result;
-    std::vector<std::string> imports;
-    bool other_imports = false;
-    size_t last_import_at = 0;
-    for (size_t i = 0; i < after_lines.size(); i++) {
+    auto result = std::vector<std::string>{};
+    auto imports = std::vector<std::string>{};
+    auto other_imports = false;
+    auto last_import_at = std::size_t{};
+    for (auto i = std::size_t{}; i < after_lines.size(); i++) {
         if (!lcs[i] && utils::starts_with(after_lines[i], "import")) {
             imports.emplace_back(after_lines[i]);
         } else {
@@ -550,7 +553,7 @@ std::string post_process_sort_imports(const std::string& before, std::string aft
     }
     std::sort(imports.begin(), imports.end());
     for (const auto& import : imports) {
-        for (size_t i = 0; i < result.size(); i++) {
+        for (auto i = std::size_t{}; i < result.size(); i++) {
             if (utils::starts_with(result[i], "import") && import < result[i]) {
                 result.insert(result.begin() + i, import);
                 break;
@@ -569,7 +572,7 @@ std::string post_process_sort_imports(const std::string& before, std::string aft
     return result_str;
 }
 
-std::string post_process(const std::string& before, std::string after) {
+auto post_process(const std::string& before, std::string after) -> std::string {
     after = post_process_remove_introduced_empty_lines(before, after);
     after = post_process_harmonize_line_terminators(before, after);
     after = post_process_auto_indent(before, after);
@@ -577,12 +580,12 @@ std::string post_process(const std::string& before, std::string after) {
     return after;
 }
 
-std::map<std::string, std::string>
-get_results(const std::set<logifix::patch_id>& accepted_patches,
-            const std::unordered_map<logifix::node_id, std::string>& filename_of_node) {
-    std::map<std::string, std::string> results;
+auto get_results(const std::set<logifix::patch_id>& accepted_patches,
+                 const std::unordered_map<logifix::node_id, std::string>& filename_of_node)
+    -> std::map<std::string, std::string> {
+    auto results = std::map<std::string, std::string>{};
     for (auto [id, filename] : filename_of_node) {
-        std::vector<logifix::patch_id> accepted_patches_for_file;
+        auto accepted_patches_for_file = std::vector<logifix::patch_id>{};
         for (auto patch : logifix::get_patches_for_file(id)) {
             if (accepted_patches.find(patch) != accepted_patches.end()) {
                 accepted_patches_for_file.emplace_back(patch);
@@ -607,19 +610,20 @@ void at_exit() {
     tty::disable_cbreak_mode();
 }
 
-int main(int argc, char** argv) {
+auto main(int argc, char** argv) -> int {
 
     setenv("SOUFFLE_ALLOW_SIGNALS", "", 1);
+
     std::signal(SIGINT, at_signal);
     std::atexit(at_exit);
 
     std::cerr << cli::TTY_HIDE_CURSOR;
 
-    cli::options options = cli::parse_options(argc, argv);
+    auto options = cli::parse_options(argc, argv);
 
-    std::set<logifix::patch_id> accepted_patches;
+    auto accepted_patches = std::set<logifix::patch_id>{};
 
-    std::unordered_map<logifix::node_id, std::string> filename_of_node;
+    auto filename_of_node = std::unordered_map<logifix::node_id, std::string>{};
 
     for (const auto& file : options.files) {
         auto node_id = logifix::add_file(cli::read_file(file));
@@ -634,12 +638,12 @@ int main(int argc, char** argv) {
         }
     }
 
-    size_t count = 0;
+    auto count = std::size_t{};
 
     logifix::run([&count, &options](size_t node) {
         count++;
-        int progress = int((double(count) / double(options.files.size())) * 40);
-        int progress_full = 40;
+        auto progress = int((double(count) / double(options.files.size())) * 40);
+        auto progress_full = 40;
         fmt::print(stderr, "\r[{2:=^{0}}{2: ^{1}}] {3}/{4}", progress, progress_full - progress, "",
                    count, options.files.size());
     });
@@ -652,7 +656,7 @@ int main(int argc, char** argv) {
         auto [rule, node_id, after] = logifix::get_patch_data(patch);
         auto filename = filename_of_node[node_id];
         fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total, filename);
-        std::string before = cli::read_file(filename);
+        auto before = cli::read_file(filename);
         auto diff = cli::create_patch(filename, before, cli::post_process(before, after));
         if (!diff.empty()) {
             for (const auto& line : cli::prettify_patch(diff)) {
@@ -677,7 +681,7 @@ int main(int argc, char** argv) {
 
         while (true) {
 
-            int selection{};
+            auto selection = 0;
 
             if (!accepted_patches.empty()) {
                 fmt::print(fmt::emphasis::bold, "\nSelected {}/{} patches\n\n",
@@ -733,15 +737,14 @@ int main(int argc, char** argv) {
 
             while (true) {
                 if (selection == 0) {
-                    std::vector<std::tuple<std::string, std::string, std::string>> columns;
+                    auto columns = std::vector<std::tuple<std::string, std::string, std::string>>{};
                     for (auto [rule, data] : rule_data) {
                         auto [sqid, pmdid, description, disabled] = data;
-                        std::vector<logifix::patch_id> patches =
-                            logifix::get_patches_for_rule(rule);
+                        auto patches = logifix::get_patches_for_rule(rule);
                         if (patches.empty()) {
                             continue;
                         }
-                        size_t accepted_count = std::count_if(
+                        auto accepted_count = std::count_if(
                             patches.begin(), patches.end(),
                             [&accepted_patches](logifix::patch_id patch) {
                                 return accepted_patches.find(patch) != accepted_patches.end();
@@ -757,11 +760,11 @@ int main(int argc, char** argv) {
                                 fmt::format("{}/{}", accepted_count, patches.size()));
                         }
                     }
-                    size_t left_column_width = 0;
+                    auto left_column_width = std::size_t{};
                     for (auto [rule, l, r] : columns) {
                         left_column_width = std::max(left_column_width, l.size());
                     }
-                    std::vector<std::string> options;
+                    auto options = std::vector<std::string>{};
                     options.reserve(columns.size());
                     for (auto [rule, l, r] : columns) {
                         options.emplace_back(
@@ -774,7 +777,7 @@ int main(int argc, char** argv) {
                     }
                     auto rule = std::get<0>(columns[rule_selection]);
                     auto patches = logifix::get_patches_for_rule(rule);
-                    for (size_t i = 0; i < patches.size(); i++) {
+                    for (auto i = std::size_t{}; i < patches.size(); i++) {
                         if (!review(patches[i], i + 1, patches.size())) {
                             break;
                         }
@@ -801,11 +804,11 @@ int main(int argc, char** argv) {
 
     for (auto [filename, after] : cli::get_results(accepted_patches, filename_of_node)) {
         if (options.in_place) {
-            std::ofstream f(filename);
+            auto f = std::ofstream(filename);
             f << after;
             f.close();
         } else if (options.patch) {
-            std::string before = cli::read_file(filename);
+            auto before = cli::read_file(filename);
             auto patch = cli::create_patch(filename, before, after);
             for (const auto& line : patch) {
                 std::cout << line << std::endl;
