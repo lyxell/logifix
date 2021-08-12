@@ -142,6 +142,12 @@ logical_complement_expression(id, expr) :-
     name_of(id, "logical_complement_expression"),
     parent_of(id, "expression", expr).
 
+.decl cast_expression(id: id, type: id, value: id)
+cast_expression(id, type, value) :-
+    name_of(id, "cast_expression"),
+    parent_of(id, "type", type),
+    parent_of(id, "value", value).
+
 .decl conditional_expression(id: id, cond: id, then: id, else: id)
 conditional_expression(id, cond, then, else) :-
     name_of(id, "conditional_expression"),

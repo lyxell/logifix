@@ -1,0 +1,9 @@
+{
+    "description": "Remove redundant casts",
+    "sonar": {
+        "id": "S1905"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}
