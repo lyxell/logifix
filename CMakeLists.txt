@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 project(logifix HOMEPAGE_URL "https://github.com/lyxell/logifix")
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ### DEPENDENCIES
@@ -61,7 +62,7 @@ add_custom_command(
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 #### Create executable
-add_executable(logifix src/cli.cpp src/tty.cpp src/javadoc.cpp src/logifix.cpp src/functors.cpp src/utils.cpp logifix.cpp rule_data.cpp)
+add_executable(logifix src/cli.cpp src/tty.cpp src/javadoc.cpp src/logifix.cpp src/functors.cpp src/utils.cpp src/timer.cpp logifix.cpp rule_data.cpp)
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 target_link_libraries(logifix pthread sjp nway fmt)
 if(UNIX AND NOT APPLE)

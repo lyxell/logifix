@@ -27,6 +27,8 @@ rewrite("simplify_ternary_conditional_expressions", filename, start, end, cat("!
         filename_of(cond_expr, filename),
         starts_at(cond_expr, start),
         ends_at(cond_expr, end),
+    !evaluates_to_boolean_value(other_expr, 0),
+    !evaluates_to_boolean_value(other_expr, 1),
     evaluates_to_boolean_value(true_expr, 1),
     string_representation(cond, cond_str),
     string_representation(other_expr, other_expr_str).
@@ -38,6 +40,8 @@ rewrite("simplify_ternary_conditional_expressions", filename, start, end, cat("(
         filename_of(cond_expr, filename),
         starts_at(cond_expr, start),
         ends_at(cond_expr, end),
+    !evaluates_to_boolean_value(other_expr, 0),
+    !evaluates_to_boolean_value(other_expr, 1),
     evaluates_to_boolean_value(false_expr, 0),
     string_representation(cond, cond_str),
     string_representation(other_expr, other_expr_str).

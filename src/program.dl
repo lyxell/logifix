@@ -28,6 +28,7 @@
 #include "rules/remove_unused_assignments/implementation.dl"
 #include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
+#include "rules/remove_use_of_fully_qualified_names/implementation.dl"
 #include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
 #include "rules/simplify_calls_to_constructor_for_string_conversion/implementation.dl"

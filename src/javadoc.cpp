@@ -73,8 +73,7 @@ std::set<std::string> get_classes(std::string s) {
         for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
             std::smatch match = *i;
             for (auto class_name : get_classes_from_link(match[idx])) {
-                class_name.erase(std::remove_if(class_name.begin(),
-                                                class_name.end(), ::isspace),
+                class_name.erase(std::remove_if(class_name.begin(), class_name.end(), ::isspace),
                                  class_name.end());
                 if (!class_name.empty()) {
                     result.emplace(class_name);

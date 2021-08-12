@@ -112,11 +112,24 @@ INFIX(remainder_expression)
 UNORDERED(equals_expression_unordered, equals_expression)
 UNORDERED(not_equals_expression_unordered, not_equals_expression)
 UNORDERED(conditional_and_expression_unordered, conditional_and_expression)
+UNORDERED(conditional_or_expression_unordered, conditional_or_expression)
+UNORDERED(less_than_or_equals_expression_unordered, less_than_or_equals_expression)
 
 .decl import_declaration(id: id, specification: id)
 import_declaration(id, specification) :-
     name_of(id, "import_declaration"),
     parent_of(id, "specification", specification).
+
+.decl ordinary_compilation_unit(id: id, package_declaration: id, import_declarations: id_list, type_declarations: id_list)
+ordinary_compilation_unit(id, pdecl, impdecls, tdecls) :-
+    name_of(id, "ordinary_compilation_unit"),
+    parent_of(id, "package_declaration", pdecl),
+    parent_of_list(id, "import_declarations", impdecls),
+    parent_of_list(id, "type_declarations", tdecls).
+
+.decl package_declaration(id: id)
+package_declaration(id) :-
+    name_of(id, "package_declaration").
 
 .decl import_specification(id: id, left_hand_side: id_list, import: id)
 import_specification(id, left_hand_side, import) :-
