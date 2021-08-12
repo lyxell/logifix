@@ -7,6 +7,7 @@
 #include <fmt/core.h>
 #include <iostream>
 #include <mutex>
+#include <numeric>
 #include <nway.h>
 #include <regex>
 #include <thread>
@@ -77,6 +78,7 @@ auto add_file(const std::string& file) -> size_t {
 auto disable_rule(const rule_id& rule) -> void { disabled_rules.emplace(rule); }
 
 /**
+ * Check if two 2d segments overlap.
  * Segments are left-inclusive and right-exclusive
  */
 template <typename T> auto segments_overlap(std::pair<T, T> a, std::pair<T, T> b) -> bool {
@@ -86,40 +88,44 @@ template <typename T> auto segments_overlap(std::pair<T, T> a, std::pair<T, T> b
     return a.second > b.first;
 }
 
-auto apply_rewrite(const std::string& original,
-                   const std::tuple<size_t, size_t, std::string>& rewrite) -> std::string {
+/**
+ * Take a string and a rewrite, apply the rewrite and return the
+ * result.
+ */
+auto apply_rewrite(const std::string& original, const rewrite_type& rewrite) -> std::string {
     const auto& [start, end, replacement] = rewrite;
     return original.substr(0, start) + replacement + original.substr(end);
 }
 
-auto apply_rewrites(std::string original, rewrite_collection rewrites) -> std::string {
-    /* sort rewrites in reverse so we can apply them one by one */
-    std::sort(rewrites.begin(), rewrites.end(),
-              [](const auto& a, const auto& b) { return std::get<0>(a) > std::get<0>(b); });
-    for (const auto& rewrite : rewrites) {
-        original = apply_rewrite(original, rewrite);
-    }
-    return original;
+/**
+ * Take a string and a collection of rewrites, apply all rewrites and return the
+ * result.
+ */
+auto apply_rewrites(const std::string& original, rewrite_collection rewrites) -> std::string {
+    /* Sort rewrites in reverse so we can apply them one by one */
+    std::sort(rewrites.begin(), rewrites.end(), std::greater<>());
+    return std::accumulate(rewrites.begin(), rewrites.end(), original,
+                           [](const std::string& acc, const rewrite_type& rewrite) {
+                               return apply_rewrite(acc, rewrite);
+                           });
 }
 
-auto adjust_rewrites(const rewrite_collection& before, const rewrite_collection& after)
-    -> rewrite_collection {
+auto adjust_rewrites(const rewrite_collection& before, const rewrite_collection& after) {
     auto result = rewrite_collection{};
-    for (const auto& x : after) {
+    for (const auto& [xs, xe, xr] : after) {
         auto diff = 0;
-        for (const auto& y : before) {
+        for (const auto& [ys, ye, yr] : before) {
             /* If rewrite y starts before rewrite x we need to adjust x */
-            if (std::get<0>(y) <= std::get<0>(x)) {
-                diff += int(std::get<2>(y).size()) - int(std::get<1>(y) - std::get<0>(y));
+            if (ys <= xs) {
+                diff += int(yr.size()) - int(ye - ys);
             }
         }
-        result.emplace_back(std::get<0>(x) + diff, std::get<1>(x) + diff, std::get<2>(x));
+        result.emplace_back(xs + diff, xe + diff, xr);
     }
     return result;
 }
 
-auto rewrites_invert(const std::string& original, rewrite_collection rewrites)
-    -> rewrite_collection {
+auto rewrites_invert(const std::string& original, rewrite_collection rewrites) {
     auto result = rewrite_collection{};
     auto diff = 0;
     std::sort(rewrites.begin(), rewrites.end());
@@ -131,8 +137,7 @@ auto rewrites_invert(const std::string& original, rewrite_collection rewrites)
     return result;
 }
 
-auto rewrite_collections_overlap(const rewrite_collection& left, const rewrite_collection& right)
-    -> bool {
+auto rewrite_collections_overlap(const rewrite_collection& left, const rewrite_collection& right) {
     for (const auto& [xs, xe, xr] : left) {
         for (const auto& [ys, ye, yr] : right) {
             if (segments_overlap<size_t>({xs, xe}, {ys, ye})) {
@@ -158,10 +163,8 @@ auto rewrite_collection_overlap(const rewrite_collection& coll) -> bool {
     return false;
 }
 
-auto split_rewrite(const std::string& original,
-                   const std::tuple<size_t, size_t, std::string>& rewrite)
-    -> std::vector<std::tuple<size_t, size_t, std::string>> {
-    auto result = std::vector<std::tuple<size_t, size_t, std::string>>{};
+auto split_rewrite(const std::string& original, const rewrite_type& rewrite) -> rewrite_collection {
+    auto result = rewrite_collection{};
     const auto& [start, end, replacement] = rewrite;
     auto a = original.substr(start, end - start);
     auto b = replacement;
@@ -239,9 +242,9 @@ auto post_process(const std::string& original, const std::string& changed) -> st
 }
 
 auto get_patches_for_file(node_id node) -> std::vector<patch_id> {
+    auto result = std::vector<patch_id>{};
     auto [pstr, rws] = nodes[node];
     auto original = apply_rewrites(pstr, rws);
-    std::vector<patch_id> result;
     for (auto [rule_id, child_id] : taken_transitions[node]) {
         result.emplace_back(child_id);
     }
@@ -462,8 +465,7 @@ auto run(std::function<void(node_id)> report_progress) -> void {
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-auto get_patches(const std::string& source)
-    -> std::set<std::pair<rule_id, std::tuple<size_t, size_t, std::string>>> {
+auto get_patches(const std::string& source) -> std::set<std::pair<rule_id, rewrite_type>> {
 
     const auto* program_name = "logifix";
     const auto* filename = "file";
@@ -501,7 +503,7 @@ auto get_patches(const std::string& source)
 
     /* extract rewrites */
     auto* relation = prog->getRelation("rewrite");
-    auto rewrites = std::set<std::pair<std::string, std::tuple<size_t, size_t, std::string>>>{};
+    auto rewrites = std::set<std::pair<std::string, rewrite_type>>{};
 
     for (auto& output : *relation) {
 
