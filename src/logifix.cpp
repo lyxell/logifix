@@ -31,7 +31,7 @@ std::vector<std::pair<size_t, std::pair<std::string, size_t>>> events;
 std::mutex timer_mutex;
 
 auto create(std::string name, size_t node_id) -> size_t {
-    std::unique_lock<std::mutex> lock(timer_mutex);
+    auto lock = std::unique_lock{timer_mutex};
     auto id = start_times.size();
     start_times.emplace_back(high_resolution_clock::now());
     event_data.emplace_back(std::move(name), node_id);
@@ -39,7 +39,7 @@ auto create(std::string name, size_t node_id) -> size_t {
 }
 
 auto stop(size_t id) -> void {
-    std::unique_lock<std::mutex> lock(timer_mutex);
+    auto lock = std::unique_lock{timer_mutex};
     auto end = high_resolution_clock::now();
     auto diff = duration_cast<microseconds>(end - start_times[id]).count();
     events.emplace_back(diff, event_data[id]);
@@ -307,7 +307,7 @@ auto get_all_patches() -> std::vector<patch_id> {
 
 auto print_performance_metrics() -> void {
     constexpr auto MAX_FILES_SHOWN = std::size_t{10};
-    constexpr auto MICROSECONDS_PER_SECOND{1000.0 * 1000.0};
+    constexpr auto MICROSECONDS_PER_SECOND = 1000.0 * 1000.0;
     auto time_per_event_type = std::map<std::string, size_t>{};
     auto time_per_node_id = std::map<node_id, size_t>{};
     for (auto [time, data] : timer::events) {
@@ -320,13 +320,12 @@ auto print_performance_metrics() -> void {
         fmt::print(stderr, "{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
     }
     auto node_data = std::vector<std::pair<size_t, node_id>>{};
-    node_data.reserve(time_per_node_id.size());
     for (auto [e, tot] : time_per_node_id) {
         node_data.emplace_back(tot, e);
     }
     std::sort(node_data.begin(), node_data.end());
-    for (auto i = std::size_t{}; i < std::min(MAX_FILES_SHOWN, node_data.size()); i++) {
-        auto [tot, e] = node_data[i];
+    node_data.resize(std::min(node_data.size(), MAX_FILES_SHOWN));
+    for (auto [tot, e] : node_data) {
         fmt::print(stderr, "{:20} {:20}\n", e, tot / MICROSECONDS_PER_SECOND);
     }
 }
@@ -342,7 +341,7 @@ auto run(std::function<void(node_id)> report_progress) -> void {
                 auto current_node_source = std::string{};
                 /* acquire work */
                 {
-                    auto lock = std::unique_lock<std::mutex>{work_mutex};
+                    auto lock = std::unique_lock{work_mutex};
                     if (pending_strings.empty() && pending_files.empty()) {
                         waiting_threads++;
                         if (waiting_threads == concurrency) {
@@ -373,7 +372,7 @@ auto run(std::function<void(node_id)> report_progress) -> void {
 
                 {
                     auto rewrites = get_patches(current_node_source);
-                    auto lock = std::unique_lock<std::mutex>{work_mutex};
+                    auto lock = std::unique_lock{work_mutex};
                     for (const auto& [rule, rewrite] : rewrites) {
                         auto next_node = create_id(current_node_source,
                                                    split_rewrite(current_node_source, rewrite));
@@ -389,7 +388,7 @@ auto run(std::function<void(node_id)> report_progress) -> void {
                         take_transition = false;
                         continue;
                     }
-                    auto lock = std::unique_lock(work_mutex);
+                    auto lock = std::unique_lock{work_mutex};
                     auto current_has_parent = parent.find(current_node) != parent.end();
                     if (current_has_parent) {
                         auto [parent_rule, parent_id] = parent[current_node];
@@ -412,7 +411,7 @@ auto run(std::function<void(node_id)> report_progress) -> void {
                     }
                 }
 
-                auto lock = std::unique_lock<std::mutex>{work_mutex};
+                auto lock = std::unique_lock{work_mutex};
 
                 auto current_has_parent = parent.find(current_node) != parent.end();
                 if (current_has_parent) {
