@@ -580,20 +580,20 @@ auto post_process(const std::string& before, std::string after) -> std::string {
     return after;
 }
 
-auto get_results(const std::set<logifix::patch_id>& accepted_patches,
+auto get_results(const logifix& program, const std::set<logifix::patch_id>& accepted_patches,
                  const std::unordered_map<logifix::node_id, std::string>& filename_of_node)
     -> std::map<std::string, std::string> {
     auto results = std::map<std::string, std::string>{};
     for (auto [id, filename] : filename_of_node) {
         auto accepted_patches_for_file = std::vector<logifix::patch_id>{};
-        for (auto patch : logifix::get_patches_for_file(id)) {
+        for (auto patch : program.get_patches_for_file(id)) {
             if (accepted_patches.find(patch) != accepted_patches.end()) {
                 accepted_patches_for_file.emplace_back(patch);
             }
         }
         if (!accepted_patches_for_file.empty()) {
             auto before = cli::read_file(filename);
-            auto after = logifix::get_result(id, accepted_patches_for_file);
+            auto after = program.get_result(id, accepted_patches_for_file);
             results.emplace(filename, post_process(before, after));
         }
     }
@@ -619,6 +619,8 @@ auto main(int argc, char** argv) -> int {
 
     std::cerr << cli::TTY_HIDE_CURSOR;
 
+    logifix program{};
+
     auto options = cli::parse_options(argc, argv);
 
     auto accepted_patches = std::set<logifix::patch_id>{};
@@ -626,21 +628,21 @@ auto main(int argc, char** argv) -> int {
     auto filename_of_node = std::unordered_map<logifix::node_id, std::string>{};
 
     for (const auto& file : options.files) {
-        auto node_id = logifix::add_file(cli::read_file(file));
+        auto node_id = program.add_file(cli::read_file(file));
         filename_of_node[node_id] = file;
     }
 
     if (!options.enable_all) {
         for (const auto& [rule, data] : rule_data) {
             if (std::get<3>(data)) {
-                logifix::disable_rule(rule);
+                program.disable_rule(rule);
             }
         }
     }
 
     auto count = std::size_t{};
 
-    logifix::run([&count, &options](size_t node) {
+    program.run([&count, &options](size_t node) {
         count++;
         auto progress = int((double(count) / double(options.files.size())) * 40);
         auto progress_full = 40;
@@ -650,10 +652,10 @@ auto main(int argc, char** argv) -> int {
 
     // logifix::print_performance_metrics();
 
-    auto review = [&options, &accepted_patches, &filename_of_node](logifix::patch_id patch,
-                                                                   size_t curr, size_t total) {
+    auto review = [&options, &accepted_patches, &filename_of_node,
+                   &program](logifix::patch_id patch, size_t curr, size_t total) {
         // auto& [filename, rule, after, accepted] = rw;
-        auto [rule, node_id, after] = logifix::get_patch_data(patch);
+        auto [rule, node_id, after] = program.get_patch_data(patch);
         auto filename = filename_of_node[node_id];
         fmt::print(fmt::emphasis::bold, "\nPatch {}/{} • {}\n\n", curr, total, filename);
         auto before = cli::read_file(filename);
@@ -685,7 +687,7 @@ auto main(int argc, char** argv) -> int {
 
             if (!accepted_patches.empty()) {
                 fmt::print(fmt::emphasis::bold, "\nSelected {}/{} patches\n\n",
-                           accepted_patches.size(), logifix::get_all_patches().size());
+                           accepted_patches.size(), program.get_all_patches().size());
                 selection = cli::multi_choice("What would you like to do?",
                                               {
                                                   "Review patches by rule",
@@ -698,7 +700,7 @@ auto main(int argc, char** argv) -> int {
                     auto* fp = popen("less -R", "w");
                     if (fp != nullptr) {
                         for (auto [filename, after] :
-                             cli::get_results(accepted_patches, filename_of_node)) {
+                             cli::get_results(program, accepted_patches, filename_of_node)) {
                             fmt::print(fp, "\n{}\n\n", filename);
                             std::string before = cli::read_file(filename);
                             auto patch = cli::create_patch(filename, before, after);
@@ -719,9 +721,9 @@ auto main(int argc, char** argv) -> int {
                 }
             } else {
                 fmt::print(fmt::emphasis::bold, "\n\nAnalyzed {} files and found {} patches\n\n",
-                           options.files.size(), logifix::get_all_patches().size());
+                           options.files.size(), program.get_all_patches().size());
 
-                if (logifix::get_all_patches().empty()) {
+                if (program.get_all_patches().empty()) {
                     break;
                 }
 
@@ -740,7 +742,7 @@ auto main(int argc, char** argv) -> int {
                     auto columns = std::vector<std::tuple<std::string, std::string, std::string>>{};
                     for (auto [rule, data] : rule_data) {
                         auto [sqid, pmdid, description, disabled] = data;
-                        auto patches = logifix::get_patches_for_rule(rule);
+                        auto patches = program.get_patches_for_rule(rule);
                         if (patches.empty()) {
                             continue;
                         }
@@ -776,7 +778,7 @@ auto main(int argc, char** argv) -> int {
                         break;
                     }
                     auto rule = std::get<0>(columns[rule_selection]);
-                    auto patches = logifix::get_patches_for_rule(rule);
+                    auto patches = program.get_patches_for_rule(rule);
                     for (auto i = std::size_t{}; i < patches.size(); i++) {
                         if (!review(patches[i], i + 1, patches.size())) {
                             break;
@@ -790,19 +792,19 @@ auto main(int argc, char** argv) -> int {
 
     } else {
         if (options.accept_all) {
-            for (auto patch : logifix::get_all_patches()) {
+            for (auto patch : program.get_all_patches()) {
                 accepted_patches.insert(patch);
             }
         } else if (!options.accepted.empty()) {
             for (const auto& rule : options.accepted) {
-                for (auto patch : logifix::get_patches_for_rule(rule)) {
+                for (auto patch : program.get_patches_for_rule(rule)) {
                     accepted_patches.insert(patch);
                 }
             }
         }
     }
 
-    for (auto [filename, after] : cli::get_results(accepted_patches, filename_of_node)) {
+    for (auto [filename, after] : cli::get_results(program, accepted_patches, filename_of_node)) {
         if (options.in_place) {
             auto f = std::ofstream(filename);
             f << after;
