@@ -573,10 +573,10 @@ auto post_process_sort_imports(const std::string& before, std::string after) -> 
 }
 
 auto post_process(const std::string& before, std::string after) -> std::string {
-    after = post_process_remove_introduced_empty_lines(before, after);
     after = post_process_harmonize_line_terminators(before, after);
     after = post_process_auto_indent(before, after);
     after = post_process_sort_imports(before, after);
+    after = post_process_remove_introduced_empty_lines(before, after);
     return after;
 }
 
