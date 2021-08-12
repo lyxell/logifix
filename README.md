@@ -52,26 +52,6 @@ requiring manual modifications.
 
 <ul> </ul>
 
-## How does it work?
-
-Logifix uses static analysis and rewriting strategies to
-detect and automatically fix bugs and bad patterns in Java source
-code. It fixes problems using multiple rewrite steps.
-
-Logifix starts by finding a set of problems in each source code
-file. Each problem is then analyzed in parallel to find an
-appropriate patch that will fix the problem. There are three
-categories of problems: code that contains bugs, code that can be
-simplified and code that can be removed.
-
-After patches have been found they are categorized by problem type
-and then presented to the user. The user may choose which patches
-to apply in each file. If the user chooses multiple patches in the
-same file the result is produced by using a merge algorithm similar
-to that of Git.
-
-<ul> </ul>
-
 ## Building
 
 ### Ubuntu
