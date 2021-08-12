@@ -15,6 +15,7 @@
 #include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"
+#include "rules/remove_redundant_casts/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_collection_copies/implementation.dl"
@@ -265,13 +266,23 @@ in_scope(start, end, filename, identifier_str, resource) :-
     parent_of(resource, "name", identifier),
     string_representation(identifier, identifier_str).
 
+/* Make variable declaration of for_statement available in its body */
+in_scope(start, end, filename, identifier_str, declaration) :-
+    for_statement(id, declaration, _, _, body),
+    local_variable_declaration(declaration, _, _, declarators),
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, declarator_id, _),
+    variable_declarator_id(declarator_id, identifier, _),
+    string_representation(identifier, identifier_str),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename).
+
 /* Make formal parameter in enhanced_for_statement accessible in its body */
 in_scope(start, end, filename, identifier_str, param) :-
-    name_of(stmt, "enhanced_for_statement"),
-    parent_of(stmt, "param", param),
+    enhanced_for_statement(_, param, _, body),
     formal_parameter(param, _, _, identifier),
     string_representation(identifier, identifier_str),
-    parent_of(stmt, "body", body),
         starts_at(body, start),
         ends_at(body, end),
         filename_of(body, filename).
@@ -425,6 +436,15 @@ has_type(id, result) :-
     method_declaration(_, _, meth_header, _),
     method_header(meth_header, result, declarator, _),
     method_declarator(declarator, meth, nil).
+
+/* Types of iterators
+ ********************************/
+
+has_type(id, arg) :-
+    method_invocation(id, subject, "next", nil),
+    has_type(subject, iterator),
+    class_type(iterator, "Iterator", type_args, nil),
+    type_arguments(type_args, [arg, nil]).
 
 /* Types of streams
  ********************************/
