@@ -580,7 +580,8 @@ auto post_process(const std::string& before, std::string after) -> std::string {
     return after;
 }
 
-auto get_results(const logifix& program, const std::set<logifix::patch_id>& accepted_patches,
+auto get_results(const logifix::program& program,
+                 const std::set<logifix::patch_id>& accepted_patches,
                  const std::unordered_map<logifix::node_id, std::string>& filename_of_node)
     -> std::map<std::string, std::string> {
     auto results = std::map<std::string, std::string>{};
@@ -619,7 +620,7 @@ auto main(int argc, char** argv) -> int {
 
     std::cerr << cli::TTY_HIDE_CURSOR;
 
-    logifix program{};
+    logifix::program program{};
 
     auto options = cli::parse_options(argc, argv);
 

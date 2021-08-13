@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sjp.h"
+#include "parser/parser.h"
 #include <algorithm>
 #include <functional>
 #include <map>
@@ -8,14 +8,15 @@
 #include <unordered_set>
 #include <set>
 
-class logifix {
+namespace logifix {
 
-public:
-    using rule_id = std::string;
-    using node_id = size_t;
-    using patch_id = size_t;
-    using rewrite_type = std::tuple<size_t, size_t, std::string>;
-    using rewrite_collection = std::vector<rewrite_type>;
+using rule_id = std::string;
+using node_id = size_t;
+using patch_id = size_t;
+using rewrite_type = std::tuple<size_t, size_t, std::string>;
+using rewrite_collection = std::vector<rewrite_type>;
+
+class program {
 
 private:
 
@@ -56,4 +57,6 @@ public:
     auto get_patches_for_file(node_id) const -> std::vector<patch_id>;
     auto get_result(node_id, const std::vector<patch_id>&) const -> std::string;
 
-}; // namespace logifix
+};
+
+} // namespace logifix
