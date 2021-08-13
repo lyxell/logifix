@@ -58,9 +58,9 @@ empty_declaration(id) :-
     name_of(id, "empty_declaration").
 
 .decl constructor_declaration(id: id, modifiers: id_list, declarator: id, throws: id_list, body: id)
-constructor_declaration(id, mods, declarator, throws, body) :-
+constructor_declaration(id, modifiers, declarator, throws, body) :-
     name_of(id, "constructor_declaration"),
-    parent_of_list(id, "modifiers", mods),
+    parent_of_list(id, "modifiers", modifiers),
     parent_of(id, "declarator", declarator),
     parent_of_list(id, "throws", throws),
     parent_of(id, "body", body).

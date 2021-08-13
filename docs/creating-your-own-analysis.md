@@ -141,3 +141,43 @@ throw_statement(id, expression)
 
 * `id` Id
 * `expression` [Expression](#expressions)
+
+## Class body declarations
+
+### constructor_declaration
+
+```erlang
+constructor_declaration(id, modifiers, declarator, throws, body)
+```
+
+* `id`
+* `modifiers` [[Modifier](#modifier)]
+* `throws`
+* `body`
+
+### method_declaration
+
+```erlang
+method_declaration(id, modifiers, header, body)
+```
+
+* `id`
+* `modifiers` [[Modifier](#modifier)]
+* `header`
+* `body`
+
+## Modifier
+
+### final_modifier
+
+### private_modifier
+
+### protected_modifier
+
+### public_modifier
+
+### static_modifier
+
+### transient_modifier
+
+### volatile_modifier
