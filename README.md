@@ -15,6 +15,29 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 <ul> </ul>
 
+## Getting started
+
+1. Watch [the demo](https://github.com/lyxell/logifix#demo)
+
+2. Install
+
+> You can also install from source, see next section.
+
+```bash
+# Ubuntu/Debian
+curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-linux-gnu.gz | gunzip -c - > /tmp/logifix
+chmod +x /tmp/logifix
+sudo mv /tmp/logifix /usr/local/bin
+# macOS
+curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-macos.gz | gunzip -c - > /tmp/logifix
+chmod +x /tmp/logifix
+sudo mv /tmp/logifix /usr/local/bin
+```
+
+3. Run `logifix path/to/your/java/project`
+
+<ul> </ul>
+
 ## Features
 
 ### Intelligent equational reasoning
@@ -36,19 +59,6 @@ If your project is slow to analyze it is considered a bug and you should
 
 Logifix is engineered to produce human-like patches that are ready-to-merge by design without
 requiring manual modifications.
-
-<ul> </ul>
-
-## Getting started
-
-1. Watch [the demo](https://github.com/lyxell/logifix#demo)
-
-2. Download and unpack [the latest version](https://github.com/lyxell/logifix/releases/latest) (Currently only GNU/Linux)
-
-3. Put the `logifix` binary in `/usr/local/bin` or somewhere else
-   in your `$PATH`
-
-4. Run `logifix path/to/your/java/project`
 
 <ul> </ul>
 
