@@ -9,7 +9,7 @@ We will write a small analysis that simplifies an expression like
 `str.substring(13, str.length())` into `str.substring(13)` when
 `str` has type `String`.
 
-```
+```prolog
 rewrite_node("simplify_calls_to_string_substring", id, cat(subject_str, ".substring(", arg1_str, ")")) :-
 
     /* match a method invocation to substring with two arguments */
