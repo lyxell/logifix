@@ -6,12 +6,12 @@ const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) (.*?)\})");
 const std::regex JAVADOC_SEE_THROWS_REGEX(R"(@(see|throws) (.*))");
 } // namespace
 
-namespace javadoc {
+namespace logifix::parser::javadoc {
 
 /**
  * Expects a string such as java.util.Collection#add(java.lang.Object)
  */
-std::vector<std::string> get_classes_from_link(std::string s) {
+auto get_classes_from_link(std::string s) -> std::vector<std::string> {
 
     std::vector<std::string> result;
     std::string class_str;
@@ -64,7 +64,7 @@ std::vector<std::string> get_classes_from_link(std::string s) {
 /**
  * Expects a multi-line comment
  */
-std::set<std::string> get_classes(std::string s) {
+auto get_classes(std::string s) -> std::set<std::string> {
     std::set<std::string> result;
     for (auto [idx, regex] :
          {std::pair(2, JAVADOC_LINK_REGEX), std::pair(2, JAVADOC_SEE_THROWS_REGEX)}) {
@@ -84,4 +84,4 @@ std::set<std::string> get_classes(std::string s) {
     return result;
 }
 
-} // namespace javadoc
+} // namespace logifix::parser::javadoc

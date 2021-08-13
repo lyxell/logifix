@@ -437,7 +437,8 @@ auto program::get_patches(const std::string& source) const
             if (std::get<0>(token) != parser::token_type::multi_line_comment) {
                 continue;
             }
-            for (const auto& class_name : javadoc::get_classes(std::string(std::get<1>(token)))) {
+            for (const auto& class_name :
+                 parser::javadoc::get_classes(std::string(std::get<1>(token)))) {
                 javadoc_references->insert(souffle::tuple(
                     javadoc_references, {prog->getSymbolTable().encode(filename),
                                          prog->getSymbolTable().encode(class_name)}));
