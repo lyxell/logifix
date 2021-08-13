@@ -166,6 +166,29 @@ method_declaration(id, modifiers, header, body)
 * `header`
 * `body`
 
+## Misc
+
+### local_variable_declaration
+
+```erlang
+local_variable_declaration(id, modifiers, type, declarators)
+```
+
+* `id`
+* `modifiers` [[Modifier](#modifier)]
+* `type`
+* `declarators` [[VariableDeclarator](#variable_declarator)]
+
+### variable_declarator
+
+```erlang
+variable_declarator(id, declarator_id, initializer)
+```
+
+* `id`
+* `declarator_id`
+* `initializer`
+
 ## Modifier
 
 ### final_modifier
