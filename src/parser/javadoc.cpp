@@ -1,8 +1,9 @@
+#include "utils.h"
 #include <regex>
 #include <set>
 
 namespace {
-const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) (.*?)\})");
+const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) ([^]*?)\})");
 const std::regex JAVADOC_SEE_THROWS_REGEX(R"(@(see|throws) (.*))");
 } // namespace
 
@@ -56,6 +57,15 @@ auto get_classes_from_link(std::string s) -> std::vector<std::string> {
             pos++;
         }
         result.emplace_back(curr);
+    }
+
+    for (auto& str : result) {
+        if (utils::ends_with(str, "...")) {
+            str = str.substr(0, str.length() - 3);
+        }
+        if (utils::ends_with(str, "[]")) {
+            str = str.substr(0, str.length() - 2);
+        }
     }
 
     return result;
