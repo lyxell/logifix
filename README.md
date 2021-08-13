@@ -17,17 +17,19 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 ## Getting started
 
-1. Watch [the demo](https://github.com/lyxell/logifix#demo)
+1. Watch [the demo](#demo)
 
 2. Install
 
-> You can also install from source, see next section.
+> You can also install from source, see (building)[#building].
 
 ```bash
 # Ubuntu/Debian
 curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-linux-gnu.gz | gunzip -c - > /tmp/logifix
 chmod +x /tmp/logifix
 sudo mv /tmp/logifix /usr/local/bin
+```
+```bash
 # macOS
 curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-macos.gz | gunzip -c - > /tmp/logifix
 chmod +x /tmp/logifix
