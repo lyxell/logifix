@@ -4,6 +4,15 @@
 
 ## Statement
 
+### block
+
+```erlang
+block(id, statements)
+```
+
+* `id` Id
+* `statements` [[Statement](#statement)]
+
 ### for_statement
 
 ```erlang
