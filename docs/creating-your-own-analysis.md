@@ -186,8 +186,14 @@ variable_declarator(id, declarator_id, initializer)
 ```
 
 * `id`
-* `declarator_id`
-* `initializer`
+* `declarator_id` [VariableDeclaratorId](#variable_declarator_id)
+* `initializer` [ArrayInitializer](#array_initializer) | [Expression](#expression)
+
+### variable_declarator_id
+
+```erlang
+variable_declarator_id(id, name, dims)
+```
 
 ## Modifier
 
