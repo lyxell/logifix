@@ -1,10 +1,10 @@
-## Creating your own analysis
+# Creating your own analysis
 
-### Expression
+## Expression
 
-### Statement
+## Statement
 
-#### for_statement
+### for_statement
 
 ```erlang
 for_statement(id, init, condition, update, body)
@@ -15,9 +15,9 @@ for_statement(id, init, condition, update, body)
 * `then` [Statement](#statement)
 * `else` [Statement](#statement)
 
-#### enhanced_for_statement
+### enhanced_for_statement
 
-```
+```erlang
 enhanced_for_statement(id, param, expression, body)
 ```
 
@@ -27,7 +27,7 @@ enhanced_for_statement(id, param, expression, body)
 * `body` [Statement](#statement)
 
 
-#### if_statement
+### if_statement
 
 ```erlang
 if_statement(id, condition, then, else)
@@ -38,7 +38,7 @@ if_statement(id, condition, then, else)
 * `then` [Statement](#statement)
 * `else` [Statement](#statement)
 
-#### return_statement
+### return_statement
 
 ```erlang
 return_statement(id, expression)
@@ -47,7 +47,7 @@ return_statement(id, expression)
 * `id` Id
 * `expression` [Expression](#expressions)
 
-#### throw_statement
+### throw_statement
 
 ```erlang
 throw_statement(id, expression)
