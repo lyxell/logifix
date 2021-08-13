@@ -71,9 +71,10 @@ add_custom_command(
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 #### Create executable
-add_executable(logifix src/cli.cpp src/tty.cpp src/javadoc.cpp src/logifix.cpp src/functors.cpp src/utils.cpp src/timer.cpp logifix.cpp rule_data.cpp parser.cpp lexer.cpp)
+add_executable(logifix src/cli/cli.cpp src/cli/tty.cpp src/javadoc.cpp src/logifix.cpp src/functors.cpp src/utils.cpp src/timer.cpp logifix.cpp rule_data.cpp parser.cpp lexer.cpp)
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
 target_include_directories(logifix PRIVATE ${CMAKE_SOURCE_DIR}/src/parser)
+target_include_directories(logifix PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(logifix pthread nway fmt)
 if(UNIX AND NOT APPLE)
     target_link_libraries(logifix -static-libgcc -static-libstdc++)
