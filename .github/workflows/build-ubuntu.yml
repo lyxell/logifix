@@ -161,3 +161,17 @@ jobs:
     - run: ./logifix --in-place --accept-all testng/
     - run: cd testng && ./gradlew autostyleApply
     - run: cd testng && ./gradlew build -x test
+
+  compile-carina:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/zebrunner/carina.git
+    - run: cd carina && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all carina/
+    - run: cd carina && mvn compile
