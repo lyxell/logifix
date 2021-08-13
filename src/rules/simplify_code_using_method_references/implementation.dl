@@ -1,10 +1,7 @@
 /* Pre  [:x] -> [:y].[:z]([:x]) */
 /* Post [:y]::[:z] */
-rewrite("simplify_code_using_method_references", filename, start, end, cat(subject_str, "::", method)) :-
+rewrite_node("simplify_code_using_method_references", lambda_expr, cat(subject_str, "::", method)) :-
     lambda_expression(lambda_expr, lambda_param, lambda_body),
-        filename_of(lambda_expr, filename),
-        starts_at(lambda_expr, start),
-        ends_at(lambda_expr, end),
     method_invocation(lambda_body, subject, method, [arg, nil]),
     string_representation(subject, subject_str),
     string_representation(arg, arg_str),
@@ -12,22 +9,16 @@ rewrite("simplify_code_using_method_references", filename, start, end, cat(subje
 
 /* Pre  [:x] -> new [:y]([:x]) */
 /* Post [:y]::new */
-rewrite("simplify_code_using_method_references", filename, start, end, cat(type_str, "::new")) :-
+rewrite_node("simplify_code_using_method_references", lambda_expr, cat(type_str, "::new")) :-
     lambda_expression(lambda_expr, lambda_param, lambda_body),
-        filename_of(lambda_expr, filename),
-        starts_at(lambda_expr, start),
-        ends_at(lambda_expr, end),
     class_instance_creation_expression(lambda_body, _, nil, type, [arg, nil], nil),
     string_representation(type, type_str),
     string_representation(arg, arg_str),
     string_representation(lambda_param, arg_str).
 
 /* Pre  [:x] -> [:x].[:y]() */
-rewrite("simplify_code_using_method_references", filename, start, end, cat(type_str, "::", method_str)) :-
+rewrite_node("simplify_code_using_method_references", lambda_expr, cat(type_str, "::", method_str)) :-
     lambda_expression(lambda_expr, params, lambda_body),
-        filename_of(lambda_expr, filename),
-        starts_at(lambda_expr, start),
-        ends_at(lambda_expr, end),
     lambda_params(params, [param, nil]),
     method_invocation(lambda_body, subject, method_str, nil),
     string_representation(subject, subject_str),

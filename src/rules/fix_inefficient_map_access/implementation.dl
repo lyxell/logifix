@@ -30,9 +30,8 @@ rewrite("fix_inefficient_map_access", filename, start, end + 1, cat("for (Map.En
 /**
  * Use entry.getValue() instead of map.get(key) if available.
  */
-rewrite("fix_inefficient_map_access", filename, start, end, cat(formal_param_id_str, ".getValue()")) :-
-    enhanced_for_statement(id, formal_param, expression, body),
-        filename_of(id, filename),
+rewrite_node("fix_inefficient_map_access", map_get, cat(formal_param_id_str, ".getValue()")) :-
+    enhanced_for_statement(_, formal_param, expression, body),
     formal_parameter(formal_param, _, _, formal_param_id),
     string_representation(formal_param_id, formal_param_id_str),
 
@@ -55,8 +54,6 @@ rewrite("fix_inefficient_map_access", filename, start, end, cat(formal_param_id_
     /* body contains a call to map.get(key) */
     ancestor_of(body, map_get),
     method_invocation(map_get, subject, "get", [key, nil]),
-        starts_at(map_get, start),
-        ends_at(map_get, end),
     point_of_declaration(subject, decl),
     (string_representation(key, cat(formal_param_id_str, ".getKey()"))
     ;string_representation(key, declarator_id_str)).

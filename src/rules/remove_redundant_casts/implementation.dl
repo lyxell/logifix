@@ -1,8 +1,5 @@
-rewrite("remove_redundant_casts", filename, start, end, value_str) :-
+rewrite_node("remove_redundant_casts", id, value_str) :-
     cast_expression(id, cast_type, value),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
     has_type(value, actual_type),
     string_representation(value, value_str),
     string_representation(cast_type, type_str),

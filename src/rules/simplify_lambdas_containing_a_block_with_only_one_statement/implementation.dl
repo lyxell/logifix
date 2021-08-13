@@ -1,18 +1,11 @@
-/**
- * Lambdas containing only one statement should not nest this statement in a
- * block
- * https://rules.sonarsource.com/java/RSPEC-1602
- */
-
 /* Pre  [:lambda_params] -> { return [:x] } */
 /* Post [:lambda_params] -> [:x] */
-rewrite("simplify_lambdas_containing_a_block_with_only_one_statement", filename, start, end, expr_str) :-
-    lambda_expression(lambda_expr, _, lambda_body),
-        filename_of(lambda_expr, filename),
+rewrite_node("simplify_lambdas_containing_a_block_with_only_one_statement", lambda_body, expr_str) :-
+    lambda_expression(_, _, lambda_body),
     block(lambda_body, [statement, nil]),
         starts_at(lambda_body, start),
         ends_at(lambda_body, end),
     return_statement(statement, expr),
     string_representation(expr, expr_str),
+    /* Do not introduce long lines */
     end - start < 80.
-

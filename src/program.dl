@@ -268,7 +268,7 @@ in_scope(start, end, filename, identifier_str, resource) :-
 
 /* Make variable declaration of for_statement available in its body */
 in_scope(start, end, filename, identifier_str, declaration) :-
-    for_statement(id, declaration, _, _, body),
+    for_statement(_, declaration, _, _, body),
     local_variable_declaration(declaration, _, _, declarators),
     list_contains(declarators, declarator),
     variable_declarator(declarator, declarator_id, _),
@@ -749,5 +749,12 @@ has_stream_type(id) :- method_invocation(id, subject, "sorted", _), has_stream_t
 /* Rewrite rules
  ********************************/
 
+.decl rewrite_node(rule: symbol, id: id, to: symbol)
+
 .decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
+rewrite(rule, filename, start, end, to) :-
+    rewrite_node(rule, id, to),
+    starts_at(id, start),
+    ends_at(id, end),
+    filename_of(id, filename).
 .output rewrite(IO=stdout)

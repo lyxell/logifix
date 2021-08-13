@@ -1,10 +1,7 @@
 /* Pre  [:x] != null && "[:y]".equals([:x]) */
 /* Post "[:y]".equals([:x]) */
-rewrite("remove_unnecessary_null_check_before_string_equals_comparison", filename, start, end, cat(invocation_str)) :-
+rewrite_node("remove_unnecessary_null_check_before_string_equals_comparison", and_expr, cat(invocation_str)) :-
     conditional_and_expression(and_expr, noteqnull, invocation),
-        filename_of(and_expr, filename),
-        starts_at(and_expr, start),
-        ends_at(and_expr, end),
     not_equals_expression_unordered(noteqnull, null, noteqnull_subject),
     null_literal(null),
     method_invocation(invocation, subject, "equals", [arg, nil]),

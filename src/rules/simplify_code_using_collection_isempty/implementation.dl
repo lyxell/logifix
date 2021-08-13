@@ -2,11 +2,8 @@
 
 /* Pre  [:x].size() == 0 */
 /* Post [:x].isEmpty()   */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat(subject_str, ".isEmpty()")) :-
-    equals_expression_unordered(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat(subject_str, ".isEmpty()")) :-
+    equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -14,11 +11,8 @@ rewrite("simplify_code_using_collection_isempty", filename, start, end, cat(subj
 
 /* Pre  [:x].size() != 0 */
 /* Post ![:x].isEmpty()  */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
-    not_equals_expression_unordered(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
+    not_equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -26,11 +20,8 @@ rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!",
 
 /* Pre  [:x].size() > 0 */
 /* Post ![:x].isEmpty()  */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
-    greater_than_expression(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
+    greater_than_expression(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -38,11 +29,8 @@ rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!",
 
 /* Pre  [:x].size() >= 1 */
 /* Post ![:x].isEmpty()  */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
-    greater_than_or_equals_expression(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
+    greater_than_or_equals_expression(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     has_collection_type(subject),
     evaluates_to_integer_value(integer, 1),
@@ -52,11 +40,8 @@ rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!",
 
 /* Pre  [:x].length() == 0 */
 /* Post [:x].isEmpty()     */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat(subject_str, ".isEmpty()")) :-
-    equals_expression_unordered(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat(subject_str, ".isEmpty()")) :-
+    equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -64,11 +49,8 @@ rewrite("simplify_code_using_collection_isempty", filename, start, end, cat(subj
 
 /* Pre  [:x].length() != 0 */
 /* Post ![:x].isEmpty()    */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
-    not_equals_expression_unordered(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
+    not_equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -76,11 +58,8 @@ rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!",
 
 /* Pre  [:x].length() > 0 */
 /* Post ![:x].isEmpty()   */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
-    greater_than_expression(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
+    greater_than_expression(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 0),
@@ -88,11 +67,8 @@ rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!",
 
 /* Pre  [:x].length() >= 1 */
 /* Post ![:x].isEmpty()    */
-rewrite("simplify_code_using_collection_isempty", filename, start, end, cat("!", subject_str, ".isEmpty()")) :-
-    greater_than_or_equals_expression(parent, invocation, integer),
-        filename_of(parent, filename),
-        starts_at(parent, start),
-        ends_at(parent, end),
+rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
+    greater_than_or_equals_expression(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
     has_string_type(subject),
     evaluates_to_integer_value(integer, 1),

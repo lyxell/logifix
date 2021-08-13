@@ -1,10 +1,7 @@
 /* Pre  return; */
 /* Post         */
-rewrite("remove_unnecessary_return", filename, start, end, "") :-
+rewrite_node("remove_unnecessary_return", return, "") :-
     method_declaration(_, _, _, body),
     block(body, stmts),
     list_last_element(stmts, return),
-    return_statement(return, nil),
-    starts_at(return, start),
-    ends_at(return, end),
-    filename_of(return, filename).
+    return_statement(return, nil).
