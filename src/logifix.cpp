@@ -16,6 +16,8 @@
 #include <utility>
 #include <vector>
 
+namespace logifix {
+
 namespace {
 /**
  * Check if two 2d segments overlap.
@@ -29,25 +31,25 @@ template <typename T> auto segments_overlap(std::pair<T, T> a, std::pair<T, T> b
 }
 } // namespace
 
-auto logifix::create_id(const std::string& str, const rewrite_collection& rewrites) -> size_t {
+auto program::create_id(const std::string& str, const rewrite_collection& rewrites) -> size_t {
     auto id = nodes.size();
     nodes.emplace_back(str, rewrites);
     return id;
 }
 
-auto logifix::add_file(const std::string& file) -> size_t {
+auto program::add_file(const std::string& file) -> size_t {
     auto node_id = create_id("", {std::tuple(0ul, 0ul, file)});
     pending_files.emplace_front(node_id);
     return node_id;
 }
 
-auto logifix::disable_rule(const rule_id& rule) -> void { disabled_rules.emplace(rule); }
+auto program::disable_rule(const rule_id& rule) -> void { disabled_rules.emplace(rule); }
 
 /**
  * Take a string and a rewrite, apply the rewrite and return the
  * result.
  */
-auto logifix::apply_rewrite(const std::string& original, const rewrite_type& rewrite) const
+auto program::apply_rewrite(const std::string& original, const rewrite_type& rewrite) const
     -> std::string {
     const auto& [start, end, replacement] = rewrite;
     return original.substr(0, start) + replacement + original.substr(end);
@@ -57,7 +59,7 @@ auto logifix::apply_rewrite(const std::string& original, const rewrite_type& rew
  * Take a string and a collection of rewrites, apply all rewrites and return the
  * result.
  */
-auto logifix::apply_rewrites(const std::string& original, rewrite_collection rewrites) const
+auto program::apply_rewrites(const std::string& original, rewrite_collection rewrites) const
     -> std::string {
     /* Sort rewrites in reverse so we can apply them one by one */
     std::sort(rewrites.begin(), rewrites.end(), std::greater<>());
@@ -67,7 +69,7 @@ auto logifix::apply_rewrites(const std::string& original, rewrite_collection rew
                            });
 }
 
-auto logifix::adjust_rewrites(const rewrite_collection& before,
+auto program::adjust_rewrites(const rewrite_collection& before,
                               const rewrite_collection& after) const -> rewrite_collection {
     auto result = rewrite_collection{};
     for (const auto& [xs, xe, xr] : after) {
@@ -83,7 +85,7 @@ auto logifix::adjust_rewrites(const rewrite_collection& before,
     return result;
 }
 
-auto logifix::rewrites_invert(const std::string& original, rewrite_collection rewrites) const
+auto program::rewrites_invert(const std::string& original, rewrite_collection rewrites) const
     -> rewrite_collection {
     auto result = rewrite_collection{};
     auto diff = 0;
@@ -96,7 +98,7 @@ auto logifix::rewrites_invert(const std::string& original, rewrite_collection re
     return result;
 }
 
-auto logifix::rewrite_collections_overlap(const rewrite_collection& left,
+auto program::rewrite_collections_overlap(const rewrite_collection& left,
                                           const rewrite_collection& right) const -> bool {
     for (const auto& [xs, xe, xr] : left) {
         for (const auto& [ys, ye, yr] : right) {
@@ -108,7 +110,7 @@ auto logifix::rewrite_collections_overlap(const rewrite_collection& left,
     return false;
 }
 
-auto logifix::rewrite_collection_overlap(const rewrite_collection& coll) const -> bool {
+auto program::rewrite_collection_overlap(const rewrite_collection& coll) const -> bool {
     for (auto i = std::size_t{}; i < coll.size(); i++) {
         for (auto j = std::size_t{}; j < coll.size(); j++) {
             if (i == j) {
@@ -123,21 +125,21 @@ auto logifix::rewrite_collection_overlap(const rewrite_collection& coll) const -
     return false;
 }
 
-auto logifix::split_rewrite(const std::string& original, const rewrite_type& rewrite) const
+auto program::split_rewrite(const std::string& original, const rewrite_type& rewrite) const
     -> rewrite_collection {
     auto result = rewrite_collection{};
     const auto& [start, end, replacement] = rewrite;
     auto a = original.substr(start, end - start);
     auto b = replacement;
-    auto a_tokens = *sjp::lex(a);
-    auto b_tokens = *sjp::lex(b);
+    auto a_tokens = *parser::lex(a);
+    auto b_tokens = *parser::lex(b);
     auto lcs = nway::lcs(a_tokens, b_tokens);
     auto a_pos = std::size_t{};
     auto b_pos = std::size_t{};
 
-    auto tokens_len_sum = [](sjp::token_collection tokens, size_t num) -> size_t {
-        auto slice = sjp::token_collection(tokens.begin(), tokens.begin() + num);
-        return sjp::token_collection_to_string(slice).size();
+    auto tokens_len_sum = [](parser::token_collection tokens, size_t num) -> size_t {
+        auto slice = parser::token_collection(tokens.begin(), tokens.begin() + num);
+        return parser::token_collection_to_string(slice).size();
     };
 
     while (a_pos < a_tokens.size() || b_pos < b_tokens.size()) {
@@ -167,7 +169,7 @@ auto logifix::split_rewrite(const std::string& original, const rewrite_type& rew
     return result;
 }
 
-auto logifix::get_recursive_merge_result_for_node(node_id node) const -> std::string {
+auto program::get_recursive_merge_result_for_node(node_id node) const -> std::string {
     if (taken_transitions.find(node) == taken_transitions.end() ||
         taken_transitions.at(node).empty()) {
         auto [pstr, rewrites] = nodes[node];
@@ -176,7 +178,7 @@ auto logifix::get_recursive_merge_result_for_node(node_id node) const -> std::st
     return get_recursive_merge_result_for_node(taken_transitions.at(node).begin()->second);
 }
 
-auto logifix::post_process(const std::string& original, const std::string& changed) const
+auto program::post_process(const std::string& original, const std::string& changed) const
     -> std::string {
     auto rewrites = rewrites_invert(
         original, split_rewrite(original, std::tuple(0ul, original.size(), changed)));
@@ -197,7 +199,7 @@ auto logifix::post_process(const std::string& original, const std::string& chang
     return apply_rewrites(changed, result);
 }
 
-auto logifix::get_patches_for_file(node_id node) const -> std::vector<patch_id> {
+auto program::get_patches_for_file(node_id node) const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
     auto [pstr, rws] = nodes[node];
     auto original = apply_rewrites(pstr, rws);
@@ -210,7 +212,7 @@ auto logifix::get_patches_for_file(node_id node) const -> std::vector<patch_id> 
     return result;
 }
 
-auto logifix::get_patches_for_rule(const rule_id& rule) const -> std::vector<patch_id> {
+auto program::get_patches_for_rule(const rule_id& rule) const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
     for (auto node = std::size_t{}; node < nodes.size(); node++) {
         if (parent.find(node) == parent.end() &&
@@ -225,12 +227,12 @@ auto logifix::get_patches_for_rule(const rule_id& rule) const -> std::vector<pat
     return result;
 }
 
-auto logifix::get_patch_data(patch_id patch) const -> std::tuple<rule_id, node_id, std::string> {
+auto program::get_patch_data(patch_id patch) const -> std::tuple<rule_id, node_id, std::string> {
     auto [r, p] = parent.at(patch);
     return {r, p, get_recursive_merge_result_for_node(patch)};
 }
 
-auto logifix::get_result(node_id parent, const std::vector<patch_id>& patches) const
+auto program::get_result(node_id parent, const std::vector<patch_id>& patches) const
     -> std::string {
     auto [parent_pstr, parent_rewrites] = nodes[parent];
     auto parent_source = apply_rewrites(parent_pstr, parent_rewrites);
@@ -254,7 +256,7 @@ auto logifix::get_result(node_id parent, const std::vector<patch_id>& patches) c
     return post_process(parent_source, apply_rewrites(parent_source, all_rewrites));
 }
 
-auto logifix::get_all_patches() const -> std::vector<patch_id> {
+auto program::get_all_patches() const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
     for (auto node = std::size_t{}; node < nodes.size(); node++) {
         if (parent.find(node) == parent.end() &&
@@ -267,7 +269,7 @@ auto logifix::get_all_patches() const -> std::vector<patch_id> {
     return result;
 }
 
-auto logifix::print_performance_metrics() -> void {
+auto program::print_performance_metrics() -> void {
     constexpr auto MAX_FILES_SHOWN = std::size_t{10};
     constexpr auto MICROSECONDS_PER_SECOND = 1000.0 * 1000.0;
     auto time_per_event_type = std::map<std::string, size_t>{};
@@ -281,7 +283,7 @@ auto logifix::print_performance_metrics() -> void {
     }
 }
 
-auto logifix::run(std::function<void(node_id)> report_progress) -> void {
+auto program::run(std::function<void(node_id)> report_progress) -> void {
     auto work_mutex = std::mutex{};
     auto cv = std::condition_variable{};
     auto waiting_threads = std::size_t{};
@@ -418,7 +420,7 @@ auto logifix::run(std::function<void(node_id)> report_progress) -> void {
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-auto logifix::get_patches(const std::string& source) const
+auto program::get_patches(const std::string& source) const
     -> std::set<std::pair<rule_id, rewrite_type>> {
 
     const auto* program_name = "logifix";
@@ -428,11 +430,11 @@ auto logifix::get_patches(const std::string& source) const
         souffle::ProgramFactory::newInstance(program_name));
 
     /* add javadoc info to prog */
-    auto tokens = sjp::lex(source);
+    auto tokens = parser::lex(source);
     if (tokens) {
         auto* javadoc_references = prog->getRelation("javadoc_references");
         for (auto token : *tokens) {
-            if (std::get<0>(token) != sjp::token_type::multi_line_comment) {
+            if (std::get<0>(token) != parser::token_type::multi_line_comment) {
                 continue;
             }
             for (const auto& class_name : javadoc::get_classes(std::string(std::get<1>(token)))) {
@@ -444,7 +446,7 @@ auto logifix::get_patches(const std::string& source) const
     }
 
     /* add ast info to prog */
-    sjp::parse(prog.get(), filename, source.c_str());
+    parser::parse(prog.get(), filename, source.c_str());
 
     /* add source_code info to prog */
     auto* source_code_relation = prog->getRelation("source_code");
@@ -474,3 +476,5 @@ auto logifix::get_patches(const std::string& source) const
 
     return rewrites;
 }
+
+} // namespace logifix
