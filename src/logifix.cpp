@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <deque>
 #include <filesystem>
+#include <fmt/color.h>
 #include <fmt/core.h>
 #include <iostream>
 #include <mutex>
@@ -381,11 +382,27 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     }
                     if (!rewrites.empty()) {
                         if (rewrite_collection_overlap(rewrites)) {
-                            std::cerr << "UNEXPECTED OVERLAP" << std::endl;
+                            fmt::print(stderr, fg(fmt::terminal_color::red), "\nFatal error: ");
+                            fmt::print("Unexpected merge conflict\n", i);
                             std::sort(rewrites.begin(), rewrites.end());
-                            for (auto [s, e, repl] : rewrites) {
-                                std::cerr << s << " " << e << " " << repl << " " << repl.size()
-                                          << std::endl;
+                            auto fragment_start = std::get<0>(rewrites.front());
+                            auto fragment_end = std::get<1>(rewrites.back());
+                            fmt::print(stderr, "Related code fragment: {}\n",
+                                       current_node_source.substr(fragment_start,
+                                                                  fragment_end - fragment_start));
+                            for (const auto& [next_node, rule, take_transition] : next_nodes) {
+                                if (take_transition) {
+                                    fmt::print(stderr, "Rule: ");
+                                    fmt::print(stderr, fg(fmt::terminal_color::cyan), "{}\n", rule);
+                                    auto [next_pstr, next_rewrites] = nodes[next_node];
+                                    for (auto [start, end, replacement] : next_rewrites) {
+                                        fmt::print(
+                                            stderr,
+                                            "    Original: {} Replacement: {} Position: {}-{}\n",
+                                            next_pstr.substr(start, end - start), replacement,
+                                            start, end);
+                                    }
+                                }
                             }
                             std::exit(1);
                         } else {
