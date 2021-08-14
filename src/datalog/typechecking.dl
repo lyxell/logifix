@@ -120,6 +120,7 @@ native_type("java.util", "ArrayList").
 native_type("java.util", "Collection").
 native_type("java.util", "Deque").
 native_type("java.util", "HashMap").
+native_type("java.util", "HashMap").
 native_type("java.util", "Iterator").
 native_type("java.util", "LinkedHashMap").
 native_type("java.util", "LinkedList").
@@ -129,7 +130,9 @@ native_type("java.util", "Queue").
 native_type("java.util", "Set").
 native_type("java.util", "SortedSet").
 native_type("java.util", "Stack").
+native_type("java.util", "TreeMap").
 native_type("java.util", "Vector").
+native_type("java.util", "WeakHashMap").
 native_type("java.util.stream", "Collectors").
 
 .decl collection_type(package: symbol, class: symbol)

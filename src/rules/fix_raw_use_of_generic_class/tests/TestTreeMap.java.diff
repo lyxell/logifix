@@ -1,0 +1,10 @@
+diff --git a/TestTreeMap.java b/TestTreeMap.java
+@@ -3,7 +3,7 @@
+ 
+ public class TestTreeMap {
+  	public Map<String, Integer> test() {
+-		Map<String, Integer> values = new TreeMap();
++		Map<String, Integer> values = new TreeMap<>();
+         values.put("hello", 0);
+         return values;
+     }

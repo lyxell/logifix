@@ -106,6 +106,10 @@ set(regression_test_data
     "simplify_code_using_map_computeifabsent,https://github.com/cbeust/testng/blob/9ea649f6c66ab6165813af7a6c28cbde13c0b685/testng-core/src/main/java/org/testng/internal/MethodGroupsHelper.java,"
     "simplify_code_using_map_computeifabsent,https://github.com/lyxell/spoon/blob/2a2d3d63e62ff7b7081cd9cac572d6ee85def1b1/src/main/java/spoon/pattern/PatternParameterConfigurator.java,"
     "simplify_code_using_map_computeifabsent,https://github.com/spring-projects/spring-framework/blob/01c8de0111806d8f9346f332b22ece9dd9fef618/spring-aop/src/main/java/org/springframework/aop/framework/autoproxy/target/AbstractBeanFactoryBasedTargetSourceCreator.java,"
+    "fix_raw_use_of_generic_class,https://github.com/lyxell/spoon/blob/69c1bc985c607c5bf6202b5bce7f553adbca76ba/src/main/java/spoon/ContractVerifier.java,"
+    "fix_raw_use_of_generic_class,https://github.com/lyxell/spoon/blob/69c1bc985c607c5bf6202b5bce7f553adbca76ba/src/main/java/spoon/pattern/internal/matcher/TobeMatched.java,"
+    "fix_raw_use_of_generic_class,https://github.com/lyxell/spoon/blob/69c1bc985c607c5bf6202b5bce7f553adbca76ba/src/main/java/spoon/reflect/visitor/ImportCleaner.java,"
+    "fix_raw_use_of_generic_class,https://github.com/lyxell/spoon/blob/69c1bc985c607c5bf6202b5bce7f553adbca76ba/src/main/java/spoon/support/reflect/declaration/CtAnnotationImpl.java,"
 )
 
 set(counter 1)
