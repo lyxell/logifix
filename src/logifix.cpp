@@ -456,9 +456,7 @@ auto program::get_patches(const std::string& source) const
                                               prog->getSymbolTable().encode(source)}));
 
     /* run program */
-    std::cerr << "start" << std::endl;
     prog->run();
-    std::cerr << "end" << std::endl;
     // prog->printAll();
 
     /* extract rewrites */
