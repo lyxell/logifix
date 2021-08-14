@@ -21,7 +21,7 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 2. Install
 
-> You can also install from source, see (building)[#building].
+> You can also install from source, see [building](#building).
 
 ```bash
 # Ubuntu/Debian
