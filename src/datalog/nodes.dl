@@ -287,9 +287,10 @@ class_instance_creation_expression(id, qualifier, type_arguments, type, argument
     parent_of_list(id, "arguments", arguments),
     parent_of(id, "body", body).
 
-.decl class_type(id: id, name: symbol, type_arguments: id, annotations: id_list)
-class_type(id, name_str, type_arguments, annotations) :-
+.decl class_type(id: id, parent: id, name: symbol, type_arguments: id, annotations: id_list)
+class_type(id, parent, name_str, type_arguments, annotations) :-
     name_of(id, "class_type"),
+    parent_of(id, "parent", parent),
     parent_of(id, "name", name),
     string_representation(name, name_str),
     parent_of(id, "type_arguments", type_arguments),

@@ -6,7 +6,7 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat(subject_str, ".is
     equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     _has_type(subject, [package, class, _]),
-    collection_type(package, class),
+    (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -16,7 +16,7 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
     not_equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     _has_type(subject, [package, class, _]),
-    collection_type(package, class),
+    (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -26,7 +26,7 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
     greater_than_expression(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     _has_type(subject, [package, class, _]),
-    collection_type(package, class),
+    (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -36,7 +36,7 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
     greater_than_or_equals_expression(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
     _has_type(subject, [package, class, _]),
-    collection_type(package, class),
+    (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 1),
     string_representation(subject, subject_str).
 

@@ -11,8 +11,8 @@ rewrite("remove_redundant_calls_to_collection_addall", filename, start, end, cat
     variable_declarator(declarator, _, initializer),
     class_instance_creation_expression(initializer, nil, nil, type, nil, nil),
         starts_at(initializer, start),
-        class_type(type, type_name, _, _),
-        collection_type(_, type_name), // TODO convert to real type
+        ast_type_to_type(type, [package, class, _]),
+        collection_type(package, class),
     predecessor_of(id, expr_stmt),
     expression_statement(expr_stmt, expr),
         ends_at(expr_stmt, end),

@@ -137,15 +137,20 @@ collection_type("java.util", "ArrayDeque").
 collection_type("java.util", "ArrayList").
 collection_type("java.util", "Collection").
 collection_type("java.util", "Deque").
-collection_type("java.util", "HashMap").
 collection_type("java.util", "LinkedList").
 collection_type("java.util", "List").
-collection_type("java.util", "Map").
 collection_type("java.util", "Queue").
 collection_type("java.util", "Set").
 collection_type("java.util", "SortedSet").
 collection_type("java.util", "Stack").
 collection_type("java.util", "Vector").
+
+.decl map_type(package: symbol, class: symbol)
+map_type("java.util", "Map").
+map_type("java.util", "HashMap").
+map_type("java.util", "TreeMap").
+map_type("java.util", "WeakHashMap").
+// ...
 
 .decl is_type_preserving_stream_method(s: symbol)
 is_type_preserving_stream_method("filter").
@@ -154,36 +159,56 @@ is_type_preserving_stream_method("map").
 is_type_preserving_stream_method("skip").
 is_type_preserving_stream_method("sorted").
 
-.decl ast_type_args_to_type_list(list: id_list, type: type_list)
-ast_type_args_to_type_list(nil, nil).
-ast_type_args_to_type_list([head, tail], [head_type, tail_type]) :-
+.decl ast_type_args_list_to_type_list(list: id_list, type: type_list)
+ast_type_args_list_to_type_list(nil, nil).
+ast_type_args_list_to_type_list([head, tail], [head_type, tail_type]) :-
     head_of(head, tail),
     ast_type_to_type(head, head_type),
-    ast_type_args_to_type_list(tail, tail_type).
+    ast_type_args_list_to_type_list(tail, tail_type).
+
+.decl ast_type_args_to_type_list(id: id, type: type_list)
+ast_type_args_to_type_list(nil, nil).
+ast_type_args_to_type_list(id, [nil, nil]) :-
+    type_arguments(id, nil).
+ast_type_args_to_type_list(id, types) :-
+    type_arguments(id, list),
+    list != nil,
+    ast_type_args_list_to_type_list(list, types).
 
 .decl ast_type_to_type(id: id, type: type)
 .output ast_type_to_type(IO=stdout)
 
-/* Non-native types */
+/* Non-native types - with type arguments */
+ast_type_to_type(id, [parent_str, class, type_args]) :-
+    !native_type(_, class),
+    class_type(id, parent, class, type_args_id, _),
+    string_representation(parent, parent_str),
+    ast_type_args_to_type_list(type_args_id, type_args).
 ast_type_to_type(id, ["", class, type_args]) :-
     !native_type(_, class),
-    class_type(id, class, args, _),
-    type_arguments(args, list),
-    ast_type_args_to_type_list(list, type_args).
+    class_type(id, nil, class, type_args_id, _), // TODO imports
+    ast_type_args_to_type_list(type_args_id, type_args).
+
+/* Non-native types - without type arguments */
+ast_type_to_type(id, [parent_str, class, nil]) :-
+    !native_type(_, class),
+    class_type(id, parent, class, nil, _),
+    string_representation(parent, parent_str).
 ast_type_to_type(id, ["", class, nil]) :-
     !native_type(_, class),
-    class_type(id, class, nil, _).
+    class_type(id, nil, class, nil, _).
 
-/* Native types */
+/* Native types - with type arguments */
 ast_type_to_type(id, [package, class, type_args]) :-
     native_type(package, class),
-    class_type(id, class, args, _),
-    type_arguments(args, list),
-    ast_type_args_to_type_list(list, type_args). // TODO: Check imports
+    class_type(id, nil, class, type_args_id, _),
+    ast_type_args_to_type_list(type_args_id, type_args). // TODO: Check imports
+/* Native types - without type arguments */
 ast_type_to_type(id, [package, class, nil]) :-
     native_type(package, class),
-    class_type(id, class, nil, _). // TODO: Check imports
+    class_type(id, nil, class, nil, _). // TODO: Check imports
 
+/* Primitive types */
 ast_type_to_type(id, ["", name_str, nil]) :-
     primitive_type(id, _, name),
     string_representation(name, name_str).

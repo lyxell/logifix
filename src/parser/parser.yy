@@ -237,22 +237,22 @@ reference_type: class_type
               ;
 
 class_type:                annotations type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", NIL);
+                                                                            PARENT($$, "parent", NIL);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", $annotations);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
           |                            type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", NIL);
+                                                                            PARENT($$, "parent", NIL);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", NIL);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
           | class_type '.' annotations type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", $1);
+                                                                            PARENT($$, "parent", $1);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", $annotations);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
           | class_type '.'             type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", $1);
+                                                                            PARENT($$, "parent", $1);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", NIL);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
@@ -664,12 +664,12 @@ unann_class_type:                                      type_identifier type_argu
                                                                                             PARENT($$, "name", $type_identifier);
                                                                                             PARENT($$, "type_arguments", $type_arguments_opt);
                                                                                             PARENT_LIST($$, "annotations", NIL);
-                                                                                            PARENT($$, "parent_class", NIL); }
+                                                                                            PARENT($$, "parent", NIL); }
                 | unann_class_type '.' annotations_opt type_identifier type_arguments_opt { $$ = ID("class_type", @$);
                                                                                             PARENT($$, "name", $type_identifier);
                                                                                             PARENT($$, "type_arguments", $type_arguments_opt);
                                                                                             PARENT_LIST($$, "annotations", $annotations_opt);
-                                                                                            PARENT($$, "parent_class", $1); }
+                                                                                            PARENT($$, "parent", $1); }
                 ;
 
 unann_array_type: unann_primitive_type dims { $$ = ID("array_type", @$);

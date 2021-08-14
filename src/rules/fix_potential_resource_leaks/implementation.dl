@@ -7,7 +7,7 @@ rewrite("fix_potential_resource_leaks", filename, try_start, decl_end, cat("try 
     block(body, [declaration_stmt, _]),
     local_variable_declaration_statement(declaration_stmt, declaration),
     local_variable_declaration(declaration, _, type, [_, nil]),
-    class_type(type, type_name, _, _),
+    class_type(type, nil, type_name, _, _),
     autocloseable_type_name(type_name),
     string_representation(declaration, declaration_str),
     method_invocation(_, subject, "close", nil),

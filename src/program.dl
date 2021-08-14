@@ -63,6 +63,7 @@
 
 .functor decrease_indentation(x: symbol):symbol stateful
 .functor type_to_string(x: type):symbol stateful
+.functor type_args_to_string(x: type_list):symbol stateful
 .functor type_to_qualified_string(x: type):symbol stateful
 
 /* AST nodes
