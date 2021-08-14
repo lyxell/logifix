@@ -11,6 +11,7 @@ imports_start_at(start) :-
     ordinary_compilation_unit(_, _, nil, [t_decl, _]),
     starts_at(t_decl, start).
 
+/* Auto-import */
 rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import java.util.stream.Collectors;\n") :-
     expression_name(id, _),
         filename_of(id, filename),
@@ -18,8 +19,9 @@ rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import j
     !imported_strings("java.util.stream.Collectors"),
     string_representation(id, "java.util.stream.Collectors").
 
-rewrite_node("remove_use_of_fully_qualified_names", id, "Collectors") :-
+rewrite_node("remove_use_of_fully_qualified_names", id, class) :-
     expression_name(id, _),
-    imported_strings("java.util.stream.Collectors"),
-    string_representation(id, "java.util.stream.Collectors").
+    imported_strings(cat(package, ".", class)),
+    native_type(package, class),
+    string_representation(id, cat(package, ".", class)).
 

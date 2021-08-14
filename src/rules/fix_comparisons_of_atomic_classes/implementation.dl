@@ -1,6 +1,0 @@
-rewrite_node("fix_comparisons_of_atomic_classes", id, cat(left_str, ".get() == ", right_str, ".get()")) :-
-    method_invocation(id, left, "equals", [right, nil]),
-    has_atomic_class_type(left),
-    has_atomic_class_type(right),
-    string_representation(left, left_str),
-    string_representation(right, right_str).

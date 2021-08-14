@@ -5,7 +5,8 @@
 rewrite_node("simplify_code_using_collection_isempty", id, cat(subject_str, ".isEmpty()")) :-
     equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
-    has_collection_type(subject),
+    _has_type(subject, [package, class, _]),
+    collection_type(package, class),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -14,7 +15,8 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat(subject_str, ".is
 rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
     not_equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
-    has_collection_type(subject),
+    _has_type(subject, [package, class, _]),
+    collection_type(package, class),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -23,7 +25,8 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
 rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_expression(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
-    has_collection_type(subject),
+    _has_type(subject, [package, class, _]),
+    collection_type(package, class),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -32,7 +35,8 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
 rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_or_equals_expression(id, invocation, integer),
     method_invocation(invocation, subject, "size", nil),
-    has_collection_type(subject),
+    _has_type(subject, [package, class, _]),
+    collection_type(package, class),
     evaluates_to_integer_value(integer, 1),
     string_representation(subject, subject_str).
 
@@ -43,7 +47,7 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
 rewrite_node("simplify_code_using_collection_isempty", id, cat(subject_str, ".isEmpty()")) :-
     equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -52,7 +56,7 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat(subject_str, ".is
 rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
     not_equals_expression_unordered(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -61,7 +65,7 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
 rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_expression(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 0),
     string_representation(subject, subject_str).
 
@@ -70,6 +74,6 @@ rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str,
 rewrite_node("simplify_code_using_collection_isempty", id, cat("!", subject_str, ".isEmpty()")) :-
     greater_than_or_equals_expression(id, invocation, integer),
     method_invocation(invocation, subject, "length", nil),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 1),
     string_representation(subject, subject_str).

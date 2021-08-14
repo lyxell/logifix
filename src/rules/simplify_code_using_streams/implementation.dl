@@ -14,19 +14,22 @@ rewrite_node("simplify_code_using_streams", id, cat(
                                            ".collect(java.util.stream.Collectors.toList()));"
 )) :-
     enhanced_for_statement(id, param, original, body),
-    has_type(original, original_type),
-    is_collection_type(original_type),
-    /* The collection that is looped over should not be raw since this would
-     * give the result of the stream type Object */
-    class_type(original_type, _, targs, _),
-    targs != nil,
+
+    /* The type of the collection that is looped over should be parameterized
+     * since otherwise the result of the stream would be java.lang.Object which
+     * would need casting */
+    _has_type(original, [original_type_package, original_type_name, type_args]),
+    type_args != nil,
+    collection_type(original_type_package, original_type_name),
+
     formal_parameter(param, nil, _, declarator_id),
     block(body, [if_stmt, nil]),
     if_statement(if_stmt, cond, then, nil),
     block(then, [expr_stmt, nil]),
     expression_statement(expr_stmt, invocation),
     method_invocation(invocation, subject, "add", [x, nil]),
-    has_collection_type(subject),
+    _has_type(subject, [subject_type_package, subject_type_name, _]),
+    collection_type(subject_type_package, subject_type_name),
     point_of_declaration(x, param),
     string_representation(cond, cond_str),
     string_representation(subject, subject_str),

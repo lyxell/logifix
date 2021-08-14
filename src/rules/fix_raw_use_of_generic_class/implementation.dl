@@ -1,49 +1,29 @@
+.decl field_or_local_variable_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
+field_or_local_variable_declaration(id, mods, type, declarators) :-
+    field_declaration(id, mods, type, declarators).
+field_or_local_variable_declaration(id, mods, type, declarators) :-
+    local_variable_declaration(id, mods, type, declarators).
+
 /* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
 /* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
-rewrite("fix_raw_use_of_generic_class", filename, start, start, "<>") :-
-    field_declaration(_, _, left_type, declarators),
-    is_collection_type(left_type),
-    class_type(left_type, _, type_args, _),
+rewrite_node("fix_raw_use_of_generic_class", right_type, cat(right_type_str, "<>")) :-
+    field_or_local_variable_declaration(_, _, left_type, declarators),
+    class_type(left_type, left_type_name, type_args, _),
     type_arguments(type_args, args),
     args != nil,
     list_contains(declarators, declarator),
     variable_declarator(declarator, _, initializer),
     class_instance_creation_expression(initializer, nil, nil, right_type, _, nil),
-    is_collection_type(right_type),
-    class_type(right_type, _, nil, _),
-        ends_at(right_type, start),
-        filename_of(right_type, filename).
+    class_type(right_type, right_type_name, nil, _),
+    string_representation(right_type, right_type_str).
+//  collection_type_name(left_type_name),
+//  collection_type_name(right_type_name),
 
-/* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
-/* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
-rewrite("fix_raw_use_of_generic_class", filename, start, start, "<>") :-
-    local_variable_declaration(_, _, left_type, declarators),
-    is_collection_type(left_type),
-    class_type(left_type, _, type_args, _),
-    type_arguments(type_args, args),
-    args != nil,
-    list_contains(declarators, declarator),
-    variable_declarator(declarator, _, initializer),
-    class_instance_creation_expression(initializer, nil, nil, right_type, _, nil),
-    is_collection_type(right_type),
-    class_type(right_type, _, nil, _),
-        ends_at(right_type, start),
-        filename_of(right_type, filename).
-
-/* Pre  Iterator [:var] = [:coll].iterator(); */
-/* Post Iterator<[:type]> [:var] = [:coll].iterator(); */
-rewrite("fix_raw_use_of_generic_class", filename, start, start, type_args_str) :-
+/* Pre  Iterator [:var] = [:it]; */
+/* Post Iterator<[:type]> [:var] = [:it]; */
+rewrite_node("fix_raw_use_of_generic_class", left_type, @type_to_string([package, class, type_args])) :-
     local_variable_declaration(id, _, left_type, [declarator, nil]),
-        filename_of(id, filename),
-    string_representation(left_type, "Iterator"),
-        ends_at(left_type, start),
+    class_type(left_type, _, nil, _),
     variable_declarator(declarator, _, initializer),
-    method_invocation(initializer, subject, "iterator", nil),
-    has_collection_type(subject),
-    point_of_declaration(subject, decl),
-    parent_of(decl, "type", original_type),
-    string_representation(original_type, _),
-    class_type(original_type, _, type_args, _),
-    type_arguments(type_args, arguments),
-    arguments != nil,
-    string_representation(type_args, type_args_str).
+    _has_type(initializer, [package, class, type_args]),
+    type_args != nil.

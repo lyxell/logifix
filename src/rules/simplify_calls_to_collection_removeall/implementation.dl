@@ -2,6 +2,7 @@
 /* Post [:collection].clear()         */
 rewrite_node("simplify_calls_to_collection_removeall", id, cat(collection_repr, ".clear()")) :-
     method_invocation(id, collection, "removeAll", [arg, nil]),
-    has_collection_type(collection),
+    _has_type(collection, [package, class, _]),
+    collection_type(package, class),
     string_representation(collection, collection_repr),
     string_representation(arg, collection_repr).

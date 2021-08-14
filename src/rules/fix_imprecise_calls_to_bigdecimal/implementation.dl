@@ -1,6 +1,7 @@
 rewrite_node("fix_imprecise_calls_to_bigdecimal", id, cat("BigDecimal.valueOf(", arg_str, ")")) :-
     class_instance_creation_expression(id, nil, nil, type, args, nil),
     args = [arg, nil],
-    has_floating_point_type(arg),
+    (_has_type(arg, ["", "float", nil])
+    ;_has_type(arg, ["", "double", nil])),
     string_representation(type, "BigDecimal"),
     string_representation(arg, arg_str).

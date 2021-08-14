@@ -2,5 +2,5 @@
 /* Post [:x].start() */
 rewrite_node("fix_calls_to_thread_run", id, cat(subject_str, ".start()")) :-
     method_invocation(id, subject, "run", nil),
-    has_thread_type(subject),
+    _has_type(subject, ["java.lang", "Thread", nil]),
     string_representation(subject, subject_str).

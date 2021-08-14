@@ -9,8 +9,8 @@ rewrite("fix_inefficient_map_access", filename, start, end + 1, cat("for (Map.En
 
     /* expression is a call to map.keySet() */
     method_invocation(expression, map_reference, "keySet", nil),
-    (has_map_type(map_reference)
-    ;has_hashmap_type(map_reference)),
+    (_has_type(map_reference, ["java.util", "Map", _])
+    ;_has_type(map_reference, ["java.util", "HashMap", _])),
 
     /* extract map information */
     point_of_declaration(map_reference, decl),

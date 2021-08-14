@@ -17,11 +17,10 @@ rewrite_node("simplify_code_using_method_references", lambda_expr, cat(type_str,
     string_representation(lambda_param, arg_str).
 
 /* Pre  [:x] -> [:x].[:y]() */
-rewrite_node("simplify_code_using_method_references", lambda_expr, cat(type_str, "::", method_str)) :-
+rewrite_node("simplify_code_using_method_references", lambda_expr, cat(type_name, "::", method_str)) :-
     lambda_expression(lambda_expr, params, lambda_body),
     lambda_params(params, [param, nil]),
     method_invocation(lambda_body, subject, method_str, nil),
     string_representation(subject, subject_str),
     string_representation(param, subject_str),
-    has_type(param, param_type),
-    class_type(param_type, type_str, nil, nil).
+    _has_type(param, [_, type_name, nil]).

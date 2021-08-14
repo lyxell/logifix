@@ -2,7 +2,7 @@
 /* Post [:x]              */
 rewrite_node("simplify_calls_to_string_substring", id, subject_str) :-
     method_invocation(id, subject, "substring", [arg, nil]),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     string_representation(arg, "0"),
     string_representation(subject, subject_str).
 
@@ -10,7 +10,7 @@ rewrite_node("simplify_calls_to_string_substring", id, subject_str) :-
 /* Post [:x]                             */
 rewrite_node("simplify_calls_to_string_substring", id, subject_str) :-
     method_invocation(id, subject, "substring", [arg1, [arg2, nil]]),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     string_representation(subject, subject_str),
     string_representation(arg1, "0"),
     string_representation(arg2, cat(subject_str, ".length()")).
@@ -19,7 +19,7 @@ rewrite_node("simplify_calls_to_string_substring", id, subject_str) :-
 /* Post ""                         */
 rewrite_node("simplify_calls_to_string_substring", id, "\"\"") :-
     method_invocation(id, subject, "substring", [arg, nil]),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     string_representation(subject, subject_str),
     string_representation(arg, cat(subject_str, ".length()")).
 
@@ -27,7 +27,7 @@ rewrite_node("simplify_calls_to_string_substring", id, "\"\"") :-
 /* Post [:x].substring([:y])                */
 rewrite_node("simplify_calls_to_string_substring", id, cat(subject_str, ".substring(", arg1_str, ")")) :-
     method_invocation(id, subject, "substring", [arg1, [arg2, nil]]),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     ! string_representation(arg1, "0"),
     string_representation(subject, subject_str),
     string_representation(arg2, cat(subject_str, ".length()")),

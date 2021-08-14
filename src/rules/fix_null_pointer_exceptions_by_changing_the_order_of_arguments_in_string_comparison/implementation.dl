@@ -3,7 +3,7 @@
 rewrite_node("fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison", invocation, cat(arg_str, ".equals(", subject_str, ")")) :-
     method_invocation(invocation, subject, "equals", [arg, nil]),
     string_literal(arg),
-    has_string_type(subject),
+    _has_type(subject, ["java.lang", "String", nil]),
     ! string_literal(subject),
     string_representation(arg, arg_str),
     string_representation(subject, subject_str).

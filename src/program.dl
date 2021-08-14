@@ -1,6 +1,5 @@
 #include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
-#include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
 #include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/fix_inefficient_calls_to_foreach_list_add/implementation.dl"
 #include "rules/fix_inefficient_map_access/implementation.dl"
@@ -37,7 +36,7 @@
 #include "rules/simplify_calls_to_string_substring/implementation.dl"
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
-#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
+//#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_code_using_streams/implementation.dl"
@@ -49,23 +48,27 @@
 
 #include "nodes.dl"
 
-/* Functors
- ********************************/
-
-.functor decrease_indentation(symbol):symbol stateful
-
 /* Types
  ********************************/
 
 .type id = [type: symbol, filename: symbol, content_from: number, content_to: number, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
 
+.type type = [package: symbol, class: symbol, type_args: type_list]
+.type type_list = [head: type, tail: type_list]
+
+/* Functors
+ ********************************/
+
+.functor decrease_indentation(x: symbol):symbol stateful
+.functor type_to_string(x: type):symbol stateful
+.functor type_to_qualified_string(x: type):symbol stateful
+
 /* AST nodes
  ********************************/
 
 .decl root(id: id)
 .input root
-.output root(IO=stdout)
 
 .decl ast_node(id: id)
 ast_node(id) :- root(id).
@@ -96,7 +99,6 @@ content_ends_at([name, fn, cA, cB, A, B], cB) :- ast_node([name, fn, cA, cB, A, 
 
 .decl javadoc_references(filename: symbol, class: symbol)
 .input javadoc_references
-.output javadoc_references(IO=stdout)
 
 /* AST node relations
  ********************************/
@@ -224,7 +226,6 @@ string_representation(id, substr(code, start, end - start)) :-
     source_code(filename, code).
 
 .decl content_string_representation(id: id, str: symbol)
-.output content_string_representation(IO=stdout)
 content_string_representation(id, substr(code, start, end - start)) :-
     ast_node(id),
     filename_of(id, filename),
@@ -254,7 +255,6 @@ string_representation_list(list, substr(code, start, end - start)) :-
  */
 
 .decl in_scope(start: number, end: number, filename: symbol, identifier: symbol, type: id)
-.output in_scope(IO=stdout)
 
 /* Make resource in try_with_resources_statement accessible in its body */
 in_scope(start, end, filename, identifier_str, resource) :-
@@ -379,7 +379,6 @@ expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
         expr_end <= end.
 
 .decl point_of_declaration(id: id, declaration: id)
-.output point_of_declaration(IO=stdout)
 /* If there is a local variable declaration or a formal parameter in scope,
    the identifier definitely refers to it (these can't be shadowed) */
 point_of_declaration(head, decl) :-
@@ -421,89 +420,6 @@ point_of_declaration(id, decl) :-
 
 /* Types of variable references
  ********************************/
-
-.decl has_type(id: id, type: id)
-.output has_type(IO=stdout)
-has_type(id, type) :-
-    point_of_declaration(id, declpoint),
-    parent_of(declpoint, "type", type).
-
-/* Types of method invocations in same class
- ********************************/
-
-has_type(id, result) :-
-    method_invocation(id, nil, meth, nil),
-    method_declaration(_, _, meth_header, _),
-    method_header(meth_header, result, declarator, _),
-    method_declarator(declarator, meth, nil).
-
-/* Types of iterators
- ********************************/
-
-has_type(id, arg) :-
-    method_invocation(id, subject, "next", nil),
-    has_type(subject, iterator),
-    class_type(iterator, "Iterator", type_args, nil),
-    type_arguments(type_args, [arg, nil]).
-
-/* Types of streams
- ********************************/
-
-.decl type_preserving_stream_action(s: symbol)
-type_preserving_stream_action("map").
-type_preserving_stream_action("filter").
-
-/* If the stream is produced from Coll<Type> then the lambda argument has type Type */
-has_type(param, type_arg) :-
-    has_collection_type(subject),
-    has_type(subject, type),
-    class_type(type, _, type_args, _),
-    type_arguments(type_args, [type_arg, nil]),
-    method_invocation(stream_invocation, subject, "stream", nil),
-    method_invocation(_, stream_invocation, action, [lambda, nil]),
-    type_preserving_stream_action(action),
-    lambda_expression(lambda, lambda_params, _),
-    lambda_params(lambda_params, [param, nil]),
-    identifier(param).
-    
-
-/* Type checking
- ********************************/
-
-.decl collection_type_name(str: symbol)
-collection_type_name("ArrayList").
-collection_type_name("Collection").
-collection_type_name("ArrayDeque").
-collection_type_name("Deque").
-collection_type_name("LinkedList").
-collection_type_name("List").
-collection_type_name("Queue").
-collection_type_name("Set").
-collection_type_name("TreeMap"). // TODO not technically true
-collection_type_name("Map"). // TODO not technically true
-collection_type_name("LinkedHashMap"). // TODO not technically true
-collection_type_name("SortedSet").
-collection_type_name("Stack").
-collection_type_name("Vector").
-
-.decl floating_point_type_name(str: symbol)
-floating_point_type_name("float").
-floating_point_type_name("double").
-
-.decl atomic_class_type_name(str: symbol)
-atomic_class_type_name("AtomicInteger").
-atomic_class_type_name("AtomicBoolean").
-atomic_class_type_name("AtomicLong").
-
-.decl boxed_type_name(str: symbol)
-boxed_type_name("Boolean").
-boxed_type_name("Byte").
-boxed_type_name("Character").
-boxed_type_name("Float").
-boxed_type_name("Integer").
-boxed_type_name("Long").
-boxed_type_name("Short").
-boxed_type_name("Double").
 
 /* list of resources that implements the AutoCloseable interface */
 .decl autocloseable_type_name(str: symbol)
@@ -618,15 +534,131 @@ autocloseable_type_name("ZipFile").
 autocloseable_type_name("ZipInputStream").
 autocloseable_type_name("ZipOutputStream").
 
-/* Is type
- ********************************/
+.decl native_type(package: symbol, class: symbol)
+native_type("java.lang", "Integer").
+native_type("java.lang", "String").
+native_type("java.lang", "Thread").
+native_type("java.util", "ArrayDeque").
+native_type("java.util", "ArrayList").
+native_type("java.util", "Collection").
+native_type("java.util", "Deque").
+native_type("java.util", "HashMap").
+native_type("java.util", "Iterator").
+native_type("java.util", "LinkedHashMap").
+native_type("java.util", "LinkedList").
+native_type("java.util", "List").
+native_type("java.util", "Map").
+native_type("java.util", "Queue").
+native_type("java.util", "Set").
+native_type("java.util", "SortedSet").
+native_type("java.util", "Stack").
+native_type("java.util", "Vector").
+native_type("java.util.stream", "Collectors").
 
-.decl is_collection_type(id: id)
-is_collection_type(id) :-
-    // TODO: Should take imports into consideration?
-    class_type(id, name_str, _, _),
-    collection_type_name(name_str).
+.decl collection_type(package: symbol, class: symbol)
+collection_type("java.util", "ArrayDeque").
+collection_type("java.util", "ArrayList").
+collection_type("java.util", "Collection").
+collection_type("java.util", "Deque").
+collection_type("java.util", "HashMap").
+collection_type("java.util", "LinkedList").
+collection_type("java.util", "List").
+collection_type("java.util", "Map").
+collection_type("java.util", "Queue").
+collection_type("java.util", "Set").
+collection_type("java.util", "SortedSet").
+collection_type("java.util", "Stack").
+collection_type("java.util", "Vector").
 
+.decl is_type_preserving_stream_method(s: symbol)
+is_type_preserving_stream_method("filter").
+is_type_preserving_stream_method("limit").
+is_type_preserving_stream_method("map").
+is_type_preserving_stream_method("skip").
+is_type_preserving_stream_method("sorted").
+
+.decl ast_type_args_to_type_list(list: id_list, type: type_list)
+ast_type_args_to_type_list(nil, nil).
+ast_type_args_to_type_list([head, tail], [head_type, tail_type]) :-
+    head_of(head, tail),
+    ast_type_to_type(head, head_type),
+    ast_type_args_to_type_list(tail, tail_type).
+
+.decl ast_type_to_type(id: id, type: type)
+.output ast_type_to_type(IO=stdout)
+
+/* Non-native types */
+ast_type_to_type(id, ["", class, type_args]) :-
+    !native_type(_, class),
+    class_type(id, class, args, _),
+    type_arguments(args, list),
+    ast_type_args_to_type_list(list, type_args).
+ast_type_to_type(id, ["", class, nil]) :-
+    !native_type(_, class),
+    class_type(id, class, nil, _).
+
+/* Native types */
+ast_type_to_type(id, [package, class, type_args]) :-
+    native_type(package, class),
+    class_type(id, class, args, _),
+    type_arguments(args, list),
+    ast_type_args_to_type_list(list, type_args). // TODO: Check imports
+ast_type_to_type(id, [package, class, nil]) :-
+    native_type(package, class),
+    class_type(id, class, nil, _). // TODO: Check imports
+
+ast_type_to_type(id, ["", name_str, nil]) :-
+    primitive_type(id, _, name),
+    string_representation(name, name_str).
+
+.decl _has_type(id: id, type: type)
+.output _has_type(IO=stdout)
+_has_type(id, type) :-
+    point_of_declaration(id, declpoint),
+    parent_of(declpoint, "type", ast_type),
+    ast_type_to_type(ast_type, type).
+
+_has_type(id, type) :-
+    method_invocation(id, nil, meth, nil),
+    method_declaration(_, _, meth_header, _),
+    method_header(meth_header, ast_type, declarator, _),
+    ast_type_to_type(ast_type, type),
+    method_declarator(declarator, meth, nil).
+
+_has_type(id, ["", "float", nil]) :-
+    floating_point_literal(id).
+
+_has_type(id, ["java.lang", "String", nil]) :-
+    string_literal(id).
+
+_has_type(id, ["java.util", "Iterator", type_args]) :-
+    method_invocation(id, subject, "iterator", nil),
+    _has_type(subject, [package, class, type_args]),
+    collection_type(package, class).
+
+_has_type(id, ["java.util.stream", "Stream", type_args]) :-
+    method_invocation(id, subject, "stream", nil),
+    _has_type(subject, [package, class, type_args]),
+    collection_type(package, class).
+_has_type(id, ["java.util.stream", "Stream", type_args]) :-
+    method_invocation(id, subject, method, _),
+    is_type_preserving_stream_method(method),
+    _has_type(subject, ["java.util.stream", "Stream", type_args]).
+
+_has_type(id, type_arg) :-
+    method_invocation(id, subject, "next", nil),
+    _has_type(subject, ["java.util", "Iterator", [type_arg, nil]]).
+
+/* Type the lambda params inside streams */
+_has_type(param, type_arg) :-
+    _has_type(subject, ["java.util.stream", "Stream", [type_arg, nil]]),
+    method_invocation(_, subject, method, [lambda, nil]),
+    is_type_preserving_stream_method(method),
+    lambda_expression(lambda, lambda_params, _),
+    lambda_params(lambda_params, [param, nil]),
+    identifier(param).
+
+/*
 .decl is_list_type(id: id)
 is_list_type(id) :-
     class_type(id, "List", _, _),
@@ -652,38 +684,10 @@ is_predicate_type(id) :-
 is_runnable_type(id) :-
     class_type(id, "Runnable", _, _).
 
-.decl is_map_type(id: id)
-is_map_type(id) :-
-    class_type(id, "Map", _, _).
-
-.decl is_hashmap_type(id: id)
-is_hashmap_type(id) :-
-    class_type(id, "HashMap", _, _).
-
-.decl is_string_type(id: id)
-is_string_type(id) :-
-    class_type(id, "String", _, _).
-
-.decl is_boxed_type(id: id)
-is_boxed_type(id) :-
-    class_type(id, name_str, _, _),
-    boxed_type_name(name_str).
-
 .decl is_autocloseable_type(id: id)
 is_autocloseable_type(id) :-
     class_type(id, name_str, _, _),
     autocloseable_type_name(name_str).
-
-.decl is_floating_point_type(id: id)
-is_floating_point_type(id) :-
-    primitive_type(id, _, name),
-    string_representation(name, name_str),
-    floating_point_type_name(name_str).
-
-.decl is_atomic_class_type(id: id)
-is_atomic_class_type(id) :-
-    class_type(id, name_str, _, _),
-    atomic_class_type_name(name_str).
 
 .decl is_thread_type(id: id)
 is_thread_type(id) :-
@@ -695,56 +699,7 @@ is_functional_interface_type(id) :-
 is_functional_interface_type(id) :-
     is_predicate_type(id).
 is_functional_interface_type(id) :-
-    is_runnable_type(id).
-
-/* Has type
- ********************************/
-
-.decl has_floating_point_type(id: id)
-has_floating_point_type(id) :- floating_point_literal(id).
-has_floating_point_type(id) :- has_type(id, type), is_floating_point_type(type).
-has_floating_point_type(id) :-
-    multiplication_expression(id, left, right),
-    has_floating_point_type(left),
-    has_floating_point_type(right).
-
-.decl has_autocloseable_type(id: id)
-has_autocloseable_type(id) :- has_type(id, type), is_autocloseable_type(type).
-
-.decl has_thread_type(id: id)
-has_thread_type(id) :- has_type(id, type), is_thread_type(type).
-
-.decl has_string_type(id: id)
-has_string_type(id) :- string_literal(id).
-has_string_type(id) :- has_type(id, type), is_string_type(type).
-
-.decl has_map_type(id: id)
-has_map_type(id) :- has_type(id, type), is_map_type(type).
-
-.decl has_hashmap_type(id: id)
-has_hashmap_type(id) :- has_type(id, type), is_hashmap_type(type).
-
-.decl has_string_or_boxed_type(id: id)
-has_string_or_boxed_type(id) :- has_type(id, type), is_boxed_type(type).
-has_string_or_boxed_type(id) :- has_string_type(id).
-
-.decl has_collection_type(id: id)
-has_collection_type(id) :- has_type(id, type), is_collection_type(type).
-
-.decl has_list_type(id: id)
-has_list_type(id) :- has_type(id, type), is_list_type(type).
-
-.decl has_atomic_class_type(id: id)
-has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
-
-.decl has_stream_type(id: id)
-has_stream_type(id) :- method_invocation(id, subject, "stream", nil), has_collection_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "distinct", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "filter", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "limit", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "map", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "skip", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "sorted", _), has_stream_type(subject).
+    is_runnable_type(id).*/
 
 /* Rewrite rules
  ********************************/
