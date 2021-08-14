@@ -1,0 +1,174 @@
+/* Variable scope
+ ********************************/
+
+/**
+ * The scope of a local variable declaration in a block (§14.2) is the rest of
+ * the block in which the declaration appears, starting with its own
+ * initializer (§14.4) and including any further declarators to the right in
+ * the local variable declaration statement.
+ * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
+ */
+
+.decl in_scope(start: number, end: number, filename: symbol, identifier: symbol, type: id)
+
+/* Make resource in try_with_resources_statement accessible in its body */
+in_scope(start, end, filename, identifier_str, resource) :-
+    try_with_resources_statement(_, resources, body, _, _),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
+    list_contains(resources, resource),
+    parent_of(resource, "name", identifier),
+    string_representation(identifier, identifier_str).
+
+/* Make variable declaration of for_statement available in its body */
+in_scope(start, end, filename, identifier_str, declaration) :-
+    for_statement(_, declaration, _, _, body),
+    local_variable_declaration(declaration, _, _, declarators),
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, declarator_id, _),
+    variable_declarator_id(declarator_id, identifier, _),
+    string_representation(identifier, identifier_str),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename).
+
+/* Make formal parameter in enhanced_for_statement accessible in its body */
+in_scope(start, end, filename, identifier_str, param) :-
+    enhanced_for_statement(_, param, _, body),
+    formal_parameter(param, _, _, identifier),
+    string_representation(identifier, identifier_str),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename).
+
+/* Make field declarations in scope in their class */
+in_scope(start, end, filename, identifier_str, field) :-
+    class_declaration(_, _, _, _, _, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
+    class_body(body, decls),
+    list_contains(decls, field),
+    field_declaration(field, _, _, declarators),
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, declarator_id, _),
+    variable_declarator_id(declarator_id, identifier, _),
+    string_representation(identifier, identifier_str).
+
+/* Make formal parameters accessible in the body of a method */
+in_scope(start, end, filename, identifier_str, param) :-
+    method_declaration(_, _, header, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
+    method_header(header, _, declarator, _),
+    parent_of_list(declarator, "params", params),
+    list_contains(params, param),
+    formal_parameter(param, _, _, declarator_id),
+    variable_declarator_id(declarator_id, identifier, _),
+    string_representation(identifier, identifier_str).
+
+/* Make formal parameters accessible in the body of a constructor */
+in_scope(start, end, filename, identifier_str, param) :-
+    constructor_declaration(_, _, declarator, _, body),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename),
+    parent_of_list(declarator, "params", params),
+    list_contains(params, param),
+    formal_parameter(param, _, _, declarator_id),
+    variable_declarator_id(declarator_id, identifier, _),
+    string_representation(identifier, identifier_str).
+
+/* Make local variable declarations accessible in the succeeding statements */
+in_scope(start, end, filename, identifier_str, declaration) :-
+    parent_of_list(id, _, stmts),
+        ends_at(id, end),
+        filename_of(id, filename),
+    list_contains(stmts, declaration_statement),
+    local_variable_declaration_statement(declaration_statement, declaration),
+    local_variable_declaration(declaration, _, _, declarators),
+    predecessor_of(declaration_statement, succeeding_statement),
+        starts_at(succeeding_statement, start),
+    list_contains(declarators, declarator),
+    variable_declarator(declarator, declarator_id, _),
+    variable_declarator_id(declarator_id, identifier, _),
+    string_representation(identifier, identifier_str).
+
+/* Point of declaration
+ ********************************/
+
+.decl expression_name_has_formal_parameter_or_local_var_decl_in_scope(id: id, decl: id)
+expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
+    expression_name(id, [head, _]),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
+    in_scope(start, end, filename, identifier, decl),
+    local_variable_declaration(decl, _, _, _),
+    string_representation(head, identifier),
+        expr_start >= start,
+        expr_end <= end.
+    
+expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
+    expression_name(id, [head, _]),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
+    in_scope(start, end, filename, identifier, decl),
+    formal_parameter(decl, _, _, _),
+    string_representation(head, identifier),
+        expr_start >= start,
+        expr_end <= end.
+
+expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
+    expression_name(id, [head, _]),
+        starts_at(id, expr_start),
+        ends_at(id, expr_end),
+        filename_of(id, filename),
+    in_scope(start, end, filename, identifier, decl),
+    name_of(decl, "resource"),
+    string_representation(head, identifier),
+        expr_start >= start,
+        expr_end <= end.
+
+.decl point_of_declaration(id: id, declaration: id)
+/* If there is a local variable declaration or a formal parameter in scope,
+   the identifier definitely refers to it (these can't be shadowed) */
+point_of_declaration(head, decl) :-
+    expression_name(id, [head, _]),
+    expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl).
+    
+/* If there is no local variable declarations of formal parameters in scope
+   the identifier refers to the field */
+point_of_declaration(head, decl) :-
+    expression_name(id, [head, _]),
+        starts_at(id, start),
+        ends_at(id, end),
+        filename_of(id, filename),
+    in_scope(scope_start, scope_end, filename, identifier, decl),
+    string_representation(head, identifier),
+    field_declaration(decl, _, _, _),
+        start >= scope_start,
+        end <= scope_end,
+    ! expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, _).
+
+/* We can always refer to a field of a class using "this" */
+point_of_declaration(id, decl) :-
+    field_access(id, this, field),
+        starts_at(id, start),
+        ends_at(id, end),
+        filename_of(id, filename),
+    name_of(this, "this_expression"),
+    in_scope(scope_start, scope_end, filename, identifier, decl),
+    field_declaration(decl, _, _, _),
+    string_representation(field, identifier),
+        start >= scope_start,
+        end <= scope_end.
+
+/* If an expression name contains only one identifier then the whole
+   expression refers to its identifier */
+point_of_declaration(id, decl) :-
+    expression_name(id, [head, nil]),
+    point_of_declaration(head, decl).
