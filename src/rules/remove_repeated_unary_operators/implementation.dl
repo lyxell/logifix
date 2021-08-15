@@ -1,6 +1,5 @@
 /* Pre  !![:x] */
 /* Post [:x]   */
-rewrite_node("remove_repeated_unary_operators", id, expr_str) :-
+replace_node_with_node("remove_repeated_unary_operators", id, expr) :-
     logical_complement_expression(id, sub),
-    logical_complement_expression(sub, expr),
-    string_representation(expr, expr_str).
+    logical_complement_expression(sub, expr).
