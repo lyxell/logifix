@@ -1,27 +1,26 @@
 /* Pre  [:x] == true */
 /* Post [:x]         */
-rewrite_node("simplify_boolean_expressions", id, other_expr_str) :-
+replace_node_with_node("simplify_boolean_expressions", id, other_expr) :-
     equals_expression_unordered(id, true_expr, other_expr),
-    evaluates_to_boolean_value(true_expr, 1),
-    string_representation(other_expr, other_expr_str).
+    evaluates_to_boolean_value(true_expr, 1).
 
 /* Pre  [:x] == false */
 /* Post ![:x]         */
-rewrite_node("simplify_boolean_expressions", id, cat("!(", other_expr_str, ")")) :-
+replace_node_with_string("simplify_boolean_expressions", id,
+    cat("!(", @node_to_string(code, other_expr), ")")
+) :-
     equals_expression_unordered(id, false_expr, other_expr),
-    evaluates_to_boolean_value(false_expr, 0),
-    string_representation(other_expr, other_expr_str).
+    source_code(_, code),
+    evaluates_to_boolean_value(false_expr, 0).
 
 /* Pre  [:x] || false */
 /* Post [:x]         */
-rewrite_node("simplify_boolean_expressions", id, other_expr_str) :-
+replace_node_with_node("simplify_boolean_expressions", id, other_expr) :-
     conditional_or_expression(id, other_expr, false_expr),
-    evaluates_to_boolean_value(false_expr, 0),
-    string_representation(other_expr, other_expr_str).
+    evaluates_to_boolean_value(false_expr, 0).
 
 /* Pre  [:x] && true */
 /* Post [:x]         */
-rewrite_node("simplify_boolean_expressions", id, other_expr_str) :-
+replace_node_with_node("simplify_boolean_expressions", id, other_expr) :-
     conditional_and_expression(id, other_expr, true_expr),
-    evaluates_to_boolean_value(true_expr, 1),
-    string_representation(other_expr, other_expr_str).
+    evaluates_to_boolean_value(true_expr, 1).
