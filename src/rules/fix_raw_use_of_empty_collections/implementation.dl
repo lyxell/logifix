@@ -1,6 +1,12 @@
-rewrite_node("fix_raw_use_of_empty_collections", id, "Collections.emptyList()") :-
-    string_representation(id, "Collections.EMPTY_LIST").
-rewrite_node("fix_raw_use_of_empty_collections", id, "Collections.emptyMap()") :-
-    string_representation(id, "Collections.EMPTY_MAP").
-rewrite_node("fix_raw_use_of_empty_collections", id, "Collections.emptySet()") :-
-    string_representation(id, "Collections.EMPTY_SET").
+replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.emptyList()") :-
+    expression_name(id, [id1, [id2, nil]]),
+    identifier(id1, "Collections"),
+    identifier(id2, "EMPTY_LIST").
+replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.emptyMap()") :-
+    expression_name(id, [id1, [id2, nil]]),
+    identifier(id1, "Collections"),
+    identifier(id2, "EMPTY_MAP").
+replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.emptySet()") :-
+    expression_name(id, [id1, [id2, nil]]),
+    identifier(id1, "Collections"),
+    identifier(id2, "EMPTY_SET").

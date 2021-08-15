@@ -329,5 +329,9 @@ expression_name(id, identifiers) :-
     name_of(id, "expression_name"),
     parent_of_list(id, "identifiers", identifiers).
 
-.decl identifier(id: id)
-identifier(id) :- name_of(id, "identifier").
+.decl identifier(id: id, symbol: symbol)
+identifier(id, substr(code, start, end - start)) :-
+    name_of(id, "identifier"),
+    starts_at(id, start),
+    ends_at(id, end),
+    source_code(_, code).
