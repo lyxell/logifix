@@ -115,6 +115,7 @@ autocloseable_type_name("ZipOutputStream").
 native_type("java.lang", "Integer").
 native_type("java.lang", "String").
 native_type("java.lang", "Thread").
+native_type("java.math", "BigDecimal").
 native_type("java.util", "ArrayDeque").
 native_type("java.util", "ArrayList").
 native_type("java.util", "Collection").

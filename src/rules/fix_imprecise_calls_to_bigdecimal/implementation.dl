@@ -1,7 +1,8 @@
-rewrite_node("fix_imprecise_calls_to_bigdecimal", id, cat("BigDecimal.valueOf(", arg_str, ")")) :-
-    class_instance_creation_expression(id, nil, nil, type, args, nil),
-    args = [arg, nil],
+rewrite_node("fix_imprecise_calls_to_bigdecimal", id,
+    cat("BigDecimal.valueOf(", @node_to_string(code, arg), ")")
+) :-
+    class_instance_creation_expression(id, nil, nil, type, [arg, nil], nil),
+    ast_type_to_type(type, ["java.math", "BigDecimal", nil]),
+    source_code(_, code),
     (_has_type(arg, ["", "float", nil])
-    ;_has_type(arg, ["", "double", nil])),
-    string_representation(type, "BigDecimal"),
-    string_representation(arg, arg_str).
+    ;_has_type(arg, ["", "double", nil])).
