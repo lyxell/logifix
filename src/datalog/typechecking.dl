@@ -183,10 +183,12 @@ ast_type_args_to_type_list(id, types) :-
 .output ast_type_to_type(IO=stdout)
 
 /* Non-native types - with type arguments */
-ast_type_to_type(id, [parent_str, class, type_args]) :-
+ast_type_to_type(id, [substr(code, parent_start, parent_end - parent_start), class, type_args]) :-
     !native_type(_, class),
     class_type(id, parent, class, type_args_id, _),
-    string_representation(parent, parent_str),
+    source_code(_, code),
+    starts_at(parent, parent_start),
+    ends_at(parent, parent_end),
     ast_type_args_to_type_list(type_args_id, type_args).
 ast_type_to_type(id, ["", class, type_args]) :-
     !native_type(_, class),
@@ -194,10 +196,12 @@ ast_type_to_type(id, ["", class, type_args]) :-
     ast_type_args_to_type_list(type_args_id, type_args).
 
 /* Non-native types - without type arguments */
-ast_type_to_type(id, [parent_str, class, nil]) :-
+ast_type_to_type(id, [substr(code, parent_start, parent_end - parent_start), class, nil]) :-
     !native_type(_, class),
     class_type(id, parent, class, nil, _),
-    string_representation(parent, parent_str).
+    source_code(_, code),
+    starts_at(parent, parent_start),
+    ends_at(parent, parent_end).
 ast_type_to_type(id, ["", class, nil]) :-
     !native_type(_, class),
     class_type(id, nil, class, nil, _).
@@ -213,9 +217,11 @@ ast_type_to_type(id, [package, class, nil]) :-
     class_type(id, nil, class, nil, _). // TODO: Check imports
 
 /* Primitive types */
-ast_type_to_type(id, ["", name_str, nil]) :-
+ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
     primitive_type(id, _, name),
-    string_representation(name, name_str).
+    source_code(_, code),
+    starts_at(name, start),
+    ends_at(name, end).
 
 .decl _has_type(id: id, type: type)
 .output _has_type(IO=stdout)
@@ -265,26 +271,6 @@ _has_type(param, type_arg) :-
     formal_parameter(param, _, _, _).
 
 /*
-.decl is_list_type(id: id)
-is_list_type(id) :-
-    class_type(id, "List", _, _),
-    import_declaration(_, spec),
-    (string_representation(spec, "java.util.List")
-    ;string_representation(spec, "java.util.*")).
-
-.decl is_comparator_type(id: id)
-is_comparator_type(id) :-
-    class_type(id, "Comparator", _, _),
-    import_declaration(_, spec),
-    (string_representation(spec, "java.util.Comparator")
-    ;string_representation(spec, "java.util.*")).
-
-.decl is_predicate_type(id: id)
-is_predicate_type(id) :-
-    class_type(id, "Predicate", _, _),
-    import_declaration(_, spec),
-    (string_representation(spec, "java.util.function.Predicate")
-    ;string_representation(spec, "java.util.function.*")).
 
 .decl is_runnable_type(id: id)
 is_runnable_type(id) :-

@@ -1,6 +1,5 @@
 rewrite_node("remove_unused_imports", id, "") :-
     import_declaration(id, specification),
-    import_specification(specification, _, import),
-    identifier(import, import_str),
+    import_specification(specification, _, import_str),
     ! javadoc_references(_, import_str),
     count : { identifier(_, import_str) } = 1.

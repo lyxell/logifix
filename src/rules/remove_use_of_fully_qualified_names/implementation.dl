@@ -1,8 +1,3 @@
-.decl imported_strings(str: symbol)
-imported_strings(str) :-
-    import_specification(spec, _, _),
-    string_representation(spec, str).
-
 .decl imports_start_at(n: number)
 imports_start_at(start) :-
     ordinary_compilation_unit(_, _, [imp_decl, _], _),
@@ -13,15 +8,19 @@ imports_start_at(start) :-
 
 /* Auto-import */
 rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import java.util.stream.Collectors;\n") :-
-    expression_name(id, _),
-        filename_of(id, filename),
+    expression_name(expr_name, _),
+        filename_of(expr_name, filename),
     imports_start_at(start),
-    !imported_strings("java.util.stream.Collectors"),
-    string_representation(id, "java.util.stream.Collectors").
+    source_code(_, code),
+    !import_specification(_, "java.util.stream", "Collectors"),
+    @node_to_string(code, expr_name) = "java.util.stream.Collectors".
 
-rewrite_node("remove_use_of_fully_qualified_names", id, class) :-
-    expression_name(id, _),
-    imported_strings(cat(package, ".", class)),
-    native_type(package, class),
-    string_representation(id, cat(package, ".", class)).
+replace_node_with_node("remove_use_of_fully_qualified_names", id, ident) :-
+    expression_name(id, list),
+    list_last_element(list, ident),
+    identifier(ident, class_name),
+    source_code(_, code),
+    import_specification(_, package, class_name),
+    native_type(package, class_name),
+    @node_to_string(code, id) = cat(package, ".", class_name).
 

@@ -6,8 +6,8 @@
 %param {const char* filename}
 %param {std::vector<logifix::parser::token>& tokens}
 %param {size_t& pos}
-%expect 1088
-%expect-rr 791
+%expect 1089
+%expect-rr 802
 %define api.location.type {logifix::parser::location}
 %start root
 %code requires
@@ -1716,10 +1716,11 @@ lambda_parameter: variable_modifiers lambda_parameter_type variable_declarator_i
                 | variable_arity_parameter 
                 ;
 
-lambda_parameter_single_identifier: identifier { $$ = ID("formal_parameter", @$);
+/* In reality this should only match identifiers and not variable_declarator_ids */
+lambda_parameter_single_identifier: variable_declarator_id { $$ = ID("formal_parameter", @$);
                                                  PARENT_LIST($$, "modifiers", NIL);
                                                  PARENT($$, "type", NIL);
-                                                 PARENT($$, "declarator_id", $identifier); }
+                                                 PARENT($$, "declarator_id", $variable_declarator_id); }
 
 lambda_parameter_type: unann_type
                      | VAR { $$ = ID("var_type", @$); }

@@ -1,4 +1,5 @@
 rewrite_node("simplify_calls_to_map_keyset", id, "Collections.emptySet()") :-
     method_invocation(id, subject, "keySet", nil),
     method_invocation(subject, collections, "emptyMap", nil),
-    string_representation(collections, "Collections").
+    expression_name(collections, [ident, nil]),
+    identifier(ident, "Collections").

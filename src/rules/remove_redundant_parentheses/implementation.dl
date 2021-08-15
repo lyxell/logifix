@@ -11,14 +11,24 @@ can_have_parentheses_fully_removed(id) :- conditional_or_expression_unordered(_,
 can_have_parentheses_fully_removed(id) :- conditional_or_expression_unordered(_, id, _), less_than_or_equals_expression(id, _, _).
 can_have_parentheses_fully_removed(id) :- if_statement(_, id, _, _).
 
-rewrite_node("remove_redundant_parentheses", id, content_str) :-
+rewrite_node("remove_redundant_parentheses", id,
+    substr(code, content_start, content_end - content_start)
+) :-
     can_have_parentheses_fully_removed(id),
-    content_string_representation(id, content_str),
-    string_representation(id, str),
-    str != content_str.
+    source_code(_, code),
+    starts_at(id, start),
+    ends_at(id, end),
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    (end - start) - (content_end - content_start) > 0.
 
-rewrite_node("remove_redundant_parentheses", id, cat("(", content_str, ")")) :-
+rewrite_node("remove_redundant_parentheses", id,
+    cat("(", substr(code, content_start, content_end - content_start), ")")
+) :-
     !can_have_parentheses_fully_removed(id),
-    content_string_representation(id, content_str),
-    string_representation(id, str),
-    strlen(str) - strlen(content_str) >= 4.
+    source_code(_, code),
+    starts_at(id, start),
+    ends_at(id, end),
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    (end - start) - (content_end - content_start) >= 4.
