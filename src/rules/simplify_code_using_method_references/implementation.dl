@@ -1,26 +1,31 @@
 /* Pre  [:x] -> [:y].[:z]([:x]) */
 /* Post [:y]::[:z] */
-rewrite_node("simplify_code_using_method_references", lambda_expr, cat(subject_str, "::", method)) :-
-    lambda_expression(lambda_expr, lambda_param, lambda_body),
+rewrite_node("simplify_code_using_method_references", lambda_expr,
+    cat(@node_to_string(code, subject), "::", method)
+) :-
+    lambda_expression(lambda_expr, params, lambda_body),
+    lambda_params(params, [param, nil]),
     method_invocation(lambda_body, subject, method, [arg, nil]),
-    string_representation(subject, subject_str),
-    string_representation(arg, arg_str),
-    string_representation(lambda_param, arg_str).
+    point_of_declaration(arg, param),
+    source_code(_, code).
 
 /* Pre  [:x] -> new [:y]([:x]) */
 /* Post [:y]::new */
-rewrite_node("simplify_code_using_method_references", lambda_expr, cat(type_str, "::new")) :-
-    lambda_expression(lambda_expr, lambda_param, lambda_body),
-    class_instance_creation_expression(lambda_body, _, nil, type, [arg, nil], nil),
-    string_representation(type, type_str),
-    string_representation(arg, arg_str),
-    string_representation(lambda_param, arg_str).
-
-/* Pre  [:x] -> [:x].[:y]() */
-rewrite_node("simplify_code_using_method_references", lambda_expr, cat(type_name, "::", method_str)) :-
+rewrite_node("simplify_code_using_method_references", lambda_expr,
+    cat(@node_to_string(code, type), "::new")
+) :-
     lambda_expression(lambda_expr, params, lambda_body),
     lambda_params(params, [param, nil]),
-    method_invocation(lambda_body, subject, method_str, nil),
-    string_representation(subject, subject_str),
-    string_representation(param, subject_str),
+    class_instance_creation_expression(lambda_body, _, nil, type, [arg, nil], nil),
+    point_of_declaration(arg, param),
+    source_code(_, code).
+
+/* Pre  [:x] -> [:x].[:y]() */
+rewrite_node("simplify_code_using_method_references", lambda_expr,
+    cat(type_name, "::", method)
+) :-
+    lambda_expression(lambda_expr, params, lambda_body),
+    lambda_params(params, [param, nil]),
+    method_invocation(lambda_body, subject, method, nil),
+    point_of_declaration(subject, param),
     _has_type(param, [_, type_name, nil]).

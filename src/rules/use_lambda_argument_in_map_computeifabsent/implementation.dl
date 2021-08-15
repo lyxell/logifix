@@ -1,5 +1,5 @@
 rewrite_node("use_lambda_argument_in_map_computeifabsent", ancestor, "k") :-
-    method_invocation(invocation, _, "computeIfAbsent", [key_var, [lambda, nil]]),
+    method_invocation(_, _, "computeIfAbsent", [key_var, [lambda, nil]]),
     lambda_expression(lambda, _, body),
     ancestor_of(body, ancestor),
     point_of_declaration(ancestor, decl),

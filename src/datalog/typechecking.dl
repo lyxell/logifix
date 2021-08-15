@@ -261,7 +261,7 @@ _has_type(param, type_arg) :-
     is_type_preserving_stream_method(method),
     lambda_expression(lambda, lambda_params, _),
     lambda_params(lambda_params, [param, nil]),
-    identifier(param).
+    formal_parameter(param, _, _, _).
 
 /*
 .decl is_list_type(id: id)

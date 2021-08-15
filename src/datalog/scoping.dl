@@ -42,6 +42,17 @@ in_scope(start, end, filename, identifier_str, param) :-
         ends_at(body, end),
         filename_of(body, filename).
 
+/* Make formal parameter in lambda expression accessible in its body */
+in_scope(start, end, filename, identifier_str, param) :-
+    lambda_expression(_, params, body),
+    lambda_params(params, params_list),
+    list_contains(params_list, param),
+    formal_parameter(param, _, _, identifier),
+    string_representation(identifier, identifier_str),
+        starts_at(body, start),
+        ends_at(body, end),
+        filename_of(body, filename).
+
 /* Make field declarations in scope in their class */
 in_scope(start, end, filename, identifier_str, field) :-
     class_declaration(_, _, _, _, _, body),

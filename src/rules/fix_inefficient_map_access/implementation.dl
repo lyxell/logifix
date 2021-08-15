@@ -76,4 +76,4 @@ replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_str
     method_invocation(map_get, map_get_subject, "get", [entry, nil]),
     point_of_declaration(map_get_subject, decl),
     method_invocation(entry, get_key_subject, "getKey", nil),
-    point_of_declaration(get_key_subject, formal_parameter).
+    point_of_declaration(get_key_subject, formal_param).

@@ -6,9 +6,10 @@ rewrite_node("remove_empty_if_statements", id, "{}") :-
 
 /* Pre  if ([:x]) {} else {[:y]} */
 /* Post if (!([:x])) {[:y]}      */
-rewrite_node("remove_empty_if_statements", id, cat("if (!(", cond_str, ")) ", else_str)) :-
+rewrite_node("remove_empty_if_statements", id,
+    cat("if (!(", @node_to_string(code, cond), ")) ", @node_to_string(code, else))
+) :-
     if_statement(id, cond, body, else),
+    source_code(_, code),
     block(body, nil),
-    block(else, _),
-    string_representation(else, else_str),
-    string_representation(cond, cond_str).
+    block(else, _).

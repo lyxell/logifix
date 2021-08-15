@@ -9,9 +9,11 @@
 */
 
 rewrite_node("simplify_code_using_streams", id, cat(
-    subject_str, ".addAll(", original_str, ".stream()",
-                                           ".filter(", declarator_id_str, " -> ", cond_str, ")",
-                                           ".collect(java.util.stream.Collectors.toList()));"
+    @node_to_string(code, subject), ".addAll(", @node_to_string(code, original),
+                                                ".stream()",
+                                                ".filter(", @node_to_string(code, declarator_id), " -> ",
+                                                    @node_to_string(code, cond), ")",
+                                                ".collect(java.util.stream.Collectors.toList()));"
 )) :-
     enhanced_for_statement(id, param, original, body),
 
@@ -22,6 +24,7 @@ rewrite_node("simplify_code_using_streams", id, cat(
     type_args != nil,
     collection_type(original_type_package, original_type_name),
 
+    source_code(_, code),
     formal_parameter(param, nil, _, declarator_id),
     block(body, [if_stmt, nil]),
     if_statement(if_stmt, cond, then, nil),
@@ -30,8 +33,4 @@ rewrite_node("simplify_code_using_streams", id, cat(
     method_invocation(invocation, subject, "add", [x, nil]),
     _has_type(subject, [subject_type_package, subject_type_name, _]),
     collection_type(subject_type_package, subject_type_name),
-    point_of_declaration(x, param),
-    string_representation(cond, cond_str),
-    string_representation(subject, subject_str),
-    string_representation(declarator_id, declarator_id_str),
-    string_representation(original, original_str).
+    point_of_declaration(x, param).

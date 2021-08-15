@@ -1,35 +1,39 @@
 /* Pre   [:x] ? true : [:y] */
 /* Post  [:x] || [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr, cat("(", cond_str, ") || (", other_expr_str, ")")) :-
+rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
+    cat("(", @node_to_string(code, cond), ") || (", @node_to_string(code, other_expr), ")")
+) :-
     conditional_expression(cond_expr, cond, true_expr, other_expr),
-    evaluates_to_boolean_value(true_expr, 1),
-    string_representation(cond, cond_str),
-    string_representation(other_expr, other_expr_str).
+    source_code(_, code),
+    evaluates_to_boolean_value(true_expr, 1).
 
 /* Pre   [:x] ? false : [:y] */
 /* Post  ![:x] && [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr, cat("!(", cond_str, ") && (", other_expr_str, ")")) :-
+rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
+    cat("!(", @node_to_string(code, cond), ") && (", @node_to_string(code, other_expr), ")")
+) :-
     conditional_expression(cond_expr, cond, false_expr, other_expr),
-    evaluates_to_boolean_value(false_expr, 0),
-    string_representation(cond, cond_str),
-    string_representation(other_expr, other_expr_str).
+    source_code(_, code),
+    evaluates_to_boolean_value(false_expr, 0).
 
 /* Pre   [:x] ? [:y] : true */
 /* Post  ![:x] || [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr, cat("!(", cond_str, ") || (", other_expr_str, ")")) :-
+rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
+    cat("!(", @node_to_string(code, cond), ") || (", @node_to_string(code, other_expr), ")")
+) :-
     conditional_expression(cond_expr, cond, other_expr, true_expr),
+    source_code(_, code),
     !evaluates_to_boolean_value(other_expr, 0),
     !evaluates_to_boolean_value(other_expr, 1),
-    evaluates_to_boolean_value(true_expr, 1),
-    string_representation(cond, cond_str),
-    string_representation(other_expr, other_expr_str).
+    evaluates_to_boolean_value(true_expr, 1).
 
 /* Pre   [:x] ? [:y] : false */
 /* Post  [:x] && [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr, cat("(", cond_str, " && ", other_expr_str, ")")) :-
+rewrite_node("simplify_ternary_conditional_expressions", cond_expr, 
+    cat("(", @node_to_string(code, cond), ") && (", @node_to_string(code, other_expr), ")")
+) :-
     conditional_expression(cond_expr, cond, other_expr, false_expr),
+    source_code(_, code),
     !evaluates_to_boolean_value(other_expr, 0),
     !evaluates_to_boolean_value(other_expr, 1),
-    evaluates_to_boolean_value(false_expr, 0),
-    string_representation(cond, cond_str),
-    string_representation(other_expr, other_expr_str).
+    evaluates_to_boolean_value(false_expr, 0).

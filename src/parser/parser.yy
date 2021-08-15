@@ -6,8 +6,8 @@
 %param {const char* filename}
 %param {std::vector<logifix::parser::token>& tokens}
 %param {size_t& pos}
-%expect 1089
-%expect-rr 790
+%expect 1088
+%expect-rr 791
 %define api.location.type {logifix::parser::location}
 %start root
 %code requires
@@ -1685,11 +1685,11 @@ lambda_expression: lambda_parameters "->" lambda_body { $$ = ID("lambda_expressi
                                                         PARENT($$, "body", $lambda_body); }
                  ;
 
-lambda_parameters: '(' ')'                       { $$ = ID("lambda_params", @$); }
-                 | '(' lambda_parameter_list ')' { $$ = ID("lambda_params", @$);
-                                                   PARENT_LIST($$, "params", $lambda_parameter_list); }
-                 | identifier                    { $$ = ID("lambda_params", @$);
-                                                   PARENT_LIST($$, "params", LIST($1, NIL)); }
+lambda_parameters: '(' ')'                              { $$ = ID("lambda_params", @$); }
+                 | '(' lambda_parameter_list ')'        { $$ = ID("lambda_params", @$);
+                                                          PARENT_LIST($$, "params", $lambda_parameter_list); }
+                 | lambda_parameter_single_identifier   { $$ = ID("lambda_params", @$);
+                                                          PARENT_LIST($$, "params", LIST($1, NIL)); }
                  ;
 
 lambda_parameter_list: lambda_parameter_list_first_option
@@ -1700,8 +1700,8 @@ lambda_parameter_list_first_option: lambda_parameter ',' lambda_parameter_list_f
                                   | lambda_parameter                                        { $$ = LIST($1, NIL); }
                                   ;
 
-lambda_parameter_list_second_option: identifier ',' lambda_parameter_list_second_option { $$ = LIST($1, $3); }
-                                   | identifier                                         { $$ = LIST($1, NIL); }
+lambda_parameter_list_second_option: lambda_parameter_single_identifier ',' lambda_parameter_list_second_option { $$ = LIST($1, $3); }
+                                   | lambda_parameter_single_identifier                                         { $$ = LIST($1, NIL); }
                                    ;
 
 lambda_parameter: variable_modifiers lambda_parameter_type variable_declarator_id { $$ = ID("formal_parameter", @$);
@@ -1715,6 +1715,11 @@ lambda_parameter: variable_modifiers lambda_parameter_type variable_declarator_i
                                                                                     PARENT($$, "declarator_id", $variable_declarator_id); }
                 | variable_arity_parameter 
                 ;
+
+lambda_parameter_single_identifier: identifier { $$ = ID("formal_parameter", @$);
+                                                 PARENT_LIST($$, "modifiers", NIL);
+                                                 PARENT($$, "type", NIL);
+                                                 PARENT($$, "declarator_id", $identifier); }
 
 lambda_parameter_type: unann_type
                      | VAR { $$ = ID("var_type", @$); }
