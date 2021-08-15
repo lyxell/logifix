@@ -1,9 +1,8 @@
 rewrite_node("fix_inefficient_calls_to_foreach_list_add", inv, cat(
-        ref_subject_str, ".addAll(", inv_subject_str, ".collect(java.util.stream.Collectors.toList()))"
+    @node_to_string(code, ref_subject), ".addAll(", @node_to_string(code, inv_subject), ".collect(java.util.stream.Collectors.toList()))"
 )) :-
     expression_statement(_, inv),
+    source_code(_, code),
     _has_type(inv_subject, ["java.util.stream", "Stream", _]),
     method_invocation(inv, inv_subject, "forEach", [ref, nil]),
-    method_reference(ref, ref_subject, nil, "add"),
-    string_representation(inv_subject, inv_subject_str),
-    string_representation(ref_subject, ref_subject_str).
+    method_reference(ref, ref_subject, nil, "add").
