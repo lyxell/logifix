@@ -139,14 +139,6 @@ head_of(head, tail) :-
 predecessor_of(x, y) :-
     head_of(x, [y, _]).
 
-/* transitive closure of predecessor_of */
-.decl precedes(x: id, y: id)
-precedes(x, y) :-
-    predecessor_of(x, y).
-precedes(x, z) :-
-    precedes(x, y),
-    predecessor_of(y, z).
-
 /* does the list contain the element? */
 .decl list_contains(list: id_list, id: id)
 list_contains([head,tail], head) :-
