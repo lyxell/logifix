@@ -15,8 +15,8 @@
 */
 
 rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
-    "return ", map_var_str, ".computeIfAbsent(", key_var_str, ", k -> {\n",
-        value_type_str, " ", value_var_str, " = ", value_initializer_str, ";\n",
+    "return ", @node_to_string(code, map_var), ".computeIfAbsent(", key_var_str, ", k -> {\n",
+        @node_to_string(code, value_type), " ", value_var_str, " = ", @node_to_string(code, value_initializer), ";\n",
         substr(code, t2_end, last_element_end - t2_end), "\n",
         "return ", value_var_str, ";\n",
     "});"
@@ -36,6 +36,7 @@ rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
     local_variable_declaration(decl, _, value_type, [declarator, nil]),
     variable_declarator(declarator, value_var, initializer),
     method_invocation(initializer, map_var, "get", [key_var, nil]),
+    point_of_declaration(map_var, map_var_declaration_point),
     _has_type(map_var, ["java.util", "Map", _]),
 
     /* The second statement is an if-statement */
@@ -60,7 +61,7 @@ rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
             /* The second statement is a call to map_var.put */
             expression_statement(t2, put),
             method_invocation(put, subj, "put", [karg, [varg, nil]]),
-            string_representation(subj, map_var_str),
+            point_of_declaration(subj, map_var_declaration_point),
             string_representation(karg, key_var_str),
             string_representation(varg, value_var_str),
 
@@ -74,8 +75,5 @@ rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
     point_of_declaration(var, decl),
 
     string_representation(key_var, key_var_str),
-    string_representation(map_var, map_var_str),
-    string_representation(value_initializer, value_initializer_str),
-    string_representation(value_type, value_type_str),
     string_representation(value_var, value_var_str).
 
