@@ -1,6 +1,6 @@
 /* Pre  [:collection].removeAll([:collection]) */
 /* Post [:collection].clear()         */
-rewrite_node("simplify_calls_to_collection_removeall", id,
+replace_node_with_string("simplify_calls_to_collection_removeall", id,
     cat(@node_to_string(code, collection), ".clear()")
 ) :-
     method_invocation(id, collection, "removeAll", [arg, nil]),

@@ -1,6 +1,6 @@
 /* Pre  [:x] == null && [:x].[:y]() */
 /* Post [:x] != null && [:x].[:y]() */
-rewrite_node("fix_broken_null_checks", id,
+replace_node_with_string("fix_broken_null_checks", id,
     cat(@node_to_string(code, expr_name), " != null && ", @node_to_string(code, rhs))
 ) :-
     conditional_and_expression(id, eq_expr, rhs),

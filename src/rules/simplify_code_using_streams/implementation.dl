@@ -8,7 +8,7 @@
                                  .collect(java.util.stream.Collectors.toList()));
 */
 
-rewrite_node("simplify_code_using_streams", id, cat(
+replace_node_with_string("simplify_code_using_streams", id, cat(
     @node_to_string(code, subject), ".addAll(", @node_to_string(code, original),
                                                 ".stream()",
                                                 ".filter(", @node_to_string(code, declarator_id), " -> ",

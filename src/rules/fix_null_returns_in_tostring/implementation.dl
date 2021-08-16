@@ -3,7 +3,7 @@
 
 /* Pre  null */
 /* Post ""   */
-rewrite_node("fix_null_returns_in_tostring", expr, "\"\"") :-
+replace_node_with_string("fix_null_returns_in_tostring", expr, "\"\"") :-
     method_declaration(_, _, method_head, method_body),
     /* Check that the method name is toString */
     method_header(method_head, _, declarator, _),

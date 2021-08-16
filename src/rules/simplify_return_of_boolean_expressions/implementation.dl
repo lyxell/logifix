@@ -14,7 +14,7 @@ does_nothing_but_return_false(id) :-
     block(id, [statement, nil]),
     does_nothing_but_return_false(statement).
 
-rewrite_node("simplify_return_of_boolean_expressions", id,
+replace_node_with_string("simplify_return_of_boolean_expressions", id,
     cat("return ", @node_to_string(code, cond), ";")
 ) :-
     if_statement(id, cond, then, else),
@@ -24,7 +24,7 @@ rewrite_node("simplify_return_of_boolean_expressions", id,
     /* id is not the else-branch of an if-statement */
     ! if_statement(_, _, _, id).
 
-rewrite_node("simplify_return_of_boolean_expressions", id,
+replace_node_with_string("simplify_return_of_boolean_expressions", id,
     cat("return !(", @node_to_string(code, cond), ");")
 ) :-
     if_statement(id, cond, then, else),

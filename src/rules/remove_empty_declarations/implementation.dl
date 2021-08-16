@@ -1,2 +1,2 @@
-rewrite_node("remove_empty_declarations", id, "") :-
+replace_node_with_string("remove_empty_declarations", id, "") :-
     empty_declaration(id).

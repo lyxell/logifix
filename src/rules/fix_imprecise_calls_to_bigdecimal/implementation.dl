@@ -1,4 +1,4 @@
-rewrite_node("fix_imprecise_calls_to_bigdecimal", id,
+replace_node_with_string("fix_imprecise_calls_to_bigdecimal", id,
     cat("BigDecimal.valueOf(", @node_to_string(code, arg), ")")
 ) :-
     class_instance_creation_expression(id, nil, nil, type, [arg, nil], nil),

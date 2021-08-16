@@ -1,4 +1,4 @@
-rewrite_node("simplify_code_using_lambda_expressions", id,
+replace_node_with_string("simplify_code_using_lambda_expressions", id,
     cat("(", substr(code, start, end - start), ") -> ", @decrease_indentation(@node_to_string(code, method_body)))
 ) :-
     class_instance_creation_expression(id, _, _, class_type, _, class_body),
@@ -13,7 +13,7 @@ rewrite_node("simplify_code_using_lambda_expressions", id,
     list_last_element(params, last),
     ends_at(last, end).
 
-rewrite_node("simplify_code_using_lambda_expressions", id,
+replace_node_with_string("simplify_code_using_lambda_expressions", id,
     cat("() -> ", @decrease_indentation(@node_to_string(code, method_body)))
 ) :-
     class_instance_creation_expression(id, _, _, class_type, _, class_body),

@@ -1,6 +1,6 @@
 /* Pre   [:x] ? true : [:y] */
 /* Post  [:x] || [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
+replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr,
     cat("(", @node_to_string(code, cond), ") || (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, true_expr, other_expr),
@@ -9,7 +9,7 @@ rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
 
 /* Pre   [:x] ? false : [:y] */
 /* Post  ![:x] && [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
+replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr,
     cat("!(", @node_to_string(code, cond), ") && (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, false_expr, other_expr),
@@ -18,7 +18,7 @@ rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
 
 /* Pre   [:x] ? [:y] : true */
 /* Post  ![:x] || [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
+replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr,
     cat("!(", @node_to_string(code, cond), ") || (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, other_expr, true_expr),
@@ -29,7 +29,7 @@ rewrite_node("simplify_ternary_conditional_expressions", cond_expr,
 
 /* Pre   [:x] ? [:y] : false */
 /* Post  [:x] && [:y]        */
-rewrite_node("simplify_ternary_conditional_expressions", cond_expr, 
+replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr, 
     cat("(", @node_to_string(code, cond), ") && (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, other_expr, false_expr),

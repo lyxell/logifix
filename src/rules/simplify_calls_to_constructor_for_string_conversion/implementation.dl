@@ -1,6 +1,6 @@
 /* Pre  new Integer([:argument]).toString() */
 /* Post Integer.toString([:argument])       */
-rewrite_node("simplify_calls_to_constructor_for_string_conversion", id,
+replace_node_with_string("simplify_calls_to_constructor_for_string_conversion", id,
     cat("Integer.toString(", @node_to_string(code, arg), ")")
 ) :-
     method_invocation(id, subject, "toString", nil),

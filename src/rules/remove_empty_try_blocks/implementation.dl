@@ -1,3 +1,3 @@
-rewrite_node("remove_empty_try_blocks", id, "") :-
+replace_node_with_string("remove_empty_try_blocks", id, "") :-
     try_statement(id, body, _, nil),
     block(body, nil).
