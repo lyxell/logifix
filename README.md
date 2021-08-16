@@ -15,28 +15,25 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 <ul> </ul>
 
-## Getting started
+## Installing
 
-1. Watch [the demo](#demo)
+Prebuilt and dependency-free binaries are provided for macOS and GNU-based Linux systems.
 
-2. Install
-
-> You can also install from source, see [building](#building).
+### Ubuntu/Debian
 
 ```bash
-# Ubuntu/Debian
 curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-linux-gnu.gz | gunzip -c - > /tmp/logifix
 chmod +x /tmp/logifix
 sudo mv /tmp/logifix /usr/local/bin
 ```
+
+### macOS
+
 ```bash
-# macOS
 curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-macos.gz | gunzip -c - > /tmp/logifix
 chmod +x /tmp/logifix
 sudo mv /tmp/logifix /usr/local/bin
 ```
-
-3. Run `logifix path/to/your/java/project`
 
 <ul> </ul>
 
