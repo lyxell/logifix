@@ -133,20 +133,6 @@ jobs:
     - run: ./logifix --in-place --accept-all karate/
     - run: cd karate && mvn compile
 
-  compile-caffeine:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download logifix
-      uses: actions/download-artifact@v2
-      with:
-        name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/ben-manes/caffeine.git
-    - run: cd caffeine && ./gradlew build -x test
-    - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all caffeine/
-    - run: cd caffeine && ./gradlew build -x test
-
   compile-testng:
     needs: build
     runs-on: ubuntu-latest
