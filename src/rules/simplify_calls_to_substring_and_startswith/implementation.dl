@@ -1,10 +1,9 @@
 /* Pre  [:str].substring([:begin_index]).startsWith([:needle])        */
 /* Post [:str].startsWith([:needle], [:begin_index])                  */
-rewrite_node("simplify_calls_to_substring_and_startswith", id,
-    cat(str_repr, ".startsWith(", needle_repr, ", ", begin_index_repr, ")")
+replace_node_with_string("simplify_calls_to_substring_and_startswith", id,
+    cat(@node_to_string(code, str), ".startsWith(", @node_to_string(code, needle), ", ",
+                                                    @node_to_string(code, begin_index), ")")
 ) :-
     method_invocation(id, subject, "startsWith", [needle, nil]),
     method_invocation(subject, str, "substring", [begin_index, nil]),
-    string_representation(str, str_repr),
-    string_representation(begin_index, begin_index_repr),
-    string_representation(needle, needle_repr).
+    source_code(_, code).

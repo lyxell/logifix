@@ -3,12 +3,17 @@
 
 /* Pre  null */
 /* Post ""   */
-rewrite_node("fix_null_returns_in_tostring", expr, "\"\"") :-
+replace_node_with_string("fix_null_returns_in_tostring", expr, "\"\"") :-
     method_declaration(_, _, method_head, method_body),
     /* Check that the method name is toString */
     method_header(method_head, _, declarator, _),
     method_declarator(declarator, "toString", nil),
     /* Check the values of the return statements */
-    ancestor_of(method_body, return_stmt),
+    starts_at(method_body, method_body_start),
+    ends_at(method_body, method_body_end),
     return_statement(return_stmt, expr),
+    starts_at(return_stmt, return_stmt_start),
+    ends_at(return_stmt, return_stmt_end),
+    return_stmt_start >= method_body_start,
+    return_stmt_end <= method_body_end,
     null_literal(expr).

@@ -7,7 +7,7 @@
 %param {std::vector<logifix::parser::token>& tokens}
 %param {size_t& pos}
 %expect 1089
-%expect-rr 790
+%expect-rr 802
 %define api.location.type {logifix::parser::location}
 %start root
 %code requires
@@ -237,22 +237,22 @@ reference_type: class_type
               ;
 
 class_type:                annotations type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", NIL);
+                                                                            PARENT($$, "parent", NIL);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", $annotations);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
           |                            type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", NIL);
+                                                                            PARENT($$, "parent", NIL);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", NIL);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
           | class_type '.' annotations type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", $1);
+                                                                            PARENT($$, "parent", $1);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", $annotations);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
           | class_type '.'             type_identifier type_arguments_or_diamond_opt { $$ = ID("class_type", @$);
-                                                                            PARENT($$, "parent_class", $1);
+                                                                            PARENT($$, "parent", $1);
                                                                             PARENT($$, "name", $type_identifier);
                                                                             PARENT_LIST($$, "annotations", NIL);
                                                                             PARENT($$, "type_arguments", $type_arguments_or_diamond_opt); }
@@ -664,12 +664,12 @@ unann_class_type:                                      type_identifier type_argu
                                                                                             PARENT($$, "name", $type_identifier);
                                                                                             PARENT($$, "type_arguments", $type_arguments_opt);
                                                                                             PARENT_LIST($$, "annotations", NIL);
-                                                                                            PARENT($$, "parent_class", NIL); }
+                                                                                            PARENT($$, "parent", NIL); }
                 | unann_class_type '.' annotations_opt type_identifier type_arguments_opt { $$ = ID("class_type", @$);
                                                                                             PARENT($$, "name", $type_identifier);
                                                                                             PARENT($$, "type_arguments", $type_arguments_opt);
                                                                                             PARENT_LIST($$, "annotations", $annotations_opt);
-                                                                                            PARENT($$, "parent_class", $1); }
+                                                                                            PARENT($$, "parent", $1); }
                 ;
 
 unann_array_type: unann_primitive_type dims { $$ = ID("array_type", @$);
@@ -1685,11 +1685,11 @@ lambda_expression: lambda_parameters "->" lambda_body { $$ = ID("lambda_expressi
                                                         PARENT($$, "body", $lambda_body); }
                  ;
 
-lambda_parameters: '(' ')'                       { $$ = ID("lambda_params", @$); }
-                 | '(' lambda_parameter_list ')' { $$ = ID("lambda_params", @$);
-                                                   PARENT_LIST($$, "params", $lambda_parameter_list); }
-                 | identifier                    { $$ = ID("lambda_params", @$);
-                                                   PARENT_LIST($$, "params", LIST($1, NIL)); }
+lambda_parameters: '(' ')'                              { $$ = ID("lambda_params", @$); }
+                 | '(' lambda_parameter_list ')'        { $$ = ID("lambda_params", @$);
+                                                          PARENT_LIST($$, "params", $lambda_parameter_list); }
+                 | lambda_parameter_single_identifier   { $$ = ID("lambda_params", @$);
+                                                          PARENT_LIST($$, "params", LIST($1, NIL)); }
                  ;
 
 lambda_parameter_list: lambda_parameter_list_first_option
@@ -1700,8 +1700,8 @@ lambda_parameter_list_first_option: lambda_parameter ',' lambda_parameter_list_f
                                   | lambda_parameter                                        { $$ = LIST($1, NIL); }
                                   ;
 
-lambda_parameter_list_second_option: identifier ',' lambda_parameter_list_second_option { $$ = LIST($1, $3); }
-                                   | identifier                                         { $$ = LIST($1, NIL); }
+lambda_parameter_list_second_option: lambda_parameter_single_identifier ',' lambda_parameter_list_second_option { $$ = LIST($1, $3); }
+                                   | lambda_parameter_single_identifier                                         { $$ = LIST($1, NIL); }
                                    ;
 
 lambda_parameter: variable_modifiers lambda_parameter_type variable_declarator_id { $$ = ID("formal_parameter", @$);
@@ -1715,6 +1715,12 @@ lambda_parameter: variable_modifiers lambda_parameter_type variable_declarator_i
                                                                                     PARENT($$, "declarator_id", $variable_declarator_id); }
                 | variable_arity_parameter 
                 ;
+
+/* In reality this should only match identifiers and not variable_declarator_ids */
+lambda_parameter_single_identifier: variable_declarator_id { $$ = ID("formal_parameter", @$);
+                                                 PARENT_LIST($$, "modifiers", NIL);
+                                                 PARENT($$, "type", NIL);
+                                                 PARENT($$, "declarator_id", $variable_declarator_id); }
 
 lambda_parameter_type: unann_type
                      | VAR { $$ = ID("var_type", @$); }

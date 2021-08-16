@@ -1,6 +1,6 @@
 /* Pre  try [:body] [:catches] finally {} */
 /* Post try [:body] [:catches]            */
-rewrite_node("remove_empty_finally_blocks", finally, "") :-
+replace_node_with_string("remove_empty_finally_blocks", finally, "") :-
     try_statement(_, _, catches, finally),
     catches != nil,
     finally_block(finally, block),
@@ -8,7 +8,7 @@ rewrite_node("remove_empty_finally_blocks", finally, "") :-
 
 /* Pre  try ([:resources]) [:body] [:catches] finally {} */
 /* Post try ([:resources]) [:body] [:catches]            */
-rewrite_node("remove_empty_finally_blocks", finally, "") :-
+replace_node_with_string("remove_empty_finally_blocks", finally, "") :-
     try_with_resources_statement(_, _, _, catches, finally),
     catches != nil,
     finally_block(finally, block),

@@ -474,6 +474,7 @@ auto program::get_patches(const std::string& source) const
 
     /* run program */
     prog->run();
+    // prog->printAll();
 
     /* extract rewrites */
     auto* relation = prog->getRelation("rewrite");

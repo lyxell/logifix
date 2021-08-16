@@ -1,6 +1,4 @@
-rewrite_node("remove_redundant_casts", id, value_str) :-
+replace_node_with_node("remove_redundant_casts", id, value) :-
     cast_expression(id, cast_type, value),
-    has_type(value, actual_type),
-    string_representation(value, value_str),
-    string_representation(cast_type, type_str),
-    string_representation(actual_type, type_str).
+    _has_type(value, type),
+    ast_type_to_type(cast_type, type).

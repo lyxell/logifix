@@ -1,8 +1,8 @@
-rewrite_node("remove_redundant_collection_copies", id, arg_str) :-
+replace_node_with_node("remove_redundant_collection_copies", id, arg) :-
     class_instance_creation_expression(id, nil, nil, type, [arg, nil], nil),
-    class_type(type, "ArrayList", _, _),
+    ast_type_to_type(type, ["java.util", "ArrayList", _]),
     method_invocation(arg, subject, "collect", [collector, nil]),
-    has_stream_type(subject),
-    string_representation(arg, arg_str),
-    (string_representation(collector, "java.util.stream.Collectors.toList()")
-    ;string_representation(collector, "Collectors.toList()")).
+    _has_type(subject, ["java.util.stream", "Stream", _]),
+    method_invocation(collector, to_list_subject, "toList", nil),
+    expression_name(to_list_subject, [collectors_identifier, nil]),
+    identifier(collectors_identifier, "Collectors").

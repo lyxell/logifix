@@ -1,0 +1,294 @@
+/* list of resources that implements the AutoCloseable interface */
+.decl autocloseable_type_name(str: symbol)
+autocloseable_type_name("AbstractInterruptibleChannel").
+autocloseable_type_name("AbstractSelectableChannel").
+autocloseable_type_name("AbstractSelector").
+autocloseable_type_name("AsynchronousFileChannel").
+autocloseable_type_name("AsynchronousServerSocketChannel").
+autocloseable_type_name("AsynchronousSocketChannel").
+autocloseable_type_name("AudioInputStream").
+autocloseable_type_name("BufferedInputStream").
+autocloseable_type_name("BufferedOutputStream").
+autocloseable_type_name("BufferedReader").
+autocloseable_type_name("BufferedWriter").
+autocloseable_type_name("ByteArrayInputStream").
+autocloseable_type_name("ByteArrayOutputStream").
+autocloseable_type_name("CharArrayReader").
+autocloseable_type_name("CharArrayWriter").
+autocloseable_type_name("CheckedInputStream").
+autocloseable_type_name("CheckedOutputStream").
+autocloseable_type_name("CipherInputStream").
+autocloseable_type_name("CipherOutputStream").
+autocloseable_type_name("DatagramChannel").
+autocloseable_type_name("DatagramSocket").
+autocloseable_type_name("DataInputStream").
+autocloseable_type_name("DataOutputStream").
+autocloseable_type_name("DeflaterInputStream").
+autocloseable_type_name("DeflaterOutputStream").
+autocloseable_type_name("DigestInputStream").
+autocloseable_type_name("DigestOutputStream").
+autocloseable_type_name("FileCacheImageInputStream").
+autocloseable_type_name("FileCacheImageOutputStream").
+autocloseable_type_name("FileChannel").
+autocloseable_type_name("FileImageInputStream").
+autocloseable_type_name("FileImageOutputStream").
+autocloseable_type_name("FileInputStream").
+autocloseable_type_name("FileLock").
+autocloseable_type_name("FileOutputStream").
+autocloseable_type_name("FileReader").
+autocloseable_type_name("FileSystem").
+autocloseable_type_name("FileWriter").
+autocloseable_type_name("FilterInputStream").
+autocloseable_type_name("FilterOutputStream").
+autocloseable_type_name("FilterReader").
+autocloseable_type_name("FilterWriter").
+autocloseable_type_name("Formatter").
+autocloseable_type_name("ForwardingJavaFileManager").
+autocloseable_type_name("GZIPInputStream").
+autocloseable_type_name("GZIPOutputStream").
+autocloseable_type_name("ImageInputStreamImpl").
+autocloseable_type_name("ImageOutputStreamImpl").
+autocloseable_type_name("InflaterInputStream").
+autocloseable_type_name("InflaterOutputStream").
+autocloseable_type_name("InputStream").
+autocloseable_type_name("InputStream").
+autocloseable_type_name("InputStream").
+autocloseable_type_name("InputStreamReader").
+autocloseable_type_name("JarFile").
+autocloseable_type_name("JarInputStream").
+autocloseable_type_name("JarOutputStream").
+autocloseable_type_name("LineNumberInputStream").
+autocloseable_type_name("LineNumberReader").
+autocloseable_type_name("LogStream").
+autocloseable_type_name("MemoryCacheImageInputStream").
+autocloseable_type_name("MemoryCacheImageOutputStream").
+autocloseable_type_name("MLet").
+autocloseable_type_name("MulticastSocket").
+autocloseable_type_name("ObjectInputStream").
+autocloseable_type_name("ObjectOutputStream").
+autocloseable_type_name("OutputStream").
+autocloseable_type_name("OutputStream").
+autocloseable_type_name("OutputStream").
+autocloseable_type_name("OutputStreamWriter").
+autocloseable_type_name("Pipe.SinkChannel").
+autocloseable_type_name("Pipe.SourceChannel").
+autocloseable_type_name("PipedInputStream").
+autocloseable_type_name("PipedOutputStream").
+autocloseable_type_name("PipedReader").
+autocloseable_type_name("PipedWriter").
+autocloseable_type_name("PrintStream").
+autocloseable_type_name("PrintWriter").
+autocloseable_type_name("PrivateMLet").
+autocloseable_type_name("ProgressMonitorInputStream").
+autocloseable_type_name("PushbackInputStream").
+autocloseable_type_name("PushbackReader").
+autocloseable_type_name("RandomAccessFile").
+autocloseable_type_name("Reader").
+autocloseable_type_name("RMIConnectionImpl").
+autocloseable_type_name("RMIConnectionImpl_Stub").
+autocloseable_type_name("RMIConnector").
+autocloseable_type_name("RMIIIOPServerImpl").
+autocloseable_type_name("RMIJRMPServerImpl").
+autocloseable_type_name("RMIServerImpl").
+autocloseable_type_name("Scanner").
+autocloseable_type_name("SelectableChannel").
+autocloseable_type_name("Selector").
+autocloseable_type_name("SequenceInputStream").
+autocloseable_type_name("ServerSocket").
+autocloseable_type_name("ServerSocketChannel").
+autocloseable_type_name("Socket").
+autocloseable_type_name("SocketChannel").
+autocloseable_type_name("SSLServerSocket").
+autocloseable_type_name("SSLSocket").
+autocloseable_type_name("StringBufferInputStream").
+autocloseable_type_name("StringReader").
+autocloseable_type_name("StringWriter").
+autocloseable_type_name("URLClassLoader").
+autocloseable_type_name("Writer").
+autocloseable_type_name("XMLDecoder").
+autocloseable_type_name("XMLEncoder").
+autocloseable_type_name("ZipFile").
+autocloseable_type_name("ZipInputStream").
+autocloseable_type_name("ZipOutputStream").
+
+.decl native_type(package: symbol, class: symbol)
+native_type("java.lang", "Integer").
+native_type("java.lang", "String").
+native_type("java.lang", "Thread").
+native_type("java.math", "BigDecimal").
+native_type("java.util", "ArrayDeque").
+native_type("java.util", "ArrayList").
+native_type("java.util", "Collection").
+native_type("java.util", "Deque").
+native_type("java.util", "HashMap").
+native_type("java.util", "HashMap").
+native_type("java.util", "Iterator").
+native_type("java.util", "LinkedHashMap").
+native_type("java.util", "LinkedList").
+native_type("java.util", "List").
+native_type("java.util", "Map").
+native_type("java.util", "Queue").
+native_type("java.util", "Set").
+native_type("java.util", "SortedSet").
+native_type("java.util", "Stack").
+native_type("java.util", "TreeMap").
+native_type("java.util", "Vector").
+native_type("java.util", "WeakHashMap").
+native_type("java.util.stream", "Collectors").
+
+.decl collection_type(package: symbol, class: symbol)
+collection_type("java.util", "ArrayDeque").
+collection_type("java.util", "ArrayList").
+collection_type("java.util", "Collection").
+collection_type("java.util", "Deque").
+collection_type("java.util", "LinkedList").
+collection_type("java.util", "List").
+collection_type("java.util", "Queue").
+collection_type("java.util", "Set").
+collection_type("java.util", "SortedSet").
+collection_type("java.util", "Stack").
+collection_type("java.util", "Vector").
+
+.decl map_type(package: symbol, class: symbol)
+map_type("java.util", "Map").
+map_type("java.util", "HashMap").
+map_type("java.util", "TreeMap").
+map_type("java.util", "WeakHashMap").
+// ...
+
+.decl is_type_preserving_stream_method(s: symbol)
+is_type_preserving_stream_method("filter").
+is_type_preserving_stream_method("limit").
+is_type_preserving_stream_method("map").
+is_type_preserving_stream_method("skip").
+is_type_preserving_stream_method("sorted").
+
+.decl ast_type_args_list_to_type_list(list: id_list, type: type_list)
+ast_type_args_list_to_type_list(nil, nil).
+ast_type_args_list_to_type_list([head, tail], [head_type, tail_type]) :-
+    head_of(head, tail),
+    ast_type_to_type(head, head_type),
+    ast_type_args_list_to_type_list(tail, tail_type).
+
+.decl ast_type_args_to_type_list(id: id, type: type_list)
+ast_type_args_to_type_list(nil, nil).
+ast_type_args_to_type_list(id, [nil, nil]) :-
+    type_arguments(id, nil).
+ast_type_args_to_type_list(id, types) :-
+    type_arguments(id, list),
+    list != nil,
+    ast_type_args_list_to_type_list(list, types).
+
+.decl ast_type_to_type(id: id, type: type)
+.output ast_type_to_type(IO=stdout)
+
+/* Non-native types - with type arguments */
+ast_type_to_type(id, [substr(code, parent_start, parent_end - parent_start), class, type_args]) :-
+    !native_type(_, class),
+    class_type(id, parent, class, type_args_id, _),
+    source_code(_, code),
+    starts_at(parent, parent_start),
+    ends_at(parent, parent_end),
+    ast_type_args_to_type_list(type_args_id, type_args).
+ast_type_to_type(id, ["", class, type_args]) :-
+    !native_type(_, class),
+    class_type(id, nil, class, type_args_id, _), // TODO imports
+    ast_type_args_to_type_list(type_args_id, type_args).
+
+/* Non-native types - without type arguments */
+ast_type_to_type(id, [substr(code, parent_start, parent_end - parent_start), class, nil]) :-
+    !native_type(_, class),
+    class_type(id, parent, class, nil, _),
+    source_code(_, code),
+    starts_at(parent, parent_start),
+    ends_at(parent, parent_end).
+ast_type_to_type(id, ["", class, nil]) :-
+    !native_type(_, class),
+    class_type(id, nil, class, nil, _).
+
+/* Native types - with type arguments */
+ast_type_to_type(id, [package, class, type_args]) :-
+    native_type(package, class),
+    class_type(id, nil, class, type_args_id, _),
+    ast_type_args_to_type_list(type_args_id, type_args). // TODO: Check imports
+/* Native types - without type arguments */
+ast_type_to_type(id, [package, class, nil]) :-
+    native_type(package, class),
+    class_type(id, nil, class, nil, _). // TODO: Check imports
+
+/* Primitive types */
+ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
+    primitive_type(id, _, name),
+    source_code(_, code),
+    starts_at(name, start),
+    ends_at(name, end).
+
+.decl _has_type(id: id, type: type)
+.output _has_type(IO=stdout)
+_has_type(id, type) :-
+    point_of_declaration(id, declpoint),
+    parent_of(declpoint, "type", ast_type),
+    ast_type_to_type(ast_type, type).
+
+_has_type(id, type) :-
+    method_invocation(id, nil, meth, nil),
+    method_declaration(_, _, meth_header, _),
+    method_header(meth_header, ast_type, declarator, _),
+    ast_type_to_type(ast_type, type),
+    method_declarator(declarator, meth, nil).
+
+_has_type(id, ["", "float", nil]) :-
+    floating_point_literal(id).
+
+_has_type(id, ["java.lang", "String", nil]) :-
+    string_literal(id).
+
+_has_type(id, ["java.util", "Iterator", type_args]) :-
+    method_invocation(id, subject, "iterator", nil),
+    _has_type(subject, [package, class, type_args]),
+    collection_type(package, class).
+
+_has_type(id, ["java.util.stream", "Stream", type_args]) :-
+    method_invocation(id, subject, "stream", nil),
+    _has_type(subject, [package, class, type_args]),
+    collection_type(package, class).
+_has_type(id, ["java.util.stream", "Stream", type_args]) :-
+    method_invocation(id, subject, method, _),
+    is_type_preserving_stream_method(method),
+    _has_type(subject, ["java.util.stream", "Stream", type_args]).
+
+_has_type(id, type_arg) :-
+    method_invocation(id, subject, "next", nil),
+    _has_type(subject, ["java.util", "Iterator", [type_arg, nil]]).
+
+/* Type the lambda params inside streams */
+_has_type(param, type_arg) :-
+    _has_type(subject, ["java.util.stream", "Stream", [type_arg, nil]]),
+    method_invocation(_, subject, method, [lambda, nil]),
+    is_type_preserving_stream_method(method),
+    lambda_expression(lambda, lambda_params, _),
+    lambda_params(lambda_params, [param, nil]),
+    formal_parameter(param, _, _, _).
+
+/*
+
+.decl is_runnable_type(id: id)
+is_runnable_type(id) :-
+    class_type(id, "Runnable", _, _).
+
+.decl is_autocloseable_type(id: id)
+is_autocloseable_type(id) :-
+    class_type(id, name_str, _, _),
+    autocloseable_type_name(name_str).
+
+.decl is_thread_type(id: id)
+is_thread_type(id) :-
+    class_type(id, "Thread", _, _).
+
+.decl is_functional_interface_type(id: id)
+is_functional_interface_type(id) :-
+    is_comparator_type(id).
+is_functional_interface_type(id) :-
+    is_predicate_type(id).
+is_functional_interface_type(id) :-
+    is_runnable_type(id).*/

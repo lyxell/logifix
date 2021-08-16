@@ -1,11 +1,10 @@
 /* Pre  [:x] != null && "[:y]".equals([:x]) */
 /* Post "[:y]".equals([:x]) */
-rewrite_node("remove_unnecessary_null_check_before_string_equals_comparison", and_expr, cat(invocation_str)) :-
+replace_node_with_node("remove_unnecessary_null_check_before_string_equals_comparison", and_expr, invocation) :-
     conditional_and_expression(and_expr, noteqnull, invocation),
     not_equals_expression_unordered(noteqnull, null, noteqnull_subject),
     null_literal(null),
     method_invocation(invocation, subject, "equals", [arg, nil]),
     string_literal(subject),
     point_of_declaration(arg, decl),
-    point_of_declaration(noteqnull_subject, decl),
-    string_representation(invocation, invocation_str).
+    point_of_declaration(noteqnull_subject, decl).

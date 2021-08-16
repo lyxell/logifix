@@ -1,6 +1,6 @@
 /* Pre  try {[:x]} finally {} */
 /* Post [:x]                  */
-rewrite_node("remove_redundant_try_blocks", id,
+replace_node_with_string("remove_redundant_try_blocks", id,
     @decrease_indentation(substr(code, body_start + 1, (body_end - 1) - (body_start + 1)))
 ) :-
     try_statement(id, body, nil, finally),

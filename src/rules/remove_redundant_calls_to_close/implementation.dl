@@ -1,6 +1,6 @@
 /* Pre  [:x].close() */
 /* Post              */
-rewrite_node("remove_redundant_calls_to_close", expr_stmt, "") :-
+replace_node_with_string("remove_redundant_calls_to_close", expr_stmt, "") :-
     try_with_resources_statement(_, resources, _, _, _),
     list_contains(resources, resource),
     /* Loop through all blocks */
