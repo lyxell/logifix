@@ -6,6 +6,7 @@ replace_node_with_string("simplify_code_using_method_references", lambda_expr,
     lambda_expression(lambda_expr, params, lambda_body),
     lambda_params(params, [param, nil]),
     method_invocation(lambda_body, subject, method, [arg, nil]),
+    subject != nil,
     point_of_declaration(arg, param),
     source_code(_, code).
 
