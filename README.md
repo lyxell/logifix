@@ -4,8 +4,8 @@
 
 # Logifix
 
-Logifix is a fast static analysis tool for Java that fixes violations
-automatically.
+Logifix is a fast static analysis-guided rewrite system for Java. It automatically rewrites bad Java code into good Java code and can be used
+to fix static analysis violations for static analyzers such as SonarQube, PMD or SpotBugs.
 
 <ul> </ul>
 
@@ -21,7 +21,7 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 2. Install
 
-> You can also install from source, see (building)[#building].
+> You can also install from source, see [building](#building).
 
 ```bash
 # Ubuntu/Debian

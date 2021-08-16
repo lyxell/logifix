@@ -227,8 +227,8 @@ evaluates_to_boolean_value(id, 0) :-
 .decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
 rewrite(rule, filename, start, end, to) :-
     rewrite_node(rule, id, to),
-    starts_at(id, start),
-    ends_at(id, end),
+    content_starts_at(id, start),
+    content_ends_at(id, end),
     filename_of(id, filename).
 rewrite(rule, filename, start, end, to) :-
     replace_node_with_string(rule, id, to),
