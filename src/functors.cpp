@@ -22,6 +22,9 @@ souffle::RamDomain decrease_indentation(souffle::SymbolTable* symbolTable,
 souffle::RamDomain node_to_string(souffle::SymbolTable* symbolTable,
                                   souffle::RecordTable* recordTable, souffle::RamDomain code,
                                   souffle::RamDomain node) {
+    if (node == 0) {
+        return symbolTable->encode("");
+    }
     const auto& str = symbolTable->decode(code);
     const souffle::RamDomain* tuple = recordTable->unpack(node, 6);
     auto start = tuple[4];
