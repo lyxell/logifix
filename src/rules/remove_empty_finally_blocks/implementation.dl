@@ -1,21 +1,15 @@
 /* Pre  try [:body] [:catches] finally {} */
 /* Post try [:body] [:catches]            */
-rewrite("remove_empty_finally_blocks", filename, start, end, "") :-
-    try_statement(id, _, catches, finally),
-        filename_of(id, filename),
-        list_last_element(catches, catch),
-        ends_at(catch, start),
+replace_node_with_string("remove_empty_finally_blocks", finally, "") :-
+    try_statement(_, _, catches, finally),
+    catches != nil,
     finally_block(finally, block),
-    block(block, nil),
-        ends_at(finally, end).
+    block(block, nil).
 
 /* Pre  try ([:resources]) [:body] [:catches] finally {} */
 /* Post try ([:resources]) [:body] [:catches]            */
-rewrite("remove_empty_finally_blocks", filename, start, end, "") :-
-    try_with_resources_statement(id, _, _, catches, finally),
-        list_last_element(catches, catch),
-        ends_at(catch, start),
-        filename_of(id, filename),
+replace_node_with_string("remove_empty_finally_blocks", finally, "") :-
+    try_with_resources_statement(_, _, _, catches, finally),
+    catches != nil,
     finally_block(finally, block),
-    block(block, nil),
-        ends_at(finally, end).
+    block(block, nil).

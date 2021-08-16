@@ -3,6 +3,8 @@ name: Ubuntu build
 on:
   push:
     branches: [ main ]
+    tags:
+      - '*'
   pull_request:
     branches: [ main ]
 
@@ -45,6 +47,20 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all spoon/src/main
     - run: cd spoon && mvn compile
+
+  compile-bytecodeviewer:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/Konloch/bytecode-viewer.git
+    - run: cd bytecode-viewer && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all bytecode-viewer/
+    - run: cd bytecode-viewer && mvn compile
 
   compile-primefaces:
     needs: build
@@ -89,6 +105,20 @@ jobs:
     - run: cd initializr && mvn spring-javaformat:apply
     - run: cd initializr && mvn compile
 
+  compile-dolphinscheduler:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/apache/dolphinscheduler.git
+    - run: cd dolphinscheduler && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all dolphinscheduler/
+    - run: cd dolphinscheduler && mvn clean compile
+
   compile-pitest:
     needs: build
     runs-on: ubuntu-latest
@@ -102,3 +132,32 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all pitest/
     - run: cd pitest && mvn compile
+
+  compile-karate:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/intuit/karate.git
+    - run: cd karate && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all karate/
+    - run: cd karate && mvn compile
+
+  compile-testng:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/cbeust/testng.git
+    - run: cd testng && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all testng/
+    - run: cd testng && ./gradlew autostyleApply
+    - run: cd testng && ./gradlew build -x test

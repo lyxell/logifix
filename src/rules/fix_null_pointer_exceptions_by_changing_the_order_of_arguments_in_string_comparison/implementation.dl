@@ -1,12 +1,10 @@
 /* Pre  [:x].equals("[:y]") */
 /* Post "[:y]".equals([:x]) */
-rewrite("fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison", filename, start, end, cat(arg_str, ".equals(", subject_str, ")")) :-
+replace_node_with_string("fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison", invocation,
+    cat(@node_to_string(code, arg), ".equals(", @node_to_string(code, subject), ")")
+) :-
     method_invocation(invocation, subject, "equals", [arg, nil]),
-        filename_of(invocation, filename),
-        starts_at(invocation, start),
-        ends_at(invocation, end),
+    source_code(_, code),
     string_literal(arg),
-    has_string_type(subject),
-    ! string_literal(subject),
-    string_representation(arg, arg_str),
-    string_representation(subject, subject_str).
+    _has_type(subject, ["java.lang", "String", nil]),
+    ! string_literal(subject).

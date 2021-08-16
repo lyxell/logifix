@@ -1,159 +1,95 @@
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix">
-</h1>
+<p align="center">
+  <img width="260px" src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix">
+</p>
 
-Logifix is a static analysis tool for Java that creates
-ready-to-merge patches for static analysis violations. Logifix is
-implemented in [a high-performance Datalog
-dialect](https://github.com/souffle-lang/souffle) that is
-synthesized into multi-threaded C++ code.
+# Logifix
+
+Logifix is a fast static analysis-guided rewrite system for Java. It automatically rewrites bad Java code into good Java code and can be used
+to fix static analysis violations for static analyzers such as SonarQube, PMD or SpotBugs.
+
+<ul> </ul>
+
+## Demo
 
 https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9752-fe988c5e0367.mp4
 
 <ul> </ul>
 
-## Getting started
+## Installing
 
-1. Watch [the demo](https://github.com/lyxell/logifix#demo)
+Prebuilt and dependency-free binaries are provided for macOS and GNU-based Linux systems.
 
-2. Download and unpack [the latest version](https://github.com/lyxell/logifix/releases/latest) (Currently only GNU/Linux)
+### Ubuntu/Debian
 
-3. Put the `logifix` binary in `/usr/local/bin` or somewhere else
-   in your `$PATH`
+```bash
+curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-linux-gnu.gz | gunzip -c - > /tmp/logifix
+chmod +x /tmp/logifix
+sudo mv /tmp/logifix /usr/local/bin
+```
 
-4. Run `logifix path/to/your/java/project`
+### macOS
+
+```bash
+curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-macos.gz | gunzip -c - > /tmp/logifix
+chmod +x /tmp/logifix
+sudo mv /tmp/logifix /usr/local/bin
+```
 
 <ul> </ul>
 
-## How does it work?
+## Features
 
-Logifix uses static analysis and deep rewriting strategies to
-detect and automatically fix bugs and bad patterns in Java source
-code. 
+### Intelligent equational reasoning
 
-Logifix starts by finding a set of problems in each source code
-file. Each problem is then analyzed in parallel to find an
-appropriate patch that will fix the problem. There are three
-categories of problems: code that contains bugs, code that can be
-simplified and code that can be removed.
+Logifix is more than a search-and-replace system. It achieves intelligent equational reasoning
+through the use of articulation points in the rewrite graph.
 
-After patches have been found they are categorized by problem type
-and then presented to the user. The user may choose which patches
-to apply in each file. If the user chooses multiple patches in the
-same file the result is produced using [an n-way merging
-algorithm](https://github.com/lyxell/nway).
+### Speed
 
-### Example
+Logifix is implemented in [a high-performance Datalog
+dialect](https://github.com/souffle-lang/souffle) that is
+synthesized into multi-threaded C++ code. It is heavily parallelized even
+when working on a single file and usually analyzes
+large projects of thousands of files in a few seconds on modern hardware.
+If your project is slow to analyze it is considered a bug and you should
+[file a bug report](https://github.com/lyxell/logifix/issues/new).
 
-Given the code below:
+### Mergeability
 
-```java
-  private static Pattern getPattern(String groupRegexp) {
-    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
-    if (groupPattern == null) {
-      groupPattern = Pattern.compile(groupRegexp);
-      PATTERN_CACHE.put(groupRegexp, groupPattern);
-    }
-    return groupPattern;
-  }
-```
-
-Logifix finds a patch in four steps:
-
-```diff
-   private static Pattern getPattern(String groupRegexp) {
--    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
--    if (groupPattern == null) {
--      groupPattern = Pattern.compile(groupRegexp);
--      PATTERN_CACHE.put(groupRegexp, groupPattern);
--    }
--    return groupPattern;
-+    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
-+      Pattern groupPattern = Pattern.compile(k);
-+      return groupPattern;
-+    });
-   }
- }
-```
-
-```diff
-   private static Pattern getPattern(String groupRegexp) {
--    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
--    if (groupPattern == null) {
--      groupPattern = Pattern.compile(groupRegexp);
--      PATTERN_CACHE.put(groupRegexp, groupPattern);
--    }
--    return groupPattern;
-+    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> {
-+      return Pattern.compile(k);
-+    });
-   }
- }
-```
-
-```diff
-   private static Pattern getPattern(String groupRegexp) {
--    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
--    if (groupPattern == null) {
--      groupPattern = Pattern.compile(groupRegexp);
--      PATTERN_CACHE.put(groupRegexp, groupPattern);
--    }
--    return groupPattern;
-+    return PATTERN_CACHE.computeIfAbsent(groupRegexp, k -> Pattern.compile(k));
-   }
-```
-
-```diff
-   private static Pattern getPattern(String groupRegexp) {
--    Pattern groupPattern = PATTERN_CACHE.get(groupRegexp);
--    if (groupPattern == null) {
--      groupPattern = Pattern.compile(groupRegexp);
--      PATTERN_CACHE.put(groupRegexp, groupPattern);
--    }
--    return groupPattern;
-+    return PATTERN_CACHE.computeIfAbsent(groupRegexp, Pattern::compile);
-   }
- }
-```
-
-In parallel, it finds the following patch in the same file:
-
-```diff
-   private static Boolean isMatch(Pattern pattern, String group) {
-     Pair<String, String> cacheKey = Pair.create(pattern.pattern(), group);
--    Boolean match = MATCH_CACHE.get(cacheKey);
--    if (match == null) {
--      match = pattern.matcher(group).matches();
--      MATCH_CACHE.put(cacheKey, match);
--    }
--    return match;
-+    return MATCH_CACHE.computeIfAbsent(cacheKey, k -> pattern.matcher(group).matches());
-   }
-```
-
-These patches were incorporated in pull request
-https://github.com/cbeust/testng/pull/2610
-
-Thanks to the [fast Datalog engine
-Soufflé](https://github.com/souffle-lang/souffle) and [fast
-diff/merge algorithms](https://github.com/lyxell/nway) these
-patches are found in a fraction of a second.
+Logifix is engineered to produce human-like patches that are ready-to-merge by design without
+requiring manual modifications.
 
 <ul> </ul>
 
 ## Building
 
-To build from source you will need [CMake](https://cmake.org/), [GNU Bison](https://www.gnu.org/software/bison/) and [re2c](https://re2c.org/).
+### Ubuntu
 
-To download and build the project, perform the following steps:
-
+* `sudo apt install -y bison cmake re2c mcpp`
 * `git clone https://github.com/lyxell/logifix`
-* `cd logifix && git submodule update --init`
-* `mkdir build && cd build && cmake .. && cmake --build .`
+* `cd logifix`
+* `git submodule update --init --recursive`
+* `mkdir build`
+* `cmake -S . -B build`
+* `cmake --build build`
+
+The logifix binary is now found under build.
+
+### macOS
+
+* `brew install bison cmake re2c mcpp`
+* `git clone https://github.com/lyxell/logifix`
+* `cd logifix`
+* `git submodule update --init --recursive`
+* `mkdir build`
+* `cmake -S . -B build`
+* `cmake --build build`
+
+The logifix binary is now found under build.
 
 <ul> </ul>
 
-## Available transformations
+## Available rules
 
-See [transformations.md](./transformations.md).
+See [rules](./rules.md).
 

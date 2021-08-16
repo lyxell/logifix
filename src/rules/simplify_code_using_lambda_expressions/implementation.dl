@@ -1,0 +1,25 @@
+replace_node_with_string("simplify_code_using_lambda_expressions", id,
+    cat("(", substr(code, start, end - start), ") -> ", @decrease_indentation(@node_to_string(code, method_body)))
+) :-
+    class_instance_creation_expression(id, _, _, class_type, _, class_body),
+    source_code(_, code),
+    is_functional_interface_type(class_type),
+    class_body(class_body, [declaration, nil]),
+    method_declaration(declaration, _, header, method_body),
+    method_header(header, _, declarator, _),
+    method_declarator(declarator, _, params),
+    list_first_element(params, first),
+    starts_at(first, start),
+    list_last_element(params, last),
+    ends_at(last, end).
+
+replace_node_with_string("simplify_code_using_lambda_expressions", id,
+    cat("() -> ", @decrease_indentation(@node_to_string(code, method_body)))
+) :-
+    class_instance_creation_expression(id, _, _, class_type, _, class_body),
+    source_code(_, code),
+    is_functional_interface_type(class_type),
+    class_body(class_body, [declaration, nil]),
+    method_declaration(declaration, _, header, method_body),
+    method_header(header, _, declarator, _),
+    method_declarator(declarator, _, nil).

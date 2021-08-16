@@ -1,10 +1,8 @@
- 	 * @param conflictMode
- 	 */
- 	void setNodeOfElement(CtElement element, RootNode node, ConflictResolutionMode conflictMode) {
--		modifyNodeOfElement(element, conflictMode, oldNode -> {
--			return node;
--		});
-+		modifyNodeOfElement(element, conflictMode, oldNode -> node);
- 	}
-
- 	/**
+                        break;
+                default:
+                        // per line suffix
+-                       printCommentContent(printer, comment, s -> { return (" * " + s).replaceAll(" *$", ""); });
++                       printCommentContent(printer, comment, s -> (" * " + s).replaceAll(" *$", ""));
+        }
+        // suffix
+        switch (commentType) {

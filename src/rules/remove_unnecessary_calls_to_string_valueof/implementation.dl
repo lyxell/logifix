@@ -1,11 +1,8 @@
 /* Pre  String.valueOf([:x]) */
 /* Post [:x] */
-rewrite("remove_unnecessary_calls_to_string_valueof", filename, start, end, arg_string) :-
-    addition_expression(id, left, right),
-        filename_of(id, filename),
-    has_string_type(left),
+replace_node_with_node("remove_unnecessary_calls_to_string_valueof", right, arg) :-
+    addition_expression(_, left, right),
+    _has_type(left, ["java.lang", "String", nil]),
     method_invocation(right, subject, "valueOf", [arg, nil]),
-        starts_at(right, start),
-        ends_at(right, end),
-    string_representation(subject, "String"),
-    string_representation(arg, arg_string).
+    expression_name(subject, [ident, nil]),
+    identifier(ident, "String").
