@@ -112,7 +112,13 @@ autocloseable_type_name("ZipInputStream").
 autocloseable_type_name("ZipOutputStream").
 
 .decl native_type(package: symbol, class: symbol)
+native_type("java.lang", "Boolean").
+native_type("java.lang", "Byte").
+native_type("java.lang", "Double").
+native_type("java.lang", "Float").
 native_type("java.lang", "Integer").
+native_type("java.lang", "Long").
+native_type("java.lang", "Short").
 native_type("java.lang", "String").
 native_type("java.lang", "Thread").
 native_type("java.math", "BigDecimal").
