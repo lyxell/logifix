@@ -6,3 +6,10 @@ replace_node_with_node("remove_redundant_collection_copies", id, arg) :-
     method_invocation(collector, to_list_subject, "toList", nil),
     expression_name(to_list_subject, [collectors_identifier, nil]),
     identifier(collectors_identifier, "Collectors").
+
+replace_node_with_node("remove_redundant_collection_copies", id, arg) :-
+    class_instance_creation_expression(id, nil, nil, type, [arg, nil], nil),
+    ast_type_to_type(type, ["java.util", "ArrayList", _]),
+    method_invocation(arg, subject, "asList", _),
+    expression_name(subject, [identifier, nil]),
+    identifier(identifier, "Arrays").
