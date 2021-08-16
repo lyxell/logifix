@@ -147,6 +147,7 @@ expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
         expr_end <= end.
 
 .decl point_of_declaration(id: id, declaration: id)
+.output point_of_declaration(IO=stdout)
 /* If there is a local variable declaration or a formal parameter in scope,
    the identifier definitely refers to it (these can't be shadowed) */
 point_of_declaration(head, decl) :-
