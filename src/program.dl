@@ -78,7 +78,11 @@
 ast_node(id) :- root(id).
 ast_node(child) :-
     ast_node(ancestor),
-    ancestor_of(ancestor, child).
+    parent_of(ancestor, _, child).
+ast_node(child) :-
+    ast_node(ancestor),
+    parent_of_list(ancestor, _, list),
+    list_contains(list, child).
 
 .decl filename_of(id: id, filename: symbol)
 filename_of([name, fn, cA, cB, A, B], fn) :- ast_node([name, fn, cA, cB, A, B]).
@@ -112,21 +116,6 @@ content_ends_at([name, fn, cA, cB, A, B], cB) :- ast_node([name, fn, cA, cB, A, 
 
 .decl parent_of_list(parent: id, name: symbol, children: id_list)
 .input parent_of_list
-
-/* transitive closure of parent_of and parent_of list */
-.decl ancestor_of(ancestor: id, child: id)
-ancestor_of(x, y) :-
-    parent_of(x, _, y).
-ancestor_of(x, z) :-
-    ancestor_of(x, y),
-    parent_of(y, _, z).
-ancestor_of(x, y) :-
-    parent_of_list(x, _, children),
-    list_contains(children, y).
-ancestor_of(x, z) :-
-    ancestor_of(x, y),
-    parent_of_list(y, _, children),
-    list_contains(children, z).
 
 .decl head_of(head: id, tail: id_list)
 head_of(head, tail) :-
@@ -192,11 +181,13 @@ evaluates_to_integer_value(id, left_value - right_value) :-
 
 .decl evaluates_to_boolean_value(id: id, value: number)
 evaluates_to_boolean_value(id, 0) :-
+    boolean_literal(id),
     content_starts_at(id, content_start),
     content_ends_at(id, content_end),
     source_code(_, code),
     substr(code, content_start, content_end - content_start) = "false".
 evaluates_to_boolean_value(id, 1) :-
+    boolean_literal(id),
     content_starts_at(id, content_start),
     content_ends_at(id, content_end),
     source_code(_, code),

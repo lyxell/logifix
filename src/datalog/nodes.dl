@@ -333,6 +333,9 @@ null_literal(id) :- name_of(id, "null_literal").
 .decl integer_literal(id: id)
 integer_literal(id) :- name_of(id, "integer_literal").
 
+.decl boolean_literal(id: id)
+boolean_literal(id) :- name_of(id, "boolean_literal").
+
 .decl floating_point_literal(id: id)
 floating_point_literal(id) :- name_of(id, "floating_point_literal").
 

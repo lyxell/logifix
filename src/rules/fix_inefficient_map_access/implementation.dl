@@ -23,8 +23,13 @@ rewrite("fix_inefficient_map_access", filename, start, end + 1,
     point_of_declaration(subject, decl),
 
     /* body contains a call to map.get(key) */
-    ancestor_of(body, map_get),
     method_invocation(map_get, subject, "get", [key, nil]),
+    starts_at(body, body_start),
+    ends_at(body, body_end),
+    starts_at(map_get, map_get_start),
+    ends_at(map_get, map_get_end),
+    map_get_start >= body_start,
+    map_get_end <= body_end,
     point_of_declaration(key, param).
 
 /**
@@ -52,7 +57,12 @@ replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_str
     point_of_declaration(get_key_subject, formal_param),
 
     /* body contains a call to map.get(key) */
-    ancestor_of(body, map_get),
+    starts_at(body, body_start),
+    ends_at(body, body_end),
+    starts_at(map_get, map_get_start),
+    ends_at(map_get, map_get_end),
+    map_get_start >= body_start,
+    map_get_end <= body_end,
     method_invocation(map_get, map_get_subject, "get", [key, nil]),
     point_of_declaration(map_get_subject, decl),
     point_of_declaration(key, declaration).
@@ -72,7 +82,12 @@ replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_str
     point_of_declaration(map_reference, decl),
 
     /* body contains a call to map.get(entry.getKey()) */
-    ancestor_of(body, map_get),
+    starts_at(body, body_start),
+    ends_at(body, body_end),
+    starts_at(map_get, map_get_start),
+    ends_at(map_get, map_get_end),
+    map_get_start >= body_start,
+    map_get_end <= body_end,
     method_invocation(map_get, map_get_subject, "get", [entry, nil]),
     point_of_declaration(map_get_subject, decl),
     method_invocation(entry, get_key_subject, "getKey", nil),
