@@ -1,9 +1,19 @@
+.decl boxed_primitive_to_fix(s: symbol)
+boxed_primitive_to_fix("Integer").
+boxed_primitive_to_fix("Long").
+boxed_primitive_to_fix("Float").
+boxed_primitive_to_fix("Double").
+boxed_primitive_to_fix("Byte").
+boxed_primitive_to_fix("Short").
+boxed_primitive_to_fix("Boolean").
+
 /* Pre  new Integer([:argument]).toString() */
 /* Post Integer.toString([:argument])       */
 replace_node_with_string("simplify_calls_to_constructor_for_string_conversion", id,
-    cat("Integer.toString(", @node_to_string(code, arg), ")")
+    cat(class, ".toString(", @node_to_string(code, arg), ")")
 ) :-
     method_invocation(id, subject, "toString", nil),
     source_code(_, code),
     class_instance_creation_expression(subject, _, nil, type, [arg, nil], nil),
-    ast_type_to_type(type, ["java.lang", "Integer", nil]).
+    boxed_primitive_to_fix(class),
+    ast_type_to_type(type, ["java.lang", class, nil]).

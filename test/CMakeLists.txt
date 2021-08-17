@@ -27,6 +27,8 @@ set(regression_test_data
     "fix_raw_use_of_generic_class,https://github.com/INRIA/spoon/blob/9a4563995d0c1cd744eb36c8ee7140c38b9977e6/src/main/java/spoon/pattern/internal/matcher/TobeMatched.java,"
     "fix_raw_use_of_generic_class,https://github.com/INRIA/spoon/blob/9a4563995d0c1cd744eb36c8ee7140c38b9977e6/src/main/java/spoon/reflect/visitor/ImportCleaner.java,"
     "fix_raw_use_of_generic_class,https://github.com/INRIA/spoon/blob/9a4563995d0c1cd744eb36c8ee7140c38b9977e6/src/main/java/spoon/support/reflect/declaration/CtAnnotationImpl.java,"
+    "remove_redundant_calls_to_collection_addall,https://github.com/spring-projects/spring-framework/blob/c5fb7b9fb70d0a711a963b2a160c3af5cc4be3a7/spring-expression/src/test/java/org/springframework/expression/spel/ConstructorInvocationTests.java,"
+    "remove_redundant_calls_to_collection_addall,https://github.com/spring-projects/spring-framework/blob/c5fb7b9fb70d0a711a963b2a160c3af5cc4be3a7/spring-expression/src/test/java/org/springframework/expression/spel/MethodInvocationTests.java,"
     "remove_unused_local_variables,https://github.com/INRIA/spoon/blob/d7b8daa0331a14b25002e091dd7299271e3a550c/src/main/java/spoon/pattern/internal/node/ElementNode.java,"
     "remove_unused_local_variables,https://github.com/INRIA/spoon/blob/d7b8daa0331a14b25002e091dd7299271e3a550c/src/main/java/spoon/reflect/visitor/CommentHelper.java,"
     "remove_unused_local_variables,https://github.com/INRIA/spoon/blob/d7b8daa0331a14b25002e091dd7299271e3a550c/src/main/java/spoon/reflect/visitor/ImportScannerImpl.java,"
