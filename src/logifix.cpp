@@ -233,6 +233,27 @@ auto program::get_patch_data(patch_id patch) const -> std::tuple<rule_id, node_i
     return {r, p, get_recursive_merge_result_for_node(patch)};
 }
 
+auto program::print_merge_conflict(const std::string& source, rewrite_collection rewrites,
+                                   const std::vector<node_id>& node_ids) const -> void {
+    fmt::print(stderr, fg(fmt::terminal_color::red), "\nFatal error: ");
+    fmt::print("Unexpected merge conflict\n");
+    std::sort(rewrites.begin(), rewrites.end());
+    auto fragment_start = std::get<0>(rewrites.front());
+    auto fragment_end = std::get<1>(rewrites.back());
+    fmt::print(stderr, "Related code fragment: {}\n",
+               source.substr(fragment_start, fragment_end - fragment_start));
+    for (const auto& node : node_ids) {
+        auto [rule, parent_id] = parent.at(node);
+        fmt::print(stderr, "Rule: ");
+        fmt::print(stderr, fg(fmt::terminal_color::cyan), "{}\n", rule);
+        auto [next_pstr, next_rewrites] = nodes[node];
+        for (auto [start, end, replacement] : next_rewrites) {
+            fmt::print(stderr, "    Original: {} Replacement: {} Position: {}-{}\n",
+                       next_pstr.substr(start, end - start), replacement, start, end);
+        }
+    }
+}
+
 auto program::get_result(node_id parent, const std::vector<patch_id>& patches) const
     -> std::string {
     auto [parent_pstr, parent_rewrites] = nodes[parent];
@@ -247,11 +268,7 @@ auto program::get_result(node_id parent, const std::vector<patch_id>& patches) c
     std::sort(all_rewrites.begin(), all_rewrites.end());
     all_rewrites.erase(std::unique(all_rewrites.begin(), all_rewrites.end()), all_rewrites.end());
     if (rewrite_collection_overlap(all_rewrites)) {
-        std::cerr << "MERGING FAILED" << std::endl;
-        std::sort(all_rewrites.begin(), all_rewrites.end());
-        for (auto [s, e, repl] : all_rewrites) {
-            std::cerr << s << " " << e << " " << repl << std::endl;
-        }
+        print_merge_conflict(parent_source, all_rewrites, patches);
         std::exit(1);
     }
     return post_process(parent_source, apply_rewrites(parent_source, all_rewrites));
@@ -382,28 +399,13 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     }
                     if (!rewrites.empty()) {
                         if (rewrite_collection_overlap(rewrites)) {
-                            fmt::print(stderr, fg(fmt::terminal_color::red), "\nFatal error: ");
-                            fmt::print("Unexpected merge conflict\n", i);
-                            std::sort(rewrites.begin(), rewrites.end());
-                            auto fragment_start = std::get<0>(rewrites.front());
-                            auto fragment_end = std::get<1>(rewrites.back());
-                            fmt::print(stderr, "Related code fragment: {}\n",
-                                       current_node_source.substr(fragment_start,
-                                                                  fragment_end - fragment_start));
-                            for (const auto& [next_node, rule, take_transition] : next_nodes) {
+                            std::vector<node_id> nodes;
+                            for (auto [next_node, rule, take_transition] : next_nodes) {
                                 if (take_transition) {
-                                    fmt::print(stderr, "Rule: ");
-                                    fmt::print(stderr, fg(fmt::terminal_color::cyan), "{}\n", rule);
-                                    auto [next_pstr, next_rewrites] = nodes[next_node];
-                                    for (auto [start, end, replacement] : next_rewrites) {
-                                        fmt::print(
-                                            stderr,
-                                            "    Original: {} Replacement: {} Position: {}-{}\n",
-                                            next_pstr.substr(start, end - start), replacement,
-                                            start, end);
-                                    }
+                                    nodes.emplace_back(next_node);
                                 }
                             }
+                            print_merge_conflict(current_node_source, rewrites, nodes);
                             std::exit(1);
                         } else {
                             auto rule = std::string{"merged"};
