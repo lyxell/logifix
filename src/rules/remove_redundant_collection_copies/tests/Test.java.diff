@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -5,9 +5,9 @@
+@@ -5,17 +5,17 @@
  
  class Test {
      List<Integer> test(List<Integer> original) {
@@ -9,5 +9,15 @@ diff --git a/Test.java b/Test.java
      List<Integer> testAsList(List<Integer> original) {
 -        return new ArrayList<>(Arrays.asList(1,2,3));
 +        return Arrays.asList(1,2,3);
+     }
+     void testAssignment(List<Integer> original) {
+-        List<Integer> list = new ArrayList<>(original.stream().filter(x -> x > 0).collect(Collectors.toList()));
++        List<Integer> list = original.stream().filter(x -> x > 0).collect(Collectors.toList());
+         System.out.println(list.size());
+     }
+     void testAsListAssignment(List<Integer> original) {
+-        List<Integer> list = new ArrayList<>(Arrays.asList(1,2,3));
++        List<Integer> list = Arrays.asList(1,2,3);
+         System.out.println(list.size());
      }
  }
