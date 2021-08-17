@@ -34,6 +34,7 @@ private:
     auto
     get_patches(const std::string&) const -> std::set<std::pair<rule_id, rewrite_type>>;
     auto print_performance_metrics() -> void;
+    auto print_merge_conflict(const std::string&, rewrite_collection, const std::vector<node_id>&) const -> void;
     auto create_id(const std::string&, const rewrite_collection&) -> size_t;
     auto apply_rewrite(const std::string&, const rewrite_type&) const -> std::string;
     auto apply_rewrites(const std::string&, rewrite_collection) const -> std::string;
