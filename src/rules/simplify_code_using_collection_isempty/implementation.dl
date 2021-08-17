@@ -3,7 +3,8 @@
 /* Pre  [:x].size() == 0 */
 /* Post [:x].isEmpty()   */
 replace_node_with_string("simplify_code_using_collection_isempty", id, cat(@node_to_string(code, subject), ".isEmpty()")) :-
-    equals_expression_unordered(id, invocation, integer),
+    (equals_expression(id, invocation, integer)
+    ;equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "size", nil),
     _has_type(subject, [package, class, _]),
@@ -13,7 +14,8 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat(@node
 /* Pre  [:x].size() != 0 */
 /* Post ![:x].isEmpty()  */
 replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", @node_to_string(code, subject), ".isEmpty()")) :-
-    not_equals_expression_unordered(id, invocation, integer),
+    (not_equals_expression(id, invocation, integer)
+    ;not_equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "size", nil),
     _has_type(subject, [package, class, _]),
@@ -45,7 +47,8 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", 
 /* Pre  [:x].length() == 0 */
 /* Post [:x].isEmpty()     */
 replace_node_with_string("simplify_code_using_collection_isempty", id, cat(@node_to_string(code, subject), ".isEmpty()")) :-
-    equals_expression_unordered(id, invocation, integer),
+    (equals_expression(id, invocation, integer)
+    ;equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "length", nil),
     _has_type(subject, ["java.lang", "String", nil]),
@@ -54,7 +57,8 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat(@node
 /* Pre  [:x].length() != 0 */
 /* Post ![:x].isEmpty()    */
 replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", @node_to_string(code, subject), ".isEmpty()")) :-
-    not_equals_expression_unordered(id, invocation, integer),
+    (not_equals_expression(id, invocation, integer)
+    ;not_equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "length", nil),
     _has_type(subject, ["java.lang", "String", nil]),
