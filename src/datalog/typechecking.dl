@@ -217,8 +217,11 @@ ast_type_to_type(id, [package, class, nil]) :-
     class_type(id, nil, class, nil, _). // TODO: Check imports
 
 /* Wildcards */
-ast_type_to_type(id, ["", "?", nil]) :-
-    wildcard(id).
+ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
+    wildcard(id),
+    source_code(_, code),
+    starts_at(id, start),
+    ends_at(id, end).
 
 /* Primitive types */
 ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
