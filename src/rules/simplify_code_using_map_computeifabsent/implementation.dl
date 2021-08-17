@@ -1,3 +1,23 @@
+/*
+    -    if (!map.containsKey(key)) {
+    -        map.put(key, value);
+    -    }
+    +    map.computeIfAbsent(key, k -> value);
+*/
+replace_node_with_string("simplify_code_using_map_computeifabsent", id,
+    cat(@node_to_string(code, contains_key_object), ".computeIfAbsent(", @node_to_string(code, contains_key_arg), ", k -> ", @node_to_string(code, put_arg2), ");")
+) :-
+    if_statement(id, condition, then, nil),
+    logical_complement_expression(condition, contains_key_expr),
+    source_code(_, code),
+    method_invocation(contains_key_expr, contains_key_object, "containsKey", [contains_key_arg, nil]),
+    block(then, [statement, nil]),
+    expression_statement(statement, put_expr),
+    method_invocation(put_expr, put_expr_object, "put", [put_arg1, [put_arg2, nil]]),
+    point_of_declaration(put_expr_object, map_decl),
+    point_of_declaration(contains_key_object, map_decl),
+    point_of_declaration(contains_key_arg, key_decl),
+    point_of_declaration(put_arg1, key_decl).
 
 /* Pre  [:value_type] [:value_var] = [:map_var].get([:key_var]);
         if ([:value_var] == null) {
