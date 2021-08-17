@@ -6,5 +6,9 @@
     },
     "pmd": {
         "id": "N/A"
+    },
+    "spotbugs": {
+        "id": "DMI_USELESS_SUBSTRING",
+        "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#dmi-invocation-of-substring-0-which-returns-the-original-value-dmi-useless-substring"
     }
 }

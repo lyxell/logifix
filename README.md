@@ -1,9 +1,13 @@
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix">
-</h1>
+<p align="center">
+  <img width="260px" src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix">
+</p>
 
-Logifix is a fast static analyzer for Java that fixes violations
-automatically.
+# Logifix
+
+Logifix is a fast static analysis-guided rewrite system for Java. It automatically rewrites bad Java code into good Java code and can be used
+to fix static analysis violations for static analyzers such as SonarQube, PMD or SpotBugs.
+
+<ul> </ul>
 
 ## Demo
 
@@ -11,52 +15,77 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 <ul> </ul>
 
-## Getting started
+## Installing
 
-1. Watch [the demo](https://github.com/lyxell/logifix#demo)
+Prebuilt and dependency-free binaries are provided for macOS and GNU-based Linux systems.
 
-2. Download and unpack [the latest version](https://github.com/lyxell/logifix/releases/latest) (Currently only GNU/Linux)
+### Ubuntu/Debian
 
-3. Put the `logifix` binary in `/usr/local/bin` or somewhere else
-   in your `$PATH`
+```bash
+curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-linux-gnu.gz | gunzip -c - > /tmp/logifix
+chmod +x /tmp/logifix
+sudo mv /tmp/logifix /usr/local/bin
+```
 
-4. Run `logifix path/to/your/java/project`
+### macOS
+
+```bash
+curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-macos.gz | gunzip -c - > /tmp/logifix
+chmod +x /tmp/logifix
+sudo mv /tmp/logifix /usr/local/bin
+```
 
 <ul> </ul>
 
-## How does it work?
+## Features
 
-Logifix uses static analysis and deep rewriting strategies to
-detect and automatically fix bugs and bad patterns in Java source
-code. 
+### Intelligent equational reasoning
+
+Logifix is more than a search-and-replace system. It achieves intelligent equational reasoning
+through the use of articulation points in the rewrite graph.
+
+### Speed
 
 Logifix is implemented in [a high-performance Datalog
 dialect](https://github.com/souffle-lang/souffle) that is
-synthesized into multi-threaded C++ code.
+synthesized into multi-threaded C++ code. It is heavily parallelized even
+when working on a single file and usually analyzes
+large projects of thousands of files in a few seconds on modern hardware.
+If your project is slow to analyze it is considered a bug and you should
+[file a bug report](https://github.com/lyxell/logifix/issues/new).
 
-Logifix starts by finding a set of problems in each source code
-file. Each problem is then analyzed in parallel to find an
-appropriate patch that will fix the problem. There are three
-categories of problems: code that contains bugs, code that can be
-simplified and code that can be removed.
+### Mergeability
 
-After patches have been found they are categorized by problem type
-and then presented to the user. The user may choose which patches
-to apply in each file. If the user chooses multiple patches in the
-same file the result is produced using [an n-way merging
-algorithm](https://github.com/lyxell/nway).
+Logifix is engineered to produce human-like patches that are ready-to-merge by design without
+requiring manual modifications.
 
 <ul> </ul>
 
 ## Building
 
-To build from source you will need [CMake](https://cmake.org/), [GNU Bison](https://www.gnu.org/software/bison/) and [re2c](https://re2c.org/).
+### Ubuntu
 
-To download and build the project, perform the following steps:
-
+* `sudo apt install -y bison cmake re2c mcpp`
 * `git clone https://github.com/lyxell/logifix`
-* `cd logifix && git submodule update --init`
-* `mkdir build && cd build && cmake .. && cmake --build .`
+* `cd logifix`
+* `git submodule update --init --recursive`
+* `mkdir build`
+* `cmake -S . -B build`
+* `cmake --build build`
+
+The logifix binary is now found under build.
+
+### macOS
+
+* `brew install bison cmake re2c mcpp`
+* `git clone https://github.com/lyxell/logifix`
+* `cd logifix`
+* `git submodule update --init --recursive`
+* `mkdir build`
+* `cmake -S . -B build`
+* `cmake --build build`
+
+The logifix binary is now found under build.
 
 <ul> </ul>
 

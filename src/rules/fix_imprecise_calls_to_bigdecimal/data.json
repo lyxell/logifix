@@ -7,5 +7,9 @@
     "pmd": {
         "id": "AvoidDecimalLiteralsInBigDecimalConstructor",
         "url": "https://pmd.github.io/latest/pmd_rules_java_errorprone.html#avoiddecimalliteralsinbigdecimalconstructor"
+    },
+    "spotbugs": {
+        "id": "DMI_BIGDECIMAL_CONSTRUCTED_FROM_DOUBLE",
+        "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#dmi-bigdecimal-constructed-from-double-that-isn-t-represented-precisely-dmi-bigdecimal-constructed-from-double"
     }
 }

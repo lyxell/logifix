@@ -3,16 +3,26 @@ cmake_minimum_required(VERSION 3.18)
 project(logifix HOMEPAGE_URL "https://github.com/lyxell/logifix")
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ### DEPENDENCIES
 
+find_package(BISON 3.5.1 REQUIRED)
+
 add_subdirectory(vendor/fmt)
 add_subdirectory(vendor/nway)
 add_subdirectory(vendor/souffle)
-# We need this to be global for project to allow sjp to use the Souffle headers
 include_directories(vendor/souffle/src/include)
-add_subdirectory(vendor/sjp)
+
+### PARSER
+
+bison_target(parser src/parser/parser.yy parser.cpp)
+add_custom_command(
+  OUTPUT lexer.cpp
+  COMMAND re2c -W --input-encoding utf8 -i ${CMAKE_CURRENT_SOURCE_DIR}/src/parser/lexer.re2c.cpp -o lexer.cpp
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/parser/lexer.re2c.cpp
+  VERBATIM)
 
 ### SOURCE
 
@@ -61,9 +71,11 @@ add_custom_command(
 configure_file(src/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 #### Create executable
-add_executable(logifix src/cli.cpp src/tty.cpp src/javadoc.cpp src/logifix.cpp src/functors.cpp src/utils.cpp logifix.cpp rule_data.cpp)
+add_executable(logifix src/cli/cli.cpp src/cli/tty.cpp src/parser/javadoc.cpp src/logifix.cpp src/functors.cpp src/utils.cpp src/timer.cpp logifix.cpp rule_data.cpp parser.cpp lexer.cpp)
 target_include_directories(logifix PRIVATE ${CMAKE_BINARY_DIR})
-target_link_libraries(logifix pthread sjp nway fmt)
+target_include_directories(logifix PRIVATE ${CMAKE_SOURCE_DIR}/src/parser)
+target_include_directories(logifix PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(logifix pthread nway fmt)
 if(UNIX AND NOT APPLE)
     target_link_libraries(logifix -static-libgcc -static-libstdc++)
 endif()

@@ -1,17 +1,18 @@
+#include "utils.h"
 #include <regex>
 #include <set>
 
 namespace {
-const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) (.*?)\})");
+const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) ([^]*?)\})");
 const std::regex JAVADOC_SEE_THROWS_REGEX(R"(@(see|throws) (.*))");
 } // namespace
 
-namespace javadoc {
+namespace logifix::parser::javadoc {
 
 /**
  * Expects a string such as java.util.Collection#add(java.lang.Object)
  */
-std::vector<std::string> get_classes_from_link(std::string s) {
+auto get_classes_from_link(std::string s) -> std::vector<std::string> {
 
     std::vector<std::string> result;
     std::string class_str;
@@ -58,13 +59,22 @@ std::vector<std::string> get_classes_from_link(std::string s) {
         result.emplace_back(curr);
     }
 
+    for (auto& str : result) {
+        if (utils::ends_with(str, "...")) {
+            str = str.substr(0, str.length() - 3);
+        }
+        if (utils::ends_with(str, "[]")) {
+            str = str.substr(0, str.length() - 2);
+        }
+    }
+
     return result;
 }
 
 /**
  * Expects a multi-line comment
  */
-std::set<std::string> get_classes(std::string s) {
+auto get_classes(std::string s) -> std::set<std::string> {
     std::set<std::string> result;
     for (auto [idx, regex] :
          {std::pair(2, JAVADOC_LINK_REGEX), std::pair(2, JAVADOC_SEE_THROWS_REGEX)}) {
@@ -73,8 +83,7 @@ std::set<std::string> get_classes(std::string s) {
         for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
             std::smatch match = *i;
             for (auto class_name : get_classes_from_link(match[idx])) {
-                class_name.erase(std::remove_if(class_name.begin(),
-                                                class_name.end(), ::isspace),
+                class_name.erase(std::remove_if(class_name.begin(), class_name.end(), ::isspace),
                                  class_name.end());
                 if (!class_name.empty()) {
                     result.emplace(class_name);
@@ -85,4 +94,4 @@ std::set<std::string> get_classes(std::string s) {
     return result;
 }
 
-} // namespace javadoc
+} // namespace logifix::parser::javadoc

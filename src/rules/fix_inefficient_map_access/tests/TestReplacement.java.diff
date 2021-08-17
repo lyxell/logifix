@@ -1,0 +1,17 @@
+diff --git a/TestReplacement.java b/TestReplacement.java
+@@ -3,13 +3,12 @@
+ public class TestReplacement {
+     public void test1(Map<Integer,String> map) {
+         for (Map.Entry<Integer, String> entry : map.entrySet()) {
+-            System.out.println(map.get(entry.getKey()));
++            System.out.println(entry.getValue());
+         }
+     }
+     public void test2(Map<Integer,String> map) {
+         for (Map.Entry<Integer, String> entry : map.entrySet()) {
+-            Integer key = entry.getKey();
+-            System.out.println(map.get(key));
++            System.out.println(entry.getValue());
+         }
+     }
+ }

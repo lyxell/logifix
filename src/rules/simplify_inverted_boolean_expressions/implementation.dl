@@ -1,67 +1,75 @@
 /* Pre  !([:x] == [:y]) */
 /* Post [:x] != [:y]    */
-rewrite("simplify_inverted_boolean_expressions", filename, start, end, cat(left_str, " != ", right_str)) :-
+rewrite("simplify_inverted_boolean_expressions", filename, start, end,
+    cat(substr(code, start + 1, left_end - (start + 1)), " != ", substr(code, right_start, end - right_start))
+) :-
     logical_complement_expression(id, expr),
     filename_of(id, filename),
-    starts_at(id, start),
-    ends_at(id, end),
+    content_starts_at(id, start),
+    content_ends_at(id, end),
+    source_code(filename, code),
     equals_expression(expr, left, right),
-    string_representation(left, left_str),
-    string_representation(right, right_str).
+    ends_at(left, left_end),
+    starts_at(right, right_start).
 
 /* Pre  !([:x] != [:y]) */
 /* Post [:x] == [:y]    */
-rewrite("simplify_inverted_boolean_expressions", filename, start, end, cat(left_str, " == ", right_str)) :-
+rewrite("simplify_inverted_boolean_expressions", filename, start, end, 
+    cat(substr(code, start + 1, left_end - (start + 1)), " == ", substr(code, right_start, end - right_start))
+) :-
     logical_complement_expression(id, expr),
     filename_of(id, filename),
-    starts_at(id, start),
-    ends_at(id, end),
+    content_starts_at(id, start),
+    content_ends_at(id, end),
+    source_code(filename, code),
     not_equals_expression(expr, left, right),
-    string_representation(left, left_str),
-    string_representation(right, right_str).
+    ends_at(left, left_end),
+    starts_at(right, right_start).
 
 /* Pre  !([:x] > [:y]) */
 /* Post [:x] <= [:y]    */
-rewrite("simplify_inverted_boolean_expressions", filename, start, end, cat(left_str, " <= ", right_str)) :-
+rewrite("simplify_inverted_boolean_expressions", filename, start, end, 
+    cat(substr(code, start + 1, left_end - (start + 1)), " <= ", substr(code, right_start, end - right_start))
+) :-
     logical_complement_expression(id, expr),
     filename_of(id, filename),
-    starts_at(id, start),
-    ends_at(id, end),
+    content_starts_at(id, start),
+    content_ends_at(id, end),
+    source_code(filename, code),
     greater_than_expression(expr, left, right),
-    string_representation(left, left_str),
-    string_representation(right, right_str).
+    ends_at(left, left_end),
+    starts_at(right, right_start).
 
 /* Pre  !([:x] < [:y]) */
 /* Post [:x] >= [:y]    */
-rewrite("simplify_inverted_boolean_expressions", filename, start, end, cat(left_str, " >= ", right_str)) :-
+rewrite("simplify_inverted_boolean_expressions", filename, start, end, 
+    cat(substr(code, start + 1, left_end - (start + 1)), " >= ", substr(code, right_start, end - right_start))
+) :-
     logical_complement_expression(id, expr),
     filename_of(id, filename),
-    starts_at(id, start),
-    ends_at(id, end),
+    content_starts_at(id, start),
+    content_ends_at(id, end),
+    source_code(filename, code),
     less_than_expression(expr, left, right),
-    string_representation(left, left_str),
-    string_representation(right, right_str).
+    ends_at(left, left_end),
+    starts_at(right, right_start).
 
 /* De Morgan's Laws */
 
 /* Pre  !([:x] && [:y]) */
 /* Post ![:x] || ![:y]  */
-rewrite("simplify_inverted_boolean_expressions", filename, start, end, cat("!(", left_str, ") || !(", right_str, ")")) :-
+replace_node_with_string("simplify_inverted_boolean_expressions", id,
+    cat("!(", @node_to_string(code, left), ") || !(", @node_to_string(code, right), ")")
+) :-
     logical_complement_expression(id, expr),
-    filename_of(id, filename),
-    starts_at(id, start),
-    ends_at(id, end),
-    conditional_and_expression(expr, left, right),
-    string_representation(left, left_str),
-    string_representation(right, right_str).
+    source_code(_, code),
+    conditional_and_expression(expr, left, right).
 
 /* Pre  !([:x] || [:y]) */
 /* Post ![:x] && ![:y]  */
-rewrite("simplify_inverted_boolean_expressions", filename, start, end, cat("!(", left_str, ") && !(", right_str, ")")) :-
+replace_node_with_string("simplify_inverted_boolean_expressions", id,
+    cat("!(", @node_to_string(code, left), ") && !(", @node_to_string(code, right), ")")
+) :-
     logical_complement_expression(id, expr),
-    filename_of(id, filename),
-    starts_at(id, start),
-    ends_at(id, end),
-    conditional_or_expression(expr, left, right),
-    string_representation(left, left_str),
-    string_representation(right, right_str).
+    source_code(_, code),
+    conditional_or_expression(expr, left, right).

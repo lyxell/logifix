@@ -1,8 +1,3 @@
-/* Pre  try {} catch ([:exception]) {} */
-/* Post                                */
-rewrite("remove_empty_try_blocks", filename, start, end, "") :-
+replace_node_with_string("remove_empty_try_blocks", id, "") :-
     try_statement(id, body, _, nil),
-        filename_of(id, filename),
-        starts_at(id, start),
-        ends_at(id, end),
     block(body, nil).

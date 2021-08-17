@@ -3,6 +3,8 @@ name: Ubuntu build
 on:
   push:
     branches: [ main ]
+    tags:
+      - '*'
   pull_request:
     branches: [ main ]
 
@@ -104,6 +106,20 @@ jobs:
     - run: cd initializr && mvn spring-javaformat:apply
     - run: cd initializr && mvn compile
 
+  compile-dolphinscheduler:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/apache/dolphinscheduler.git
+    - run: cd dolphinscheduler && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all dolphinscheduler/
+    - run: cd dolphinscheduler && mvn clean compile
+
   compile-pitest:
     needs: build
     runs-on: ubuntu-latest
@@ -118,7 +134,7 @@ jobs:
     - run: ./logifix --in-place --accept-all pitest/
     - run: cd pitest && mvn compile
 
-  compile-caffeine:
+  compile-karate:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -126,11 +142,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/ben-manes/caffeine.git
-    - run: cd caffeine && ./gradlew build -x test
+    - run: git clone --depth 1 https://github.com/intuit/karate.git
+    - run: cd karate && mvn compile
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all caffeine/
-    - run: cd caffeine && ./gradlew build -x test
+    - run: ./logifix --in-place --accept-all karate/
+    - run: cd karate && mvn compile
 
   compile-testng:
     needs: build

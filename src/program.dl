@@ -1,6 +1,5 @@
 #include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
-#include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
 #include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/fix_inefficient_calls_to_foreach_list_add/implementation.dl"
 #include "rules/fix_inefficient_map_access/implementation.dl"
@@ -15,6 +14,7 @@
 #include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"
+#include "rules/remove_redundant_casts/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_collection_copies/implementation.dl"
@@ -28,13 +28,15 @@
 #include "rules/remove_unused_assignments/implementation.dl"
 #include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
+#include "rules/remove_use_of_fully_qualified_names/implementation.dl"
 #include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
 #include "rules/simplify_calls_to_constructor_for_string_conversion/implementation.dl"
+#include "rules/simplify_calls_to_map_keyset/implementation.dl"
 #include "rules/simplify_calls_to_string_substring/implementation.dl"
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
-#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
+//#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_code_using_streams/implementation.dl"
@@ -44,12 +46,9 @@
 #include "rules/simplify_ternary_conditional_expressions/implementation.dl"
 #include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
-#include "nodes.dl"
-
-/* Functors
- ********************************/
-
-.functor decrease_indentation(symbol):symbol stateful
+#include "datalog/nodes.dl"
+#include "datalog/scoping.dl"
+#include "datalog/typechecking.dl"
 
 /* Types
  ********************************/
@@ -57,18 +56,33 @@
 .type id = [type: symbol, filename: symbol, content_from: number, content_to: number, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
 
+.type type = [package: symbol, class: symbol, type_args: type_list]
+.type type_list = [head: type, tail: type_list]
+
+/* Functors
+ ********************************/
+
+.functor decrease_indentation(x: symbol):symbol stateful
+.functor type_to_string(x: type):symbol stateful
+.functor type_args_to_string(x: type_list):symbol stateful
+.functor type_to_qualified_string(x: type):symbol stateful
+.functor node_to_string(c: symbol, x: id):symbol stateful
+
 /* AST nodes
  ********************************/
 
 .decl root(id: id)
 .input root
-.output root(IO=stdout)
 
 .decl ast_node(id: id)
 ast_node(id) :- root(id).
 ast_node(child) :-
     ast_node(ancestor),
-    ancestor_of(ancestor, child).
+    parent_of(ancestor, _, child).
+ast_node(child) :-
+    ast_node(ancestor),
+    parent_of_list(ancestor, _, list),
+    list_contains(list, child).
 
 .decl filename_of(id: id, filename: symbol)
 filename_of([name, fn, cA, cB, A, B], fn) :- ast_node([name, fn, cA, cB, A, B]).
@@ -93,7 +107,6 @@ content_ends_at([name, fn, cA, cB, A, B], cB) :- ast_node([name, fn, cA, cB, A, 
 
 .decl javadoc_references(filename: symbol, class: symbol)
 .input javadoc_references
-.output javadoc_references(IO=stdout)
 
 /* AST node relations
  ********************************/
@@ -103,21 +116,6 @@ content_ends_at([name, fn, cA, cB, A, B], cB) :- ast_node([name, fn, cA, cB, A, 
 
 .decl parent_of_list(parent: id, name: symbol, children: id_list)
 .input parent_of_list
-
-/* transitive closure of parent_of and parent_of list */
-.decl ancestor_of(ancestor: id, child: id)
-ancestor_of(x, y) :-
-    parent_of(x, _, y).
-ancestor_of(x, z) :-
-    ancestor_of(x, y),
-    parent_of(y, _, z).
-ancestor_of(x, y) :-
-    parent_of_list(x, _, children),
-    list_contains(children, y).
-ancestor_of(x, z) :-
-    ancestor_of(x, y),
-    parent_of_list(y, _, children),
-    list_contains(children, z).
 
 .decl head_of(head: id, tail: id_list)
 head_of(head, tail) :-
@@ -129,14 +127,6 @@ head_of(head, tail) :-
 .decl predecessor_of(x: id, y: id)
 predecessor_of(x, y) :-
     head_of(x, [y, _]).
-
-/* transitive closure of predecessor_of */
-.decl precedes(x: id, y: id)
-precedes(x, y) :-
-    predecessor_of(x, y).
-precedes(x, z) :-
-    precedes(x, y),
-    predecessor_of(y, z).
 
 /* does the list contain the element? */
 .decl list_contains(list: id_list, id: id)
@@ -161,10 +151,16 @@ list_first_element([head, tail], head) :-
 .decl evaluates_to_integer_value(id: id, value: number)
 evaluates_to_integer_value(id, 0) :-
     integer_literal(id),
-    string_representation(id, "0").
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "0".
 evaluates_to_integer_value(id, 1) :-
     integer_literal(id),
-    string_representation(id, "1").
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "1".
 /* TODO
 evaluates_to_integer_value(id, to_number(repr)) :-
     integer_literal(id),
@@ -185,9 +181,17 @@ evaluates_to_integer_value(id, left_value - right_value) :-
 
 .decl evaluates_to_boolean_value(id: id, value: number)
 evaluates_to_boolean_value(id, 0) :-
-    content_string_representation(id, "false").
+    boolean_literal(id),
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "false".
 evaluates_to_boolean_value(id, 1) :-
-    content_string_representation(id, "true").
+    boolean_literal(id),
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "true".
 evaluates_to_boolean_value(id, left_value land right_value) :-
     conditional_and_expression(id, left, right),
     evaluates_to_boolean_value(left, left_value),
@@ -212,520 +216,24 @@ evaluates_to_boolean_value(id, 0) :-
 .decl source_code(filename: symbol, str: symbol)
 .input source_code
 
-.decl string_representation(id: id, str: symbol)
-string_representation(id, substr(code, start, end - start)) :-
-    ast_node(id),
-    filename_of(id, filename),
-    starts_at(id, start),
-    ends_at(id, end),
-    source_code(filename, code).
-
-.decl content_string_representation(id: id, str: symbol)
-.output content_string_representation(IO=stdout)
-content_string_representation(id, substr(code, start, end - start)) :-
-    ast_node(id),
-    filename_of(id, filename),
-    content_starts_at(id, start),
-    content_ends_at(id, end),
-    source_code(filename, code).
-
-.decl string_representation_list(list: id_list, str: symbol)
-string_representation_list(list, substr(code, start, end - start)) :-
-    list_first_element(list, first),
-        starts_at(first, start),
-        filename_of(first, filename),
-    list_last_element(list, last),
-        ends_at(last, end),
-        filename_of(last, filename),
-    source_code(filename, code).
-
-/* Variable scope
- ********************************/
-
-/**
- * The scope of a local variable declaration in a block (§14.2) is the rest of
- * the block in which the declaration appears, starting with its own
- * initializer (§14.4) and including any further declarators to the right in
- * the local variable declaration statement.
- * https://docs.oracle.com/javase/specs/jls/se6/html/statements.html
- */
-
-.decl in_scope(start: number, end: number, filename: symbol, identifier: symbol, type: id)
-.output in_scope(IO=stdout)
-
-/* Make resource in try_with_resources_statement accessible in its body */
-in_scope(start, end, filename, identifier_str, resource) :-
-    try_with_resources_statement(_, resources, body, _, _),
-        starts_at(body, start),
-        ends_at(body, end),
-        filename_of(body, filename),
-    list_contains(resources, resource),
-    parent_of(resource, "name", identifier),
-    string_representation(identifier, identifier_str).
-
-/* Make formal parameter in enhanced_for_statement accessible in its body */
-in_scope(start, end, filename, identifier_str, param) :-
-    name_of(stmt, "enhanced_for_statement"),
-    parent_of(stmt, "param", param),
-    formal_parameter(param, _, _, identifier),
-    string_representation(identifier, identifier_str),
-    parent_of(stmt, "body", body),
-        starts_at(body, start),
-        ends_at(body, end),
-        filename_of(body, filename).
-
-/* Make field declarations in scope in their class */
-in_scope(start, end, filename, identifier_str, field) :-
-    class_declaration(_, _, _, _, _, body),
-        starts_at(body, start),
-        ends_at(body, end),
-        filename_of(body, filename),
-    class_body(body, decls),
-    list_contains(decls, field),
-    field_declaration(field, _, _, declarators),
-    list_contains(declarators, declarator),
-    variable_declarator(declarator, declarator_id, _),
-    variable_declarator_id(declarator_id, identifier, _),
-    string_representation(identifier, identifier_str).
-
-/* Make formal parameters accessible in the body of a method */
-in_scope(start, end, filename, identifier_str, param) :-
-    method_declaration(_, _, header, body),
-        starts_at(body, start),
-        ends_at(body, end),
-        filename_of(body, filename),
-    method_header(header, _, declarator, _),
-    parent_of_list(declarator, "params", params),
-    list_contains(params, param),
-    formal_parameter(param, _, _, declarator_id),
-    variable_declarator_id(declarator_id, identifier, _),
-    string_representation(identifier, identifier_str).
-
-/* Make formal parameters accessible in the body of a constructor */
-in_scope(start, end, filename, identifier_str, param) :-
-    constructor_declaration(_, _, declarator, _, body),
-        starts_at(body, start),
-        ends_at(body, end),
-        filename_of(body, filename),
-    parent_of_list(declarator, "params", params),
-    list_contains(params, param),
-    formal_parameter(param, _, _, declarator_id),
-    variable_declarator_id(declarator_id, identifier, _),
-    string_representation(identifier, identifier_str).
-
-/* Make local variable declarations accessible in the succeeding statements */
-in_scope(start, end, filename, identifier_str, declaration) :-
-    parent_of_list(id, _, stmts),
-        ends_at(id, end),
-        filename_of(id, filename),
-    list_contains(stmts, declaration_statement),
-    local_variable_declaration_statement(declaration_statement, declaration),
-    local_variable_declaration(declaration, _, _, declarators),
-    predecessor_of(declaration_statement, succeeding_statement),
-        starts_at(succeeding_statement, start),
-    list_contains(declarators, declarator),
-    variable_declarator(declarator, declarator_id, _),
-    variable_declarator_id(declarator_id, identifier, _),
-    string_representation(identifier, identifier_str).
-
-/* Point of declaration
- ********************************/
-
-.decl expression_name_has_formal_parameter_or_local_var_decl_in_scope(id: id, decl: id)
-expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
-    expression_name(id, [head, _]),
-        starts_at(id, expr_start),
-        ends_at(id, expr_end),
-        filename_of(id, filename),
-    in_scope(start, end, filename, identifier, decl),
-    local_variable_declaration(decl, _, _, _),
-    string_representation(head, identifier),
-        expr_start >= start,
-        expr_end <= end.
-    
-expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
-    expression_name(id, [head, _]),
-        starts_at(id, expr_start),
-        ends_at(id, expr_end),
-        filename_of(id, filename),
-    in_scope(start, end, filename, identifier, decl),
-    formal_parameter(decl, _, _, _),
-    string_representation(head, identifier),
-        expr_start >= start,
-        expr_end <= end.
-
-expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl) :-
-    expression_name(id, [head, _]),
-        starts_at(id, expr_start),
-        ends_at(id, expr_end),
-        filename_of(id, filename),
-    in_scope(start, end, filename, identifier, decl),
-    name_of(decl, "resource"),
-    string_representation(head, identifier),
-        expr_start >= start,
-        expr_end <= end.
-
-.decl point_of_declaration(id: id, declaration: id)
-.output point_of_declaration(IO=stdout)
-/* If there is a local variable declaration or a formal parameter in scope,
-   the identifier definitely refers to it (these can't be shadowed) */
-point_of_declaration(head, decl) :-
-    expression_name(id, [head, _]),
-    expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, decl).
-    
-/* If there is no local variable declarations of formal parameters in scope
-   the identifier refers to the field */
-point_of_declaration(head, decl) :-
-    expression_name(id, [head, _]),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
-    in_scope(scope_start, scope_end, filename, identifier, decl),
-    string_representation(head, identifier),
-    field_declaration(decl, _, _, _),
-        start >= scope_start,
-        end <= scope_end,
-    ! expression_name_has_formal_parameter_or_local_var_decl_in_scope(id, _).
-
-/* We can always refer to a field of a class using "this" */
-point_of_declaration(id, decl) :-
-    field_access(id, this, field),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
-    name_of(this, "this_expression"),
-    in_scope(scope_start, scope_end, filename, identifier, decl),
-    field_declaration(decl, _, _, _),
-    string_representation(field, identifier),
-        start >= scope_start,
-        end <= scope_end.
-
-/* If an expression name contains only one identifier then the whole
-   expression refers to its identifier */
-point_of_declaration(id, decl) :-
-    expression_name(id, [head, nil]),
-    point_of_declaration(head, decl).
-
-/* Types of variable references
- ********************************/
-
-.decl has_type(id: id, type: id)
-.output has_type(IO=stdout)
-has_type(id, type) :-
-    point_of_declaration(id, declpoint),
-    parent_of(declpoint, "type", type).
-
-/* Types of method invocations in same class
- ********************************/
-
-has_type(id, result) :-
-    method_invocation(id, nil, meth, nil),
-    method_declaration(_, _, meth_header, _),
-    method_header(meth_header, result, declarator, _),
-    method_declarator(declarator, meth, nil).
-
-/* Types of streams
- ********************************/
-
-.decl type_preserving_stream_action(s: symbol)
-type_preserving_stream_action("map").
-type_preserving_stream_action("filter").
-
-/* If the stream is produced from Coll<Type> then the lambda argument has type Type */
-has_type(param, type_arg) :-
-    has_collection_type(subject),
-    has_type(subject, type),
-    class_type(type, _, type_args, _),
-    type_arguments(type_args, [type_arg, nil]),
-    method_invocation(stream_invocation, subject, "stream", nil),
-    method_invocation(_, stream_invocation, action, [lambda, nil]),
-    type_preserving_stream_action(action),
-    lambda_expression(lambda, lambda_params, _),
-    lambda_params(lambda_params, [param, nil]),
-    identifier(param).
-    
-
-/* Type checking
- ********************************/
-
-.decl collection_type_name(str: symbol)
-collection_type_name("ArrayList").
-collection_type_name("Collection").
-collection_type_name("ArrayDeque").
-collection_type_name("Deque").
-collection_type_name("LinkedList").
-collection_type_name("List").
-collection_type_name("Queue").
-collection_type_name("Set").
-collection_type_name("TreeMap"). // TODO not technically true
-collection_type_name("Map"). // TODO not technically true
-collection_type_name("LinkedHashMap"). // TODO not technically true
-collection_type_name("SortedSet").
-collection_type_name("Stack").
-collection_type_name("Vector").
-
-.decl floating_point_type_name(str: symbol)
-floating_point_type_name("float").
-floating_point_type_name("double").
-
-.decl atomic_class_type_name(str: symbol)
-atomic_class_type_name("AtomicInteger").
-atomic_class_type_name("AtomicBoolean").
-atomic_class_type_name("AtomicLong").
-
-.decl boxed_type_name(str: symbol)
-boxed_type_name("Boolean").
-boxed_type_name("Byte").
-boxed_type_name("Character").
-boxed_type_name("Float").
-boxed_type_name("Integer").
-boxed_type_name("Long").
-boxed_type_name("Short").
-boxed_type_name("Double").
-
-/* list of resources that implements the AutoCloseable interface */
-.decl autocloseable_type_name(str: symbol)
-autocloseable_type_name("AbstractInterruptibleChannel").
-autocloseable_type_name("AbstractSelectableChannel").
-autocloseable_type_name("AbstractSelector").
-autocloseable_type_name("AsynchronousFileChannel").
-autocloseable_type_name("AsynchronousServerSocketChannel").
-autocloseable_type_name("AsynchronousSocketChannel").
-autocloseable_type_name("AudioInputStream").
-autocloseable_type_name("BufferedInputStream").
-autocloseable_type_name("BufferedOutputStream").
-autocloseable_type_name("BufferedReader").
-autocloseable_type_name("BufferedWriter").
-autocloseable_type_name("ByteArrayInputStream").
-autocloseable_type_name("ByteArrayOutputStream").
-autocloseable_type_name("CharArrayReader").
-autocloseable_type_name("CharArrayWriter").
-autocloseable_type_name("CheckedInputStream").
-autocloseable_type_name("CheckedOutputStream").
-autocloseable_type_name("CipherInputStream").
-autocloseable_type_name("CipherOutputStream").
-autocloseable_type_name("DatagramChannel").
-autocloseable_type_name("DatagramSocket").
-autocloseable_type_name("DataInputStream").
-autocloseable_type_name("DataOutputStream").
-autocloseable_type_name("DeflaterInputStream").
-autocloseable_type_name("DeflaterOutputStream").
-autocloseable_type_name("DigestInputStream").
-autocloseable_type_name("DigestOutputStream").
-autocloseable_type_name("FileCacheImageInputStream").
-autocloseable_type_name("FileCacheImageOutputStream").
-autocloseable_type_name("FileChannel").
-autocloseable_type_name("FileImageInputStream").
-autocloseable_type_name("FileImageOutputStream").
-autocloseable_type_name("FileInputStream").
-autocloseable_type_name("FileLock").
-autocloseable_type_name("FileOutputStream").
-autocloseable_type_name("FileReader").
-autocloseable_type_name("FileSystem").
-autocloseable_type_name("FileWriter").
-autocloseable_type_name("FilterInputStream").
-autocloseable_type_name("FilterOutputStream").
-autocloseable_type_name("FilterReader").
-autocloseable_type_name("FilterWriter").
-autocloseable_type_name("Formatter").
-autocloseable_type_name("ForwardingJavaFileManager").
-autocloseable_type_name("GZIPInputStream").
-autocloseable_type_name("GZIPOutputStream").
-autocloseable_type_name("ImageInputStreamImpl").
-autocloseable_type_name("ImageOutputStreamImpl").
-autocloseable_type_name("InflaterInputStream").
-autocloseable_type_name("InflaterOutputStream").
-autocloseable_type_name("InputStream").
-autocloseable_type_name("InputStream").
-autocloseable_type_name("InputStream").
-autocloseable_type_name("InputStreamReader").
-autocloseable_type_name("JarFile").
-autocloseable_type_name("JarInputStream").
-autocloseable_type_name("JarOutputStream").
-autocloseable_type_name("LineNumberInputStream").
-autocloseable_type_name("LineNumberReader").
-autocloseable_type_name("LogStream").
-autocloseable_type_name("MemoryCacheImageInputStream").
-autocloseable_type_name("MemoryCacheImageOutputStream").
-autocloseable_type_name("MLet").
-autocloseable_type_name("MulticastSocket").
-autocloseable_type_name("ObjectInputStream").
-autocloseable_type_name("ObjectOutputStream").
-autocloseable_type_name("OutputStream").
-autocloseable_type_name("OutputStream").
-autocloseable_type_name("OutputStream").
-autocloseable_type_name("OutputStreamWriter").
-autocloseable_type_name("Pipe.SinkChannel").
-autocloseable_type_name("Pipe.SourceChannel").
-autocloseable_type_name("PipedInputStream").
-autocloseable_type_name("PipedOutputStream").
-autocloseable_type_name("PipedReader").
-autocloseable_type_name("PipedWriter").
-autocloseable_type_name("PrintStream").
-autocloseable_type_name("PrintWriter").
-autocloseable_type_name("PrivateMLet").
-autocloseable_type_name("ProgressMonitorInputStream").
-autocloseable_type_name("PushbackInputStream").
-autocloseable_type_name("PushbackReader").
-autocloseable_type_name("RandomAccessFile").
-autocloseable_type_name("Reader").
-autocloseable_type_name("RMIConnectionImpl").
-autocloseable_type_name("RMIConnectionImpl_Stub").
-autocloseable_type_name("RMIConnector").
-autocloseable_type_name("RMIIIOPServerImpl").
-autocloseable_type_name("RMIJRMPServerImpl").
-autocloseable_type_name("RMIServerImpl").
-autocloseable_type_name("Scanner").
-autocloseable_type_name("SelectableChannel").
-autocloseable_type_name("Selector").
-autocloseable_type_name("SequenceInputStream").
-autocloseable_type_name("ServerSocket").
-autocloseable_type_name("ServerSocketChannel").
-autocloseable_type_name("Socket").
-autocloseable_type_name("SocketChannel").
-autocloseable_type_name("SSLServerSocket").
-autocloseable_type_name("SSLSocket").
-autocloseable_type_name("StringBufferInputStream").
-autocloseable_type_name("StringReader").
-autocloseable_type_name("StringWriter").
-autocloseable_type_name("URLClassLoader").
-autocloseable_type_name("Writer").
-autocloseable_type_name("XMLDecoder").
-autocloseable_type_name("XMLEncoder").
-autocloseable_type_name("ZipFile").
-autocloseable_type_name("ZipInputStream").
-autocloseable_type_name("ZipOutputStream").
-
-/* Is type
- ********************************/
-
-.decl is_collection_type(id: id)
-is_collection_type(id) :-
-    // TODO: Should take imports into consideration?
-    class_type(id, name_str, _, _),
-    collection_type_name(name_str).
-
-.decl is_list_type(id: id)
-is_list_type(id) :-
-    class_type(id, "List", _, _),
-    import_declaration(_, spec),
-    (string_representation(spec, "java.util.List")
-    ;string_representation(spec, "java.util.*")).
-
-.decl is_comparator_type(id: id)
-is_comparator_type(id) :-
-    class_type(id, "Comparator", _, _),
-    import_declaration(_, spec),
-    (string_representation(spec, "java.util.Comparator")
-    ;string_representation(spec, "java.util.*")).
-
-.decl is_predicate_type(id: id)
-is_predicate_type(id) :-
-    class_type(id, "Predicate", _, _),
-    import_declaration(_, spec),
-    (string_representation(spec, "java.util.function.Predicate")
-    ;string_representation(spec, "java.util.function.*")).
-
-.decl is_runnable_type(id: id)
-is_runnable_type(id) :-
-    class_type(id, "Runnable", _, _).
-
-.decl is_map_type(id: id)
-is_map_type(id) :-
-    class_type(id, "Map", _, _).
-
-.decl is_hashmap_type(id: id)
-is_hashmap_type(id) :-
-    class_type(id, "HashMap", _, _).
-
-.decl is_string_type(id: id)
-is_string_type(id) :-
-    class_type(id, "String", _, _).
-
-.decl is_boxed_type(id: id)
-is_boxed_type(id) :-
-    class_type(id, name_str, _, _),
-    boxed_type_name(name_str).
-
-.decl is_autocloseable_type(id: id)
-is_autocloseable_type(id) :-
-    class_type(id, name_str, _, _),
-    autocloseable_type_name(name_str).
-
-.decl is_floating_point_type(id: id)
-is_floating_point_type(id) :-
-    primitive_type(id, _, name),
-    string_representation(name, name_str),
-    floating_point_type_name(name_str).
-
-.decl is_atomic_class_type(id: id)
-is_atomic_class_type(id) :-
-    class_type(id, name_str, _, _),
-    atomic_class_type_name(name_str).
-
-.decl is_thread_type(id: id)
-is_thread_type(id) :-
-    class_type(id, "Thread", _, _).
-
-.decl is_functional_interface_type(id: id)
-is_functional_interface_type(id) :-
-    is_comparator_type(id).
-is_functional_interface_type(id) :-
-    is_predicate_type(id).
-is_functional_interface_type(id) :-
-    is_runnable_type(id).
-
-/* Has type
- ********************************/
-
-.decl has_floating_point_type(id: id)
-has_floating_point_type(id) :- floating_point_literal(id).
-has_floating_point_type(id) :- has_type(id, type), is_floating_point_type(type).
-has_floating_point_type(id) :-
-    multiplication_expression(id, left, right),
-    has_floating_point_type(left),
-    has_floating_point_type(right).
-
-.decl has_autocloseable_type(id: id)
-has_autocloseable_type(id) :- has_type(id, type), is_autocloseable_type(type).
-
-.decl has_thread_type(id: id)
-has_thread_type(id) :- has_type(id, type), is_thread_type(type).
-
-.decl has_string_type(id: id)
-has_string_type(id) :- string_literal(id).
-has_string_type(id) :- has_type(id, type), is_string_type(type).
-
-.decl has_map_type(id: id)
-has_map_type(id) :- has_type(id, type), is_map_type(type).
-
-.decl has_hashmap_type(id: id)
-has_hashmap_type(id) :- has_type(id, type), is_hashmap_type(type).
-
-.decl has_string_or_boxed_type(id: id)
-has_string_or_boxed_type(id) :- has_type(id, type), is_boxed_type(type).
-has_string_or_boxed_type(id) :- has_string_type(id).
-
-.decl has_collection_type(id: id)
-has_collection_type(id) :- has_type(id, type), is_collection_type(type).
-
-.decl has_list_type(id: id)
-has_list_type(id) :- has_type(id, type), is_list_type(type).
-
-.decl has_atomic_class_type(id: id)
-has_atomic_class_type(id) :- has_type(id, type), is_atomic_class_type(type).
-
-.decl has_stream_type(id: id)
-has_stream_type(id) :- method_invocation(id, subject, "stream", nil), has_collection_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "distinct", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "filter", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "limit", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "map", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "skip", _), has_stream_type(subject).
-has_stream_type(id) :- method_invocation(id, subject, "sorted", _), has_stream_type(subject).
-
 /* Rewrite rules
  ********************************/
 
+.decl replace_node_with_node(rule: symbol, original: id, replacement: id)
+.decl replace_node_with_string(rule: symbol, original: id, replacement: symbol)
+
 .decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
+rewrite(rule, filename, start, end, to) :-
+    replace_node_with_string(rule, id, to),
+    starts_at(id, start),
+    ends_at(id, end),
+    filename_of(id, filename).
+rewrite(rule, filename, start, end, substr(code, replacement_start, replacement_end - replacement_start)) :-
+    replace_node_with_node(rule, original, replacement),
+    starts_at(original, start),
+    ends_at(original, end),
+    filename_of(original, filename),
+    source_code(_, code),
+    starts_at(replacement, replacement_start),
+    ends_at(replacement, replacement_end).
 .output rewrite(IO=stdout)

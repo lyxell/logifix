@@ -112,22 +112,48 @@ INFIX(remainder_expression)
 UNORDERED(equals_expression_unordered, equals_expression)
 UNORDERED(not_equals_expression_unordered, not_equals_expression)
 UNORDERED(conditional_and_expression_unordered, conditional_and_expression)
+UNORDERED(conditional_or_expression_unordered, conditional_or_expression)
+UNORDERED(less_than_or_equals_expression_unordered, less_than_or_equals_expression)
 
 .decl import_declaration(id: id, specification: id)
 import_declaration(id, specification) :-
     name_of(id, "import_declaration"),
     parent_of(id, "specification", specification).
 
-.decl import_specification(id: id, left_hand_side: id_list, import: id)
-import_specification(id, left_hand_side, import) :-
+.decl ordinary_compilation_unit(id: id, package_declaration: id, import_declarations: id_list, type_declarations: id_list)
+ordinary_compilation_unit(id, pdecl, impdecls, tdecls) :-
+    name_of(id, "ordinary_compilation_unit"),
+    parent_of(id, "package_declaration", pdecl),
+    parent_of_list(id, "import_declarations", impdecls),
+    parent_of_list(id, "type_declarations", tdecls).
+
+.decl package_declaration(id: id)
+package_declaration(id) :-
+    name_of(id, "package_declaration").
+
+.decl import_specification(id: id, package: symbol, import: symbol)
+import_specification(id, substr(code, lhs_start, lhs_end - lhs_start), substr(code, import_start, import_end - import_start)) :-
     name_of(id, "import_specification"),
-    parent_of_list(id, "left_hand_side", left_hand_side),
-    parent_of(id, "import", import).
+    parent_of_list(id, "left_hand_side", lhs),
+    parent_of(id, "import", import),
+    source_code(_, code),
+    list_first_element(lhs, lhs_first),
+    list_last_element(lhs, lhs_last),
+    starts_at(lhs_first, lhs_start),
+    ends_at(lhs_last, lhs_end),
+    starts_at(import, import_start),
+    ends_at(import, import_end).
 
 .decl logical_complement_expression(id: id, expr: id)
 logical_complement_expression(id, expr) :-
     name_of(id, "logical_complement_expression"),
     parent_of(id, "expression", expr).
+
+.decl cast_expression(id: id, type: id, value: id)
+cast_expression(id, type, value) :-
+    name_of(id, "cast_expression"),
+    parent_of(id, "type", type),
+    parent_of(id, "value", value).
 
 .decl conditional_expression(id: id, cond: id, then: id, else: id)
 conditional_expression(id, cond, then, else) :-
@@ -206,27 +232,33 @@ field_access(id, subject, field) :-
     parent_of(id, "field", field).
 
 .decl method_invocation(id: id, subject: id, method: symbol, arguments: id_list)
-method_invocation(id, subject, method_str, arguments) :-
+method_invocation(id, subject, substr(code, method_start, method_end - method_start), arguments) :-
     name_of(id, "method_invocation"),
     parent_of(id, "subject", subject),
     parent_of(id, "method", method),
     parent_of_list(id, "arguments", arguments),
-    string_representation(method, method_str).
+    content_starts_at(method, method_start),
+    content_ends_at(method, method_end),
+    source_code(_, code).
 
 .decl method_reference(id: id, subject: id, type_arguments: id, method: symbol)
-method_reference(id, subject, type_arguments, method_str) :-
+method_reference(id, subject, type_arguments, substr(code, method_start, method_end - method_start)) :-
     name_of(id, "method_reference"),
     parent_of(id, "subject", subject),
     parent_of(id, "type_arguments", type_arguments),
     parent_of(id, "method", method),
-    string_representation(method, method_str).
+    content_starts_at(method, method_start),
+    content_ends_at(method, method_end),
+    source_code(_, code).
 
 .decl method_declarator(id: id, name: symbol, params: id_list)
-method_declarator(id, name_str, params) :-
+method_declarator(id, substr(code, name_start, name_end - name_start), params) :-
     name_of(id, "method_declarator"),
     parent_of(id, "name", name),
-    string_representation(name, name_str),
-    parent_of_list(id, "params", params).
+    parent_of_list(id, "params", params),
+    content_starts_at(name, name_start),
+    content_ends_at(name, name_end),
+    source_code(_, code).
 
 .decl formal_parameter(id: id, modifiers: id_list, type: id, declarator_id: id)
 formal_parameter(id, modifiers, type, declarator_id) :-
@@ -268,13 +300,16 @@ class_instance_creation_expression(id, qualifier, type_arguments, type, argument
     parent_of_list(id, "arguments", arguments),
     parent_of(id, "body", body).
 
-.decl class_type(id: id, name: symbol, type_arguments: id, annotations: id_list)
-class_type(id, name_str, type_arguments, annotations) :-
+.decl class_type(id: id, parent: id, name: symbol, type_arguments: id, annotations: id_list)
+class_type(id, parent, substr(code, name_start, name_end - name_start), type_arguments, annotations) :-
     name_of(id, "class_type"),
+    parent_of(id, "parent", parent),
     parent_of(id, "name", name),
-    string_representation(name, name_str),
     parent_of(id, "type_arguments", type_arguments),
-    parent_of_list(id, "annotations", annotations).
+    parent_of_list(id, "annotations", annotations),
+    content_starts_at(name, name_start),
+    content_ends_at(name, name_end),
+    source_code(_, code).
 
 .decl type_arguments(id: id, arguments: id_list)
 type_arguments(id, arguments) :-
@@ -298,6 +333,9 @@ null_literal(id) :- name_of(id, "null_literal").
 .decl integer_literal(id: id)
 integer_literal(id) :- name_of(id, "integer_literal").
 
+.decl boolean_literal(id: id)
+boolean_literal(id) :- name_of(id, "boolean_literal").
+
 .decl floating_point_literal(id: id)
 floating_point_literal(id) :- name_of(id, "floating_point_literal").
 
@@ -309,5 +347,9 @@ expression_name(id, identifiers) :-
     name_of(id, "expression_name"),
     parent_of_list(id, "identifiers", identifiers).
 
-.decl identifier(id: id)
-identifier(id) :- name_of(id, "identifier").
+.decl identifier(id: id, symbol: symbol)
+identifier(id, substr(code, start, end - start)) :-
+    name_of(id, "identifier"),
+    starts_at(id, start),
+    ends_at(id, end),
+    source_code(_, code).
