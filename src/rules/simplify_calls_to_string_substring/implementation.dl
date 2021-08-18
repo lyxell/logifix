@@ -2,14 +2,14 @@
 /* Post [:x]              */
 replace_node_with_node("simplify_calls_to_string_substring", id, substring_subject) :-
     method_invocation(id, substring_subject, "substring", [arg, nil]),
-    _has_type(substring_subject, ["java.lang", "String", nil]),
+    has_type(substring_subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(arg, 0).
 
 /* Pre  [:x].substring(0, [:x].length()) */
 /* Post [:x]                             */
 replace_node_with_node("simplify_calls_to_string_substring", id, substring_subject) :-
     method_invocation(id, substring_subject, "substring", [arg1, [arg2, nil]]),
-    _has_type(substring_subject, ["java.lang", "String", nil]),
+    has_type(substring_subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(arg1, 0),
     method_invocation(arg2, length_subject, "length", nil),
     point_of_declaration(substring_subject, declaration_point),
@@ -20,7 +20,7 @@ replace_node_with_node("simplify_calls_to_string_substring", id, substring_subje
 /* Post ""                         */
 replace_node_with_string("simplify_calls_to_string_substring", id, "\"\"") :-
     method_invocation(id, substring_subject, "substring", [arg, nil]),
-    _has_type(substring_subject, ["java.lang", "String", nil]),
+    has_type(substring_subject, ["java.lang", "String", nil]),
     method_invocation(arg, length_subject, "length", nil),
     point_of_declaration(substring_subject, declaration_point),
     point_of_declaration(length_subject, declaration_point).
@@ -32,7 +32,7 @@ replace_node_with_string("simplify_calls_to_string_substring", id,
 ) :-
     method_invocation(id, substring_subject, "substring", [arg1, [arg2, nil]]),
     source_code(_, code),
-    _has_type(substring_subject, ["java.lang", "String", nil]),
+    has_type(substring_subject, ["java.lang", "String", nil]),
     ! evaluates_to_integer_value(arg1, 0),
     method_invocation(arg2, length_subject, "length", nil),
     point_of_declaration(substring_subject, declaration_point),

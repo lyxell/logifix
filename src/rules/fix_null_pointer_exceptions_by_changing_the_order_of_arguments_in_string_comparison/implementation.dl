@@ -6,5 +6,5 @@ replace_node_with_string("fix_null_pointer_exceptions_by_changing_the_order_of_a
     method_invocation(invocation, subject, "equals", [arg, nil]),
     source_code(_, code),
     string_literal(arg),
-    _has_type(subject, ["java.lang", "String", nil]),
+    has_type(subject, ["java.lang", "String", nil]),
     ! string_literal(subject).

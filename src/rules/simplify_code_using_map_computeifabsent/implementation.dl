@@ -57,7 +57,7 @@ rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
     method_invocation(initializer, map_var, "get", [key_var, nil]),
     point_of_declaration(key_var, key_var_declaration_point),
     point_of_declaration(map_var, map_var_declaration_point),
-    _has_type(map_var, ["java.util", "Map", _]),
+    has_type(map_var, ["java.util", "Map", _]),
 
     /* The second statement is an if-statement */
     if_statement(s2, cond, then, nil),

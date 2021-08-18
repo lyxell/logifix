@@ -7,7 +7,7 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat(@node
     ;equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "size", nil),
-    _has_type(subject, [package, class, _]),
+    has_type(subject, [package, class, _]),
     (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 0).
 
@@ -18,7 +18,7 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", 
     ;not_equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "size", nil),
-    _has_type(subject, [package, class, _]),
+    has_type(subject, [package, class, _]),
     (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 0).
 
@@ -28,7 +28,7 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", 
     greater_than_expression(id, invocation, integer),
     source_code(_, code),
     method_invocation(invocation, subject, "size", nil),
-    _has_type(subject, [package, class, _]),
+    has_type(subject, [package, class, _]),
     (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 0).
 
@@ -38,7 +38,7 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", 
     greater_than_or_equals_expression(id, invocation, integer),
     source_code(_, code),
     method_invocation(invocation, subject, "size", nil),
-    _has_type(subject, [package, class, _]),
+    has_type(subject, [package, class, _]),
     (collection_type(package, class);map_type(package, class)),
     evaluates_to_integer_value(integer, 1).
 
@@ -51,7 +51,7 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat(@node
     ;equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "length", nil),
-    _has_type(subject, ["java.lang", "String", nil]),
+    has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 0).
 
 /* Pre  [:x].length() != 0 */
@@ -61,7 +61,7 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", 
     ;not_equals_expression(id, integer, invocation)),
     source_code(_, code),
     method_invocation(invocation, subject, "length", nil),
-    _has_type(subject, ["java.lang", "String", nil]),
+    has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 0).
 
 /* Pre  [:x].length() > 0 */
@@ -70,7 +70,7 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", 
     greater_than_expression(id, invocation, integer),
     source_code(_, code),
     method_invocation(invocation, subject, "length", nil),
-    _has_type(subject, ["java.lang", "String", nil]),
+    has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 0).
 
 /* Pre  [:x].length() >= 1 */
@@ -79,5 +79,5 @@ replace_node_with_string("simplify_code_using_collection_isempty", id, cat("!", 
     greater_than_or_equals_expression(id, invocation, integer),
     source_code(_, code),
     method_invocation(invocation, subject, "length", nil),
-    _has_type(subject, ["java.lang", "String", nil]),
+    has_type(subject, ["java.lang", "String", nil]),
     evaluates_to_integer_value(integer, 1).

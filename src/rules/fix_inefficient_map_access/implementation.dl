@@ -14,7 +14,7 @@ rewrite("fix_inefficient_map_access", filename, start, end + 1,
 
     /* expression is a call to map.keySet() */
     method_invocation(expression, map_reference, "keySet", nil),
-    _has_type(map_reference, [package, class, type_args]),
+    has_type(map_reference, [package, class, type_args]),
     type_args != nil,
     map_type(package, class),
 

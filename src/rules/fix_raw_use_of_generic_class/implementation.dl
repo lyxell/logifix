@@ -24,5 +24,5 @@ replace_node_with_string("fix_raw_use_of_generic_class", left_type, @type_to_str
     local_variable_declaration(_, _, left_type, [declarator, nil]),
     ast_type_to_type(left_type, [_, _, nil]),
     variable_declarator(declarator, _, initializer),
-    _has_type(initializer, [package, class, type_args]),
+    has_type(initializer, [package, class, type_args]),
     type_args != nil.
