@@ -41,8 +41,9 @@ sudo mv /tmp/logifix /usr/local/bin
 
 ### Intelligent equational reasoning
 
-Logifix is more than a search-and-replace system. It achieves intelligent equational reasoning
-through the use of articulation points in the rewrite graph.
+Logifix is more than a search-and-replace system. It performs
+rewrites in multiple steps and achieves intelligent equational
+reasoning by building articulation points in the rewrite graph.
 
 ### Speed
 
@@ -89,7 +90,19 @@ The logifix binary is now found under build.
 
 <ul> </ul>
 
-## Available rules
+## FAQ
 
-See [rules](./rules.md).
+### Can I create my own transformations?
 
+Yes! See [docs/creating-your-own-transformations.md](docs/creating-your-own-transformations.md).
+
+<ul> </ul>
+
+## Related projects
+
+If you find this project interesting, be sure to check out these
+as well:
+
+* [souffle-lang/souffle](https://github.com/souffle-lang/souffle) - The Datalog compiler used by Logifix
+* [comby-tools/comby](https://github.com/comby-tools/comby) - A lightweight AST based search-and-replace tool
+* [egraphs-good/egg](https://github.com/egraphs-good/egg) - A nice library for efficient equality saturation
