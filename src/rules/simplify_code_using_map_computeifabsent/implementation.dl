@@ -64,9 +64,9 @@ rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
 
         /* The condition is an equality expression which checks if the value
          * from the initializer is null */
-        equals_expression_unordered(cond, fst, snd),
-        null_literal(fst),
-        point_of_declaration(snd, decl),
+        equals_expression(cond, fst, snd),
+        point_of_declaration(fst, decl),
+        null_literal(snd),
 
         /* The then-clause is a block containing at least two statements */
         block(then, then_stmts),
