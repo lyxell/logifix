@@ -69,34 +69,6 @@ requiring manual modifications.
 
 <ul> </ul>
 
-## Building
-
-### Ubuntu
-
-* `sudo apt install -y bison cmake re2c mcpp`
-* `git clone https://github.com/lyxell/logifix`
-* `cd logifix`
-* `git submodule update --init --recursive`
-* `mkdir build`
-* `cmake -S . -B build`
-* `cmake --build build`
-
-The logifix binary is now found under build.
-
-### macOS
-
-* `brew install bison cmake re2c mcpp`
-* `git clone https://github.com/lyxell/logifix`
-* `cd logifix`
-* `git submodule update --init --recursive`
-* `mkdir build`
-* `cmake -S . -B build`
-* `cmake --build build`
-
-The logifix binary is now found under build.
-
-<ul> </ul>
-
 ## FAQ
 
 ### Where can I find the predefined transformations?
@@ -106,6 +78,10 @@ See [docs/predefined-transformations.md](docs/predefined-transformations.md).
 ### Can I create my own transformations?
 
 Yes! See [docs/creating-your-own-transformations.md](docs/creating-your-own-transformations.md).
+
+### How do I build from source?
+
+See [docs/building.md](docs/building.md).
 
 <ul> </ul>
 
