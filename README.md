@@ -15,11 +15,13 @@ https://user-images.githubusercontent.com/4975941/126644571-3215f01b-40f6-4278-9
 
 <ul> </ul>
 
-## Installing
+## Getting started
+
+#### 1. Install
 
 Prebuilt and dependency-free binaries are provided for macOS and GNU-based Linux systems.
 
-### Ubuntu/Debian
+##### Ubuntu/Debian
 
 ```bash
 curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-linux-gnu.gz | gunzip -c - > /tmp/logifix
@@ -27,13 +29,18 @@ chmod +x /tmp/logifix
 sudo mv /tmp/logifix /usr/local/bin
 ```
 
-### macOS
+##### macOS
 
 ```bash
 curl -L https://github.com/lyxell/logifix/releases/latest/download/logifix-x86_64-macos.gz | gunzip -c - > /tmp/logifix
 chmod +x /tmp/logifix
 sudo mv /tmp/logifix /usr/local/bin
 ```
+
+#### 2. Run
+
+* Run `logifix path/to/your/project` in your terminal, run
+  `logifix --help` to get help
 
 <ul> </ul>
 
