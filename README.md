@@ -52,9 +52,9 @@ sudo mv /tmp/logifix /usr/local/bin
 Logifix is an analysis-guided rewrite system for Java source
 code. This means that you define (or use predefined) analyses and
 transformations that all work together to improve your code.
-Transformations are chained and combined automatically by the
-rewrite engine. The analyses and transformations are written in
-the highly declarative logic-based language Datalog.
+The analyses and transformations are written in
+the highly declarative logic-based language Datalog and
+are combined and chained automatically by the rewrite engine.
 
 <ul> </ul>
 
