@@ -4,7 +4,7 @@
 
 # Logifix
 
-Logifix is a fast static analysis-guided rewrite system for Java. It automatically rewrites bad Java code into good Java code and can be used
+Logifix is a fast analysis-guided rewrite system for Java source code. It automatically rewrites bad Java code into good Java code and can be used
 to fix static analysis violations for static analyzers such as SonarQube, PMD or SpotBugs.
 
 <ul> </ul>
@@ -44,12 +44,23 @@ sudo mv /tmp/logifix /usr/local/bin
 
 <ul> </ul>
 
+## What is Logifix?
+
+Logifix is an analysis-guided rewrite system for Java source
+code. This means that you define (or use predefined) analyses and
+transformations that all work together to improve your code.
+Transformations are chained and combined automatically by the
+rewrite engine. The analyses and transformations are written in
+the highly declarative logic-based language Datalog.
+
+<ul> </ul>
+
 ## Features
 
 ### Intelligent equational reasoning
 
 Logifix is more than a search-and-replace system. It performs
-rewrites in multiple steps and achieves intelligent equational
+rewrites in multiple steps and can achieve intelligent equational
 reasoning by building articulation points in the rewrite graph.
 
 ### Speed
@@ -73,7 +84,7 @@ requiring manual modifications.
 
 ### Where can I find the predefined transformations?
 
-See [docs/predefined-transformations.md](docs/predefined-transformations.md).
+See [docs/predefined-transformations.md](docs/predefined-transformations.md) or the source code [src/rules](src/rules).
 
 ### Can I create my own transformations?
 
@@ -91,5 +102,5 @@ If you find this project interesting, be sure to check out these
 as well:
 
 * [souffle-lang/souffle](https://github.com/souffle-lang/souffle) - The Datalog compiler used by Logifix
-* [comby-tools/comby](https://github.com/comby-tools/comby) - A lightweight AST based search-and-replace tool
 * [egraphs-good/egg](https://github.com/egraphs-good/egg) - A nice library for efficient equality saturation of rewrite systems
+* [comby-tools/comby](https://github.com/comby-tools/comby) - A lightweight AST based search-and-replace tool
