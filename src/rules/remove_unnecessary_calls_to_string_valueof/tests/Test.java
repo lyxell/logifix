@@ -27,4 +27,7 @@ class Test {
         System.out.println(String.valueOf(s.getKey()));
         System.out.println(String.valueOf(s.getValue()));
     }
+    void test6(Map<String, String> s) {
+        System.out.println(String.valueOf(s.get("test")));
+    }
 }

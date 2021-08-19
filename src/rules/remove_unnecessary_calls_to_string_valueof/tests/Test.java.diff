@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -4,27 +4,27 @@
+@@ -4,30 +4,30 @@
      void test1() {
          String s = "hello ";
          float val = 2.0f;
@@ -35,5 +35,9 @@ diff --git a/Test.java b/Test.java
 -        System.out.println(String.valueOf(s.getValue()));
 +        System.out.println(s.getKey());
 +        System.out.println(s.getValue());
+     }
+     void test6(Map<String, String> s) {
+-        System.out.println(String.valueOf(s.get("test")));
++        System.out.println(s.get("test"));
      }
  }
