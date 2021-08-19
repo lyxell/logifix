@@ -487,7 +487,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S2131](https://rules.sonarsource.com/java/RSPEC-2131)
-* SpotBugs ID: N/A
+* SpotBugs ID: [DM_BOXED_PRIMITIVE_TOSTRING](https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bx-method-allocates-a-boxed-primitive-just-to-call-tostring-dm-boxed-primitive-tostring)
 
 
 <ul> </ul>
