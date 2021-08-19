@@ -276,6 +276,17 @@ has_type(param, type_arg) :-
     lambda_params(lambda_params, [param, nil]),
     formal_parameter(param, _, _, _).
 
+has_type(id, type_arg) :-
+    method_invocation(id, subject, "get", _),
+    has_type(subject, ["java.util", "Map", [_, [type_arg, nil]]]).
+
+has_type(id, type_arg) :-
+    method_invocation(id, subject, "getKey", nil),
+    has_type(subject, ["Map", "Entry", [type_arg, [_, nil]]]).
+has_type(id, type_arg) :-
+    method_invocation(id, subject, "getValue", nil),
+    has_type(subject, ["Map", "Entry", [_, [type_arg, nil]]]).
+
 /*
 
 .decl is_runnable_type(id: id)
