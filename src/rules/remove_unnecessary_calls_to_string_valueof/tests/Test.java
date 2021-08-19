@@ -17,4 +17,8 @@ class Test {
         System.out.println("hello " + String.valueOf(val));
         System.out.println(s + String.valueOf(val));
     }
+    void test4(String s) {
+        System.out.println(String.valueOf(s));
+        System.out.println(String.valueOf("hello"));
+    }
 }

@@ -1,5 +1,5 @@
 diff --git a/Test.java b/Test.java
-@@ -2,19 +2,19 @@
+@@ -2,23 +2,23 @@
      void test1() {
          String s = "hello ";
          float val = 2.0f;
@@ -23,5 +23,11 @@ diff --git a/Test.java b/Test.java
 -        System.out.println(s + String.valueOf(val));
 +        System.out.println("hello " + val);
 +        System.out.println(s + val);
+     }
+     void test4(String s) {
+-        System.out.println(String.valueOf(s));
+-        System.out.println(String.valueOf("hello"));
++        System.out.println(s);
++        System.out.println("hello");
      }
  }
