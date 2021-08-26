@@ -1,6 +1,4 @@
-<p align="center">
-  <img width="260px" src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix">
-</p>
+<img src="https://raw.githubusercontent.com/lyxell/logifix/master/.github/logifix-logo-beam.svg" alt="Logifix" width="250" align="right">
 
 # Logifix
 
