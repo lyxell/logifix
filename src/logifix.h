@@ -26,8 +26,7 @@ private:
     std::deque<node_id> pending_strings;
     size_t id_counter = 0;
     std::unordered_map<node_id, std::tuple<rule_id, node_id, rewrite_collection>> parent;
-    std::unordered_map<node_id, std::unordered_map<rule_id, std::unordered_set<std::string>>>
-        children_strs;
+    std::unordered_map<node_id, std::unordered_set<std::string>> children_strs;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
 
     std::vector<std::pair<std::string, rewrite_collection>> nodes;
