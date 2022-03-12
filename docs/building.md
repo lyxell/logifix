@@ -2,7 +2,7 @@
 
 ### Ubuntu
 
-* `sudo apt install -y bison cmake re2c mcpp`
+* `sudo apt install -y bison cmake re2c mcpp jq ccache`
 * `git clone https://github.com/lyxell/logifix`
 * `cd logifix`
 * `git submodule update --init --recursive`
@@ -14,7 +14,7 @@ The logifix binary is now found under build.
 
 ### macOS
 
-* `brew install bison cmake re2c mcpp`
+* `brew install bison cmake re2c mcpp jq ccache`
 * `git clone https://github.com/lyxell/logifix`
 * `cd logifix`
 * `git submodule update --init --recursive`
