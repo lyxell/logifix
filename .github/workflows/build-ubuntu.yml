@@ -63,20 +63,6 @@ jobs:
     - run: ./logifix --in-place --accept-all bytecode-viewer/
     - run: cd bytecode-viewer && mvn compile
 
-  compile-primefaces:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download logifix
-      uses: actions/download-artifact@v2
-      with:
-        name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/primefaces/primefaces.git
-    - run: cd primefaces && mvn compile -Dcheckstyle.skip
-    - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all primefaces/
-    - run: cd primefaces && mvn compile -Dcheckstyle.skip
-
   compile-initializr:
     needs: build
     runs-on: ubuntu-latest
