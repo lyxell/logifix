@@ -32,7 +32,7 @@ private:
     std::vector<std::pair<std::string, rewrite_collection>> nodes;
 
     auto
-    get_patches(const std::string&) const -> std::set<std::pair<rule_id, rewrite_type>>;
+    run_datalog_analysis(const std::string&) const -> std::set<std::pair<rule_id, rewrite_type>>;
     auto print_performance_metrics() -> void;
     auto print_merge_conflict(const std::string&, rewrite_collection, const std::vector<node_id>&) const -> void;
     auto create_id(const std::string&, const rewrite_collection&) -> size_t;

@@ -188,7 +188,7 @@ auto program::post_process(const std::string& original, const std::string& chang
     auto rewrites = rewrites_invert(
         original, split_rewrite(original, std::tuple(0ul, original.size(), changed)));
     auto result = rewrite_collection{};
-    for (const auto& [rule, rewrite] : get_patches(changed)) {
+    for (const auto& [rule, rewrite] : run_datalog_analysis(changed)) {
         if (rule != "remove_redundant_parentheses") {
             continue;
         }
@@ -365,7 +365,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                 auto next_nodes = std::vector<std::tuple<node_id, rule_id, bool>>{};
 
                 {
-                    auto rewrites = get_patches(current_node_source);
+                    auto rewrites = run_datalog_analysis(current_node_source);
                     auto lock = std::unique_lock{work_mutex};
                     for (const auto& [rule, rewrite] : rewrites) {
                         auto next_node = create_id(current_node_source,
@@ -465,7 +465,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
  * and perform rewrites and finally return the set of resulting strings and the
  * rule ids for each rewrite.
  */
-auto program::get_patches(const std::string& source) const
+auto program::run_datalog_analysis(const std::string& source) const
     -> std::set<std::pair<rule_id, rewrite_type>> {
 
     const auto* program_name = "logifix";
