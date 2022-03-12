@@ -1,6 +1,7 @@
 #include "logifix.h"
 #include "javadoc.h"
 #include "timer.h"
+#include "utils.h"
 #include <condition_variable>
 #include <cstdlib>
 #include <deque>
@@ -301,6 +302,22 @@ auto program::print_performance_metrics() -> void {
     }
 }
 
+auto program::print_graphviz_data() const -> void {
+    std::cout << "digraph {" << std::endl;
+    size_t i = 0;
+
+    for (const auto& [par, y] : parent) {
+        const auto& [rule, child] = y;
+        if (rule == "remove_redundant_parentheses") continue;
+        if (utils::starts_with(rule, "pick")) {
+            std::cout << "    " << child << " -> " << par << " [style = dashed label=\"" << rule << "\"];" << std::endl;
+        } else {
+            std::cout << "    " << child << " -> " << par << " [label = \"" << rule << "\"];" << std::endl;
+        }
+    }
+    std::cout << "}" << std::endl;
+}
+
 auto program::run(std::function<void(node_id)> report_progress) -> void {
     auto work_mutex = std::mutex{};
     auto cv = std::condition_variable{};
@@ -390,9 +407,11 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                 auto current_has_parent = parent.find(current_node) != parent.end();
                 if (current_has_parent) {
                     auto rewrites = rewrite_collection{};
+                    std::vector<node_id> taken_nodes;
                     for (const auto& [next_node, rule, take_transition] : next_nodes) {
                         if (take_transition) {
                             auto [next_pstr, next_rewrites] = nodes[next_node];
+                            taken_nodes.emplace_back(next_node);
                             rewrites.insert(rewrites.end(), next_rewrites.begin(),
                                             next_rewrites.end());
                         }
@@ -408,7 +427,11 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             print_merge_conflict(current_node_source, rewrites, nodes);
                             std::exit(1);
                         } else {
-                            auto rule = std::string{"merged"};
+                            auto rule = std::string{"pick"};
+                            for (auto x : taken_nodes) {
+                                rule += " ";
+                                rule += fmt::format("{}", x);
+                            }
                             auto next_node = create_id(current_node_source, rewrites);
                             parent[next_node] = {rule, current_node};
                             pending_strings.emplace_back(next_node);
