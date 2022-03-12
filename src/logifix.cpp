@@ -333,7 +333,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
             while (true) {
                 auto current_node = node_id{};
                 auto current_node_source = std::string{};
-                bool current_has_parent = false;
+                bool current_node_has_parent = false;
                 /* acquire work */
                 {
                     auto lock = std::unique_lock{work_mutex};
@@ -358,7 +358,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     } else {
                         current_node = pending_strings.front();
                         pending_strings.pop_front();
-                        current_has_parent = true;
+                        current_node_has_parent = true;
                     }
                     auto [pstr, rewrites] = nodes[current_node];
                     current_node_source = apply_rewrites(pstr, rewrites);
@@ -379,7 +379,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     }
                 }
 
-                if (!current_has_parent) {
+                if (!current_node_has_parent) {
                     for (auto& [next_node, rule, take_transition] : next_nodes) {
                         if (rule == "remove_redundant_parentheses") {
                             continue;
