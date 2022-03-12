@@ -407,8 +407,10 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                         auto next_str = apply_rewrites(next_pstr, next_rewrites);
                         /* Calculate the rewrites that would be needed to turn the current node into its parent */
                         auto inverted = rewrites_invert(curr_pstr, curr_rewrites);
-                        /* Check if the inverted rewrites and the rewrites for the next node has any overlap */
+                        /* Make sure that the inverted rewrites and the rewrites for the next node does not have any overlap */
                         if (!rewrite_collections_overlap(inverted, next_rewrites)) {
+                            /* We "backport" the rewrites for the next node to apply to the parent node and check if there's any child with
+                             * source code which matches these rewrites */
                             auto adjusted = adjust_rewrites(inverted, next_rewrites);
                             auto candidate_string = apply_rewrites(curr_pstr, adjusted);
                             if (children_strs[parent_id][rule].find(candidate_string) !=
