@@ -399,13 +399,17 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             continue;
                         }
                         auto lock = std::unique_lock{work_mutex};
+                        /* Find the parent of the current node */
                         auto [parent_rule, parent_id] = parent[current_node];
                         auto [curr_pstr, curr_rewrites] = nodes[current_node];
                         auto [next_pstr, next_rewrites] = nodes[next_node];
+                        /* Create the source code for the transition node */
                         auto next_str = apply_rewrites(next_pstr, next_rewrites);
+                        /* Calculate the rewrites that would be needed to turn the current node into its parent */
                         auto inverted = rewrites_invert(curr_pstr, curr_rewrites);
-                        auto adjusted = adjust_rewrites(inverted, next_rewrites);
+                        /* Check if the inverted rewrites and the rewrites for the next node has any overlap */
                         if (!rewrite_collections_overlap(inverted, next_rewrites)) {
+                            auto adjusted = adjust_rewrites(inverted, next_rewrites);
                             auto candidate_string = apply_rewrites(curr_pstr, adjusted);
                             if (children_strs[parent_id][rule].find(candidate_string) !=
                                 children_strs[parent_id][rule].end()) {
