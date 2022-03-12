@@ -33,14 +33,12 @@ template <typename T> auto segments_overlap(std::pair<T, T> a, std::pair<T, T> b
 }
 } // namespace
 
-auto program::create_id(const std::string& str, const rewrite_collection& rewrites) -> size_t {
-    auto id = nodes.size();
-    nodes.emplace_back(str, rewrites);
-    return id;
+auto program::create_id() -> size_t {
+    return id_counter++;
 }
 
 auto program::add_file(const std::string& file) -> size_t {
-    auto node_id = create_id("", {std::tuple(0ul, 0ul, file)});
+    auto node_id = create_id();
     source_code[node_id] = file;
     pending_files.emplace_front(node_id);
     return node_id;
@@ -217,7 +215,7 @@ auto program::get_patches_for_file(node_id node) const -> std::vector<patch_id> 
 
 auto program::get_patches_for_rule(const rule_id& rule) const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
-    for (auto node = std::size_t{}; node < nodes.size(); node++) {
+    for (auto node = std::size_t{}; node < id_counter; node++) {
         if (parent.find(node) == parent.end() &&
             taken_transitions.find(node) != taken_transitions.end()) {
             for (auto [transition_rule, node_id] : taken_transitions.at(node)) {
@@ -248,10 +246,11 @@ auto program::print_merge_conflict(const std::string& source, rewrite_collection
         auto [rule, parent_id, rws] = parent.at(node);
         fmt::print(stderr, "Rule: ");
         fmt::print(stderr, fg(fmt::terminal_color::cyan), "{}\n", rule);
-        auto [next_pstr, next_rewrites] = nodes[node];
-        for (auto [start, end, replacement] : next_rewrites) {
+        auto [p_rule, p_id, c_rewrites] = parent.at(node);
+        auto p_str = source_code.at(p_id);
+        for (auto [start, end, replacement] : c_rewrites) {
             fmt::print(stderr, "    Original: {} Replacement: {} Position: {}-{}\n",
-                       next_pstr.substr(start, end - start), replacement, start, end);
+                       p_str.substr(start, end - start), replacement, start, end);
         }
     }
 }
@@ -277,7 +276,7 @@ auto program::get_result(node_id parent, const std::vector<patch_id>& patches) c
 
 auto program::get_all_patches() const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
-    for (auto node = std::size_t{}; node < nodes.size(); node++) {
+    for (auto node = std::size_t{}; node < id_counter; node++) {
         if (parent.find(node) == parent.end() &&
             taken_transitions.find(node) != taken_transitions.end()) {
             for (auto [rule_id, node_id] : taken_transitions.at(node)) {
@@ -376,7 +375,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     auto lock = std::unique_lock{work_mutex};
                     for (const auto& [rule, rewrite] : rewrites) {
                         auto rewrites = split_rewrite(current_node_source, rewrite);
-                        auto next_node = create_id(current_node_source, rewrites);
+                        auto next_node = create_id();
                         auto next_node_source = apply_rewrite(current_node_source, rewrite);
                         source_code[next_node] = next_node_source;
                         parent[next_node] = {rule, current_node, rewrites};
@@ -435,7 +434,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                                 rule += fmt::format("{}", x);
                             }
                             auto lock = std::unique_lock{work_mutex};
-                            auto next_node = create_id(current_node_source, rewrites);
+                            auto next_node = create_id();
                             source_code[next_node] = apply_rewrites(current_node_source, rewrites);
                             parent[next_node] = {rule, current_node, rewrites};
                             pending_strings.emplace_back(next_node);

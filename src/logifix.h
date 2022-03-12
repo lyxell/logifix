@@ -29,13 +29,11 @@ private:
     std::unordered_map<node_id, std::unordered_set<std::string>> children_strs;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
 
-    std::vector<std::pair<std::string, rewrite_collection>> nodes;
-
     auto
     run_datalog_analysis(const std::string&) const -> std::set<std::pair<rule_id, rewrite_type>>;
     auto print_performance_metrics() -> void;
     auto print_merge_conflict(const std::string&, rewrite_collection, const std::vector<node_id>&) const -> void;
-    auto create_id(const std::string&, const rewrite_collection&) -> size_t;
+    auto create_id() -> size_t;
     auto apply_rewrite(const std::string&, const rewrite_type&) const -> std::string;
     auto apply_rewrites(const std::string&, rewrite_collection) const -> std::string;
     auto adjust_rewrites(const rewrite_collection&, const rewrite_collection&) const -> rewrite_collection;
