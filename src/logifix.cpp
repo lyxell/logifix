@@ -127,6 +127,9 @@ auto program::rewrite_collection_overlap(const rewrite_collection& coll) const -
     return false;
 }
 
+/**
+ * Use LCS algorithm to split a rewrite into multiple smaller rewrites if possible.
+ */
 auto program::split_rewrite(const std::string& original, const rewrite_type& rewrite) const
     -> rewrite_collection {
     auto result = rewrite_collection{};
