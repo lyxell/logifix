@@ -365,7 +365,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     current_node_source = source_code[current_node];
                 }
 
-                auto next_nodes = std::vector<std::tuple<node_id, rule_id, bool>>{};
+                auto next_nodes = std::vector<std::tuple<node_id, rule_id>>{};
 
                 {
                     auto rewrites = run_datalog_analysis(current_node_source);
@@ -377,12 +377,12 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                         parent[next_node] = {rule, current_node, split_rewrite(current_node_source, rewrite)};
                         children_strs[current_node][rule].emplace(
                             apply_rewrite(current_node_source, rewrite));
-                        next_nodes.emplace_back(next_node, rule, true);
+                        next_nodes.emplace_back(next_node, rule);
                     }
                 }
 
                 if (!current_node_has_parent) {
-                    for (auto& [next_node, rule, take_transition] : next_nodes) {
+                    for (auto& [next_node, rule] : next_nodes) {
                         if (rule == "remove_redundant_parentheses") {
                             continue;
                         }
@@ -398,7 +398,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     auto rewrites = rewrite_collection{};
                     std::vector<node_id> taken_nodes;
 
-                    for (auto& [next_node, rule, take_transition] : next_nodes) {
+                    for (auto& [next_node, rule] : next_nodes) {
                         if (rule == "remove_redundant_parentheses") {
                             continue;
                         }
