@@ -333,6 +333,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
             while (true) {
                 auto current_node = node_id{};
                 auto current_node_source = std::string{};
+                bool current_has_parent = false;
                 /* acquire work */
                 {
                     auto lock = std::unique_lock{work_mutex};
@@ -357,6 +358,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     } else {
                         current_node = pending_strings.front();
                         pending_strings.pop_front();
+                        current_has_parent = true;
                     }
                     auto [pstr, rewrites] = nodes[current_node];
                     current_node_source = apply_rewrites(pstr, rewrites);
@@ -383,7 +385,6 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                         continue;
                     }
                     auto lock = std::unique_lock{work_mutex};
-                    auto current_has_parent = parent.find(current_node) != parent.end();
                     if (current_has_parent) {
                         auto [parent_rule, parent_id] = parent[current_node];
                         auto [curr_pstr, curr_rewrites] = nodes[current_node];
@@ -407,7 +408,6 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
 
                 auto lock = std::unique_lock{work_mutex};
 
-                auto current_has_parent = parent.find(current_node) != parent.end();
                 if (current_has_parent) {
                     auto rewrites = rewrite_collection{};
                     std::vector<node_id> taken_nodes;
