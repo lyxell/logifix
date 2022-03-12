@@ -654,7 +654,8 @@ auto main(int argc, char** argv) -> int {
     // logifix::print_performance_metrics();
     //
     std::cout << std::endl;
-    program.print_json_data();
+    program.print_graphviz_data();
+    std::exit(0);
 
     auto review = [&options, &accepted_patches, &filename_of_node,
                    &program](logifix::patch_id patch, size_t curr, size_t total) {

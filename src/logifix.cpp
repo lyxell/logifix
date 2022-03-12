@@ -313,6 +313,17 @@ auto program::print_json_data() const -> void {
     std::cout << "}" << std::endl;
 }
 
+auto program::print_graphviz_data() const -> void {
+    std::cout << "digraph {" << std::endl;
+    size_t i = 0;
+    for (const auto& [par, y] : parent) {
+        const auto [rule, child] = y;
+        if (rule == "remove_redundant_parentheses") continue;
+        std::cout << "    " << child << " -> " << par << " [label = \"" << rule << "\"];" << std::endl;
+    }
+    std::cout << "}" << std::endl;
+}
+
 auto program::print_performance_metrics() -> void {
     constexpr auto MAX_FILES_SHOWN = std::size_t{10};
     constexpr auto MICROSECONDS_PER_SECOND = 1000.0 * 1000.0;

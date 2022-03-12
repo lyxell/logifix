@@ -50,6 +50,7 @@ private:
 public:
 
     auto print_json_data() const -> void;
+    auto print_graphviz_data() const -> void;
     auto add_file(const std::string&) -> node_id;
     auto run(std::function<void(node_id)>) -> void;
     auto disable_rule(const rule_id&) -> void;
