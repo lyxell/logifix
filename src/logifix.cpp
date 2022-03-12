@@ -379,13 +379,26 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     }
                 }
 
-                for (auto& [next_node, rule, take_transition] : next_nodes) {
-                    if (rule == "remove_redundant_parentheses") {
-                        take_transition = false;
-                        continue;
+                if (!current_has_parent) {
+                    for (auto& [next_node, rule, take_transition] : next_nodes) {
+                        if (rule == "remove_redundant_parentheses") {
+                            continue;
+                        }
+                        if (disabled_rules.find(rule) != disabled_rules.end()) {
+                            continue;
+                        }
+                        auto lock = std::unique_lock{work_mutex};
+                        pending_strings.emplace_back(next_node);
+                        taken_transitions[current_node].emplace(rule, next_node);
                     }
-                    auto lock = std::unique_lock{work_mutex};
-                    if (current_has_parent) {
+                } else {
+
+                    for (auto& [next_node, rule, take_transition] : next_nodes) {
+                        if (rule == "remove_redundant_parentheses") {
+                            take_transition = false;
+                            continue;
+                        }
+                        auto lock = std::unique_lock{work_mutex};
                         auto [parent_rule, parent_id] = parent[current_node];
                         auto [curr_pstr, curr_rewrites] = nodes[current_node];
                         auto [next_pstr, next_rewrites] = nodes[next_node];
@@ -399,16 +412,10 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                                 take_transition = false;
                             }
                         }
-                    } else if (disabled_rules.find(rule) != disabled_rules.end()) {
-                        take_transition = false;
-                    } else {
-                        take_transition = true;
                     }
-                }
 
-                auto lock = std::unique_lock{work_mutex};
+                    auto lock = std::unique_lock{work_mutex};
 
-                if (current_has_parent) {
                     auto rewrites = rewrite_collection{};
                     std::vector<node_id> taken_nodes;
                     for (const auto& [next_node, rule, take_transition] : next_nodes) {
@@ -441,13 +448,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             taken_transitions[current_node].emplace(rule, next_node);
                         }
                     }
-                } else {
-                    for (const auto& [next_node, rule, take_transition] : next_nodes) {
-                        if (take_transition) {
-                            pending_strings.emplace_back(next_node);
-                            taken_transitions[current_node].emplace(rule, next_node);
-                        }
-                    }
+
                 }
 
                 /* notify all threads that there is more work available */
