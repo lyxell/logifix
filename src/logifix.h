@@ -22,7 +22,8 @@ struct node_data_type {
     node_id parent;
     rewrite_collection creation_rewrites;
     std::string source_code;
-    std::unordered_set<std::string> children_strs;
+    std::unordered_set<std::string> children_hashset;
+    std::vector<node_id> children;
 };
 
 class program {
@@ -34,7 +35,6 @@ private:
     std::deque<node_id> pending_child_nodes;
     size_t id_counter = 0;
     std::unordered_map<node_id, node_data_type> node_data;
-    std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
 
     auto
     run_datalog_analysis(const std::string&) const -> std::set<std::pair<rule_id, rewrite_type>>;

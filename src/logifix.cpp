@@ -177,12 +177,14 @@ auto program::split_rewrite(const std::string& original, const rewrite_type& rew
     return result;
 }
 
-auto program::get_recursive_merge_result_for_node(node_id node) const -> std::string {
-    if (taken_transitions.find(node) == taken_transitions.end() ||
-        taken_transitions.at(node).empty()) {
-        return node_data.at(node).source_code;
+auto program::get_recursive_merge_result_for_node(node_id id) const -> std::string {
+    auto node = node_data.at(id);
+    for (auto child_id : node.children) {
+        if (node_data.at(child_id).creation_rule == "merge") {
+            return get_recursive_merge_result_for_node(child_id);
+        }
     }
-    return get_recursive_merge_result_for_node(taken_transitions.at(node).begin()->second);
+    return node.source_code;
 }
 
 auto program::post_process(const std::string& original, const std::string& changed) const
@@ -206,13 +208,17 @@ auto program::post_process(const std::string& original, const std::string& chang
     return apply_rewrites(changed, result);
 }
 
-auto program::get_patches_for_file(node_id node) const -> std::vector<patch_id> {
-    auto result = std::vector<patch_id>{};
-    if (taken_transitions.find(node) == taken_transitions.end()) {
-        return result;
-    }
-    for (auto [rule_id, child_id] : taken_transitions.at(node)) {
-        result.emplace_back(child_id);
+auto program::get_patches_for_file(node_id id) const -> std::vector<patch_id> {
+    std::vector<patch_id> result;
+    for (auto child_id : node_data.at(id).children) {
+        auto child = node_data.at(child_id);
+        if (child.creation_rule == "remove_redundant_parentheses") {
+            continue;
+        }
+        if (disabled_rules.find(child.creation_rule) != disabled_rules.end()) {
+            continue;
+        }
+        result.emplace_back(child.id);
     }
     return result;
 }
@@ -221,11 +227,10 @@ auto program::get_patches_for_rule(const rule_id& rule) const -> std::vector<pat
     auto result = std::vector<patch_id>{};
     for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
         auto node = node_data.at(node_id);
-        if (node.parent == node_id &&
-            taken_transitions.find(node.id) != taken_transitions.end()) {
-            for (auto [transition_rule, inner_node_id] : taken_transitions.at(node.id)) {
-                if (rule == transition_rule) {
-                    result.emplace_back(inner_node_id);
+        if (node.parent == node_id) {
+            for (auto child_id : node_data.at(node.id).children) {
+                if (rule == node_data.at(child_id).creation_rule) {
+                    result.emplace_back(child_id);
                 }
             }
         }
@@ -282,10 +287,16 @@ auto program::get_all_patches() const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
     for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
         auto node = node_data.at(node_id);
-        if (node.parent == node.id &&
-            taken_transitions.find(node.id) != taken_transitions.end()) {
-            for (auto [rule_id, inner_node_id] : taken_transitions.at(node.id)) {
-                result.emplace_back(inner_node_id);
+        if (node.parent == node.id) {
+            for (auto child_id : node_data.at(node.id).children) {
+                auto child = node_data.at(child_id);
+                if (disabled_rules.find(child.creation_rule) != disabled_rules.end()) {
+                    continue;
+                }
+                if (child.creation_rule == "remove_redundant_parentheses") {
+                    continue;
+                }
+                result.emplace_back(child_id);
             }
         }
     }
@@ -313,7 +324,7 @@ auto program::print_graphviz_data() const -> void {
     for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
         auto node = node_data.at(node_id);
         if (node.creation_rule == "remove_redundant_parentheses") continue;
-        if (utils::starts_with(node.creation_rule, "pick")) {
+        if (node.creation_rule == "merge") {
             std::cout << "    " << node.parent << " -> " << node.id << " [style = dashed label=\"" << node.creation_rule << "\"];" << std::endl;
         } else {
             std::cout << "    " << node.parent << " -> " << node.id << " [label = \"" << node.creation_rule << "\"];" << std::endl;
@@ -376,9 +387,10 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                         next_node.source_code = apply_rewrite(current_node.source_code, rewrite);
                         next_node.creation_rewrites = split_rewrite(current_node.source_code, rewrite);
                         next_node.parent = current_node.id;
-                        node_data[current_node.id].children_strs.emplace(next_node.source_code);
+                        node_data[current_node.id].children_hashset.emplace(next_node.source_code);
                         node_data[next_node.id] = next_node;
                         next_nodes.emplace_back(next_node);
+                        node_data[current_node.id].children.emplace_back(next_node.id);
                     }
                 }
 
@@ -392,7 +404,6 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                         }
                         auto lock = std::unique_lock{work_mutex};
                         pending_child_nodes.emplace_back(next_node.id);
-                        taken_transitions[current_node.id].emplace(next_node.creation_rule, next_node.id);
                     }
                 } else {
 
@@ -413,8 +424,8 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                              */
                             auto adjusted = adjust_rewrites(inverted, next_node.creation_rewrites);
                             auto candidate_string = apply_rewrites(parent_node.source_code, adjusted);
-                            if (parent_node.children_strs.find(candidate_string) !=
-                                parent_node.children_strs.end()) {
+                            if (parent_node.children_hashset.find(candidate_string) !=
+                                parent_node.children_hashset.end()) {
                                 continue;
                             }
                         }
@@ -428,21 +439,16 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             print_merge_conflict(current_node.source_code, rewrites, taken_nodes);
                             std::exit(1);
                         } else {
-                            auto rule = std::string{"pick"};
-                            for (auto x : taken_nodes) {
-                                rule += " ";
-                                rule += fmt::format("{}", x);
-                            }
                             auto lock = std::unique_lock{work_mutex};
                             node_data_type next_node;
                             next_node.id = create_id();
-                            next_node.creation_rule = rule;
+                            next_node.creation_rule = "merge";
                             next_node.source_code = apply_rewrites(current_node.source_code, rewrites);
                             next_node.creation_rewrites = rewrites;
                             next_node.parent = current_node.id;
                             node_data[next_node.id] = next_node;
                             pending_child_nodes.emplace_back(next_node.id);
-                            taken_transitions[current_node.id].emplace(next_node.creation_rule, next_node.id);
+                            node_data[current_node.id].children.emplace_back(next_node.id);
                         }
                     }
 
