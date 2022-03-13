@@ -317,10 +317,28 @@ auto program::print_performance_metrics() -> void {
     }
 }
 
+auto program::print_json_relations(node_id id) const -> void {
+    auto node = node_data.at(id);
+    for (auto child_id : node.children) {
+        auto child = node_data.at(child_id);
+        std::cout << "        [" << node.id << ", " << child.id << ", \"" << child.creation_rule << "\"]" << std::endl;
+        print_json_relations(child.id);
+    }
+}
+
+auto program::print_json_data(node_id id, std::string filename) const -> void {
+    auto node = node_data.at(id);
+    std::cout << "{" << std::endl;
+    std::cout << "    \"filename\": \"" << filename << "\"," << std::endl;
+    std::cout << "    \"edges\": [" << std::endl;
+    print_json_relations(id);
+    std::cout << "    ]" << std::endl;
+    std::cout << "}";
+}
+
 auto program::print_graphviz_data() const -> void {
     std::cout << "digraph {" << std::endl;
     size_t i = 0;
-
     for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
         auto node = node_data.at(node_id);
         if (node.creation_rule == "remove_redundant_parentheses") continue;

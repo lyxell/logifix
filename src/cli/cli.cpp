@@ -33,6 +33,7 @@ struct options {
     bool verbose;
     bool enable_all;
     bool print_graphviz;
+    bool print_json;
     std::set<std::string> files;
     std::set<std::string> accepted;
 };
@@ -267,6 +268,7 @@ auto parse_options(int argc, char** argv) -> options {
         .verbose = false,
         .enable_all = false,
         .print_graphviz = false,
+        .print_json = false,
         .files = {},
         .accepted = {},
     };
@@ -320,6 +322,8 @@ auto parse_options(int argc, char** argv) -> options {
          "Disable interaction, output a patch to stdout"},
         {"--print-graphviz", [&](const std::string& str) { opts.print_graphviz = true; },
          "Print graphviz representation of rewrite graph to stdout and exit"},
+        {"--print-json", [&](const std::string& str) { opts.print_json = true; },
+         "Print json data to stdout and exit"},
         {"--help",
          [&](const std::string& str) {
              print_usage();
@@ -686,6 +690,20 @@ auto main(int argc, char** argv) -> int {
 
     if (options.print_graphviz) {
         program.print_graphviz_data();
+        return 0;
+    }
+
+    if (options.print_json) {
+        size_t count = 0;
+        std::cout << "[" << std::endl;
+        for (auto [k, v] : filename_of_node) {
+            program.print_json_data(k, v);
+            if (count != filename_of_node.size() - 1) {
+                std::cout << "," << std::endl;
+            }
+            count++;
+        }
+        std::cout << std::endl << "]" << std::endl;
         return 0;
     }
 
