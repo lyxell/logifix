@@ -44,7 +44,7 @@ auto program::add_file(const std::string& file) -> size_t {
     node.creation_rule = "file";
     node.parent = node.id;
     node_data[node.id] = node;
-    pending_files.emplace_front(node.id);
+    pending_root_nodes.emplace_front(node.id);
     return node.id;
 }
 
@@ -338,13 +338,13 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                 /* acquire work */
                 {
                     auto lock = std::unique_lock{work_mutex};
-                    if (pending_strings.empty() && pending_files.empty()) {
+                    if (pending_child_nodes.empty() && pending_root_nodes.empty()) {
                         waiting_threads++;
                         if (waiting_threads == concurrency) {
                             done = true;
                             cv.notify_all();
                         } else {
-                            auto wakeup_when = [&]() { return !pending_strings.empty() || done; };
+                            auto wakeup_when = [&]() { return !pending_child_nodes.empty() || done; };
                             cv.wait(lock, wakeup_when);
                             waiting_threads--;
                         }
@@ -352,13 +352,13 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     if (done) {
                         return;
                     }
-                    if (pending_strings.empty()) {
-                        current_node = node_data[pending_files.front()];
-                        pending_files.pop_front();
+                    if (pending_child_nodes.empty()) {
+                        current_node = node_data[pending_root_nodes.front()];
+                        pending_root_nodes.pop_front();
                         report_progress(current_node.id);
                     } else {
-                        current_node = node_data[pending_strings.front()];
-                        pending_strings.pop_front();
+                        current_node = node_data[pending_child_nodes.front()];
+                        pending_child_nodes.pop_front();
                         current_node_has_parent = true;
                         parent_node = node_data[current_node.parent];
                     }
@@ -391,7 +391,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             continue;
                         }
                         auto lock = std::unique_lock{work_mutex};
-                        pending_strings.emplace_back(next_node.id);
+                        pending_child_nodes.emplace_back(next_node.id);
                         taken_transitions[current_node.id].emplace(next_node.creation_rule, next_node.id);
                     }
                 } else {
@@ -441,7 +441,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             next_node.creation_rewrites = rewrites;
                             next_node.parent = current_node.id;
                             node_data[next_node.id] = next_node;
-                            pending_strings.emplace_back(next_node.id);
+                            pending_child_nodes.emplace_back(next_node.id);
                             taken_transitions[current_node.id].emplace(next_node.creation_rule, next_node.id);
                         }
                     }

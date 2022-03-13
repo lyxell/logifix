@@ -30,8 +30,8 @@ class program {
 private:
 
     std::unordered_set<rule_id> disabled_rules;
-    std::deque<node_id> pending_files;
-    std::deque<node_id> pending_strings;
+    std::deque<node_id> pending_root_nodes;
+    std::deque<node_id> pending_child_nodes;
     size_t id_counter = 0;
     std::unordered_map<node_id, node_data_type> node_data;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
