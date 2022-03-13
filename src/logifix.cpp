@@ -38,10 +38,14 @@ auto program::create_id() -> size_t {
 }
 
 auto program::add_file(const std::string& file) -> size_t {
-    auto node_id = create_id();
-    source_code[node_id] = file;
-    pending_files.emplace_front(node_id);
-    return node_id;
+    node_data_type node;
+    node.id = create_id();
+    node.source_code = file;
+    node.creation_rule = "file";
+    node.parent = node.id;
+    node_data[node.id] = node;
+    pending_files.emplace_front(node.id);
+    return node.id;
 }
 
 auto program::disable_rule(const rule_id& rule) -> void { disabled_rules.emplace(rule); }
@@ -176,7 +180,7 @@ auto program::split_rewrite(const std::string& original, const rewrite_type& rew
 auto program::get_recursive_merge_result_for_node(node_id node) const -> std::string {
     if (taken_transitions.find(node) == taken_transitions.end() ||
         taken_transitions.at(node).empty()) {
-        return source_code.at(node);
+        return node_data.at(node).source_code;
     }
     return get_recursive_merge_result_for_node(taken_transitions.at(node).begin()->second);
 }
@@ -215,12 +219,13 @@ auto program::get_patches_for_file(node_id node) const -> std::vector<patch_id> 
 
 auto program::get_patches_for_rule(const rule_id& rule) const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
-    for (auto node = std::size_t{}; node < id_counter; node++) {
-        if (parent.find(node) == parent.end() &&
-            taken_transitions.find(node) != taken_transitions.end()) {
-            for (auto [transition_rule, node_id] : taken_transitions.at(node)) {
+    for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
+        auto node = node_data.at(node_id);
+        if (node.parent == node_id &&
+            taken_transitions.find(node.id) != taken_transitions.end()) {
+            for (auto [transition_rule, inner_node_id] : taken_transitions.at(node.id)) {
                 if (rule == transition_rule) {
-                    result.emplace_back(node_id);
+                    result.emplace_back(inner_node_id);
                 }
             }
         }
@@ -229,8 +234,8 @@ auto program::get_patches_for_rule(const rule_id& rule) const -> std::vector<pat
 }
 
 auto program::get_patch_data(patch_id patch) const -> std::tuple<rule_id, node_id, std::string> {
-    auto [r, p, rws] = parent.at(patch);
-    return {r, p, get_recursive_merge_result_for_node(patch)};
+    auto node = node_data.at(patch);
+    return {node.creation_rule, node.parent, get_recursive_merge_result_for_node(node.id)};
 }
 
 auto program::print_merge_conflict(const std::string& source, rewrite_collection rewrites,
@@ -242,45 +247,45 @@ auto program::print_merge_conflict(const std::string& source, rewrite_collection
     auto fragment_end = std::get<1>(rewrites.back());
     fmt::print(stderr, "Related code fragment: {}\n",
                source.substr(fragment_start, fragment_end - fragment_start));
-    for (const auto& node : node_ids) {
-        auto [rule, parent_id, rws] = parent.at(node);
+    for (const auto& node_id : node_ids) {
+        auto node = node_data.at(node_id);
+        auto parent = node_data.at(node.parent);
         fmt::print(stderr, "Rule: ");
-        fmt::print(stderr, fg(fmt::terminal_color::cyan), "{}\n", rule);
-        auto [p_rule, p_id, c_rewrites] = parent.at(node);
-        auto p_str = source_code.at(p_id);
-        for (auto [start, end, replacement] : c_rewrites) {
+        fmt::print(stderr, fg(fmt::terminal_color::cyan), "{}\n", node.creation_rule);
+        for (auto [start, end, replacement] : node.creation_rewrites) {
             fmt::print(stderr, "    Original: {} Replacement: {} Position: {}-{}\n",
-                       p_str.substr(start, end - start), replacement, start, end);
+                       parent.source_code.substr(start, end - start), replacement, start, end);
         }
     }
 }
 
-auto program::get_result(node_id parent, const std::vector<patch_id>& patches) const
+auto program::get_result(node_id parent_id, const std::vector<patch_id>& patches) const
     -> std::string {
-    auto parent_source = source_code.at(parent);
+    auto parent = node_data.at(parent_id);
     auto all_rewrites = rewrite_collection{};
     for (auto patch : patches) {
         auto data = get_patch_data(patch);
         auto result = get_recursive_merge_result_for_node(patch);
-        auto rewrites = split_rewrite(parent_source, std::tuple(0ul, parent_source.size(), result));
+        auto rewrites = split_rewrite(parent.source_code, std::tuple(0ul, parent.source_code.size(), result));
         all_rewrites.insert(all_rewrites.end(), rewrites.begin(), rewrites.end());
     }
     std::sort(all_rewrites.begin(), all_rewrites.end());
     all_rewrites.erase(std::unique(all_rewrites.begin(), all_rewrites.end()), all_rewrites.end());
     if (rewrite_collection_overlap(all_rewrites)) {
-        print_merge_conflict(parent_source, all_rewrites, patches);
+        print_merge_conflict(parent.source_code, all_rewrites, patches);
         std::exit(1);
     }
-    return post_process(parent_source, apply_rewrites(parent_source, all_rewrites));
+    return post_process(parent.source_code, apply_rewrites(parent.source_code, all_rewrites));
 }
 
 auto program::get_all_patches() const -> std::vector<patch_id> {
     auto result = std::vector<patch_id>{};
-    for (auto node = std::size_t{}; node < id_counter; node++) {
-        if (parent.find(node) == parent.end() &&
-            taken_transitions.find(node) != taken_transitions.end()) {
-            for (auto [rule_id, node_id] : taken_transitions.at(node)) {
-                result.emplace_back(node_id);
+    for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
+        auto node = node_data.at(node_id);
+        if (node.parent == node.id &&
+            taken_transitions.find(node.id) != taken_transitions.end()) {
+            for (auto [rule_id, inner_node_id] : taken_transitions.at(node.id)) {
+                result.emplace_back(inner_node_id);
             }
         }
     }
@@ -305,13 +310,13 @@ auto program::print_graphviz_data() const -> void {
     std::cout << "digraph {" << std::endl;
     size_t i = 0;
 
-    for (const auto& [par, y] : parent) {
-        const auto& [rule, child, rws] = y;
-        if (rule == "remove_redundant_parentheses") continue;
-        if (utils::starts_with(rule, "pick")) {
-            std::cout << "    " << child << " -> " << par << " [style = dashed label=\"" << rule << "\"];" << std::endl;
+    for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
+        auto node = node_data.at(node_id);
+        if (node.creation_rule == "remove_redundant_parentheses") continue;
+        if (utils::starts_with(node.creation_rule, "pick")) {
+            std::cout << "    " << node.parent << " -> " << node.id << " [style = dashed label=\"" << node.creation_rule << "\"];" << std::endl;
         } else {
-            std::cout << "    " << child << " -> " << par << " [label = \"" << rule << "\"];" << std::endl;
+            std::cout << "    " << node.parent << " -> " << node.id << " [label = \"" << node.creation_rule << "\"];" << std::endl;
         }
     }
     std::cout << "}" << std::endl;
@@ -327,13 +332,9 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
     for (auto i = std::size_t{}; i < concurrency; i++) {
         thread_pool.emplace_back(std::thread([&] {
             while (true) {
-                auto current_node = node_id{};
-                auto current_node_source = std::string{};
+                node_data_type current_node;
+                node_data_type parent_node;
                 bool current_node_has_parent = false;
-                rewrite_collection current_node_rewrites;
-                std::string parent_source;
-                std::unordered_set<std::string> parent_children_strs;
-                node_id parent_id;
                 /* acquire work */
                 {
                     auto lock = std::unique_lock{work_mutex};
@@ -352,80 +353,79 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                         return;
                     }
                     if (pending_strings.empty()) {
-                        current_node = pending_files.front();
+                        current_node = node_data[pending_files.front()];
                         pending_files.pop_front();
-                        report_progress(current_node);
+                        report_progress(current_node.id);
                     } else {
-                        current_node = pending_strings.front();
+                        current_node = node_data[pending_strings.front()];
                         pending_strings.pop_front();
                         current_node_has_parent = true;
-                        auto [p_rule, p_id, c_rewrites] = parent[current_node];
-                        parent_source = source_code[p_id];
-                        parent_id = p_id;
-                        parent_children_strs = children_strs[p_id];
-                        current_node_rewrites = c_rewrites;
+                        parent_node = node_data[current_node.parent];
                     }
-                    current_node_source = source_code[current_node];
                 }
 
-                auto next_nodes = std::vector<std::tuple<node_id, rule_id, std::string, rewrite_collection>>{};
+                auto next_nodes = std::vector<node_data_type>{};
 
                 {
-                    auto rewrites = run_datalog_analysis(current_node_source);
+                    auto rewrites = run_datalog_analysis(current_node.source_code);
                     auto lock = std::unique_lock{work_mutex};
                     for (const auto& [rule, rewrite] : rewrites) {
-                        auto rewrites = split_rewrite(current_node_source, rewrite);
-                        auto next_node = create_id();
-                        auto next_node_source = apply_rewrite(current_node_source, rewrite);
-                        source_code[next_node] = next_node_source;
-                        parent[next_node] = {rule, current_node, rewrites};
-                        children_strs[current_node].emplace(next_node_source);
-                        next_nodes.emplace_back(next_node, rule, next_node_source, rewrites);
+                        node_data_type next_node;
+                        next_node.id = create_id();
+                        next_node.creation_rule = rule;
+                        next_node.source_code = apply_rewrite(current_node.source_code, rewrite);
+                        next_node.creation_rewrites = split_rewrite(current_node.source_code, rewrite);
+                        next_node.parent = current_node.id;
+                        node_data[current_node.id].children_strs.emplace(next_node.source_code);
+                        node_data[next_node.id] = next_node;
+                        next_nodes.emplace_back(next_node);
                     }
                 }
 
                 if (!current_node_has_parent) {
-                    for (const auto& [next_node, rule, next_source, next_rewrites] : next_nodes) {
-                        if (rule == "remove_redundant_parentheses") {
+                    for (const auto& next_node : next_nodes) {
+                        if (next_node.creation_rule == "remove_redundant_parentheses") {
                             continue;
                         }
-                        if (disabled_rules.find(rule) != disabled_rules.end()) {
+                        if (disabled_rules.find(next_node.creation_rule) != disabled_rules.end()) {
                             continue;
                         }
                         auto lock = std::unique_lock{work_mutex};
-                        pending_strings.emplace_back(next_node);
-                        taken_transitions[current_node].emplace(rule, next_node);
+                        pending_strings.emplace_back(next_node.id);
+                        taken_transitions[current_node.id].emplace(next_node.creation_rule, next_node.id);
                     }
                 } else {
 
                     auto rewrites = rewrite_collection{};
                     std::vector<node_id> taken_nodes;
 
-                    for (const auto& [next_node, rule, next_source, next_rewrites] : next_nodes) {
-                        if (rule == "remove_redundant_parentheses") {
+                    for (const auto& next_node : next_nodes) {
+                        if (next_node.creation_rule == "remove_redundant_parentheses") {
                             continue;
                         }
-                        /* Calculate what rewrites would be needed to turn the current node into its parent */
-                        auto inverted = rewrites_invert(parent_source, current_node_rewrites);
-                        /* Make sure that the inverted rewrites and the rewrites for the next node does not have any overlap */
-                        if (!rewrite_collections_overlap(inverted, next_rewrites)) {
-                            /* We "backport" the rewrites for the next node to apply to the parent node and check if there's any child with
-                             * source code which matches these rewrites */
-                            auto adjusted = adjust_rewrites(inverted, next_rewrites);
-                            auto candidate_string = apply_rewrites(parent_source, adjusted);
-                            if (parent_children_strs.find(candidate_string) !=
-                                parent_children_strs.end()) {
+                        auto inverted = rewrites_invert(parent_node.source_code, current_node.creation_rewrites);
+                        /* Make sure that the inverted rewrites and the rewrites for the next node do not have any overlap */
+                        if (!rewrite_collections_overlap(inverted, next_node.creation_rewrites)) {
+                            /**
+                             * We "backport" the rewrites for the next node to apply to
+                             * the parent node and check if there's any child with
+                             * source code which matches these rewrites
+                             */
+                            auto adjusted = adjust_rewrites(inverted, next_node.creation_rewrites);
+                            auto candidate_string = apply_rewrites(parent_node.source_code, adjusted);
+                            if (parent_node.children_strs.find(candidate_string) !=
+                                parent_node.children_strs.end()) {
                                 continue;
                             }
                         }
-                        taken_nodes.emplace_back(next_node);
-                        rewrites.insert(rewrites.end(), next_rewrites.begin(),
-                                        next_rewrites.end());
+                        taken_nodes.emplace_back(next_node.id);
+                        rewrites.insert(rewrites.end(), next_node.creation_rewrites.begin(),
+                                        next_node.creation_rewrites.end());
                     }
 
                     if (!rewrites.empty()) {
                         if (rewrite_collection_overlap(rewrites)) {
-                            print_merge_conflict(current_node_source, rewrites, taken_nodes);
+                            print_merge_conflict(current_node.source_code, rewrites, taken_nodes);
                             std::exit(1);
                         } else {
                             auto rule = std::string{"pick"};
@@ -434,11 +434,15 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                                 rule += fmt::format("{}", x);
                             }
                             auto lock = std::unique_lock{work_mutex};
-                            auto next_node = create_id();
-                            source_code[next_node] = apply_rewrites(current_node_source, rewrites);
-                            parent[next_node] = {rule, current_node, rewrites};
-                            pending_strings.emplace_back(next_node);
-                            taken_transitions[current_node].emplace(rule, next_node);
+                            node_data_type next_node;
+                            next_node.id = create_id();
+                            next_node.creation_rule = rule;
+                            next_node.source_code = apply_rewrites(current_node.source_code, rewrites);
+                            next_node.creation_rewrites = rewrites;
+                            next_node.parent = current_node.id;
+                            node_data[next_node.id] = next_node;
+                            pending_strings.emplace_back(next_node.id);
+                            taken_transitions[current_node.id].emplace(next_node.creation_rule, next_node.id);
                         }
                     }
 

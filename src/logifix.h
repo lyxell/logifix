@@ -16,17 +16,24 @@ using patch_id = size_t;
 using rewrite_type = std::tuple<size_t, size_t, std::string>;
 using rewrite_collection = std::vector<rewrite_type>;
 
+struct node_data_type {
+    node_id id;
+    rule_id creation_rule;
+    node_id parent;
+    rewrite_collection creation_rewrites;
+    std::string source_code;
+    std::unordered_set<std::string> children_strs;
+};
+
 class program {
 
 private:
 
-    std::unordered_map<node_id, std::string> source_code;
     std::unordered_set<rule_id> disabled_rules;
     std::deque<node_id> pending_files;
     std::deque<node_id> pending_strings;
     size_t id_counter = 0;
-    std::unordered_map<node_id, std::tuple<rule_id, node_id, rewrite_collection>> parent;
-    std::unordered_map<node_id, std::unordered_set<std::string>> children_strs;
+    std::unordered_map<node_id, node_data_type> node_data;
     std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
 
     auto
