@@ -317,12 +317,25 @@ auto program::print_performance_metrics() -> void {
     }
 }
 
-auto program::print_json_relations(node_id id) const -> void {
+auto program::add_relations(node_id id, std::vector<std::tuple<node_id, node_id, std::string>>& result) const -> void {
     auto node = node_data.at(id);
     for (auto child_id : node.children) {
         auto child = node_data.at(child_id);
-        std::cout << "        [" << node.id << ", " << child.id << ", \"" << child.creation_rule << "\"]" << std::endl;
-        print_json_relations(child.id);
+        result.emplace_back(node.id, child.id, child.creation_rule);
+        add_relations(child.id, result);
+    }
+}
+
+auto program::print_json_relations(node_id id) const -> void {
+    std::vector<std::tuple<node_id, node_id, std::string>> result;
+    add_relations(id, result);
+    for (size_t i = 0; i < result.size(); i++) {
+      auto [node_id, child_id, creation_rule] = result[i];
+      std::cout << "        [" << node_id << ", " << child_id << ", \"" << creation_rule << "\"]";
+      if (i != result.size() - 1) {
+        std::cout << ",";
+      }
+      std::cout << std::endl;
     }
 }
 

@@ -58,6 +58,7 @@ public:
     auto run(std::function<void(node_id)>) -> void;
     auto disable_rule(const rule_id&) -> void;
     auto print_graphviz_data() const -> void;
+    auto add_relations(node_id id, std::vector<std::tuple<node_id, node_id, std::string>>& result) const -> void;
     auto print_json_relations(node_id) const -> void;
     auto print_json_data(node_id, std::string) const -> void;
     auto get_patch_data(patch_id) const -> std::tuple<rule_id, node_id, std::string>;
