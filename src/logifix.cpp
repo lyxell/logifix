@@ -470,16 +470,21 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             print_merge_conflict(current_node.source_code, rewrites, taken_nodes);
                             std::exit(1);
                         } else {
-                            auto lock = std::unique_lock{work_mutex};
-                            node_data_type next_node;
-                            next_node.id = create_id();
-                            next_node.creation_rule = "merge";
-                            next_node.source_code = apply_rewrites(current_node.source_code, rewrites);
-                            next_node.creation_rewrites = rewrites;
-                            next_node.parent = current_node.id;
-                            node_data[next_node.id] = next_node;
-                            pending_child_nodes.emplace_back(next_node.id);
-                            node_data[current_node.id].children.emplace_back(next_node.id);
+                            for (auto taken_node : taken_nodes) {
+                              auto lock = std::unique_lock{work_mutex};
+                              /*
+                              node_data_type next_node;
+                              next_node.id = create_id();
+                              next_node.creation_rule = "merge";
+                              next_node.source_code = apply_rewrites(current_node.source_code, rewrites);
+                              next_node.creation_rewrites = rewrites;
+                              next_node.parent = current_node.id;
+                              node_data[next_node.id] = next_node;
+                              pending_child_nodes.emplace_back(next_node.id);
+                              node_data[current_node.id].children.emplace_back(next_node.id);
+                              */
+                              pending_child_nodes.emplace_back(taken_node);
+                            }
                         }
                     }
 
