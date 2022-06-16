@@ -465,6 +465,12 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                                         next_node.creation_rewrites.end());
                     }
 
+                    for (auto taken_node : taken_nodes) {
+                      auto lock = std::unique_lock{work_mutex};
+                      pending_child_nodes.emplace_back(taken_node);
+                    }
+
+                    /*
                     if (!rewrites.empty()) {
                         if (rewrite_collection_overlap(rewrites)) {
                             print_merge_conflict(current_node.source_code, rewrites, taken_nodes);
@@ -472,7 +478,6 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                         } else {
                             for (auto taken_node : taken_nodes) {
                               auto lock = std::unique_lock{work_mutex};
-                              /*
                               node_data_type next_node;
                               next_node.id = create_id();
                               next_node.creation_rule = "merge";
@@ -482,11 +487,11 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                               node_data[next_node.id] = next_node;
                               pending_child_nodes.emplace_back(next_node.id);
                               node_data[current_node.id].children.emplace_back(next_node.id);
-                              */
                               pending_child_nodes.emplace_back(taken_node);
                             }
                         }
                     }
+                    */
 
                 }
 
