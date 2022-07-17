@@ -40,6 +40,9 @@ is_side_effect_free_expression(id) :-
 is_side_effect_free_expression(id) :-
   floating_point_literal(id).
 
+is_side_effect_free_expression(id) :-
+  string_literal(id).
+
 /** Other */
 
 is_side_effect_free_expression(id) :-
