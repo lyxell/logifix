@@ -483,6 +483,13 @@ field_access(id, subject, field) :-
     parent_of(id, "subject", subject),
     parent_of(id, "field", field).
 
+/**
+ * `id`             Id
+ */
+.decl this_expression(id: id)
+this_expression(id) :-
+    name_of(id, "this_expression").
+
 /* }
  ****************************************************/
 
