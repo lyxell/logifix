@@ -48,6 +48,7 @@
 #include "datalog/ast.dl"
 #include "datalog/scoping.dl"
 #include "datalog/typechecking.dl"
+#include "datalog/sideeffects.dl"
 
 /* Types
  ********************************/
