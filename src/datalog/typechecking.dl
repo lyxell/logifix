@@ -178,6 +178,7 @@ ast_type_args_list_to_type_list([head, tail], [head_type, tail_type]) :-
 
 .decl ast_type_args_to_type_list(id: id, type: type_list)
 ast_type_args_to_type_list(nil, nil).
+// diamond operator
 ast_type_args_to_type_list(id, [nil, nil]) :-
     type_arguments(id, nil).
 ast_type_args_to_type_list(id, types) :-
@@ -221,6 +222,9 @@ ast_type_to_type(id, [package, class, type_args]) :-
 ast_type_to_type(id, [package, class, nil]) :-
     native_type(package, class),
     class_type(id, nil, class, nil, _). // TODO: Check imports
+/* Wildcards */
+ast_type_to_type(id, ["", "?", nil]) :-
+    name_of(id, "wildcard").
 
 /* Primitive types */
 ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
