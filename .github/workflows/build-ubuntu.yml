@@ -105,20 +105,6 @@ jobs:
     - run: ./logifix --in-place --accept-all pitest/
     - run: cd pitest && mvn compile
 
-  compile-karate:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download logifix
-      uses: actions/download-artifact@v2
-      with:
-        name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/intuit/karate.git
-    - run: cd karate && mvn compile
-    - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all karate/
-    - run: cd karate && mvn compile
-
   compile-testng:
     needs: build
     runs-on: ubuntu-latest
