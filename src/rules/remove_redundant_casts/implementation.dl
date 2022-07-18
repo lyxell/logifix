@@ -1,4 +1,4 @@
 replace_node_with_node("remove_redundant_casts", id, value) :-
     cast_expression(id, cast_type, value),
-    has_type(value, type),
-    ast_type_to_type(cast_type, type).
+    has_type(value, [x, y, nil]),
+    ast_type_to_type(cast_type, [x, y, nil]).
