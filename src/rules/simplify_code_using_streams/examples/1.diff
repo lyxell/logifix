@@ -1,0 +1,10 @@
+        private List<FlashMap> getExpiredFlashMaps(List<FlashMap> allMaps) {
+-               List<FlashMap> result = new ArrayList<>();
+-               for (FlashMap map : allMaps) {
+-                       if (map.isExpired()) {
+-                               result.add(map);
+-                       }
+-               }
+-               return result;
++               return allMaps.stream().filter(FlashMap::isExpired).collect(Collectors.toList());
+        }

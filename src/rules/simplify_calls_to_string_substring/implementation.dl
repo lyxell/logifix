@@ -1,46 +1,39 @@
 /* Pre  [:x].substring(0) */
 /* Post [:x]              */
-rewrite("simplify_calls_to_string_substring", filename, start, end, subject_str) :-
-    method_invocation(id, subject, "substring", [arg, nil]),
-        filename_of(id, filename),
-        starts_at(id, start),
-        ends_at(id, end),
-    has_string_type(subject),
-    string_representation(arg, "0"),
-    string_representation(subject, subject_str).
+replace_node_with_node("simplify_calls_to_string_substring", id, substring_subject) :-
+    method_invocation(id, substring_subject, "substring", [arg, nil]),
+    has_type(substring_subject, ["java.lang", "String", nil]),
+    evaluates_to_integer_value(arg, 0).
 
 /* Pre  [:x].substring(0, [:x].length()) */
 /* Post [:x]                             */
-rewrite("simplify_calls_to_string_substring", filename, start, end, subject_str) :-
-    method_invocation(id, subject, "substring", [arg1, [arg2, nil]]),
-        filename_of(id, filename),
-        starts_at(id, start),
-        ends_at(id, end),
-    has_string_type(subject),
-    string_representation(subject, subject_str),
-    string_representation(arg1, "0"),
-    string_representation(arg2, cat(subject_str, ".length()")).
+replace_node_with_node("simplify_calls_to_string_substring", id, substring_subject) :-
+    method_invocation(id, substring_subject, "substring", [arg1, [arg2, nil]]),
+    has_type(substring_subject, ["java.lang", "String", nil]),
+    evaluates_to_integer_value(arg1, 0),
+    method_invocation(arg2, length_subject, "length", nil),
+    point_of_declaration(substring_subject, declaration_point),
+    point_of_declaration(length_subject, declaration_point).
+
 
 /* Pre  [:x].substring([:x].length()) */
 /* Post ""                         */
-rewrite("simplify_calls_to_string_substring", filename, start, end, "\"\"") :-
-    method_invocation(id, subject, "substring", [arg, nil]),
-        filename_of(id, filename),
-        starts_at(id, start),
-        ends_at(id, end),
-    has_string_type(subject),
-    string_representation(subject, subject_str),
-    string_representation(arg, cat(subject_str, ".length()")).
+replace_node_with_string("simplify_calls_to_string_substring", id, "\"\"") :-
+    method_invocation(id, substring_subject, "substring", [arg, nil]),
+    has_type(substring_subject, ["java.lang", "String", nil]),
+    method_invocation(arg, length_subject, "length", nil),
+    point_of_declaration(substring_subject, declaration_point),
+    point_of_declaration(length_subject, declaration_point).
 
 /* Pre  [:x].substring([:y], [:x].length()) */
 /* Post [:x].substring([:y])                */
-rewrite("simplify_calls_to_string_substring", filename, start, end, cat(subject_str, ".substring(", arg1_str, ")")) :-
-    method_invocation(id, subject, "substring", [arg1, [arg2, nil]]),
-        filename_of(id, filename),
-        starts_at(id, start),
-        ends_at(id, end),
-    has_string_type(subject),
-    ! string_representation(arg1, "0"),
-    string_representation(subject, subject_str),
-    string_representation(arg2, cat(subject_str, ".length()")),
-    string_representation(arg1, arg1_str).
+replace_node_with_string("simplify_calls_to_string_substring", id,
+    cat(@node_to_string(code, substring_subject), ".substring(", @node_to_string(code, arg1), ")")
+) :-
+    method_invocation(id, substring_subject, "substring", [arg1, [arg2, nil]]),
+    source_code(_, code),
+    has_type(substring_subject, ["java.lang", "String", nil]),
+    ! evaluates_to_integer_value(arg1, 0),
+    method_invocation(arg2, length_subject, "length", nil),
+    point_of_declaration(substring_subject, declaration_point),
+    point_of_declaration(length_subject, declaration_point).
