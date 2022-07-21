@@ -16,26 +16,31 @@ using patch_id = size_t;
 using rewrite_type = std::tuple<size_t, size_t, std::string>;
 using rewrite_collection = std::vector<rewrite_type>;
 
+struct node_data_type {
+    node_id id;
+    rule_id creation_rule;
+    node_id parent;
+    rewrite_collection creation_rewrites;
+    std::string source_code;
+    std::unordered_set<std::string> children_hashset;
+    std::vector<node_id> children;
+};
+
 class program {
 
 private:
 
     std::unordered_set<rule_id> disabled_rules;
-    std::deque<node_id> pending_files;
-    std::deque<node_id> pending_strings;
+    std::deque<node_id> pending_root_nodes;
+    std::deque<node_id> pending_child_nodes;
     size_t id_counter = 0;
-    std::unordered_map<node_id, std::pair<rule_id, node_id>> parent;
-    std::unordered_map<node_id, std::unordered_map<rule_id, std::unordered_set<std::string>>>
-        children_strs;
-    std::unordered_map<node_id, std::set<std::pair<rule_id, node_id>>> taken_transitions;
-
-    std::vector<std::pair<std::string, rewrite_collection>> nodes;
+    std::unordered_map<node_id, node_data_type> node_data;
 
     auto
-    get_patches(const std::string&) const -> std::set<std::pair<rule_id, rewrite_type>>;
+    run_datalog_analysis(const std::string&) const -> std::set<std::pair<rule_id, rewrite_type>>;
     auto print_performance_metrics() -> void;
     auto print_merge_conflict(const std::string&, rewrite_collection, const std::vector<node_id>&) const -> void;
-    auto create_id(const std::string&, const rewrite_collection&) -> size_t;
+    auto create_id() -> size_t;
     auto apply_rewrite(const std::string&, const rewrite_type&) const -> std::string;
     auto apply_rewrites(const std::string&, rewrite_collection) const -> std::string;
     auto adjust_rewrites(const rewrite_collection&, const rewrite_collection&) const -> rewrite_collection;
@@ -52,6 +57,10 @@ public:
     auto add_file(const std::string&) -> node_id;
     auto run(std::function<void(node_id)>) -> void;
     auto disable_rule(const rule_id&) -> void;
+    auto print_graphviz_data() const -> void;
+    auto add_relations(node_id id, std::vector<std::tuple<node_id, node_id, std::string>>& result) const -> void;
+    auto print_json_relations(node_id) const -> void;
+    auto print_json_data(node_id, std::string) const -> void;
     auto get_patch_data(patch_id) const -> std::tuple<rule_id, node_id, std::string>;
     auto get_all_patches() const -> std::vector<patch_id>;
     auto get_patches_for_rule(const rule_id&) const -> std::vector<patch_id>;

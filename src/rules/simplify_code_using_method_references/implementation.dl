@@ -31,4 +31,4 @@ replace_node_with_string("simplify_code_using_method_references", lambda_expr,
     lambda_params(params, [param, nil]),
     method_invocation(lambda_body, subject, method, nil),
     point_of_declaration(subject, param),
-    _has_type(param, [_, type_name, nil]).
+    has_type(param, [_, type_name, nil]).

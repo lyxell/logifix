@@ -5,7 +5,7 @@ replace_node_with_string("simplify_calls_to_collection_removeall", id,
 ) :-
     method_invocation(id, collection, "removeAll", [arg, nil]),
     source_code(_, code),
-    _has_type(collection, [package, class, _]),
+    has_type(collection, [package, class, _]),
     collection_type(package, class),
     point_of_declaration(collection, declaration_point),
     point_of_declaration(arg, declaration_point).

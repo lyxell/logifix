@@ -3,7 +3,6 @@
 #include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/fix_inefficient_calls_to_foreach_list_add/implementation.dl"
 #include "rules/fix_inefficient_map_access/implementation.dl"
-#include "rules/fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison/implementation.dl"
 #include "rules/fix_null_returns_in_tostring/implementation.dl"
 #include "rules/fix_potential_resource_leaks/implementation.dl"
 #include "rules/fix_raw_use_of_empty_collections/implementation.dl"
@@ -46,9 +45,10 @@
 #include "rules/simplify_ternary_conditional_expressions/implementation.dl"
 #include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
-#include "datalog/nodes.dl"
+#include "datalog/ast.dl"
 #include "datalog/scoping.dl"
 #include "datalog/typechecking.dl"
+#include "datalog/sideeffects.dl"
 
 /* Types
  ********************************/

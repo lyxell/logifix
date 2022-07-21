@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "## Rules"
+echo "# Predefined transformations"
 
 for f in ../src/rules/*; do
     json_file="$f/data.json"
@@ -19,6 +19,11 @@ for f in ../src/rules/*; do
                 echo "* SonarSource ID: N/A"
             else
                 echo "* SonarSource ID: [$(jq --raw-output .sonar.id $json_file)]($(jq --raw-output .sonar.url $json_file))"
+            fi
+            if [ "$(jq --raw-output .spotbugs.id $json_file)" = "N/A" ] || [ "$(jq --raw-output .spotbugs.id $json_file)" = "null" ]; then
+                echo "* SpotBugs ID: N/A"
+            else
+                echo "* SpotBugs ID: [$(jq --raw-output .spotbugs.id $json_file)]($(jq --raw-output .spotbugs.url $json_file))"
             fi
             echo ""
             if [ -d "$examples_dir" ]; then

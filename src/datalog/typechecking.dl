@@ -178,6 +178,7 @@ ast_type_args_list_to_type_list([head, tail], [head_type, tail_type]) :-
 
 .decl ast_type_args_to_type_list(id: id, type: type_list)
 ast_type_args_to_type_list(nil, nil).
+// diamond operator
 ast_type_args_to_type_list(id, [nil, nil]) :-
     type_arguments(id, nil).
 ast_type_args_to_type_list(id, types) :-
@@ -221,6 +222,9 @@ ast_type_to_type(id, [package, class, type_args]) :-
 ast_type_to_type(id, [package, class, nil]) :-
     native_type(package, class),
     class_type(id, nil, class, nil, _). // TODO: Check imports
+/* Wildcards */
+ast_type_to_type(id, ["", "?", nil]) :-
+    name_of(id, "wildcard").
 
 /* Primitive types */
 ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
@@ -229,52 +233,63 @@ ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
     starts_at(name, start),
     ends_at(name, end).
 
-.decl _has_type(id: id, type: type)
-.output _has_type(IO=stdout)
-_has_type(id, type) :-
+.decl has_type(id: id, type: type)
+.output has_type(IO=stdout)
+has_type(id, type) :-
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", ast_type),
     ast_type_to_type(ast_type, type).
 
-_has_type(id, type) :-
+has_type(id, type) :-
     method_invocation(id, nil, meth, nil),
     method_declaration(_, _, meth_header, _),
     method_header(meth_header, ast_type, declarator, _),
     ast_type_to_type(ast_type, type),
     method_declarator(declarator, meth, nil).
 
-_has_type(id, ["", "float", nil]) :-
+has_type(id, ["", "float", nil]) :-
     floating_point_literal(id).
 
-_has_type(id, ["java.lang", "String", nil]) :-
+has_type(id, ["java.lang", "String", nil]) :-
     string_literal(id).
 
-_has_type(id, ["java.util", "Iterator", type_args]) :-
+has_type(id, ["java.util", "Iterator", type_args]) :-
     method_invocation(id, subject, "iterator", nil),
-    _has_type(subject, [package, class, type_args]),
+    has_type(subject, [package, class, type_args]),
     collection_type(package, class).
 
-_has_type(id, ["java.util.stream", "Stream", type_args]) :-
+has_type(id, ["java.util.stream", "Stream", type_args]) :-
     method_invocation(id, subject, "stream", nil),
-    _has_type(subject, [package, class, type_args]),
+    has_type(subject, [package, class, type_args]),
     collection_type(package, class).
-_has_type(id, ["java.util.stream", "Stream", type_args]) :-
+has_type(id, ["java.util.stream", "Stream", type_args]) :-
     method_invocation(id, subject, method, _),
     is_type_preserving_stream_method(method),
-    _has_type(subject, ["java.util.stream", "Stream", type_args]).
+    has_type(subject, ["java.util.stream", "Stream", type_args]).
 
-_has_type(id, type_arg) :-
+has_type(id, type_arg) :-
     method_invocation(id, subject, "next", nil),
-    _has_type(subject, ["java.util", "Iterator", [type_arg, nil]]).
+    has_type(subject, ["java.util", "Iterator", [type_arg, nil]]).
 
 /* Type the lambda params inside streams */
-_has_type(param, type_arg) :-
-    _has_type(subject, ["java.util.stream", "Stream", [type_arg, nil]]),
+has_type(param, type_arg) :-
+    has_type(subject, ["java.util.stream", "Stream", [type_arg, nil]]),
     method_invocation(_, subject, method, [lambda, nil]),
     is_type_preserving_stream_method(method),
     lambda_expression(lambda, lambda_params, _),
     lambda_params(lambda_params, [param, nil]),
     formal_parameter(param, _, _, _).
+
+has_type(id, type_arg) :-
+    method_invocation(id, subject, "get", _),
+    has_type(subject, ["java.util", "Map", [_, [type_arg, nil]]]).
+
+has_type(id, type_arg) :-
+    method_invocation(id, subject, "getKey", nil),
+    has_type(subject, ["Map", "Entry", [type_arg, [_, nil]]]).
+has_type(id, type_arg) :-
+    method_invocation(id, subject, "getValue", nil),
+    has_type(subject, ["Map", "Entry", [_, [type_arg, nil]]]).
 
 /*
 

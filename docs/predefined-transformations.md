@@ -1,9 +1,10 @@
-## Rules
+# Predefined transformations
 
 ### Fix broken null checks
 
 * PMD ID: [BrokenNullCheck](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#brokennullcheck)
 * SonarSource ID: [S2259](https://rules.sonarsource.com/java/RSPEC-2259)
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -13,6 +14,7 @@
 
 * PMD ID: [DontCallThreadRun](https://pmd.github.io/latest/pmd_rules_java_multithreading.html#dontcallthreadrun)
 * SonarSource ID: [S1217](https://rules.sonarsource.com/java/RSPEC-1217)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -29,19 +31,11 @@
 <ul> </ul>
 
 
-### Fix comparisons of atomic classes
-
-* PMD ID: N/A
-* SonarSource ID: [S2204](https://rules.sonarsource.com/java/RSPEC-2204)
-
-
-<ul> </ul>
-
-
 ### Fix imprecise calls to BigDecimal
 
 * PMD ID: [AvoidDecimalLiteralsInBigDecimalConstructor](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#avoiddecimalliteralsinbigdecimalconstructor)
 * SonarSource ID: [S2111](https://rules.sonarsource.com/java/RSPEC-2111)
+* SpotBugs ID: [DMI_BIGDECIMAL_CONSTRUCTED_FROM_DOUBLE](https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#dmi-bigdecimal-constructed-from-double-that-isn-t-represented-precisely-dmi-bigdecimal-constructed-from-double)
 
 #### Examples
 ```diff
@@ -62,6 +56,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S2203](https://rules.sonarsource.com/java/RSPEC-2203)
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -71,6 +66,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S2864](https://rules.sonarsource.com/java/RSPEC-2864)
+* SpotBugs ID: [WMI_WRONG_MAP_ITERATOR](https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#wmi-inefficient-use-of-keyset-iterator-instead-of-entryset-iterator-wmi-wrong-map-iterator)
 
 
 <ul> </ul>
@@ -80,6 +76,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S2225](https://rules.sonarsource.com/java/RSPEC-2225)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -99,6 +96,7 @@
 
 * PMD ID: [CloseResource](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#closeresource)
 * SonarSource ID: [S2095](https://rules.sonarsource.com/java/RSPEC-4087)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -134,6 +132,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S1596](https://rules.sonarsource.com/java/RSPEC-1596)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -154,6 +153,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S3740](https://rules.sonarsource.com/java/RSPEC-3740)
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -163,6 +163,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S1116](https://rules.sonarsource.com/java/RSPEC-1116)
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -172,6 +173,7 @@
 
 * PMD ID: [EmptyFinallyBlock](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptyfinallyblock)
 * SonarSource ID: N/A
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -190,6 +192,7 @@
 
 * PMD ID: [EmptyIfStmt](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptyifstmt)
 * SonarSource ID: N/A
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -199,6 +202,7 @@
 
 * PMD ID: [EmptyStatementBlock](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptystatementblock)
 * SonarSource ID: [S108](https://rules.sonarsource.com/java/RSPEC-108)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -218,6 +222,7 @@
 
 * PMD ID: [EmptyStatementNotInLoop](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#emptystatementnotinloop)
 * SonarSource ID: [S1116](https://rules.sonarsource.com/java/RSPEC-1116)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -238,6 +243,7 @@
 
 * PMD ID: [EmptyTryBlock](https://pmd.github.io/pmd-6.36.0/pmd_rules_java_errorprone.html#emptytryblock)
 * SonarSource ID: N/A
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -260,6 +266,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S4087](https://rules.sonarsource.com/java/RSPEC-4087)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -274,10 +281,31 @@
 <ul> </ul>
 
 
+### Remove redundant calls to Collection::addAll
+
+* PMD ID: N/A
+* SonarSource ID: N/A
+* SpotBugs ID: N/A
+
+
+<ul> </ul>
+
+
+### Remove redundant casts
+
+* PMD ID: N/A
+* SonarSource ID: [S1905](null)
+* SpotBugs ID: N/A
+
+
+<ul> </ul>
+
+
 ### Remove redundant collection copies
 
 * PMD ID: N/A
 * SonarSource ID: N/A
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -287,6 +315,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: N/A
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -296,6 +325,7 @@
 
 * PMD ID: [AvoidMultipleUnaryOperators](https://pmd.github.io/latest/pmd_rules_java_errorprone.html#avoidmultipleunaryoperators)
 * SonarSource ID: [S2761](https://rules.sonarsource.com/java/RSPEC-2761)
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -305,6 +335,7 @@
 
 * PMD ID: [UselessStringValueOf](https://pmd.github.io/latest/pmd_rules_java_performance.html#uselessstringvalueof)
 * SonarSource ID: [S1153](https://rules.sonarsource.com/java/RSPEC-1153)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -325,6 +356,7 @@
 
 * PMD ID: [UnnecessaryLocalBeforeReturn](https://pmd.github.io/latest/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn)
 * SonarSource ID: [S1488](https://rules.sonarsource.com/java/RSPEC-1488)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -345,6 +377,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: N/A
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -354,6 +387,7 @@
 
 * PMD ID: [UnnecessaryReturn](https://pmd.github.io/latest/pmd_rules_java_codestyle.html#unnecessaryreturn)
 * SonarSource ID: [S3626](https://rules.sonarsource.com/java/RSPEC-3626)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -372,6 +406,7 @@
 
 * PMD ID: [UnusedAssignment](https://pmd.github.io/pmd-6.36.0/pmd_rules_java_bestpractices.html#unusedassignment)
 * SonarSource ID: [S1854](https://rules.sonarsource.com/java/RSPEC-1854)
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -381,6 +416,7 @@
 
 * PMD ID: [UnnecessaryImport](https://pmd.github.io/latest/pmd_rules_java_codestyle.html#unnecessaryimport)
 * SonarSource ID: [S1128](https://rules.sonarsource.com/java/tag/unused/RSPEC-1128)
+* SpotBugs ID: N/A
 
 
 <ul> </ul>
@@ -390,6 +426,7 @@
 
 * PMD ID: [UnusedLocalVariable](https://pmd.github.io/latest/pmd_rules_java_bestpractices.html#unusedlocalvariable)
 * SonarSource ID: [S1481](https://rules.sonarsource.com/java/RSPEC-1481)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -419,6 +456,7 @@
 
 * PMD ID: [SimplifyBooleanExpressions](https://pmd.github.io/latest/pmd_rules_java_design.html#simplifybooleanexpressions)
 * SonarSource ID: [S1125](https://rules.sonarsource.com/java/RSPEC-1125)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -439,6 +477,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S2114](https://rules.sonarsource.com/java/RSPEC-2114)
+* SpotBugs ID: [DMI_USING_REMOVEALL_TO_CLEAR_COLLECTION](https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#dmi-don-t-use-removeall-to-clear-a-collection-dmi-using-removeall-to-clear-collection)
 
 
 <ul> </ul>
@@ -448,6 +487,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S2131](https://rules.sonarsource.com/java/RSPEC-2131)
+* SpotBugs ID: [DM_BOXED_PRIMITIVE_TOSTRING](https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bx-method-allocates-a-boxed-primitive-just-to-call-tostring-dm-boxed-primitive-tostring)
 
 
 <ul> </ul>
@@ -457,6 +497,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S2121](https://rules.sonarsource.com/java/RSPEC-2121)
+* SpotBugs ID: [DMI_USELESS_SUBSTRING](https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#dmi-invocation-of-substring-0-which-returns-the-original-value-dmi-useless-substring)
 
 #### Examples
 ```diff
@@ -478,6 +519,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S4635](https://rules.sonarsource.com/java/RSPEC-4635)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -498,6 +540,7 @@
 
 * PMD ID: [UseCollectionIsEmpty](https://pmd.github.io/latest/pmd_rules_java_bestpractices.html#usecollectionisempty)
 * SonarSource ID: [S1155](https://rules.sonarsource.com/java/RSPEC-1155)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -523,10 +566,21 @@
 <ul> </ul>
 
 
+### Simplify code using lambda expressions
+
+* PMD ID: N/A
+* SonarSource ID: [S1604](https://rules.sonarsource.com/java/RSPEC-1604)
+* SpotBugs ID: N/A
+
+
+<ul> </ul>
+
+
 ### Simplify code using Map::computeIfAbsent
 
 * PMD ID: N/A
 * SonarSource ID: [S3824](https://rules.sonarsource.com/java/RSPEC-3824)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -544,27 +598,6 @@
 
      @Override
 ```
-```diff
-      * @param initializer is called immediately after the value is added to the map
-      */
-     static <K, V> V getOrCreate(Map<K, V> map, K key, Supplier<V> valueCreator, Consumer<V> initializer) {
--        V value = map.get(key);
--        if (value == null) {
--            value = valueCreator.get();
--            map.put(key, value);
-+        return map.computeIfAbsent(key, k -> {
-+            V value = valueCreator.get();
-             if (initializer != null) {
-                 initializer.accept(value);
-             }
--        }
--        return value;
-+            return value;
-+        });
-     }
-     static <T> boolean addUniqueObject(Collection<T> col, T o) {
-         if (containsObject(col, o)) {
-```
 
 <ul> </ul>
 
@@ -573,6 +606,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S1612](https://rules.sonarsource.com/java/RSPEC-1612)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -593,6 +627,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: N/A
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -615,6 +650,7 @@
 
 * PMD ID: [LogicInversion](https://pmd.github.io/latest/pmd_rules_java_design.html#logicinversion)
 * SonarSource ID: [S1940](https://rules.sonarsource.com/java/RSPEC-1940)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -635,6 +671,7 @@
 
 * PMD ID: N/A
 * SonarSource ID: [S1602](https://rules.sonarsource.com/java/RSPEC-1602)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -655,6 +692,7 @@
 
 * PMD ID: [SimplifyBooleanReturns](https://pmd.github.io/latest/pmd_rules_java_design.html#simplifybooleanreturns)
 * SonarSource ID: [S1126](https://rules.sonarsource.com/java/RSPEC-1126)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff
@@ -679,6 +717,7 @@
 
 * PMD ID: [SimplifiedTernary](https://pmd.github.io/latest/pmd_rules_java_design.html#simplifiedternary)
 * SonarSource ID: [S1125](https://rules.sonarsource.com/java/RSPEC-1125)
+* SpotBugs ID: N/A
 
 #### Examples
 ```diff

@@ -21,7 +21,7 @@ replace_node_with_node("remove_redundant_collection_copies", id, arg) :-
     is_assigned_to_type(id, ["java.util", "List", _]),
     ast_type_to_type(type, ["java.util", "ArrayList", _]),
     method_invocation(arg, subject, "collect", [collector, nil]),
-    _has_type(subject, ["java.util.stream", "Stream", _]),
+    has_type(subject, ["java.util.stream", "Stream", _]),
     method_invocation(collector, to_list_subject, "toList", nil),
     expression_name(to_list_subject, [collectors_identifier, nil]),
     identifier(collectors_identifier, "Collectors").

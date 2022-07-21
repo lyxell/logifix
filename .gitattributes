@@ -1,3 +1,4 @@
 *.java linguist-detectable=false
 *.yy linguist-detectable=false
 tests linguist-detectable=false
+scripts linguist-detectable=false

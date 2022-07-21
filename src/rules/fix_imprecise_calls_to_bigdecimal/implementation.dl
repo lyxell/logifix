@@ -4,5 +4,5 @@ replace_node_with_string("fix_imprecise_calls_to_bigdecimal", id,
     class_instance_creation_expression(id, nil, nil, type, [arg, nil], nil),
     ast_type_to_type(type, ["java.math", "BigDecimal", nil]),
     source_code(_, code),
-    (_has_type(arg, ["", "float", nil])
-    ;_has_type(arg, ["", "double", nil])).
+    (has_type(arg, ["", "float", nil])
+    ;has_type(arg, ["", "double", nil])).
