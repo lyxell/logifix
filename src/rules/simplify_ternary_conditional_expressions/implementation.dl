@@ -4,6 +4,7 @@ replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr,
     cat("(", @node_to_string(code, cond), ") || (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, true_expr, other_expr),
+    has_type(other_expr, ["", "boolean", nil]),
     source_code(_, code),
     evaluates_to_boolean_value(true_expr, 1).
 
@@ -13,6 +14,7 @@ replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr,
     cat("!(", @node_to_string(code, cond), ") && (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, false_expr, other_expr),
+    has_type(other_expr, ["", "boolean", nil]),
     source_code(_, code),
     evaluates_to_boolean_value(false_expr, 0).
 
@@ -22,6 +24,7 @@ replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr,
     cat("!(", @node_to_string(code, cond), ") || (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, other_expr, true_expr),
+    has_type(other_expr, ["", "boolean", nil]),
     source_code(_, code),
     !evaluates_to_boolean_value(other_expr, 0),
     !evaluates_to_boolean_value(other_expr, 1),
@@ -33,6 +36,7 @@ replace_node_with_string("simplify_ternary_conditional_expressions", cond_expr,
     cat("(", @node_to_string(code, cond), ") && (", @node_to_string(code, other_expr), ")")
 ) :-
     conditional_expression(cond_expr, cond, other_expr, false_expr),
+    has_type(other_expr, ["", "boolean", nil]),
     source_code(_, code),
     !evaluates_to_boolean_value(other_expr, 0),
     !evaluates_to_boolean_value(other_expr, 1),

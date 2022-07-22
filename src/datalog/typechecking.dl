@@ -133,6 +133,7 @@ native_type("java.util", "LinkedHashMap").
 native_type("java.util", "LinkedList").
 native_type("java.util", "List").
 native_type("java.util", "Map").
+native_type("java.util", "Optional").
 native_type("java.util", "Queue").
 native_type("java.util", "Set").
 native_type("java.util", "SortedSet").
@@ -161,13 +162,6 @@ map_type("java.util", "HashMap").
 map_type("java.util", "TreeMap").
 map_type("java.util", "WeakHashMap").
 // ...
-
-.decl is_type_preserving_stream_method(s: symbol)
-is_type_preserving_stream_method("filter").
-is_type_preserving_stream_method("limit").
-is_type_preserving_stream_method("map").
-is_type_preserving_stream_method("skip").
-is_type_preserving_stream_method("sorted").
 
 .decl ast_type_args_list_to_type_list(list: id_list, type: type_list)
 ast_type_args_list_to_type_list(nil, nil).
@@ -234,7 +228,6 @@ ast_type_to_type(id, ["", substr(code, start, end - start), nil]) :-
     ends_at(name, end).
 
 .decl has_type(id: id, type: type)
-.output has_type(IO=stdout)
 has_type(id, type) :-
     point_of_declaration(id, declpoint),
     parent_of(declpoint, "type", ast_type),
@@ -247,43 +240,26 @@ has_type(id, type) :-
     ast_type_to_type(ast_type, type),
     method_declarator(declarator, meth, nil).
 
+/* Types of booleans */
+
+has_type(id, ["", "boolean", nil]) :-
+    boolean_literal(id).
+
+/* Types of floats */
+
 has_type(id, ["", "float", nil]) :-
     floating_point_literal(id).
+
+/* Types of Strings */
 
 has_type(id, ["java.lang", "String", nil]) :-
     string_literal(id).
 
-has_type(id, ["java.util", "Iterator", type_args]) :-
-    method_invocation(id, subject, "iterator", nil),
-    has_type(subject, [package, class, type_args]),
-    collection_type(package, class).
-
-has_type(id, ["java.util.stream", "Stream", type_args]) :-
-    method_invocation(id, subject, "stream", nil),
-    has_type(subject, [package, class, type_args]),
-    collection_type(package, class).
-has_type(id, ["java.util.stream", "Stream", type_args]) :-
-    method_invocation(id, subject, method, _),
-    is_type_preserving_stream_method(method),
-    has_type(subject, ["java.util.stream", "Stream", type_args]).
-
-has_type(id, type_arg) :-
-    method_invocation(id, subject, "next", nil),
-    has_type(subject, ["java.util", "Iterator", [type_arg, nil]]).
-
-/* Type the lambda params inside streams */
-has_type(param, type_arg) :-
-    has_type(subject, ["java.util.stream", "Stream", [type_arg, nil]]),
-    method_invocation(_, subject, method, [lambda, nil]),
-    is_type_preserving_stream_method(method),
-    lambda_expression(lambda, lambda_params, _),
-    lambda_params(lambda_params, [param, nil]),
-    formal_parameter(param, _, _, _).
+/* Types of Maps */
 
 has_type(id, type_arg) :-
     method_invocation(id, subject, "get", _),
     has_type(subject, ["java.util", "Map", [_, [type_arg, nil]]]).
-
 has_type(id, type_arg) :-
     method_invocation(id, subject, "getKey", nil),
     has_type(subject, ["Map", "Entry", [type_arg, [_, nil]]]).
@@ -291,25 +267,66 @@ has_type(id, type_arg) :-
     method_invocation(id, subject, "getValue", nil),
     has_type(subject, ["Map", "Entry", [_, [type_arg, nil]]]).
 
-/*
+/* Types of Iterators */
 
-.decl is_runnable_type(id: id)
-is_runnable_type(id) :-
-    class_type(id, "Runnable", _, _).
+has_type(id, type_arg) :-
+    method_invocation(id, subject, "next", nil),
+    has_type(subject, ["java.util", "Iterator", [type_arg, nil]]).
+has_type(id, ["java.util", "Iterator", type_args]) :-
+    method_invocation(id, subject, "iterator", nil),
+    has_type(subject, [package, class, type_args]),
+    collection_type(package, class).
 
-.decl is_autocloseable_type(id: id)
-is_autocloseable_type(id) :-
-    class_type(id, name_str, _, _),
-    autocloseable_type_name(name_str).
+/* Types of Streams */
 
-.decl is_thread_type(id: id)
-is_thread_type(id) :-
-    class_type(id, "Thread", _, _).
+// Type the return type of Collection.stream
+has_type(id, ["java.util.stream", "Stream", type_args]) :-
+    method_invocation(id, subject, "stream", nil),
+    has_type(subject, [package, class, type_args]),
+    collection_type(package, class).
+// Propagate the type of the stream across methods on streams
+has_type(id, ["java.util.stream", "Stream", type_args]) :-
+    method_invocation(id, subject, method, _),
+    (method = "concat"
+    ;method = "distinct"
+    ;method = "filter"
+    ;method = "limit"
+    ;method = "peek"
+    ;method = "skip"
+    ;method = "sorted"),
+    has_type(subject, ["java.util.stream", "Stream", type_args]).
+// Type the lambda params inside streams
+has_type(param, type_arg) :-
+    has_type(subject, ["java.util.stream", "Stream", [type_arg, nil]]),
+    method_invocation(_, subject, method, [lambda, nil]),
+    (method = "allMatch"
+    ;method = "anyMatch"
+    ;method = "filter"
+    ;method = "flatMap"
+    ;method = "flatMapToDouble"
+    ;method = "flatMapToInt"
+    ;method = "flatMapToLong"
+    ;method = "forEach"
+    ;method = "forEachOrdered"
+    ;method = "generate"
+    ;method = "map"
+    ;method = "mapToDouble"
+    ;method = "mapToInt"
+    ;method = "mapToLong"
+    ;method = "noneMatch"),
+    lambda_expression(lambda, lambda_params, _),
+    lambda_params(lambda_params, [param, nil]),
+    formal_parameter(param, _, _, _).
 
-.decl is_functional_interface_type(id: id)
-is_functional_interface_type(id) :-
-    is_comparator_type(id).
-is_functional_interface_type(id) :-
-    is_predicate_type(id).
-is_functional_interface_type(id) :-
-    is_runnable_type(id).*/
+/* Types of Optionals */
+
+has_type(param, type_arg) :-
+    has_type(subject, ["java.util", "Optional", [type_arg, nil]]),
+    method_invocation(_, subject, method, [lambda, nil]),
+    (method = "filter"
+    ;method = "flatMap"
+    ;method = "ifPresent"
+    ;method = "map"),
+    lambda_expression(lambda, lambda_params, _),
+    lambda_params(lambda_params, [param, nil]),
+    formal_parameter(param, _, _, _).
