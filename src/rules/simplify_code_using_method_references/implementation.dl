@@ -12,6 +12,28 @@ replace_node_with_string("simplify_code_using_method_references", lambda_expr,
     count : { point_of_declaration(_, param) } = 2,
     source_code(_, code).
 
+/* Pre  [:x] -> [:x] instanceof [:y] */
+/* Post [:y].class::isInstance */
+replace_node_with_string("simplify_code_using_method_references", lambda_expr,
+    cat(class_name, ".class::isInstance")
+) :-
+    lambda_expression(lambda_expr, params, lambda_body),
+    lambda_params(params, [param, nil]),
+    instanceof_expression(lambda_body, expr, type),
+    class_type(type, nil, class_name, nil, nil),
+    point_of_declaration(expr, param).
+
+/* Pre  [:x] -> ([:y]) [:x] */
+/* Post [:y].class::cast */
+replace_node_with_string("simplify_code_using_method_references", lambda_expr,
+    cat(class_name, ".class::cast")
+) :-
+    lambda_expression(lambda_expr, params, lambda_body),
+    lambda_params(params, [param, nil]),
+    cast_expression(lambda_body, type, expr),
+    class_type(type, nil, class_name, nil, nil),
+    point_of_declaration(expr, param).
+
 /* Pre  [:x] -> new [:y]([:x]) */
 /* Post [:y]::new */
 replace_node_with_string("simplify_code_using_method_references", lambda_expr,
