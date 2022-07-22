@@ -20,7 +20,7 @@ replace_node_with_string("simplify_code_using_streams", id, cat(
     /* The type of the collection that is looped over should be parameterized
      * since otherwise the result of the stream would be java.lang.Object which
      * would need casting */
-    _has_type(original, [original_type_package, original_type_name, type_args]),
+    has_type(original, [original_type_package, original_type_name, type_args]),
     type_args != nil,
     collection_type(original_type_package, original_type_name),
 
@@ -31,6 +31,6 @@ replace_node_with_string("simplify_code_using_streams", id, cat(
     block(then, [expr_stmt, nil]),
     expression_statement(expr_stmt, invocation),
     method_invocation(invocation, subject, "add", [x, nil]),
-    _has_type(subject, [subject_type_package, subject_type_name, _]),
+    has_type(subject, [subject_type_package, subject_type_name, _]),
     collection_type(subject_type_package, subject_type_name),
     point_of_declaration(x, param).

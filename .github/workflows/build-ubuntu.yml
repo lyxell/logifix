@@ -34,7 +34,8 @@ jobs:
       with:
         name: logifix-ubuntu
         path: ${{github.workspace}}/build/logifix
-  check-for-compile-errors:
+
+  compile-spoon:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -61,20 +62,6 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all bytecode-viewer/
     - run: cd bytecode-viewer && mvn compile
-
-  compile-primefaces:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download logifix
-      uses: actions/download-artifact@v2
-      with:
-        name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/primefaces/primefaces.git
-    - run: cd primefaces && mvn compile -Dcheckstyle.skip
-    - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all primefaces/
-    - run: cd primefaces && mvn compile -Dcheckstyle.skip
 
   compile-presto:
     needs: build
@@ -113,8 +100,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/apache/dolphinscheduler.git
-    - run: cd dolphinscheduler && mvn compile
+    - run: mkdir dolphinscheduler && cd dolphinscheduler && git init && git remote add origin https://github.com/apache/dolphinscheduler.git && git fetch --depth 1 origin 14e80ab5fd3a6c068fe168fb76c5b9c836edf113 && git checkout 14e80ab5fd3a6c068fe168fb76c5b9c836edf113 && mvn compile
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all dolphinscheduler/
     - run: cd dolphinscheduler && mvn clean compile

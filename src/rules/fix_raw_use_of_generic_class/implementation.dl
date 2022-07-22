@@ -22,7 +22,7 @@ replace_node_with_string("fix_raw_use_of_generic_class", right_type, cat(@node_t
 /* Post Type<[:type]> [:var] = [:it]; */
 replace_node_with_string("fix_raw_use_of_generic_class", left_type, @type_to_string([package, class, type_args])) :-
     local_variable_declaration(_, _, left_type, [declarator, nil]),
-    ast_type_to_type(left_type, [_, _, nil]),
+    ast_type_to_type(left_type, [package, class, nil]),
     variable_declarator(declarator, _, initializer),
-    _has_type(initializer, [package, class, type_args]),
+    has_type(initializer, [package, class, type_args]),
     type_args != nil.

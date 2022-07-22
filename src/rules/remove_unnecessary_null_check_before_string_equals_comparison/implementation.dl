@@ -2,7 +2,8 @@
 /* Post "[:y]".equals([:x]) */
 replace_node_with_node("remove_unnecessary_null_check_before_string_equals_comparison", and_expr, invocation) :-
     conditional_and_expression(and_expr, noteqnull, invocation),
-    not_equals_expression_unordered(noteqnull, null, noteqnull_subject),
+    (not_equals_expression(noteqnull, null, noteqnull_subject)
+    ;not_equals_expression(noteqnull, noteqnull_subject, null)),
     null_literal(null),
     method_invocation(invocation, subject, "equals", [arg, nil]),
     string_literal(subject),

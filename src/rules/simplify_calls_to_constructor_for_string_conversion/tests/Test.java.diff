@@ -1,9 +1,39 @@
 diff --git a/Test.java b/Test.java
-@@ -1,6 +1,6 @@
+@@ -1,30 +1,30 @@
  public class Test {
-     public void main(String[] args) {
--        String x = new Integer(20).toString();
-+        String x = Integer.toString(20);
+     public void test1() {
+-        String x = new Integer(1).toString();
++        String x = Integer.toString(1);
+         System.out.println(x);
+     }
+     public void test2() {
+-        String x = new Long(1).toString();
++        String x = Long.toString(1);
+         System.out.println(x);
+     }
+     public void test3() {
+-        String x = new Float(1.0).toString();
++        String x = Float.toString(1.0);
+         System.out.println(x);
+     }
+     public void test4() {
+-        String x = new Double(1.0).toString();
++        String x = Double.toString(1.0);
+         System.out.println(x);
+     }
+     public void test5() {
+-        String x = new Byte(1).toString();
++        String x = Byte.toString(1);
+         System.out.println(x);
+     }
+     public void test6() {
+-        String x = new Short(1).toString();
++        String x = Short.toString(1);
+         System.out.println(x);
+     }
+     public void test7() {
+-        String x = new Boolean(true).toString();
++        String x = Boolean.toString(true);
          System.out.println(x);
      }
  }

@@ -1,3 +1,23 @@
+/*
+    -    if (!map.containsKey(key)) {
+    -        map.put(key, value);
+    -    }
+    +    map.computeIfAbsent(key, k -> value);
+*/
+replace_node_with_string("simplify_code_using_map_computeifabsent", id,
+    cat(@node_to_string(code, contains_key_object), ".computeIfAbsent(", @node_to_string(code, contains_key_arg), ", k -> ", @node_to_string(code, put_arg2), ");")
+) :-
+    if_statement(id, condition, then, nil),
+    logical_complement_expression(condition, contains_key_expr),
+    source_code(_, code),
+    method_invocation(contains_key_expr, contains_key_object, "containsKey", [contains_key_arg, nil]),
+    block(then, [statement, nil]),
+    expression_statement(statement, put_expr),
+    method_invocation(put_expr, put_expr_object, "put", [put_arg1, [put_arg2, nil]]),
+    point_of_declaration(put_expr_object, map_decl),
+    point_of_declaration(contains_key_object, map_decl),
+    point_of_declaration(contains_key_arg, key_decl),
+    point_of_declaration(put_arg1, key_decl).
 
 /* Pre  [:value_type] [:value_var] = [:map_var].get([:key_var]);
         if ([:value_var] == null) {
@@ -37,16 +57,16 @@ rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
     method_invocation(initializer, map_var, "get", [key_var, nil]),
     point_of_declaration(key_var, key_var_declaration_point),
     point_of_declaration(map_var, map_var_declaration_point),
-    _has_type(map_var, ["java.util", "Map", _]),
+    has_type(map_var, ["java.util", "Map", _]),
 
     /* The second statement is an if-statement */
     if_statement(s2, cond, then, nil),
 
         /* The condition is an equality expression which checks if the value
          * from the initializer is null */
-        equals_expression_unordered(cond, fst, snd),
-        null_literal(fst),
-        point_of_declaration(snd, decl),
+        equals_expression(cond, fst, snd),
+        point_of_declaration(fst, decl),
+        null_literal(snd),
 
         /* The then-clause is a block containing at least two statements */
         block(then, then_stmts),

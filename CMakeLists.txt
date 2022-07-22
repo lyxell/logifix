@@ -48,6 +48,7 @@ endif()
 message(STATUS "Building logifix version ${LOGIFIX_VERSION}")
 
 #### Find files
+file(GLOB_RECURSE DATALOG_FILES src/datalog/*.dl)
 file(GLOB_RECURSE RULE_IMPLEMENTATION_FILES src/rules/*.dl)
 file(GLOB_RECURSE RULE_DATA_FILES src/rules/*.json)
 
@@ -57,6 +58,7 @@ add_custom_command(
   COMMAND souffle --generate=logifix ${CMAKE_CURRENT_SOURCE_DIR}/src/program.dl
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/program.dl
   DEPENDS ${RULE_IMPLEMENTATION_FILES}
+  DEPENDS ${DATALOG_FILES}
   VERBATIM)
 set_source_files_properties(logifix.cpp PROPERTIES COMPILE_FLAGS -D__EMBEDDED_SOUFFLE__)
 

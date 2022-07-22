@@ -1,8 +1,35 @@
+.decl is_assigned_to_type(id: id, type: type)
+is_assigned_to_type(initializer, type) :-
+    local_variable_declaration(_, _, ast_type, declarators),
+    list_contains(declarators, declarator),
+    ast_type_to_type(ast_type, type),
+    variable_declarator(declarator, _, initializer).
+is_assigned_to_type(expr, type) :-
+    method_declaration(_, _, header, body),
+    method_header(header, result, _, _),
+    ast_type_to_type(result, type),
+    starts_at(body, body_start),
+    ends_at(body, body_end),
+    return_statement(_, expr),
+    starts_at(expr, expr_start),
+    ends_at(expr, expr_end),
+    expr_start >= body_start,
+    expr_end <= body_end.
+
 replace_node_with_node("remove_redundant_collection_copies", id, arg) :-
     class_instance_creation_expression(id, nil, nil, type, [arg, nil], nil),
+    is_assigned_to_type(id, ["java.util", "List", _]),
     ast_type_to_type(type, ["java.util", "ArrayList", _]),
     method_invocation(arg, subject, "collect", [collector, nil]),
-    _has_type(subject, ["java.util.stream", "Stream", _]),
+    has_type(subject, ["java.util.stream", "Stream", _]),
     method_invocation(collector, to_list_subject, "toList", nil),
     expression_name(to_list_subject, [collectors_identifier, nil]),
     identifier(collectors_identifier, "Collectors").
+
+replace_node_with_node("remove_redundant_collection_copies", id, arg) :-
+    class_instance_creation_expression(id, nil, nil, type, [arg, nil], nil),
+    is_assigned_to_type(id, ["java.util", "List", _]),
+    ast_type_to_type(type, ["java.util", "ArrayList", _]),
+    method_invocation(arg, subject, "asList", _),
+    expression_name(subject, [identifier, nil]),
+    identifier(identifier, "Arrays").

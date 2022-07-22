@@ -1,0 +1,64 @@
+.decl is_side_effect_free_expression(id: id)
+
+#define SIDE_EFFECT_FREE_INFIX(name) \
+    is_side_effect_free_expression(id) :- \
+        name(id, left, right), \
+        is_side_effect_free_expression(left), \
+        is_side_effect_free_expression(right).
+
+SIDE_EFFECT_FREE_INFIX(conditional_or_expression)
+SIDE_EFFECT_FREE_INFIX(conditional_and_expression)
+SIDE_EFFECT_FREE_INFIX(inclusive_or_expression)
+SIDE_EFFECT_FREE_INFIX(exclusive_or_expression)
+SIDE_EFFECT_FREE_INFIX(equals_expression)
+SIDE_EFFECT_FREE_INFIX(not_equals_expression)
+SIDE_EFFECT_FREE_INFIX(less_than_expression)
+SIDE_EFFECT_FREE_INFIX(greater_than_expression)
+SIDE_EFFECT_FREE_INFIX(less_than_or_equals_expression)
+SIDE_EFFECT_FREE_INFIX(greater_than_or_equals_expression)
+SIDE_EFFECT_FREE_INFIX(instanceof_expression)
+SIDE_EFFECT_FREE_INFIX(signed_left_shift_expression)
+SIDE_EFFECT_FREE_INFIX(signed_right_shift_expression)
+SIDE_EFFECT_FREE_INFIX(unsigned_right_shift_expression)
+SIDE_EFFECT_FREE_INFIX(addition_expression)
+SIDE_EFFECT_FREE_INFIX(subtraction_expression)
+SIDE_EFFECT_FREE_INFIX(multiplication_expression)
+SIDE_EFFECT_FREE_INFIX(division_expression)
+SIDE_EFFECT_FREE_INFIX(remainder_expression)
+
+/** Literals */
+
+is_side_effect_free_expression(id) :-
+  null_literal(id).
+
+is_side_effect_free_expression(id) :-
+  integer_literal(id).
+
+is_side_effect_free_expression(id) :-
+  boolean_literal(id).
+
+is_side_effect_free_expression(id) :-
+  floating_point_literal(id).
+
+is_side_effect_free_expression(id) :-
+  string_literal(id).
+
+/** Other */
+
+is_side_effect_free_expression(id) :-
+  field_access(id, _, _).
+
+is_side_effect_free_expression(id) :-
+  this_expression(id).
+
+is_side_effect_free_expression(id) :-
+  cast_expression(id, _, value),
+  is_side_effect_free_expression(value).
+
+is_side_effect_free_expression(id) :-
+  field_access(id, _, _).
+
+/* This is needed to clean up after fix_inefficient_map_access */
+is_side_effect_free_expression(id) :-
+  method_invocation(id, subject, "getKey", nil),
+  has_type(subject, ["Map", "Entry", _]).

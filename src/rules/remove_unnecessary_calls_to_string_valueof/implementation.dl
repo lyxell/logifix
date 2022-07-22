@@ -1,8 +1,17 @@
-/* Pre  String.valueOf([:x]) */
-/* Post [:x] */
+/**
+ * If the left side of an addition expression has type string then the right
+ * side gets wrapped in an implicit call to String.valueOf
+ */
 replace_node_with_node("remove_unnecessary_calls_to_string_valueof", right, arg) :-
     addition_expression(_, left, right),
-    _has_type(left, ["java.lang", "String", nil]),
+    has_type(left, ["java.lang", "String", nil]),
     method_invocation(right, subject, "valueOf", [arg, nil]),
     expression_name(subject, [ident, nil]),
     identifier(ident, "String").
+
+/* No need to call String.valueOf if the argument already has String type */
+replace_node_with_node("remove_unnecessary_calls_to_string_valueof", id, arg) :-
+    method_invocation(id, subject, "valueOf", [arg, nil]),
+    expression_name(subject, [ident, nil]),
+    identifier(ident, "String"),
+    has_type(arg, ["java.lang", "String", nil]).

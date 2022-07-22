@@ -1,7 +1,9 @@
 diff --git a/Test.java b/Test.java
-@@ -1,5 +1,4 @@
+@@ -1,7 +1,4 @@
  class Test {
      void test() {
 -        int x = 20;
+-        String y = "";
+-        int z = 20 + 30;
      }
  }
