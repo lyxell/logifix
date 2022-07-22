@@ -1,7 +1,0 @@
- 	 * @return boolean true is input wildcard, false otherwise
- 	 */
- 	private boolean isWildCard(String name) {
--		return name.equals("?");
-+		return "?".equals(name);
- 	}
- }

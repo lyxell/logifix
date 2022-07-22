@@ -1,0 +1,24 @@
+diff --git a/TestField.java b/TestField.java
+@@ -8,16 +8,18 @@
+     public HashMap<Integer, String> hashMap;
+ 
+     public void run1() {
+-        for (Integer key : map.keySet()) {
++        for (Map.Entry<Integer, String> entry : map.entrySet()) {
++            Integer key = entry.getKey();
+             System.out.println(key);
+-            System.out.println(map.get(key));
++            System.out.println(entry.getValue());
+         }
+     }
+ 
+     public void run2() {
+-        for (Integer key : hashMap.keySet()) {
++        for (Map.Entry<Integer, String> entry : hashMap.entrySet()) {
++            Integer key = entry.getKey();
+             System.out.println(key);
+-            System.out.println(hashMap.get(key));
++            System.out.println(entry.getValue());
+         }
+     }
+ 

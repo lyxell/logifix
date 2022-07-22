@@ -1,7 +1,8 @@
 diff --git a/TestMethod.java b/TestMethod.java
-@@ -1,17 +1,10 @@
+@@ -1,17 +1,11 @@
  import java.util.List;
 -import java.util.ArrayList;
++import java.util.stream.Collectors;
  
  public class TestMethod {
      public List<Integer> getNumbers() {
@@ -15,6 +16,6 @@ diff --git a/TestMethod.java b/TestMethod.java
 -            }
 -        }
 -        return positiveNumbers;
-+        return getNumbers().stream().filter(i -> i > 0).collect(java.util.stream.Collectors.toList());
++        return getNumbers().stream().filter(i -> i > 0).collect(Collectors.toList());
      }
  }

@@ -1,12 +1,23 @@
 diff --git a/Test.java b/Test.java
-@@ -1,9 +1,8 @@
- import java.util.List;
--import java.util.ArrayList;
- import java.util.stream.Collectors;
+@@ -5,17 +5,17 @@
  
  class Test {
      List<Integer> test(List<Integer> original) {
--        return new ArrayList<>(original.stream().filter(x > 0).collect(Collectors.toList()));
-+        return original.stream().filter(x > 0).collect(Collectors.toList());
+-        return new ArrayList<>(original.stream().filter(x -> x > 0).collect(Collectors.toList()));
++        return original.stream().filter(x -> x > 0).collect(Collectors.toList());
+     }
+     List<Integer> testAsList(List<Integer> original) {
+-        return new ArrayList<>(Arrays.asList(1,2,3));
++        return Arrays.asList(1,2,3);
+     }
+     void testAssignment(List<Integer> original) {
+-        List<Integer> list = new ArrayList<>(original.stream().filter(x -> x > 0).collect(Collectors.toList()));
++        List<Integer> list = original.stream().filter(x -> x > 0).collect(Collectors.toList());
+         System.out.println(list.size());
+     }
+     void testAsListAssignment(List<Integer> original) {
+-        List<Integer> list = new ArrayList<>(Arrays.asList(1,2,3));
++        List<Integer> list = Arrays.asList(1,2,3);
+         System.out.println(list.size());
      }
  }

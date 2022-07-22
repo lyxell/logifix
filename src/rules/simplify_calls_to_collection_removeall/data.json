@@ -6,5 +6,9 @@
     },
     "pmd": {
         "id": "N/A"
+    },
+    "spotbugs": {
+        "id": "DMI_USING_REMOVEALL_TO_CLEAR_COLLECTION",
+        "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#dmi-don-t-use-removeall-to-clear-a-collection-dmi-using-removeall-to-clear-collection"
     }
 }

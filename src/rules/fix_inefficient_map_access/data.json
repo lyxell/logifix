@@ -6,5 +6,9 @@
     },
     "pmd": {
         "id": "N/A"
+    },
+    "spotbugs": {
+        "id": "WMI_WRONG_MAP_ITERATOR",
+        "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#wmi-inefficient-use-of-keyset-iterator-instead-of-entryset-iterator-wmi-wrong-map-iterator"
     }
 }

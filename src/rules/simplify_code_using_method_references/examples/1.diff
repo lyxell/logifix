@@ -1,0 +1,8 @@
+                int off = getStart();
+                ElementSourceFragment child = getFirstChild();
+                while (child != null) {
+-                       forEachConstantFragment(off, child.getStart(), cf -> children.add(cf));
++                       forEachConstantFragment(off, child.getStart(), children::add);
+                        children.add(child);
+                        off = child.getEnd();
+                        child = child.getNextSibling();

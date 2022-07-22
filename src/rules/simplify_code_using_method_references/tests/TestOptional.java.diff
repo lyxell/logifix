@@ -1,0 +1,9 @@
+diff --git a/TestOptional.java b/TestOptional.java
+@@ -4,6 +4,6 @@
+     public static void main(String[] args) {
+         String name = "test";
+         Optional<String> opt = Optional.of(name);
+-        System.out.println(opt.map(x -> x.length()).get());
++        System.out.println(opt.map(String::length).get());
+     }
+ }

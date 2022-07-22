@@ -1,10 +1,8 @@
 #include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
-#include "rules/fix_comparisons_of_atomic_classes/implementation.dl"
 #include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/fix_inefficient_calls_to_foreach_list_add/implementation.dl"
 #include "rules/fix_inefficient_map_access/implementation.dl"
-#include "rules/fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison/implementation.dl"
 #include "rules/fix_null_returns_in_tostring/implementation.dl"
 #include "rules/fix_potential_resource_leaks/implementation.dl"
 #include "rules/fix_raw_use_of_empty_collections/implementation.dl"
@@ -15,8 +13,9 @@
 #include "rules/remove_empty_nested_blocks/implementation.dl"
 #include "rules/remove_empty_statements/implementation.dl"
 #include "rules/remove_empty_try_blocks/implementation.dl"
-#include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
+#include "rules/remove_redundant_casts/implementation.dl"
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
+#include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_collection_copies/implementation.dl"
 #include "rules/remove_redundant_parentheses/implementation.dl"
 #include "rules/remove_redundant_try_blocks/implementation.dl"
@@ -28,12 +27,15 @@
 #include "rules/remove_unused_assignments/implementation.dl"
 #include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
+#include "rules/remove_use_of_fully_qualified_names/implementation.dl"
 #include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
 #include "rules/simplify_calls_to_constructor_for_string_conversion/implementation.dl"
+#include "rules/simplify_calls_to_map_keyset/implementation.dl"
 #include "rules/simplify_calls_to_string_substring/implementation.dl"
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
+//#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_code_using_streams/implementation.dl"
@@ -43,12 +45,10 @@
 #include "rules/simplify_ternary_conditional_expressions/implementation.dl"
 #include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
-#include "nodes.dl"
-
-/* Functors
- ********************************/
-
-.functor decrease_indentation(symbol):symbol stateful
+#include "datalog/ast.dl"
+#include "datalog/scoping.dl"
+#include "datalog/typechecking.dl"
+#include "datalog/sideeffects.dl"
 
 /* Types
  ********************************/
@@ -56,18 +56,33 @@
 .type id = [type: symbol, filename: symbol, content_from: number, content_to: number, from: number, to: number]
 .type id_list = [head: id, tail: id_list]
 
+.type type = [package: symbol, class: symbol, type_args: type_list]
+.type type_list = [head: type, tail: type_list]
+
+/* Functors
+ ********************************/
+
+.functor decrease_indentation(x: symbol):symbol stateful
+.functor type_to_string(x: type):symbol stateful
+.functor type_args_to_string(x: type_list):symbol stateful
+.functor type_to_qualified_string(x: type):symbol stateful
+.functor node_to_string(c: symbol, x: id):symbol stateful
+
 /* AST nodes
  ********************************/
 
 .decl root(id: id)
 .input root
-.output root(IO=stdout)
 
 .decl ast_node(id: id)
 ast_node(id) :- root(id).
 ast_node(child) :-
     ast_node(ancestor),
-    ancestor_of(ancestor, child).
+    parent_of(ancestor, _, child).
+ast_node(child) :-
+    ast_node(ancestor),
+    parent_of_list(ancestor, _, list),
+    list_contains(list, child).
 
 .decl filename_of(id: id, filename: symbol)
 filename_of([name, fn, cA, cB, A, B], fn) :- ast_node([name, fn, cA, cB, A, B]).
@@ -92,7 +107,6 @@ content_ends_at([name, fn, cA, cB, A, B], cB) :- ast_node([name, fn, cA, cB, A, 
 
 .decl javadoc_references(filename: symbol, class: symbol)
 .input javadoc_references
-.output javadoc_references(IO=stdout)
 
 /* AST node relations
  ********************************/
@@ -102,21 +116,6 @@ content_ends_at([name, fn, cA, cB, A, B], cB) :- ast_node([name, fn, cA, cB, A, 
 
 .decl parent_of_list(parent: id, name: symbol, children: id_list)
 .input parent_of_list
-
-/* transitive closure of parent_of and parent_of list */
-.decl ancestor_of(ancestor: id, child: id)
-ancestor_of(x, y) :-
-    parent_of(x, _, y).
-ancestor_of(x, z) :-
-    ancestor_of(x, y),
-    parent_of(y, _, z).
-ancestor_of(x, y) :-
-    parent_of_list(x, _, children),
-    list_contains(children, y).
-ancestor_of(x, z) :-
-    ancestor_of(x, y),
-    parent_of_list(y, _, children),
-    list_contains(children, z).
 
 .decl head_of(head: id, tail: id_list)
 head_of(head, tail) :-
@@ -128,14 +127,6 @@ head_of(head, tail) :-
 .decl predecessor_of(x: id, y: id)
 predecessor_of(x, y) :-
     head_of(x, [y, _]).
-
-/* transitive closure of predecessor_of */
-.decl precedes(x: id, y: id)
-precedes(x, y) :-
-    predecessor_of(x, y).
-precedes(x, z) :-
-    precedes(x, y),
-    predecessor_of(y, z).
 
 /* does the list contain the element? */
 .decl list_contains(list: id_list, id: id)
@@ -160,10 +151,16 @@ list_first_element([head, tail], head) :-
 .decl evaluates_to_integer_value(id: id, value: number)
 evaluates_to_integer_value(id, 0) :-
     integer_literal(id),
-    string_representation(id, "0").
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "0".
 evaluates_to_integer_value(id, 1) :-
     integer_literal(id),
-    string_representation(id, "1").
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "1".
 /* TODO
 evaluates_to_integer_value(id, to_number(repr)) :-
     integer_literal(id),
@@ -184,9 +181,17 @@ evaluates_to_integer_value(id, left_value - right_value) :-
 
 .decl evaluates_to_boolean_value(id: id, value: number)
 evaluates_to_boolean_value(id, 0) :-
-    content_string_representation(id, "false").
+    boolean_literal(id),
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "false".
 evaluates_to_boolean_value(id, 1) :-
-    content_string_representation(id, "true").
+    boolean_literal(id),
+    content_starts_at(id, content_start),
+    content_ends_at(id, content_end),
+    source_code(_, code),
+    substr(code, content_start, content_end - content_start) = "true".
 evaluates_to_boolean_value(id, left_value land right_value) :-
     conditional_and_expression(id, left, right),
     evaluates_to_boolean_value(left, left_value),
@@ -211,6 +216,7 @@ evaluates_to_boolean_value(id, 0) :-
 .decl source_code(filename: symbol, str: symbol)
 .input source_code
 
+<<<<<<< HEAD
 .decl string_representation(id: id, str: symbol)
 string_representation(id, substr(code, start, end - start)) :-
     ast_node(id),
@@ -237,18 +243,6 @@ string_representation_list(list, substr(code, start, end - start)) :-
         ends_at(last, end),
         filename_of(last, filename),
     source_code(filename, code).
-
-/* Misc
- ********************************/
-
-.decl method_invocation_root_subject(meth_inv: id, root: id)
-method_invocation_root_subject(meth_inv, subject) :-
-    method_invocation(meth_inv, subject, _, _),
-    !method_invocation(subject, _, _, _).
-method_invocation_root_subject(meth_inv, subject_root) :-
-    method_invocation(meth_inv, subject, _, _),
-    method_invocation(subject, _, _, _),
-    method_invocation_root_subject(subject, subject_root).
 
 /* Variable scope
  ********************************/
@@ -676,8 +670,26 @@ has_stream_type(id) :- method_invocation(id, subject, "map", _), has_stream_type
 has_stream_type(id) :- method_invocation(id, subject, "skip", _), has_stream_type(subject).
 has_stream_type(id) :- method_invocation(id, subject, "sorted", _), has_stream_type(subject).
 
+=======
+>>>>>>> main
 /* Rewrite rules
  ********************************/
 
+.decl replace_node_with_node(rule: symbol, original: id, replacement: id)
+.decl replace_node_with_string(rule: symbol, original: id, replacement: symbol)
+
 .decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
+rewrite(rule, filename, start, end, to) :-
+    replace_node_with_string(rule, id, to),
+    starts_at(id, start),
+    ends_at(id, end),
+    filename_of(id, filename).
+rewrite(rule, filename, start, end, substr(code, replacement_start, replacement_end - replacement_start)) :-
+    replace_node_with_node(rule, original, replacement),
+    starts_at(original, start),
+    ends_at(original, end),
+    filename_of(original, filename),
+    source_code(_, code),
+    starts_at(replacement, replacement_start),
+    ends_at(replacement, replacement_end).
 .output rewrite(IO=stdout)
