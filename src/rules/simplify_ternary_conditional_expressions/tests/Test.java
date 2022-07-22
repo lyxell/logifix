@@ -1,22 +1,20 @@
 import java.util.Random;
 
 class Test1 {
-    class Inner {
-        boolean run() {
-            return new Random().nextBoolean();
-        }
+    boolean getBoolean() {
+        return new Random().nextBoolean();
     }
-    boolean test1(boolean x, Inner obj) {
-        return x ? true : obj.run();
+    boolean test1(boolean x) {
+        return x ? true : getBoolean();
     }
-    boolean test2(boolean x, Inner obj) {
-        return x ? false : obj.run();
+    boolean test2(boolean x) {
+        return x ? false : getBoolean();
     }
-    boolean test3(boolean x, Inner obj) {
-        return x ? obj.run() : true;
+    boolean test3(boolean x) {
+        return x ? getBoolean() : true;
     }
-    boolean test4(boolean x, Inner obj) {
-        return x ? obj.run() : false;
+    boolean test4(boolean x) {
+        return x ? getBoolean() : false;
     }
     boolean test5(boolean x) {
         return x ? true : false;
@@ -32,5 +30,8 @@ class Test1 {
     }
     boolean test9(Object x, boolean y) {
         return ((x == null))  ?   (y) :  ( (  true) );
+    }
+    Boolean test10(Object x, boolean y) {
+        return x == null ? true : null;
     }
 }
