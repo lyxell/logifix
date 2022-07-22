@@ -284,11 +284,16 @@ has_type(id, ["java.util.stream", "Stream", type_args]) :-
     method_invocation(id, subject, "stream", nil),
     has_type(subject, [package, class, type_args]),
     collection_type(package, class).
+// Propagate the type of the stream across methods on streams where resulting type is not known
+has_type(id, ["java.util.stream", "Stream", [["", "?", nil], nil]]) :-
+    method_invocation(id, subject, method, _),
+    (method = "map"
+    ;method = "flatMap"),
+    has_type(subject, ["java.util.stream", "Stream", _]).
 // Propagate the type of the stream across methods on streams
 has_type(id, ["java.util.stream", "Stream", type_args]) :-
     method_invocation(id, subject, method, _),
-    (method = "concat"
-    ;method = "distinct"
+    (method = "distinct"
     ;method = "filter"
     ;method = "limit"
     ;method = "peek"
