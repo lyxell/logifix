@@ -3,20 +3,20 @@
 
 /* Post [:coll_type] [:id] = new [:initializer]([:arg]); */
 rewrite("remove_redundant_calls_to_collection_addall", filename, start, end, cat(
-    "new ", type_str, "(", arg_str, ");"
+    "new ", @node_to_string(code, type), "(", @node_to_string(code, arg), ");"
 )) :-
     local_variable_declaration_statement(id, declaration),
         filename_of(id, filename),
+        source_code(_, code),
     local_variable_declaration(declaration, _, _, [declarator, nil]),
     variable_declarator(declarator, _, initializer),
     class_instance_creation_expression(initializer, nil, nil, type, nil, nil),
         starts_at(initializer, start),
-        is_collection_type(type),
+        ast_type_to_type(type, [package, class, _]),
+        collection_type(package, class),
     predecessor_of(id, expr_stmt),
     expression_statement(expr_stmt, expr),
         ends_at(expr_stmt, end),
     method_invocation(expr, subject, "addAll", [arg, nil]),
-    point_of_declaration(subject, declaration),
-    string_representation(type, type_str),
-    string_representation(arg, arg_str).
+    point_of_declaration(subject, declaration).
 

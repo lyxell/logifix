@@ -1,9 +1,6 @@
 /* Pre  [:x].run()   */
 /* Post [:x].start() */
-rewrite("fix_calls_to_thread_run", filename, start, end, cat(subject_str, ".start()")) :-
+replace_node_with_string("fix_calls_to_thread_run", id, cat(@node_to_string(code, subject), ".start()")) :-
     method_invocation(id, subject, "run", nil),
-        filename_of(id, filename),
-        starts_at(id, start),
-        ends_at(id, end),
-    has_thread_type(subject),
-    string_representation(subject, subject_str).
+    has_type(subject, ["java.lang", "Thread", nil]),
+    source_code(_, code).

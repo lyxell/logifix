@@ -1,0 +1,24 @@
+diff --git a/TestTypeCheck.java b/TestTypeCheck.java
+@@ -5,17 +5,17 @@
+     public static void main(String[] args) {
+         List<String> list = List.of("Hello", "Hi");
+         // map
+-        list.stream().map(x -> x.length()).forEach(x -> System.out.println(x));
++        list.stream().map(String::length).forEach(System.out::println);
+         // filter
+-        list.stream().filter(x -> x.isEmpty()).forEach(x -> System.out.println(x));
++        list.stream().filter(String::isEmpty).forEach(System.out::println);
+     }
+     public void test1(List<String> list) {
+         // map
+-        list.stream().map(x -> x.length()).forEach(x -> System.out.println(x));
++        list.stream().map(String::length).forEach(System.out::println);
+         // filter
+-        list.stream().filter(x -> x.isEmpty()).forEach(x -> System.out.println(x));
++        list.stream().filter(String::isEmpty).forEach(System.out::println);
+     }
+     public void test2(List<String> list1, List<String> list2) {
+-        list2.addAll(list1.stream().filter(x -> x.isEmpty()).collect(Collectors.toList()));
++        list2.addAll(list1.stream().filter(String::isEmpty).collect(Collectors.toList()));
+     }
+ }

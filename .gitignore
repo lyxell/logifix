@@ -4,3 +4,5 @@ Release
 Debug
 scripts/GithubRelease
 .gdb_history
+compile_commands.json
+.cache
