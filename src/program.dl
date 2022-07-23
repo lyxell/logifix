@@ -28,7 +28,6 @@
 #include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
 #include "rules/remove_use_of_fully_qualified_names/implementation.dl"
-#include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
 #include "rules/simplify_calls_to_constructor_for_string_conversion/implementation.dl"
 #include "rules/simplify_calls_to_map_keyset/implementation.dl"
@@ -39,10 +38,7 @@
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_code_using_streams/implementation.dl"
-#include "rules/simplify_inverted_boolean_expressions/implementation.dl"
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
-#include "rules/simplify_return_of_boolean_expressions/implementation.dl"
-#include "rules/simplify_ternary_conditional_expressions/implementation.dl"
 #include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
 #include "datalog/ast.dl"

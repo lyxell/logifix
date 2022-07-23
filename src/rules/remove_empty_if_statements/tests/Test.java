@@ -18,10 +18,5 @@ public class Test {
             System.out.println("hello");
         }
 
-        if (x && y) {
-        } else {
-            System.out.println("hello");
-        }
-
     }
 }
