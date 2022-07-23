@@ -61,7 +61,7 @@ jobs:
     - run: cd maven && mvn compile
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all maven/
-    - run: cd maven && mvn compile
+    - run: cd maven && mvn compile -Dcheckstyle.skip
 
   compile-bytecodeviewer:
     needs: build
