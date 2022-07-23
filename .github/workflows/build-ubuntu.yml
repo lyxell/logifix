@@ -159,5 +159,5 @@ jobs:
     - run: git clone --depth 1 https://github.com/MovingBlocks/Terasology.git
     - run: cd Terasology && ./gradlew build -x test
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all Terasology/
+    - run: ./logifix --in-place --accept-all Terasology/engine/
     - run: cd Terasology && ./gradlew build -x test
