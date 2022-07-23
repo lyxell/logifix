@@ -92,6 +92,20 @@ jobs:
     - run: cd initializr && mvn spring-javaformat:apply
     - run: cd initializr && mvn compile
 
+  compile-netty:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/netty/netty.git
+    - run: cd netty && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all netty/
+    - run: cd netty && mvn compile
+
   compile-dolphinscheduler:
     needs: build
     runs-on: ubuntu-latest
