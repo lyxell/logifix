@@ -105,6 +105,20 @@ jobs:
     - run: ./logifix --in-place --accept-all dolphinscheduler/
     - run: cd dolphinscheduler && mvn clean compile
 
+  compile-spring-batch:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/spring-projects/spring-batch.git
+    - run: cd spring-batch && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all spring-batch/
+    - run: cd spring-batch && mvn compile
+
   compile-pitest:
     needs: build
     runs-on: ubuntu-latest
