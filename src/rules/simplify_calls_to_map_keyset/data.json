@@ -1,0 +1,10 @@
+{
+    "description": "Simplify calls to Map::keySet",
+    "disabled_by_default": true,
+    "sonar": {
+        "id": "N/A"
+    },
+    "pmd": {
+        "id": "N/A"
+    }
+}

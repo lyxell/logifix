@@ -6,5 +6,9 @@
     },
     "pmd": {
         "id": "N/A"
+    },
+    "spotbugs": {
+        "id": "DM_BOXED_PRIMITIVE_TOSTRING",
+        "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#bx-method-allocates-a-boxed-primitive-just-to-call-tostring-dm-boxed-primitive-tostring"
     }
 }

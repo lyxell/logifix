@@ -1,12 +1,10 @@
-rewrite("fix_inefficient_calls_to_foreach_list_add", filename, start, end, cat(
-        ref_subject_str, ".addAll(", inv_subject_str, ".collect(java.util.stream.Collectors.toList()))"
+replace_node_with_string("fix_inefficient_calls_to_foreach_list_add", inv, cat(
+    @node_to_string(code, ref_subject), ".addAll(", @node_to_string(code, inv_subject), ".collect(java.util.stream.Collectors.toList()))"
 )) :-
-    expression_statement(stmt, inv),
-        filename_of(stmt, filename),
-    has_stream_type(inv_subject),
+    expression_statement(_, inv),
+    source_code(_, code),
+    has_type(inv_subject, ["java.util.stream", "Stream", _]),
     method_invocation(inv, inv_subject, "forEach", [ref, nil]),
-        starts_at(inv, start),
-        ends_at(inv, end),
-    method_reference(ref, ref_subject, nil, "add"),
-    string_representation(inv_subject, inv_subject_str),
-    string_representation(ref_subject, ref_subject_str).
+    has_type(ref_subject, [ref_package, ref_class, _]),
+    collection_type(ref_package, ref_class),
+    method_reference(ref, ref_subject, nil, "add").

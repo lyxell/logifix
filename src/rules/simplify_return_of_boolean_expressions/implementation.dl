@@ -1,7 +1,7 @@
 .decl does_nothing_but_return_true(id: id)
 does_nothing_but_return_true(id) :-
     return_statement(id, ret),
-    content_string_representation(ret, "true").
+    evaluates_to_boolean_value(ret, 1).
 does_nothing_but_return_true(id) :-
     block(id, [statement, nil]),
     does_nothing_but_return_true(statement).
@@ -9,29 +9,27 @@ does_nothing_but_return_true(id) :-
 .decl does_nothing_but_return_false(id: id)
 does_nothing_but_return_false(id) :-
     return_statement(id, ret),
-    content_string_representation(ret, "false").
+    evaluates_to_boolean_value(ret, 0).
 does_nothing_but_return_false(id) :-
     block(id, [statement, nil]),
     does_nothing_but_return_false(statement).
 
-rewrite("simplify_return_of_boolean_expressions", filename, start, end, cat("return ", cond_str, ";")) :-
+replace_node_with_string("simplify_return_of_boolean_expressions", id,
+    cat("return ", @node_to_string(code, cond), ";")
+) :-
     if_statement(id, cond, then, else),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
+    source_code(_, code),
     does_nothing_but_return_true(then),
     does_nothing_but_return_false(else),
-    string_representation(cond, cond_str),
     /* id is not the else-branch of an if-statement */
     ! if_statement(_, _, _, id).
 
-rewrite("simplify_return_of_boolean_expressions", filename, start, end, cat("return !(", cond_str, ");")) :-
+replace_node_with_string("simplify_return_of_boolean_expressions", id,
+    cat("return !(", @node_to_string(code, cond), ");")
+) :-
     if_statement(id, cond, then, else),
-        starts_at(id, start),
-        ends_at(id, end),
-        filename_of(id, filename),
+    source_code(_, code),
     does_nothing_but_return_false(then),
     does_nothing_but_return_true(else),
-    string_representation(cond, cond_str),
     /* id is not the else-branch of an if-statement */
     ! if_statement(_, _, _, id).

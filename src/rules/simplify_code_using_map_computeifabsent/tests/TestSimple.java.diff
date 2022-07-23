@@ -1,0 +1,11 @@
+diff --git a/TestSimple.java b/TestSimple.java
+@@ -4,8 +4,6 @@
+ 
+ public class TestSimple {
+     public test(Map<Integer, List<String>> map, Integer key) {
+-        if (!map.containsKey(key)) {
+-            map.put(key, new ArrayList<>());
+-        }
++        map.computeIfAbsent(key, k -> new ArrayList<>());
+     }
+ }

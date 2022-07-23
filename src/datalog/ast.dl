@@ -1,0 +1,737 @@
+#define INFIX(name) \
+    .decl name(id: id, left: id, right: id) \
+    name(id, left, right) :- \
+        name_of(id, #name), \
+        parent_of(id, "left", left), \
+        parent_of(id, "right", right).
+
+/* Top-level declarations {
+ ****************************************************/
+
+.decl ordinary_compilation_unit(id: id, package_declaration: id, import_declarations: id_list, type_declarations: id_list)
+ordinary_compilation_unit(id, pdecl, impdecls, tdecls) :-
+    name_of(id, "ordinary_compilation_unit"),
+    parent_of(id, "package_declaration", pdecl),
+    parent_of_list(id, "import_declarations", impdecls),
+    parent_of_list(id, "type_declarations", tdecls).
+
+.decl package_declaration(id: id)
+package_declaration(id) :-
+    name_of(id, "package_declaration").
+
+.decl import_declaration(id: id, specification: id)
+import_declaration(id, specification) :-
+    name_of(id, "import_declaration"),
+    parent_of(id, "specification", specification).
+
+/**
+ * `id`             Id
+ * `package`        symbol
+ */
+.decl import_specification(id: id, package: symbol, import: symbol)
+import_specification(id, substr(code, lhs_start, lhs_end - lhs_start), substr(code, import_start, import_end - import_start)) :-
+    name_of(id, "import_specification"),
+    parent_of_list(id, "left_hand_side", lhs),
+    parent_of(id, "import", import),
+    source_code(_, code),
+    list_first_element(lhs, lhs_first),
+    list_last_element(lhs, lhs_last),
+    starts_at(lhs_first, lhs_start),
+    ends_at(lhs_last, lhs_end),
+    starts_at(import, import_start),
+    ends_at(import, import_end).
+
+/**
+ * `id`                 Id
+ * `modifiers`          [Modifier]
+ * `name`               Identifier
+ * `superclass`         ClassType
+ * `superinterfaces`    [ClassType]
+ * `body`               ClassBody
+ */
+.decl class_declaration(id: id, modifiers: id_list, name: id, superclass: id, superinterfaces: id_list, body: id)
+class_declaration(id, mods, name, superclass, superinterfaces, body) :-
+    name_of(id, "class_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "name", name),
+    parent_of(id, "superclass", superclass),
+    parent_of_list(id, "superinterfaces", superinterfaces),
+    parent_of(id, "body", body).
+
+/**
+ * `id`                 Id
+ * `declarations`       Declaration
+ */
+.decl class_body(id: id, declarations: id_list)
+class_body(id, declarations) :-
+    name_of(id, "class_body"),
+    parent_of_list(id, "declarations", declarations).
+
+/* }
+ ****************************************************/
+
+/* Blocks and statements {
+ ****************************************************/
+
+/**
+ * `id`             Id
+ * `statements`     Statement
+ */
+.decl block(id: id, statements: id_list)
+block(id, statements) :-
+    name_of(id, "block"),
+    parent_of_list(id, "statements", statements).
+
+/**
+ * `id`             Id
+ * `declaration`    LocalVariableDeclaration
+ */
+.decl local_variable_declaration_statement(id: id, declaration: id)
+local_variable_declaration_statement(id, declaration) :-
+    name_of(id, "local_variable_declaration_statement"),
+    parent_of(id, "declaration", declaration).
+
+/**
+ * `id`         Id
+ * `init`       LocalVariableDeclaration | StatementExpressionList
+ * `condition`  Expression
+ * `update`     StatementExpressionList
+ * `body`       Statement
+ */
+.decl for_statement(id: id, init: id, condition: id, update: id, body: id)
+for_statement(id, init, condition, update, body) :-
+    name_of(id, "for_statement"),
+    parent_of(id, "init", init),
+    parent_of(id, "condition", condition),
+    parent_of(id, "update", update),
+    parent_of(id, "body", body).
+
+/**
+ * `id`         Id
+ * `param`      FormalParameter
+ * `expression` Expression
+ * `body`       Statement
+ */
+.decl enhanced_for_statement(id: id, param: id, expression: id, body: id)
+enhanced_for_statement(id, param, expression, body) :-
+    name_of(id, "enhanced_for_statement"),
+    parent_of(id, "param", param),
+    parent_of(id, "expression", expression),
+    parent_of(id, "body", body).
+
+/**
+ * `id`         Id
+ * `condition`  Expression
+ * `body`       Statement
+ */
+.decl while_statement(id: id, condition: id, body: id)
+while_statement(id, condition, body) :-
+    name_of(id, "while_statement"),
+    parent_of(id, "condition", condition),
+    parent_of(id, "body", body).
+
+/**
+ * `id`         Id
+ * `condition`  Expression
+ * `body`       Statement
+ */
+.decl do_statement(id: id, condition: id, body: id)
+do_statement(id, condition, body) :-
+    name_of(id, "do_statement"),
+    parent_of(id, "condition", condition),
+    parent_of(id, "body", body).
+
+/**
+ * `id`         Id
+ */
+.decl empty_statement(id: id)
+empty_statement(id) :-
+    name_of(id, "empty_statement").
+
+/**
+ * `id`         Id
+ * `expr`       Expression
+ */
+.decl throw_statement(id: id, expr: id)
+throw_statement(id, expr) :-
+    name_of(id, "throw_statement"),
+    parent_of(id, "expression", expr).
+
+/**
+ * `id`         Id
+ * `expr`       Expression
+ */
+.decl expression_statement(id: id, expr: id)
+expression_statement(id, expr) :-
+    name_of(id, "expression_statement"),
+    parent_of(id, "expression", expr).
+
+/**
+ * `id`         Id
+ * `expr`       Expression
+ */
+.decl return_statement(id: id, expr: id)
+return_statement(id, expr) :-
+    name_of(id, "return_statement"),
+    parent_of(id, "expression", expr).
+
+/**
+ * `id`         Id
+ * `condition`  Expression
+ * `then`       Statement
+ * `else`       Statement
+ */
+.decl if_statement(id: id, condition: id, then: id, else: id)
+if_statement(id, condition, then, else) :-
+    name_of(id, "if_statement"),
+    parent_of(id, "condition", condition),
+    parent_of(id, "then", then),
+    parent_of(id, "else", else).
+
+/**
+ * `id`         Id
+ * `body`       Block
+ * `catches`    [CatchBlock]
+ * `finally`    FinallyBlock
+ */
+.decl try_statement(id: id, body: id, catches: id_list, finally: id)
+try_statement(id, body, catches, finally) :-
+    name_of(id, "try_statement"),
+    parent_of(id, "body", body),
+    parent_of_list(id, "catches", catches),
+    parent_of(id, "finally", finally).
+
+/**
+ * `id`         Id
+ * `resources`  [Resource]
+ * `body`       Block
+ * `finally`    FinallyBlock
+ */
+.decl try_with_resources_statement(id: id, resources: id_list, body: id, catches: id_list, finally: id)
+try_with_resources_statement(id, resources, body, catches, finally) :-
+    name_of(id, "try_with_resources_statement"),
+    parent_of_list(id, "resources", resources),
+    parent_of(id, "body", body),
+    parent_of_list(id, "catches", catches),
+    parent_of(id, "finally", finally).
+
+/**
+ * `id`         Id
+ * `block`      Block
+ */
+.decl finally_block(id: id, block: id)
+finally_block(id, block) :-
+    name_of(id, "finally_block"),
+    parent_of(id, "block", block).
+
+/* }
+ ****************************************************/
+
+/* Expressions {
+ ****************************************************/
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(assignment_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(conditional_or_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(conditional_and_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(inclusive_or_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(exclusive_or_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(equals_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(not_equals_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(less_than_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(greater_than_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(less_than_or_equals_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(greater_than_or_equals_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(instanceof_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(signed_left_shift_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(signed_right_shift_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(unsigned_right_shift_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(addition_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(subtraction_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(multiplication_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(division_expression)
+
+/**
+ * `id`     Id
+ * `left`   Expression
+ * `right`  Expression
+ */
+INFIX(remainder_expression)
+
+/**
+ * `id`         Id
+ * `expression` Expression
+ */
+.decl logical_complement_expression(id: id, expression: id)
+logical_complement_expression(id, expression) :-
+    name_of(id, "logical_complement_expression"),
+    parent_of(id, "expression", expression).
+
+/**
+ * `id`         Id
+ * `type`       Type
+ * `value`      Expression
+ */
+.decl cast_expression(id: id, type: id, value: id)
+cast_expression(id, type, value) :-
+    name_of(id, "cast_expression"),
+    parent_of(id, "type", type),
+    parent_of(id, "value", value).
+
+/**
+ * `id`         Id
+ * `condition`  Expression
+ * `then`       Expression
+ * `else`       Expression
+ */
+.decl conditional_expression(id: id, cond: id, then: id, else: id)
+conditional_expression(id, cond, then, else) :-
+    name_of(id, "conditional_expression"),
+    parent_of(id, "condition", cond),
+    parent_of(id, "then", then),
+    parent_of(id, "else", else).
+
+/**
+ * `id`             Id
+ * `qualifier`      Expression
+ * `type_arguments` TypeArguments
+ * `type`           Type
+ * `arguments`      [Expression]
+ * `body`           ClassBody
+ */
+.decl class_instance_creation_expression(id: id, qualifier: id, type_arguments: id, type: id, arguments: id_list, body: id)
+class_instance_creation_expression(id, qualifier, type_arguments, type, arguments, body) :-
+    name_of(id, "class_instance_creation_expression"),
+    parent_of(id, "qualifier", qualifier),
+    parent_of(id, "type_arguments", type_arguments),
+    parent_of(id, "type", type),
+    parent_of_list(id, "arguments", arguments),
+    parent_of(id, "body", body).
+
+/**
+ * `id`             Id
+ * `params`         LambdaParams
+ * `body`           Block | Expression
+ */
+.decl lambda_expression(id: id, params: id, body: id)
+lambda_expression(id, params, body) :-
+    name_of(id, "lambda_expression"),
+    parent_of(id, "params", params),
+    parent_of(id, "body", body).
+
+/**
+ * `id`             Id
+ * `params`         [FormalParameter]
+ */
+.decl lambda_params(id: id, params: id_list)
+lambda_params(id, params) :-
+    name_of(id, "lambda_params"),
+    parent_of_list(id, "params", params).
+
+/**
+ * `id`             Id
+ * `subject`        Expression
+ * `method`         symbol
+ * `arguments`      [Expression]
+ */
+.decl method_invocation(id: id, subject: id, method: symbol, arguments: id_list)
+method_invocation(id, subject, substr(code, method_start, method_end - method_start), arguments) :-
+    name_of(id, "method_invocation"),
+    parent_of(id, "subject", subject),
+    parent_of(id, "method", method),
+    parent_of_list(id, "arguments", arguments),
+    content_starts_at(method, method_start),
+    content_ends_at(method, method_end),
+    source_code(_, code).
+
+/**
+ * `id`             Id
+ * `subject`        Expression
+ * `type_arguments` TypeArguments
+ * `method`         symbol
+ */
+.decl method_reference(id: id, subject: id, type_arguments: id, method: symbol)
+method_reference(id, subject, type_arguments, substr(code, method_start, method_end - method_start)) :-
+    name_of(id, "method_reference"),
+    parent_of(id, "subject", subject),
+    parent_of(id, "type_arguments", type_arguments),
+    parent_of(id, "method", method),
+    content_starts_at(method, method_start),
+    content_ends_at(method, method_end),
+    source_code(_, code).
+
+/**
+ * `id`             Id
+ * `subject`        Expression
+ * `field`          Identifier
+ */
+.decl field_access(id: id, subject: id, field: id)
+field_access(id, subject, field) :-
+    name_of(id, "field_access"),
+    parent_of(id, "subject", subject),
+    parent_of(id, "field", field).
+
+/**
+ * `id`             Id
+ */
+.decl this_expression(id: id)
+this_expression(id) :-
+    name_of(id, "this_expression").
+
+/* }
+ ****************************************************/
+
+/* Literals {
+ ****************************************************/
+
+/**
+ * `id`        Id
+ */
+.decl null_literal(id: id)
+null_literal(id) :- name_of(id, "null_literal").
+
+/**
+ * `id`        Id
+ */
+.decl integer_literal(id: id)
+integer_literal(id) :- name_of(id, "integer_literal").
+
+/**
+ * `id`        Id
+ */
+.decl boolean_literal(id: id)
+boolean_literal(id) :- name_of(id, "boolean_literal").
+
+/**
+ * `id`        Id
+ */
+.decl floating_point_literal(id: id)
+floating_point_literal(id) :- name_of(id, "floating_point_literal").
+
+/**
+ * `id`        Id
+ */
+.decl string_literal(id: id)
+string_literal(id) :- name_of(id, "string_literal").
+
+/* }
+ ****************************************************/
+
+/* Declarations {
+ ****************************************************/
+
+/**
+ * `id`         Id
+ */
+.decl empty_declaration(id: id)
+empty_declaration(id) :-
+    name_of(id, "empty_declaration").
+
+/**
+ * `id`         Id
+ * `block`      Block
+ */
+.decl static_initializer(id: id, block: id)
+static_initializer(id, block) :-
+    name_of(id, "static_initializer"),
+    parent_of(id, "block", block).
+
+/**
+ * `id`         Id
+ * `modifiers`  [Modifier]
+ */
+.decl field_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
+field_declaration(id, mods, type, declarators) :-
+    name_of(id, "field_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "type", type),
+    parent_of_list(id, "declarators", declarators).
+
+/**
+ * `id`         Id
+ * `modifiers`  [Modifier]
+ * `declarator` ConstructorDeclarator
+ * `throws`     [ClassType]
+ * `body`       ConstructorBody
+ */
+.decl constructor_declaration(id: id, modifiers: id_list, declarator: id, throws: id_list, body: id)
+constructor_declaration(id, mods, declarator, throws, body) :-
+    name_of(id, "constructor_declaration"),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "declarator", declarator),
+    parent_of_list(id, "throws", throws),
+    parent_of(id, "body", body).
+
+/**
+ * `id`         Id
+ * `modifiers`  [Modifier]
+ * `header`     MethodHeader
+ * `throws`     [ClassType]
+ * `body`       Block 
+ */
+.decl method_declaration(id: id, modifiers: id_list, header: id, body: id)
+method_declaration(id, mods, header, body) :-
+    name_of(id, "method_declaration"),
+    parent_of(id, "header", header),
+    parent_of_list(id, "modifiers", mods),
+    parent_of(id, "body", body).
+
+/**
+ * `id`         Id
+ * `name`       symbol
+ * `params`     [FormalParameter]
+ */
+.decl method_declarator(id: id, name: symbol, params: id_list)
+method_declarator(id, substr(code, name_start, name_end - name_start), params) :-
+    name_of(id, "method_declarator"),
+    parent_of(id, "name", name),
+    parent_of_list(id, "params", params),
+    content_starts_at(name, name_start),
+    content_ends_at(name, name_end),
+    source_code(_, code).
+
+/**
+ * `id`                 Id
+ * `result`             Type
+ * `declarator`         MethodDeclarator
+ * `throws`             [ClassType]
+ */
+.decl method_header(id: id, result: id, declarator: id, throws: id_list)
+method_header(id, result, declarator, throws) :-
+    name_of(id, "method_header"),
+    parent_of(id, "result", result),
+    parent_of(id, "declarator", declarator),
+    parent_of_list(id, "throws", throws).
+
+/**
+ * `id`                 Id
+ * `modifiers`          [Modifier]
+ * `type`               Type
+ * `declarators`        [ClassType]
+ */
+.decl local_variable_declaration(id: id, modifiers: id_list, type: id, declarators: id_list)
+local_variable_declaration(id, modifiers, type, declarators) :-
+    name_of(id, "local_variable_declaration"),
+    parent_of_list(id, "modifiers", modifiers),
+    parent_of(id, "type", type),
+    parent_of_list(id, "declarators", declarators).
+
+/**
+ * `id`                 Id
+ * `declarator_id`      VariableDeclaratorId
+ * `initializer`        Expression
+ */
+.decl variable_declarator(id: id, declarator_id: id, initializer: id)
+variable_declarator(id, declarator_id, initializer) :-
+    name_of(id, "variable_declarator"),
+    parent_of(id, "declarator_id", declarator_id),
+    parent_of(id, "initializer", initializer).
+
+/* }
+ ****************************************************/
+
+/* Types {
+ ****************************************************/
+
+/**
+ * `id`             Id
+ * `annotations`    [Annotation]
+ * `name`           symbol
+ */
+.decl primitive_type(id: id, annotations: id_list, name: id)
+primitive_type(id, annotations, name) :-
+    name_of(id, "primitive_type"),
+    parent_of(id, "name", name),
+    parent_of_list(id, "annotations", annotations).
+
+/**
+ * `id`             Id
+ * `parent`         ClassType
+ * `name`           symbol
+ * `type_arguments` TypeArguments
+ * `annotations`    [Annotation]
+ */
+.decl class_type(id: id, parent: id, name: symbol, type_arguments: id, annotations: id_list)
+class_type(id, parent, substr(code, name_start, name_end - name_start), type_arguments, annotations) :-
+    name_of(id, "class_type"),
+    parent_of(id, "parent", parent),
+    parent_of(id, "name", name),
+    parent_of(id, "type_arguments", type_arguments),
+    parent_of_list(id, "annotations", annotations),
+    content_starts_at(name, name_start),
+    content_ends_at(name, name_end),
+    source_code(_, code).
+
+/**
+ * `id`             Id
+ * `arguments`      [ClassType]
+ */
+.decl type_arguments(id: id, arguments: id_list)
+type_arguments(id, arguments) :-
+    name_of(id, "type_arguments"),
+    parent_of_list(id, "arguments", arguments).
+
+/* }
+ ****************************************************/
+
+/* Names and parameters {
+ ****************************************************/
+
+/**
+ * `id`             Id
+ * `modifiers`      [Modifier]
+ * `type`           Type
+ * `declarator_id`  VariableDeclaratorId
+ */
+.decl formal_parameter(id: id, modifiers: id_list, type: id, declarator_id: id)
+formal_parameter(id, modifiers, type, declarator_id) :-
+    name_of(id, "formal_parameter"),
+    parent_of_list(id, "modifiers", modifiers),
+    parent_of(id, "type", type),
+    parent_of(id, "declarator_id", declarator_id).
+
+/**
+ * `id`             Id
+ * `name`           Identifier
+ * `dims`           [Dim]
+ */
+.decl variable_declarator_id(id: id, name: id, dims: id_list)
+variable_declarator_id(id, name, dims) :-
+    name_of(id, "variable_declarator_id"),
+    parent_of(id, "name", name),
+    parent_of_list(id, "dims", dims).
+
+/**
+ * `id`             Id
+ * `identifiers`    [Identifier]
+ */
+.decl expression_name(id: id, identifiers: id_list)
+expression_name(id, identifiers) :-
+    name_of(id, "expression_name"),
+    parent_of_list(id, "identifiers", identifiers).
+
+/**
+ * `id`             Id
+ * `symbol`         symbol
+ */
+.decl identifier(id: id, symbol: symbol)
+identifier(id, substr(code, start, end - start)) :-
+    name_of(id, "identifier"),
+    starts_at(id, start),
+    ends_at(id, end),
+    source_code(_, code).
+
+/* }
+ ****************************************************/

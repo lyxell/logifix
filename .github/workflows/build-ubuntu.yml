@@ -3,6 +3,8 @@ name: Ubuntu build
 on:
   push:
     branches: [ main ]
+    tags:
+      - '*'
   pull_request:
     branches: [ main ]
 
@@ -32,7 +34,8 @@ jobs:
       with:
         name: logifix-ubuntu
         path: ${{github.workspace}}/build/logifix
-  check-for-compile-errors:
+
+  compile-spoon:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -59,3 +62,102 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all maven/
     - run: cd maven && mvn compile
+
+  compile-bytecodeviewer:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/Konloch/bytecode-viewer.git
+    - run: cd bytecode-viewer && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all bytecode-viewer/
+    - run: cd bytecode-viewer && mvn compile
+
+  compile-spock:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/spockframework/spock.git
+    - run: cd spock && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all spock/
+    - run: cd spock && ./gradlew build -x test
+
+  compile-initializr:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/spring-io/initializr.git
+    - run: cd initializr && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all initializr/
+    - run: cd initializr && mvn spring-javaformat:apply
+    - run: cd initializr && mvn compile
+
+  compile-dolphinscheduler:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: mkdir dolphinscheduler && cd dolphinscheduler && git init && git remote add origin https://github.com/apache/dolphinscheduler.git && git fetch --depth 1 origin 14e80ab5fd3a6c068fe168fb76c5b9c836edf113 && git checkout 14e80ab5fd3a6c068fe168fb76c5b9c836edf113 && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all dolphinscheduler/
+    - run: cd dolphinscheduler && mvn clean compile
+
+  compile-pitest:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/hcoles/pitest.git
+    - run: cd pitest && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all pitest/
+    - run: cd pitest && mvn compile
+
+  compile-karate:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/intuit/karate.git
+    - run: cd karate && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all karate/
+    - run: cd karate && mvn compile
+
+  compile-testng:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/cbeust/testng.git
+    - run: cd testng && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all testng/
+    - run: cd testng && ./gradlew autostyleApply
+    - run: cd testng && ./gradlew build -x test
