@@ -157,7 +157,7 @@ jobs:
       with:
         name: logifix-ubuntu
     - run: git clone --depth 1 https://github.com/payara/Payara
-    - run: cd payara && mvn compile
+    - run: cd Payara && mvn compile
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all appserver
-    - run: cd payara && mvn compile
+    - run: ./logifix --in-place --accept-all Payara/appserver/
+    - run: cd Payara && mvn compile
