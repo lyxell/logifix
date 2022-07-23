@@ -157,7 +157,7 @@ jobs:
       with:
         name: logifix-ubuntu
     - run: git clone --depth 1 https://github.com/DV8FromTheWorld/JDA.git
-    - run: cd jda && ./gradlew build -x test
+    - run: cd JDA && ./gradlew build -x test
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all jda/
-    - run: cd jda && ./gradlew build -x test
+    - run: ./logifix --in-place --accept-all JDA/
+    - run: cd JDA && ./gradlew build -x test
