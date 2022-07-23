@@ -13,13 +13,3 @@ diff --git a/Test.java b/Test.java
          }
  
          if (x || y) {
-@@ -18,8 +13,7 @@
-             System.out.println("hello");
-         }
- 
--        if (x && y) {
--        } else {
-+        if (!x || !y) {
-             System.out.println("hello");
-         }
- 

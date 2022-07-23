@@ -5,4 +5,6 @@ replace_node_with_string("fix_inefficient_calls_to_foreach_list_add", inv, cat(
     source_code(_, code),
     has_type(inv_subject, ["java.util.stream", "Stream", _]),
     method_invocation(inv, inv_subject, "forEach", [ref, nil]),
+    has_type(ref_subject, [ref_package, ref_class, _]),
+    collection_type(ref_package, ref_class),
     method_reference(ref, ref_subject, nil, "add").

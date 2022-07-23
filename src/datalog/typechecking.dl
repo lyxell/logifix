@@ -133,6 +133,7 @@ native_type("java.util", "LinkedHashMap").
 native_type("java.util", "LinkedList").
 native_type("java.util", "List").
 native_type("java.util", "Map").
+native_type("java.util", "Optional").
 native_type("java.util", "Queue").
 native_type("java.util", "Set").
 native_type("java.util", "SortedSet").
@@ -276,27 +277,61 @@ has_type(id, ["java.util", "Iterator", type_args]) :-
     has_type(subject, [package, class, type_args]),
     collection_type(package, class).
 
-/* Types of streams */
+/* Types of Streams */
 
-.decl is_type_preserving_stream_method(s: symbol)
-is_type_preserving_stream_method("filter").
-is_type_preserving_stream_method("limit").
-is_type_preserving_stream_method("map").
-is_type_preserving_stream_method("skip").
-is_type_preserving_stream_method("sorted").
+// Type the return type of Collection.stream
 has_type(id, ["java.util.stream", "Stream", type_args]) :-
     method_invocation(id, subject, "stream", nil),
     has_type(subject, [package, class, type_args]),
     collection_type(package, class).
+// Propagate the type of the stream across methods on streams where resulting type is not known
+has_type(id, ["java.util.stream", "Stream", [["", "?", nil], nil]]) :-
+    method_invocation(id, subject, method, _),
+    (method = "map"
+    ;method = "flatMap"),
+    has_type(subject, ["java.util.stream", "Stream", _]).
+// Propagate the type of the stream across methods on streams
 has_type(id, ["java.util.stream", "Stream", type_args]) :-
     method_invocation(id, subject, method, _),
-    is_type_preserving_stream_method(method),
+    (method = "distinct"
+    ;method = "filter"
+    ;method = "limit"
+    ;method = "peek"
+    ;method = "skip"
+    ;method = "sorted"),
     has_type(subject, ["java.util.stream", "Stream", type_args]).
 // Type the lambda params inside streams
 has_type(param, type_arg) :-
     has_type(subject, ["java.util.stream", "Stream", [type_arg, nil]]),
     method_invocation(_, subject, method, [lambda, nil]),
-    is_type_preserving_stream_method(method),
+    (method = "allMatch"
+    ;method = "anyMatch"
+    ;method = "filter"
+    ;method = "flatMap"
+    ;method = "flatMapToDouble"
+    ;method = "flatMapToInt"
+    ;method = "flatMapToLong"
+    ;method = "forEach"
+    ;method = "forEachOrdered"
+    ;method = "generate"
+    ;method = "map"
+    ;method = "mapToDouble"
+    ;method = "mapToInt"
+    ;method = "mapToLong"
+    ;method = "noneMatch"),
+    lambda_expression(lambda, lambda_params, _),
+    lambda_params(lambda_params, [param, nil]),
+    formal_parameter(param, _, _, _).
+
+/* Types of Optionals */
+
+has_type(param, type_arg) :-
+    has_type(subject, ["java.util", "Optional", [type_arg, nil]]),
+    method_invocation(_, subject, method, [lambda, nil]),
+    (method = "filter"
+    ;method = "flatMap"
+    ;method = "ifPresent"
+    ;method = "map"),
     lambda_expression(lambda, lambda_params, _),
     lambda_params(lambda_params, [param, nil]),
     formal_parameter(param, _, _, _).
