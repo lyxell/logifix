@@ -159,5 +159,5 @@ jobs:
     - run: git clone --depth 1 https://github.com/mockito/mockito.git
     - run: cd mockito && ./gradlew build -x test
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all mockito/
+    - run: ./logifix --in-place --accept-all --dont-accept=fix_raw_use_of_generic_class mockito/
     - run: cd mockito && ./gradlew build -x test
