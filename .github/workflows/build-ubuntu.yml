@@ -35,6 +35,20 @@ jobs:
         name: logifix-ubuntu
         path: ${{github.workspace}}/build/logifix
 
+  compile-caffeine:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/ben-manes/caffeine.git
+    - run: cd caffeine && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all --dont-accept=fix_raw_use_of_generic_class --dont-accept=fix_inefficient_calls_to_foreach_list_add caffeine/
+    - run: cd caffeine && ./gradlew build -x test
+
   compile-spotbugs:
     needs: build
     runs-on: ubuntu-latest
