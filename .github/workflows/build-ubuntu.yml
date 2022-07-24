@@ -188,7 +188,8 @@ jobs:
     - run: git clone --depth 1 https://github.com/DV8FromTheWorld/JDA.git
     - run: cd JDA && ./gradlew build -x test
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all JDA/
+    # Rule disabled due to issue #162
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_method_references JDA/
     - run: cd JDA && ./gradlew build -x test
 
   compile-zipkin:
