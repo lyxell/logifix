@@ -61,7 +61,7 @@ jobs:
     - run: cd dbeaver && mvn compile
     - run: chmod +x logifix
     # Disable rules due to issue #161
-    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_streams --dont-accept=simplify_code_using_map_computeifabsent dbeaver/
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_streams --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=simplify_code_using_method_references dbeaver/
     - run: cd dbeaver && mvn compile
 
   compile-maven:
