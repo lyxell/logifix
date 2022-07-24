@@ -2,7 +2,7 @@
  * Introduce entry by iterating over entrySet instead of keySet.
  */
 rewrite("fix_inefficient_map_access", filename, start, end + 1,
-    cat("for (Map.Entry", @type_args_to_string(type_args), " entry : ", @node_to_string(code, map_reference), ".entrySet()) {\n",
+    cat("for (java.util.Map.Entry", @type_args_to_string(type_args), " entry : ", @node_to_string(code, map_reference), ".entrySet()) {\n",
         @node_to_string(code, param), " = entry.getKey();")
 ) :-
     enhanced_for_statement(id, param, expression, body),
