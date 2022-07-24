@@ -100,7 +100,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/netty/netty.git
+    - run: mkdir netty && cd netty && git init && git remote add origin https://github.com/netty/netty.git && git fetch --depth 1 origin c87c911c010c3a34a69e550d52299df20e5fc740 && git checkout c87c911c010c3a34a69e550d52299df20e5fc740 && mvn compile
     - run: cd netty && mvn compile
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all netty/
