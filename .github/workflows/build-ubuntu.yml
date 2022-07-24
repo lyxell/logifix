@@ -156,7 +156,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/MovingBlocks/Terasology.git
+    - run: mkdir Terasology && cd Terasology && git init && git remote add https://github.com/MovingBlocks/Terasology.git && git fetch --depth 1 origin 3cf39f5120da933a26aa7bac24fe85a88eb0883d && git checkout 3cf39f5120da933a26aa7bac24fe85a88eb0883d && mvn compile
     - run: cd Terasology && ./gradlew build -x test
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all Terasology/engine/
