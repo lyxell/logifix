@@ -206,6 +206,20 @@ jobs:
     - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_method_references JDA/
     - run: cd JDA && ./gradlew build -x test
 
+  compile-terasology:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: mkdir Terasology && cd Terasology && git init && git remote add origin https://github.com/MovingBlocks/Terasology.git && git fetch --depth 1 origin 3cf39f5120da933a26aa7bac24fe85a88eb0883d && git checkout 3cf39f5120da933a26aa7bac24fe85a88eb0883d
+    - run: cd Terasology && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all Terasology/engine/src/
+    - run: cd Terasology && ./gradlew build -x test
+
   compile-mockito:
     needs: build
     runs-on: ubuntu-latest
