@@ -2,3 +2,4 @@
 *.yy linguist-detectable=false
 tests linguist-detectable=false
 scripts linguist-detectable=false
+*.dl linguist-language=Diff
