@@ -47,7 +47,7 @@ jobs:
     - run: cd spotbugs && ./gradlew build -x test
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=remove_unnecessary_declarations_above_return_statements spotbugs/spotbugs/src/main/java/
-    - run: cd spotbugs && ./gradlew build -x test
+    - run: cd spotbugs && ./gradlew build -x test -x spotbugs:spotlessJavaCheck
 
   compile-spoon:
     needs: build
