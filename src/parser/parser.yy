@@ -1257,7 +1257,7 @@ assert_statement: ASSERT                expression ';' { $$ = ID("assert_stateme
                                                          PARENT($$, "condition", $2); }
                 | ASSERT expression ':' expression ';' { $$ = ID("assert_statement", @$);
                                                          PARENT($$, "condition", $2);
-                                                         PARENT($$, "message", $3); }
+                                                         PARENT($$, "message", $4); }
                 ;
 
 switch_statement: SWITCH '(' expression ')' switch_block { $$ = ID("switch_statement", @$);
