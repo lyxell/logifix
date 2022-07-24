@@ -101,6 +101,7 @@ jobs:
       with:
         name: logifix-ubuntu
     - run: mkdir netty && cd netty && git init && git remote add origin https://github.com/netty/netty.git && git fetch --depth 1 origin b237c87bcc92d6875919a01b2445279dc5c6170c && git checkout b237c87bcc92d6875919a01b2445279dc5c6170c && mvn compile
+    - run: cd netty && mvn clean package
     - run: cd netty && mvn compile
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all netty/
