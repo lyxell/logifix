@@ -248,7 +248,18 @@ has_type(id, ["", "boolean", nil]) :-
 /* Types of floats */
 
 has_type(id, ["", "float", nil]) :-
-    floating_point_literal(id).
+    source_code(_, code),
+    (substr(code, pos - 1, 1) = "f"
+    ;substr(code, pos - 1, 1) = "F"),
+    floating_point_literal(id),
+    ends_at(id, pos).
+
+has_type(id, ["", "double", nil]) :-
+    source_code(_, code),
+    substr(code, pos - 1, 1) != "f",
+    substr(code, pos - 1, 1) != "F",
+    floating_point_literal(id),
+    ends_at(id, pos).
 
 /* Types of Strings */
 
