@@ -49,6 +49,21 @@ jobs:
     - run: ./logifix --in-place --accept-all spoon/src/main
     - run: cd spoon && mvn compile
 
+  compile-maven:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/apache/maven
+    - run: cd maven && mvn compile
+    - run: chmod +x logifix
+    # Disable rules due to issue #158
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=simplify_code_using_streams maven/
+    - run: cd maven && mvn compile -Dcheckstyle.skip
+
   compile-bytecodeviewer:
     needs: build
     runs-on: ubuntu-latest
@@ -119,6 +134,20 @@ jobs:
     - run: ./logifix --in-place --accept-all pitest/
     - run: cd pitest && mvn compile
 
+  compile-sorald:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/SpoonLabs/sorald.git
+    - run: cd sorald && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all sorald/
+    - run: cd sorald && mvn compile
+
   compile-karate:
     needs: build
     runs-on: ubuntu-latest
@@ -161,3 +190,46 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all JDA/
     - run: cd JDA && ./gradlew build -x test
+
+  compile-zipkin:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/openzipkin/zipkin.git
+    - run: cd zipkin && mvn compile
+    - run: chmod +x logifix
+    # Disable simplify_code_using_map_computeifabsent since zipkin uses java 7 (flag -source 7)
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent zipkin/
+    - run: cd zipkin && mvn compile
+
+  compile-musicbot:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/jagrosh/MusicBot.git
+    - run: cd MusicBot && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all MusicBot/
+    - run: cd MusicBot && mvn compile
+
+  compile-iceberg:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/apache/iceberg.git
+    - run: cd iceberg && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all iceberg/
+    - run: cd iceberg && ./gradlew build -x test -x checkstyleMain -x checkstyleTest
