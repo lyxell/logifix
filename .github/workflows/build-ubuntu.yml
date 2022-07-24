@@ -161,3 +161,17 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all Terasology/engine/
     - run: cd Terasology && ./gradlew build -x test
+
+  compile-musicbot:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/jagrosh/MusicBot.git
+    - run: cd MusicBot && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all MusicBot/
+    - run: cd MusicBot && mvn compile
