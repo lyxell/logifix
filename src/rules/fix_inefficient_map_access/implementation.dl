@@ -1,6 +1,8 @@
-/**
- * Introduce entry by iterating over entrySet instead of keySet.
- */
+/*
+- for ([:param] : [:map_var].keySet()) {
++ for (java.util.Map.Entry[:type_args] entry : [:map_var].entrySet()) {
++     [:param] = entry.getKey();
+*/
 rewrite("fix_inefficient_map_access", filename, start, end + 1,
     cat("for (java.util.Map.Entry", @type_args_to_string(type_args), " entry : ", @node_to_string(code, map_reference), ".entrySet()) {\n",
         @node_to_string(code, param), " = entry.getKey();")
@@ -32,9 +34,11 @@ rewrite("fix_inefficient_map_access", filename, start, end + 1,
     map_get_end <= body_end,
     point_of_declaration(key, param).
 
-/**
- * Use entry.getValue() instead of map.get(key) if available.
- */
+/*
+- [:map_var].get([:key])
++ entry.getValue()
+    where key is assigned with the value entry.getKey()
+*/
 replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_string(code, formal_param_id), ".getValue()")) :-
 
     enhanced_for_statement(_, formal_param, expression, body),
@@ -67,9 +71,10 @@ replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_str
     point_of_declaration(map_get_subject, decl),
     point_of_declaration(key, declaration).
 
-/**
- * Use entry.getValue() instead of map.get(entry.getKey()) if available.
- */
+/*
+- [:map_var].get([:entry].getKey())
++ [:entry].getValue()
+*/
 replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_string(code, get_key_subject), ".getValue()")) :-
 
     enhanced_for_statement(_, formal_param, expression, body),

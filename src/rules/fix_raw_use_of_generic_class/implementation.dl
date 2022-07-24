@@ -4,8 +4,10 @@ field_or_local_variable_declaration(id, mods, type, declarators) :-
 field_or_local_variable_declaration(id, mods, type, declarators) :-
     local_variable_declaration(id, mods, type, declarators).
 
-/* Pre  [:left_type]<[:left_type_parameters]> [:left] = new [:right_type](); */
-/* Post [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>(); */
+/*
+- [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]();
++ [:left_type]<[:left_type_parameters]> [:left] = new [:right_type]<>();
+*/
 replace_node_with_string("fix_raw_use_of_generic_class", right_type, cat(@node_to_string(code, right_type), "<>")) :-
     field_or_local_variable_declaration(_, _, left_type, declarators),
     ast_type_to_type(left_type, [left_package, left_class, left_type_args]),
@@ -18,8 +20,10 @@ replace_node_with_string("fix_raw_use_of_generic_class", right_type, cat(@node_t
     ast_type_to_type(right_type, [right_package, right_class, nil]),
     (collection_type(right_package, right_class); map_type(right_package, right_class)).
 
-/* Pre  Type [:var] = [:it]; */
-/* Post Type<[:type]> [:var] = [:it]; */
+/*
+- [:type] [:var] = [:it];
++ [:type]<[:type_args]> [:var] = [:it];
+*/
 replace_node_with_string("fix_raw_use_of_generic_class", left_type, @type_to_string([package, class, type_args])) :-
     local_variable_declaration(_, _, left_type, [declarator, nil]),
     ast_type_to_type(left_type, [package, class, nil]),

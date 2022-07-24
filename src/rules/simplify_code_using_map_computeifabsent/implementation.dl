@@ -1,10 +1,8 @@
 /*
-
--    if (!map.containsKey(key)) {
--        map.put(key, value);
--    }
-+    map.computeIfAbsent(key, k -> value);
-
+- if (![:map_var].containsKey([:key_var])) {
+-     [:map_var].put([:key_var], [:value_var]);
+- }
++ [:map_var].computeIfAbsent([:key_var], k -> [:value_var]);
 */
 replace_node_with_string("simplify_code_using_map_computeifabsent", id,
     cat(@node_to_string(code, contains_key_object), ".computeIfAbsent(", @node_to_string(code, contains_key_arg), ", k -> ", @node_to_string(code, put_arg2), ");")
@@ -21,18 +19,18 @@ replace_node_with_string("simplify_code_using_map_computeifabsent", id,
     point_of_declaration(contains_key_arg, key_decl),
     point_of_declaration(put_arg1, key_decl).
 
-/* Pre  [:value_type] [:value_var] = [:map_var].get([:key_var]);
-        if ([:value_var] == null) {
-            [:value_var] = [:value_initializer];
-            [:map_var].put([:key_var], [:value_var]);
-            [:trailing_statements]
-        }
-
-   Post [:value_type] [:value_var] = [:map_var].computeIfAbsent([:key_var], k -> {
-            [:value_type] [:value_var] = [:value_initializer];
-            [:trailing_statements]
-            return [:value_var];
-        });
+/*
+- [:value_type] [:value_var] = [:map_var].get([:key_var]);
+- if ([:value_var] == null) {
+-     [:value_var] = [:value_initializer];
+-     [:map_var].put([:key_var], [:value_var]);
+-     [:trailing_statements]
+- }
++ [:value_type] [:value_var] = [:map_var].computeIfAbsent([:key_var], k -> {
++     [:value_type] [:value_var] = [:value_initializer];
++     [:trailing_statements]
++     return [:value_var];
++ });
 */
 
 rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(

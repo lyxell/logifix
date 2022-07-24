@@ -6,8 +6,11 @@ imports_start_at(start) :-
     ordinary_compilation_unit(_, _, nil, [t_decl, _]),
     starts_at(t_decl, start).
 
-/* Auto-import java.util.stream.Collectors */
 /* Used by simplify_code_using_streams */
+
+/*
++ import java.util.stream.Collectors;
+*/
 rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import java.util.stream.Collectors;\n") :-
     expression_name(expr_name, _),
         filename_of(expr_name, filename),
@@ -16,6 +19,11 @@ rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import j
     !import_specification(_, "java.util.stream", "Collectors"),
     !import_specification(_, "java.util.stream", "*"),
     @node_to_string(code, expr_name) = "java.util.stream.Collectors".
+
+/*
+- java.util.stream.Collectors
++ Collectors
+*/
 replace_node_with_string("remove_use_of_fully_qualified_names", expr_name, "Collectors") :-
     expression_name(expr_name, _),
     source_code(_, code),
@@ -23,8 +31,11 @@ replace_node_with_string("remove_use_of_fully_qualified_names", expr_name, "Coll
     ;import_specification(_, "java.util.stream", "*")),
     @node_to_string(code, expr_name) = "java.util.stream.Collectors".
 
-/* Auto-import java.util.Map */
 /* Used by fix_inefficient_map_access */
+
+/*
++ import java.util.Map;
+*/
 rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import java.util.Map;\n") :-
     class_type(class_type, _, _, _, _),
         filename_of(class_type, filename),
@@ -33,6 +44,11 @@ rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import j
     !import_specification(_, "java.util", "Map"),
     !import_specification(_, "java.util", "*"),
     @node_to_string(code, class_type) = "java.util.Map".
+
+/*
+- java.util.Map
++ Map
+*/
 replace_node_with_string("remove_use_of_fully_qualified_names", class_type, "Map") :-
     class_type(class_type, _, _, _, _),
     source_code(_, code),
