@@ -46,7 +46,7 @@ jobs:
     - run: git clone --depth 1 https://github.com/spotbugs/spotbugs.git
     - run: cd spotbugs && ./gradlew build -x test
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all --dont-accept=remove_unnecessary_declarations_above_return_statements spotbugs/spotbugs/src/main/java/
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=remove_unnecessary_declarations_above_return_statements spotbugs/spotbugs/src/main/java/
     - run: cd spotbugs && ./gradlew build -x test
 
   compile-spoon:
