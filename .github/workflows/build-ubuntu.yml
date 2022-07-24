@@ -60,7 +60,7 @@ jobs:
     - run: git clone --depth 1 https://github.com/apache/maven
     - run: cd maven && mvn compile
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all maven/
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_streams maven/
     - run: cd maven && mvn compile -Dcheckstyle.skip
 
   compile-bytecodeviewer:
