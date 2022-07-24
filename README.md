@@ -2,11 +2,12 @@
 
 # Logifix
 
-Logifix is a fast analysis-guided rewrite system for Java source
-code. Logifix can be used to automatically fix static analysis violations
-for static analyzers such as SonarQube, PMD or SpotBugs, but also
-to modernize legacy code or even to automatically enforce custom
-rules specific to your code base.
+Logifix is a Datalog-based tool for automatically fixing static
+analysis violations in Java source code. Logifix can be used to
+fix static analysis violations for static analyzers such as
+SonarQube, PMD or SpotBugs, but also to modernize legacy code or
+even to automatically enforce custom rules specific to your code
+base.
 
 <ul> </ul>
 
