@@ -25,9 +25,8 @@ replace_node_with_string("simplify_code_using_map_computeifabsent", id,
             [:map_var].put([:key_var], [:value_var]);
             [:trailing_statements]
         }
-        return [:value_var];
 
-   Post return [:map_var].computeIfAbsent([:key_var], k -> {
+   Post [:value_type] [:value_var] = [:map_var].computeIfAbsent([:key_var], k -> {
             [:value_type] [:value_var] = [:value_initializer];
             [:trailing_statements]
             return [:value_var];
@@ -35,23 +34,24 @@ replace_node_with_string("simplify_code_using_map_computeifabsent", id,
 */
 
 rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
-    "return ", @node_to_string(code, map_var), ".computeIfAbsent(", @node_to_string(code, key_var), ", k -> {\n",
+    @node_to_string(code, map_var), ".computeIfAbsent(", @node_to_string(code, key_var), ", k -> {\n",
         @node_to_string(code, value_type), " ", @node_to_string(code, value_var), " = ", @node_to_string(code, value_initializer), ";\n",
         substr(code, t2_end, last_element_end - t2_end), "\n",
         "return ", @node_to_string(code, value_var), ";\n",
     "});"
 )) :-
 
-    predecessor_of(s1, s2),
-    predecessor_of(s2, s3),
+    /* There's two adjacent statements, the first is a local variable declaration and the other is an if */
+    local_variable_declaration_statement(local_var_decl_stmt, decl),
+    predecessor_of(local_var_decl_stmt, if_stmt),
+    if_statement(if_stmt, cond, then, nil),
 
-    filename_of(s1, filename),
-    starts_at(s1, start),
-    ends_at(s3, end),
+    /* Extract information used for rewriting */
+    ends_at(if_stmt, end),
+    filename_of(local_var_decl_stmt, filename),
     source_code(filename, code),
 
-    /* The first statement is a local variable declaration statement */
-    local_variable_declaration_statement(s1, decl),
+    /* Extract information from local variable declaration*/
     local_variable_declaration(decl, _, value_type, [declarator, nil]),
     variable_declarator(declarator, value_var, initializer),
     method_invocation(initializer, map_var, "get", [key_var, nil]),
@@ -59,37 +59,33 @@ rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
     point_of_declaration(map_var, map_var_declaration_point),
     has_type(map_var, ["java.util", "Map", _]),
 
-    /* The second statement is an if-statement */
-    if_statement(s2, cond, then, nil),
+    /* Extract information used for rewriting */
+    starts_at(initializer, start),
 
-        /* The condition is an equality expression which checks if the value
-         * from the initializer is null */
-        equals_expression(cond, fst, snd),
-        point_of_declaration(fst, decl),
-        null_literal(snd),
+    /* The condition is an equality expression which checks if the value
+     * from the initializer is null */
+    equals_expression(cond, fst, snd),
+    point_of_declaration(fst, decl),
+    null_literal(snd),
 
-        /* The then-clause is a block containing at least two statements */
-        block(then, then_stmts),
-        then_stmts = [t1, [t2, _]],
+    /* The then-clause is a block containing at least two statements */
+    block(then, then_stmts),
+    then_stmts = [t1, [t2, _]],
 
-            /* The first statement is an expression statement containing an
-             * assignment_expression assigning to value_var */
-            expression_statement(t1, assignment),
-            assignment_expression(assignment, lhs, value_initializer),
-            point_of_declaration(lhs, decl),
+    /* The first statement is an expression statement containing an
+     * assignment_expression assigning to value_var */
+    expression_statement(t1, assignment),
+    assignment_expression(assignment, lhs, value_initializer),
+    point_of_declaration(lhs, decl),
 
-            /* The second statement is a call to map_var.put */
-            expression_statement(t2, put),
-            method_invocation(put, subj, "put", [karg, [varg, nil]]),
-            point_of_declaration(subj, map_var_declaration_point),
-            point_of_declaration(karg, key_var_declaration_point),
-            @node_to_string(code, value_var) = @node_to_string(code, varg),
+    /* The second statement is a call to map_var.put */
+    expression_statement(t2, put),
+    method_invocation(put, subj, "put", [karg, [varg, nil]]),
+    point_of_declaration(subj, map_var_declaration_point),
+    point_of_declaration(karg, key_var_declaration_point),
+    @node_to_string(code, value_var) = @node_to_string(code, varg),
 
-            ends_at(t2, t2_end),
+    ends_at(t2, t2_end),
 
-        list_last_element(then_stmts, last_element),
-        ends_at(last_element, last_element_end),
-
-    /* The third statement is a return statement */
-    return_statement(s3, var),
-    point_of_declaration(var, decl).
+    list_last_element(then_stmts, last_element),
+    ends_at(last_element, last_element_end).
