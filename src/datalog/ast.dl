@@ -98,12 +98,12 @@ local_variable_declaration_statement(id, declaration) :-
  * `update`     StatementExpressionList
  * `body`       Statement
  */
-.decl for_statement(id: id, init: id, condition: id, update: id, body: id)
+.decl for_statement(id: id, init: id, condition: id, update: id_list, body: id)
 for_statement(id, init, condition, update, body) :-
     name_of(id, "for_statement"),
     parent_of(id, "init", init),
     parent_of(id, "condition", condition),
-    parent_of(id, "update", update),
+    parent_of_list(id, "update", update),
     parent_of(id, "body", body).
 
 /**

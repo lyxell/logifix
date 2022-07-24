@@ -162,6 +162,21 @@ jobs:
     - run: cd testng && ./gradlew autostyleApply
     - run: cd testng && ./gradlew build -x test
 
+  compile-zipkin:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/openzipkin/zipkin.git
+    - run: cd zipkin && mvn compile
+    - run: chmod +x logifix
+    # Disable simplify_code_using_map_computeifabsent since zipkin uses java 7 (flag -source 7)
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent zipkin/
+    - run: cd zipkin && mvn compile
+
   compile-musicbot:
     needs: build
     runs-on: ubuntu-latest
@@ -175,3 +190,17 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all MusicBot/
     - run: cd MusicBot && mvn compile
+
+  compile-iceberg:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/apache/iceberg.git
+    - run: cd iceberg && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all iceberg/
+    - run: cd iceberg && ./gradlew build -x test -x checkstyleMain -x checkstyleTest
