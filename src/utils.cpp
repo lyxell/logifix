@@ -31,6 +31,13 @@ auto ends_with(const std::string& str, const std::string& suffix) -> bool {
     return str.size() >= suffix.size() && str.substr(str.size() - suffix.size()) == suffix;
 }
 
+auto ltrim(std::string s) -> std::string {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](auto c) {
+        return !std::isspace(c);
+    }));
+    return s;
+}
+
 auto rtrim(std::string s) -> std::string {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](auto c) { return !std::isspace(c); }).base(),
             s.end());
