@@ -46,7 +46,7 @@ jobs:
     - run: git clone --depth 1 https://github.com/ben-manes/caffeine.git
     - run: cd caffeine && ./gradlew build -x test
     - run: chmod +x logifix
-    - run: ./logifix --in-place --accept-all --dont-accept=fix_raw_use_of_generic_class caffeine/
+    - run: ./logifix --in-place --accept-all --dont-accept=fix_raw_use_of_generic_class --dont-accept=fix_inefficient_calls_to_foreach_list_add caffeine/
     - run: cd caffeine && ./gradlew build -x test
 
   compile-spotbugs:
