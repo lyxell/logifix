@@ -36,6 +36,7 @@ struct options {
     bool print_json;
     std::set<std::string> files;
     std::set<std::string> accepted;
+    std::set<std::string> not_accepted;
 };
 
 enum class key { down, left, ret, right, up, unknown };
@@ -271,6 +272,7 @@ auto parse_options(int argc, char** argv) -> options {
         .print_json = false,
         .files = {},
         .accepted = {},
+        .not_accepted = {},
     };
 
     auto flags = std::vector<
@@ -309,11 +311,22 @@ auto parse_options(int argc, char** argv) -> options {
         }
     };
 
+    auto parse_not_accepted = [&](const std::string& str) {
+        auto ss = std::stringstream(str);
+        while (ss.good()) {
+            std::string substr;
+            std::getline(ss, substr, ',');
+            opts.not_accepted.emplace(substr);
+        }
+    };
+
     flags = {
         {"--accept-all", [&](const std::string& str) { opts.accept_all = true; },
          "Accept all patches without asking"},
         {"--accept=<rules>", [&](const std::string& str) { parse_accepted(str); },
          "Comma-separated list of rules to accept"},
+        {"--dont-accept=<rules>", [&](const std::string& str) { parse_not_accepted(str); },
+         "Comma-separated list of rules to not accept"},
         {"--enable-all", [&](const std::string& str) { opts.enable_all = true; },
          "Enable rules that are disabled by default"},
         {"--in-place", [&](const std::string& str) { opts.in_place = true; },
@@ -820,8 +833,12 @@ auto main(int argc, char** argv) -> int {
 
     } else {
         if (options.accept_all) {
-            for (auto patch : program.get_all_patches()) {
-                accepted_patches.insert(patch);
+            for (auto [rule, data] : rule_data) {
+                if (options.not_accepted.find(rule) == options.not_accepted.end()) {
+                  for (auto patch : program.get_patches_for_rule(rule)) {
+                      accepted_patches.insert(patch);
+                  }
+                }
             }
         } else if (!options.accepted.empty()) {
             for (const auto& rule : options.accepted) {
