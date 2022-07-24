@@ -63,6 +63,21 @@ jobs:
     - run: ./logifix --in-place --accept-all spoon/src/main
     - run: cd spoon && mvn compile
 
+  compile-dbeaver:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/dbeaver/dbeaver
+    - run: cd dbeaver && mvn compile
+    - run: chmod +x logifix
+    # Disable rules due to issue #161
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_streams --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=simplify_code_using_method_references dbeaver/
+    - run: cd dbeaver && mvn compile
+
   compile-maven:
     needs: build
     runs-on: ubuntu-latest
