@@ -6,21 +6,36 @@ imports_start_at(start) :-
     ordinary_compilation_unit(_, _, nil, [t_decl, _]),
     starts_at(t_decl, start).
 
-/* Auto-import */
+/* Auto-import java.util.stream.Collectors */
+/* Used by simplify_code_using_streams */
 rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import java.util.stream.Collectors;\n") :-
     expression_name(expr_name, _),
         filename_of(expr_name, filename),
     imports_start_at(start),
     source_code(_, code),
     !import_specification(_, "java.util.stream", "Collectors"),
+    !import_specification(_, "java.util.stream", "*"),
+    @node_to_string(code, expr_name) = "java.util.stream.Collectors".
+replace_node_with_string("remove_use_of_fully_qualified_names", expr_name, "Collectors") :-
+    expression_name(expr_name, _),
+    source_code(_, code),
+    (import_specification(_, "java.util.stream", "Collectors")
+    ;import_specification(_, "java.util.stream", "*")),
     @node_to_string(code, expr_name) = "java.util.stream.Collectors".
 
-replace_node_with_node("remove_use_of_fully_qualified_names", id, ident) :-
-    expression_name(id, list),
-    list_last_element(list, ident),
-    identifier(ident, class_name),
+/* Auto-import java.util.Map */
+/* Used by fix_inefficient_map_access */
+rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import java.util.Map;\n") :-
+    class_type(class_type, _, _, _, _),
+        filename_of(class_type, filename),
+    imports_start_at(start),
     source_code(_, code),
-    import_specification(_, package, class_name),
-    native_type(package, class_name),
-    @node_to_string(code, id) = cat(package, ".", class_name).
-
+    !import_specification(_, "java.util", "Map"),
+    !import_specification(_, "java.util", "*"),
+    @node_to_string(code, class_type) = "java.util.Map".
+replace_node_with_string("remove_use_of_fully_qualified_names", class_type, "Map") :-
+    class_type(class_type, _, _, _, _),
+    source_code(_, code),
+    (import_specification(_, "java.util", "Map")
+    ;import_specification(_, "java.util", "*")),
+    @node_to_string(code, class_type) = "java.util.Map".

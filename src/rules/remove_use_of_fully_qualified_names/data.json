@@ -1,6 +1,5 @@
 {
-    "description": "Remove redundant parentheses",
-    "disabled_by_default": true,
+    "description": "Remove use of fully qualified names",
     "sonar": {
         "id": "N/A"
     },
