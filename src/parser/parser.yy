@@ -1343,11 +1343,15 @@ for_statement_no_short_if: basic_for_statement_no_short_if
 basic_for_statement: FOR '(' for_init_opt ';' expression_opt ';' for_update_opt ')' statement { $$ = ID("for_statement", @$);
                   PARENT($$, "init", $for_init_opt);
                   PARENT($$, "condition", $expression_opt);
-                  PARENT($$, "update", $for_update_opt);
+                  PARENT_LIST($$, "update", $for_update_opt);
                   PARENT($$, "body", $statement); }
                    ;
 
-basic_for_statement_no_short_if: FOR '(' for_init_opt ';' expression_opt ';' for_update_opt ')' statement_no_short_if { $$ = ID("for_statement", @$); }
+basic_for_statement_no_short_if: FOR '(' for_init_opt ';' expression_opt ';' for_update_opt ')' statement_no_short_if { $$ = ID("for_statement", @$);
+                                        PARENT($$, "init", $for_init_opt);
+                                        PARENT($$, "condition", $expression_opt);
+                                        PARENT_LIST($$, "update", $for_update_opt);
+                                        PARENT($$, "body", $statement_no_short_if); }
                                ;
 
 for_init: statement_expression_list
