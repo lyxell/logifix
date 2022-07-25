@@ -41,6 +41,7 @@
 #include "datalog/scoping.dl"
 #include "datalog/typechecking.dl"
 #include "datalog/sideeffects.dl"
+#include "datalog/constant-evaluation.dl"
 
 /* Types
  ********************************/
@@ -136,71 +137,6 @@ list_last_element(list, id) :-
 .decl list_first_element(list: id_list, id: id)
 list_first_element([head, tail], head) :-
     parent_of_list(_, _, [head, tail]).
-
-/* Constant evaluation
- ********************************/
-
-.decl evaluates_to_integer_value(id: id, value: number)
-evaluates_to_integer_value(id, 0) :-
-    integer_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "0".
-evaluates_to_integer_value(id, 1) :-
-    integer_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "1".
-/* TODO
-evaluates_to_integer_value(id, to_number(repr)) :-
-    integer_literal(id),
-    string_representation(id, repr).
-*/
-evaluates_to_integer_value(id, left_value + right_value) :-
-    addition_expression(id, left, right),
-    evaluates_to_integer_value(left, left_value),
-    evaluates_to_integer_value(right, right_value).
-evaluates_to_integer_value(id, left_value * right_value) :-
-    multiplication_expression(id, left, right),
-    evaluates_to_integer_value(left, left_value),
-    evaluates_to_integer_value(right, right_value).
-evaluates_to_integer_value(id, left_value - right_value) :-
-    subtraction_expression(id, left, right),
-    evaluates_to_integer_value(left, left_value),
-    evaluates_to_integer_value(right, right_value).
-
-.decl evaluates_to_boolean_value(id: id, value: number)
-evaluates_to_boolean_value(id, 0) :-
-    boolean_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "false".
-evaluates_to_boolean_value(id, 1) :-
-    boolean_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "true".
-evaluates_to_boolean_value(id, left_value land right_value) :-
-    conditional_and_expression(id, left, right),
-    evaluates_to_boolean_value(left, left_value),
-    evaluates_to_boolean_value(right, right_value).
-evaluates_to_boolean_value(id, left_value lor right_value) :-
-    conditional_or_expression(id, left, right),
-    evaluates_to_boolean_value(left, left_value),
-    evaluates_to_boolean_value(right, right_value).
-evaluates_to_boolean_value(id, 1) :-
-    equals_expression(id, left, right),
-    evaluates_to_integer_value(left, x),
-    evaluates_to_integer_value(right, x).
-evaluates_to_boolean_value(id, 0) :-
-    equals_expression(id, left, right),
-    evaluates_to_integer_value(left, x),
-    evaluates_to_integer_value(right, y),
-    x != y.
 
 /* String representation
  ********************************/
