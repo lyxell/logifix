@@ -2,7 +2,6 @@
 #include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/fix_inefficient_calls_to_foreach_list_add/implementation.dl"
 #include "rules/fix_inefficient_map_access/implementation.dl"
-#include "rules/fix_null_returns_in_tostring/implementation.dl"
 #include "rules/fix_potential_resource_leaks/implementation.dl"
 #include "rules/fix_raw_use_of_empty_collections/implementation.dl"
 #include "rules/fix_raw_use_of_generic_class/implementation.dl"

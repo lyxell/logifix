@@ -1,7 +1,0 @@
-         case PROVIDER_KEY:
-           return "providerKey[" + key + "]";
-       }
--      return null;
-+      return "";
-     }
-   }
