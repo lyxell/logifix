@@ -1,4 +1,4 @@
-replace_node_with_string("use_lambda_argument_in_map_computeifabsent", ancestor, "k") :-
+replace_node_with_fragment("use_lambda_argument_in_map_computeifabsent", ancestor, "k") :-
     method_invocation(_, _, "computeIfAbsent", [key_var, [lambda, nil]]),
     lambda_expression(lambda, _, body),
     expression_name(ancestor, _),

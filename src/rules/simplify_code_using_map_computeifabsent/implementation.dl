@@ -4,7 +4,7 @@
 - }
 + [:map_var].computeIfAbsent([:key_var], k -> [:value_var]);
 */
-replace_node_with_string("simplify_code_using_map_computeifabsent", id,
+replace_node_with_fragment("simplify_code_using_map_computeifabsent", id,
     cat(@node_to_string(code, contains_key_object), ".computeIfAbsent(", @node_to_string(code, contains_key_arg), ", k -> ", @node_to_string(code, put_arg2), ");")
 ) :-
     if_statement(id, condition, then, nil),

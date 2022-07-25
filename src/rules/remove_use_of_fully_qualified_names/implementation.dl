@@ -24,7 +24,7 @@ rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import j
 - java.util.stream.Collectors
 + Collectors
 */
-replace_node_with_string("remove_use_of_fully_qualified_names", expr_name, "Collectors") :-
+replace_node_with_fragment("remove_use_of_fully_qualified_names", expr_name, "Collectors") :-
     expression_name(expr_name, _),
     source_code(_, code),
     (import_specification(_, "java.util.stream", "Collectors")
@@ -49,7 +49,7 @@ rewrite("remove_use_of_fully_qualified_names", filename, start, start, "import j
 - java.util.Map
 + Map
 */
-replace_node_with_string("remove_use_of_fully_qualified_names", class_type, "Map") :-
+replace_node_with_fragment("remove_use_of_fully_qualified_names", class_type, "Map") :-
     class_type(class_type, _, _, _, _),
     source_code(_, code),
     (import_specification(_, "java.util", "Map")

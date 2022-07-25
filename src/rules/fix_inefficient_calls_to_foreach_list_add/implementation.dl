@@ -2,7 +2,7 @@
 - [:stream].forEach([:coll]::add)
 + [:coll].addAll([:stream].collect(java.util.stream.Collectors.toList()))
 */
-replace_node_with_string("fix_inefficient_calls_to_foreach_list_add", inv, cat(
+replace_node_with_fragment("fix_inefficient_calls_to_foreach_list_add", inv, cat(
     @node_to_string(code, ref_subject), ".addAll(", @node_to_string(code, inv_subject), ".collect(java.util.stream.Collectors.toList()))"
 )) :-
     source_code(_, code),

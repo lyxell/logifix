@@ -1,6 +1,6 @@
 /* Pre  [:x].close() */
 /* Post              */
-replace_node_with_string("remove_redundant_calls_to_close", inv, "") :-
+replace_node_with_fragment("remove_redundant_calls_to_close", inv, "") :-
     try_with_resources_statement(_, resources, _, _, _),
     list_contains(resources, resource),
     /* Loop through all method_invocations */

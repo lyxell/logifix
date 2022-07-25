@@ -2,7 +2,7 @@
 - Collections.EMPTY_LIST
 + Collections.emptyList()
 */
-replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.emptyList()") :-
+replace_node_with_fragment("fix_raw_use_of_empty_collections", id, "Collections.emptyList()") :-
     expression_name(id, [id1, [id2, nil]]),
     identifier(id1, "Collections"),
     identifier(id2, "EMPTY_LIST").
@@ -11,7 +11,7 @@ replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.em
 - Collections.EMPTY_MAP
 + Collections.emptyMap()
 */
-replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.emptyMap()") :-
+replace_node_with_fragment("fix_raw_use_of_empty_collections", id, "Collections.emptyMap()") :-
     expression_name(id, [id1, [id2, nil]]),
     identifier(id1, "Collections"),
     identifier(id2, "EMPTY_MAP").
@@ -20,7 +20,7 @@ replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.em
 - Collections.EMPTY_SET
 + Collections.emptySet()
 */
-replace_node_with_string("fix_raw_use_of_empty_collections", id, "Collections.emptySet()") :-
+replace_node_with_fragment("fix_raw_use_of_empty_collections", id, "Collections.emptySet()") :-
     expression_name(id, [id1, [id2, nil]]),
     identifier(id1, "Collections"),
     identifier(id2, "EMPTY_SET").

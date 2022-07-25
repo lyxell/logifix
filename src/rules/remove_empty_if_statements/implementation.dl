@@ -1,5 +1,5 @@
 /* Pre  if ([:x]) {} */
 /* Post {}           */
-replace_node_with_string("remove_empty_if_statements", id, "{}") :-
+replace_node_with_fragment("remove_empty_if_statements", id, "{}") :-
     if_statement(id, _, body, nil),
     block(body, nil).

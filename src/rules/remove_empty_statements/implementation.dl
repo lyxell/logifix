@@ -1,4 +1,4 @@
-replace_node_with_string("remove_empty_statements", id, "") :-
+replace_node_with_fragment("remove_empty_statements", id, "") :-
     empty_statement(id),
     ! if_statement(_, _, id, _),
     ! if_statement(_, _, _, id),

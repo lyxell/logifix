@@ -1,6 +1,6 @@
 /* Pre  return; */
 /* Post         */
-replace_node_with_string("remove_unnecessary_return", return, "") :-
+replace_node_with_fragment("remove_unnecessary_return", return, "") :-
     method_declaration(_, _, _, body),
     block(body, stmts),
     list_last_element(stmts, return),

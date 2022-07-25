@@ -1,4 +1,4 @@
-replace_node_with_string("simplify_calls_to_map_keyset", id, "Collections.emptySet()") :-
+replace_node_with_fragment("simplify_calls_to_map_keyset", id, "Collections.emptySet()") :-
     method_invocation(id, subject, "keySet", nil),
     method_invocation(subject, collections, "emptyMap", nil),
     expression_name(collections, [ident, nil]),

@@ -73,17 +73,17 @@ invocation to a method called `substring`:
 ```prolog
 /* file: src/rules/my_custom_rule/implementation.dl */
 
-replace_node_with_string("my_custom_rule", node, "") :-
+replace_node_with_fragment("my_custom_rule", node, "") :-
     
     /* Match a method invocation */
     method_invocation(node, _, "substring", _).
 ```
 Note that using underscores in place of variable names in a relation will match any value.
-The relations `replace_node_with_string` and `method_invocation` are
+The relations `replace_node_with_fragment` and `method_invocation` are
 from the Logifix API, they have the following signatures:
 
 ```prolog
-replace_node_with_string(rule_name: symbol, node: id, replacement: symbol)
+replace_node_with_fragment(rule_name: symbol, node: id, replacement: symbol)
 ```
 
 > The attribute `rule_name` is a string that identifies this
@@ -151,7 +151,7 @@ We proceed by specifying the arguments of the method invocation.
 ```prolog
 /* file: src/rules/my_custom_rule/implementation.dl */
 
-replace_node_with_string("my_custom_rule", node, "") :-
+replace_node_with_fragment("my_custom_rule", node, "") :-
 
     /* Match a method invocation of `substring` with two arguments */
     method_invocation(node, _, "substring", [arg1, [arg2, nil]]).
@@ -185,7 +185,7 @@ We proceed by limiting the matches to nodes where the object has the correct typ
 ```prolog
 /* file: src/rules/my_custom_rule/implementation.dl */
 
-replace_node_with_string("my_custom_rule", node, "") :-
+replace_node_with_fragment("my_custom_rule", node, "") :-
 
     /* Match a method invocation of `substring` with two arguments */
     method_invocation(node, substring_object, "substring", [arg1, [arg2, nil]]),
@@ -202,7 +202,7 @@ is a method invocation of `length`.
 ```prolog
 /* file: src/rules/my_custom_rule/implementation.dl */
 
-replace_node_with_string("my_custom_rule", node, "") :-
+replace_node_with_fragment("my_custom_rule", node, "") :-
 
     /* Match a method invocation of `substring` with two arguments */
     method_invocation(node, substring_object, "substring", [arg1, [arg2, nil]]),
@@ -237,7 +237,7 @@ We do this by checking that they are declared at the same location.
 ```prolog
 /* file: src/rules/my_custom_rule/implementation.dl */
 
-replace_node_with_string("my_custom_rule", node, "") :-
+replace_node_with_fragment("my_custom_rule", node, "") :-
 
     /* Match a method invocation of `substring` with two arguments */
     method_invocation(node, substring_object, "substring", [arg1, [arg2, nil]]),
