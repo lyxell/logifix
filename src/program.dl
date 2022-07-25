@@ -37,11 +37,11 @@
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
 #include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
-#include "datalog/ast.dl"
-#include "datalog/scoping.dl"
-#include "datalog/typechecking.dl"
-#include "datalog/sideeffects.dl"
-#include "datalog/constant-evaluation.dl"
+#include "analysis/ast.dl"
+#include "analysis/scoping.dl"
+#include "analysis/typechecking.dl"
+#include "analysis/sideeffects.dl"
+#include "analysis/constant-evaluation.dl"
 
 /* Types
  ********************************/
