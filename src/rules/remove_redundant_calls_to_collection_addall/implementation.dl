@@ -2,7 +2,7 @@
 /*      [:id].addAll([:arg]);               */
 
 /* Post [:coll_type] [:id] = new [:initializer]([:arg]); */
-rewrite("remove_redundant_calls_to_collection_addall", filename, start, end, cat(
+replace_range_with_fragment("remove_redundant_calls_to_collection_addall", filename, start, end, cat(
     "new ", @node_to_string(code, type), "(", @node_to_string(code, arg), ");"
 )) :-
     local_variable_declaration_statement(id, declaration),

@@ -3,7 +3,7 @@
 - return [:id];
 + return [:initializer];
 */
-rewrite("remove_unnecessary_declarations_above_return_statements", filename, start, end,
+replace_range_with_fragment("remove_unnecessary_declarations_above_return_statements", filename, start, end,
     cat("return ", @node_to_string(code, initializer), ";")
 ) :-
     local_variable_declaration_statement(id, declaration),

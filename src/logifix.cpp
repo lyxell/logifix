@@ -512,7 +512,7 @@ auto program::run_datalog_analysis(const std::string& source) const
     // prog->printAll();
 
     /* extract rewrites */
-    auto* relation = prog->getRelation("rewrite");
+    auto* relation = prog->getRelation("replace_range_with_fragment");
     auto rewrites = std::set<std::pair<std::string, rewrite_type>>{};
 
     for (auto& output : *relation) {

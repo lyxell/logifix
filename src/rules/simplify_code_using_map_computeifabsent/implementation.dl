@@ -33,7 +33,7 @@ replace_node_with_fragment("simplify_code_using_map_computeifabsent", id,
 + });
 */
 
-rewrite("simplify_code_using_map_computeifabsent", filename, start, end, cat(
+replace_range_with_fragment("simplify_code_using_map_computeifabsent", filename, start, end, cat(
     @node_to_string(code, map_var), ".computeIfAbsent(", @node_to_string(code, key_var), ", k -> {\n",
         @node_to_string(code, value_type), " ", @node_to_string(code, value_var), " = ", @node_to_string(code, value_initializer), ";\n",
         substr(code, t2_end, last_element_end - t2_end), "\n",

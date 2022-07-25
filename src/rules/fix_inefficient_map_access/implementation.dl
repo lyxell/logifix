@@ -3,7 +3,7 @@
 + for (java.util.Map.Entry[:type_args] entry : [:map_var].entrySet()) {
 +     [:param] = entry.getKey();
 */
-rewrite("fix_inefficient_map_access", filename, start, end + 1,
+replace_range_with_fragment("fix_inefficient_map_access", filename, start, end + 1,
     cat("for (java.util.Map.Entry", @type_args_to_string(type_args), " entry : ", @node_to_string(code, map_reference), ".entrySet()) {\n",
         @node_to_string(code, param), " = entry.getKey();")
 ) :-

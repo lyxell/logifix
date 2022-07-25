@@ -150,13 +150,13 @@ list_first_element([head, tail], head) :-
 .decl replace_node_with_node(rule: symbol, original: id, replacement: id)
 .decl replace_node_with_fragment(rule: symbol, original: id, replacement: symbol)
 
-.decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
-rewrite(rule, filename, start, end, to) :-
+.decl replace_range_with_fragment(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
+replace_range_with_fragment(rule, filename, start, end, to) :-
     replace_node_with_fragment(rule, id, to),
     starts_at(id, start),
     ends_at(id, end),
     filename_of(id, filename).
-rewrite(rule, filename, start, end, substr(code, replacement_start, replacement_end - replacement_start)) :-
+replace_range_with_fragment(rule, filename, start, end, substr(code, replacement_start, replacement_end - replacement_start)) :-
     replace_node_with_node(rule, original, replacement),
     starts_at(original, start),
     ends_at(original, end),
@@ -164,4 +164,4 @@ rewrite(rule, filename, start, end, substr(code, replacement_start, replacement_
     source_code(_, code),
     starts_at(replacement, replacement_start),
     ends_at(replacement, replacement_end).
-.output rewrite(IO=stdout)
+.output replace_range_with_fragment(IO=stdout)

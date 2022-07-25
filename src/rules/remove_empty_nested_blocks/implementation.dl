@@ -1,6 +1,6 @@
 /* Pre  {} */
 /* Post    */
-rewrite("remove_empty_nested_blocks", filename, start, end, "") :-
+replace_range_with_fragment("remove_empty_nested_blocks", filename, start, end, "") :-
     block(_, stmts),
     list_contains(stmts, id),
     block(id, nil),
@@ -10,7 +10,7 @@ rewrite("remove_empty_nested_blocks", filename, start, end, "") :-
 
 /* Pre  if ([:cond]) [:body] else {} */
 /* Post if ([:cond]) [:body] */
-rewrite("remove_empty_nested_blocks", filename, start, end, "") :-
+replace_range_with_fragment("remove_empty_nested_blocks", filename, start, end, "") :-
     if_statement(id, _, then, else),
         filename_of(id, filename),
         ends_at(then, start),
