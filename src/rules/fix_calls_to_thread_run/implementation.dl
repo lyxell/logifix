@@ -1,6 +1,6 @@
 /* Pre  [:x].run()   */
 /* Post [:x].start() */
-replace_node_with_string("fix_calls_to_thread_run", id, cat(@node_to_string(code, subject), ".start()")) :-
+replace_node_with_fragment("fix_calls_to_thread_run", id, cat(@node_to_string(code, subject), ".start()")) :-
     method_invocation(id, subject, "run", nil),
     has_type(subject, ["java.lang", "Thread", nil]),
     source_code(_, code).

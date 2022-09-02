@@ -35,6 +35,34 @@ jobs:
         name: logifix-ubuntu
         path: ${{github.workspace}}/build/logifix
 
+  compile-caffeine:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/ben-manes/caffeine.git
+    - run: cd caffeine && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all --dont-accept=fix_raw_use_of_generic_class --dont-accept=fix_inefficient_calls_to_foreach_list_add caffeine/
+    - run: cd caffeine && ./gradlew build -x test
+
+  compile-spotbugs:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/spotbugs/spotbugs.git
+    - run: cd spotbugs && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=remove_unnecessary_declarations_above_return_statements spotbugs/spotbugs/src/main/java/
+    - run: cd spotbugs && ./gradlew build -x test -x spotbugs:spotlessJavaCheck
+
   compile-spoon:
     needs: build
     runs-on: ubuntu-latest
@@ -49,6 +77,36 @@ jobs:
     - run: ./logifix --in-place --accept-all spoon/src/main
     - run: cd spoon && mvn compile
 
+  compile-dbeaver:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/dbeaver/dbeaver
+    - run: cd dbeaver && mvn compile
+    - run: chmod +x logifix
+    # Disable rules due to issue #161
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_streams --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=simplify_code_using_method_references dbeaver/
+    - run: cd dbeaver && mvn compile
+
+  compile-maven:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/apache/maven
+    - run: cd maven && mvn compile
+    - run: chmod +x logifix
+    # Disable rules due to issue #158
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent --dont-accept=simplify_code_using_streams maven/
+    - run: cd maven && mvn compile -Dcheckstyle.skip
+
   compile-bytecodeviewer:
     needs: build
     runs-on: ubuntu-latest
@@ -62,6 +120,20 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all bytecode-viewer/
     - run: cd bytecode-viewer && mvn compile
+
+  compile-spock:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/spockframework/spock.git
+    - run: cd spock && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all spock/
+    - run: cd spock && ./gradlew build -x test
 
   compile-initializr:
     needs: build
@@ -86,8 +158,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: logifix-ubuntu
-    - run: git clone --depth 1 https://github.com/apache/dolphinscheduler.git
-    - run: cd dolphinscheduler && mvn compile
+    - run: mkdir dolphinscheduler && cd dolphinscheduler && git init && git remote add origin https://github.com/apache/dolphinscheduler.git && git fetch --depth 1 origin 14e80ab5fd3a6c068fe168fb76c5b9c836edf113 && git checkout 14e80ab5fd3a6c068fe168fb76c5b9c836edf113 && mvn compile
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all dolphinscheduler/
     - run: cd dolphinscheduler && mvn clean compile
@@ -105,6 +176,20 @@ jobs:
     - run: chmod +x logifix
     - run: ./logifix --in-place --accept-all pitest/
     - run: cd pitest && mvn compile
+
+  compile-sorald:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/SpoonLabs/sorald.git
+    - run: cd sorald && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all sorald/
+    - run: cd sorald && mvn compile
 
   compile-karate:
     needs: build
@@ -134,3 +219,90 @@ jobs:
     - run: ./logifix --in-place --accept-all testng/
     - run: cd testng && ./gradlew autostyleApply
     - run: cd testng && ./gradlew build -x test
+
+  compile-jda:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/DV8FromTheWorld/JDA.git
+    - run: cd JDA && ./gradlew build -x test
+    - run: chmod +x logifix
+    # Rule disabled due to issue #162
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_method_references JDA/
+    - run: cd JDA && ./gradlew build -x test
+
+  compile-terasology:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: mkdir Terasology && cd Terasology && git init && git remote add origin https://github.com/MovingBlocks/Terasology.git && git fetch --depth 1 origin 3cf39f5120da933a26aa7bac24fe85a88eb0883d && git checkout 3cf39f5120da933a26aa7bac24fe85a88eb0883d
+    - run: cd Terasology && ./gradlew build -x test
+    - run: chmod +x logifix
+    # Rule disabled due to issue #158
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent Terasology/engine/src/
+    - run: cd Terasology && ./gradlew build -x test
+
+  compile-mockito:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/mockito/mockito.git
+    - run: cd mockito && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all --dont-accept=fix_raw_use_of_generic_class mockito/
+    - run: cd mockito && ./gradlew build -x test
+
+  compile-zipkin:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/openzipkin/zipkin.git
+    - run: cd zipkin && mvn compile
+    - run: chmod +x logifix
+    # Disable simplify_code_using_map_computeifabsent since zipkin uses java 7 (flag -source 7)
+    - run: ./logifix --in-place --accept-all --dont-accept=simplify_code_using_map_computeifabsent zipkin/
+    - run: cd zipkin && mvn compile
+
+  compile-musicbot:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/jagrosh/MusicBot.git
+    - run: cd MusicBot && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all MusicBot/
+    - run: cd MusicBot && mvn compile
+
+  compile-iceberg:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/apache/iceberg.git
+    - run: cd iceberg && ./gradlew build -x test
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all iceberg/
+    - run: cd iceberg && ./gradlew build -x test -x checkstyleMain -x checkstyleTest

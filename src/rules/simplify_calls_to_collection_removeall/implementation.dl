@@ -1,6 +1,8 @@
-/* Pre  [:collection].removeAll([:collection]) */
-/* Post [:collection].clear()         */
-replace_node_with_string("simplify_calls_to_collection_removeall", id,
+/*
+- [:collection].removeAll([:collection])
++ [:collection].clear()
+*/
+replace_node_with_fragment("simplify_calls_to_collection_removeall", id,
     cat(@node_to_string(code, collection), ".clear()")
 ) :-
     method_invocation(id, collection, "removeAll", [arg, nil]),

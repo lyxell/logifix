@@ -1,8 +1,10 @@
-/**
- * Introduce entry by iterating over entrySet instead of keySet.
- */
-rewrite("fix_inefficient_map_access", filename, start, end + 1,
-    cat("for (Map.Entry", @type_args_to_string(type_args), " entry : ", @node_to_string(code, map_reference), ".entrySet()) {\n",
+/*
+- for ([:param] : [:map_var].keySet()) {
++ for (java.util.Map.Entry[:type_args] entry : [:map_var].entrySet()) {
++     [:param] = entry.getKey();
+*/
+replace_range_with_fragment("fix_inefficient_map_access", filename, start, end + 1,
+    cat("for (java.util.Map.Entry", @type_args_to_string(type_args), " entry : ", @node_to_string(code, map_reference), ".entrySet()) {\n",
         @node_to_string(code, param), " = entry.getKey();")
 ) :-
     enhanced_for_statement(id, param, expression, body),
@@ -32,10 +34,12 @@ rewrite("fix_inefficient_map_access", filename, start, end + 1,
     map_get_end <= body_end,
     point_of_declaration(key, param).
 
-/**
- * Use entry.getValue() instead of map.get(key) if available.
- */
-replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_string(code, formal_param_id), ".getValue()")) :-
+/*
+- [:map_var].get([:key])
++ entry.getValue()
+    where key is assigned with the value entry.getKey()
+*/
+replace_node_with_fragment("fix_inefficient_map_access", map_get, cat(@node_to_string(code, formal_param_id), ".getValue()")) :-
 
     enhanced_for_statement(_, formal_param, expression, body),
     formal_parameter(formal_param, _, _, formal_param_id),
@@ -67,10 +71,11 @@ replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_str
     point_of_declaration(map_get_subject, decl),
     point_of_declaration(key, declaration).
 
-/**
- * Use entry.getValue() instead of map.get(entry.getKey()) if available.
- */
-replace_node_with_string("fix_inefficient_map_access", map_get, cat(@node_to_string(code, get_key_subject), ".getValue()")) :-
+/*
+- [:map_var].get([:entry].getKey())
++ [:entry].getValue()
+*/
+replace_node_with_fragment("fix_inefficient_map_access", map_get, cat(@node_to_string(code, get_key_subject), ".getValue()")) :-
 
     enhanced_for_statement(_, formal_param, expression, body),
     source_code(_, code),

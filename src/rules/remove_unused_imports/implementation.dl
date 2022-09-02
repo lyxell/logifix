@@ -1,4 +1,4 @@
-replace_node_with_string("remove_unused_imports", id, "") :-
+replace_node_with_fragment("remove_unused_imports", id, "") :-
     import_declaration(id, specification),
     import_specification(specification, _, import_str),
     ! javadoc_references(_, import_str),

@@ -1,7 +1,9 @@
-/* Pre  [:local_var_decl] */
-/* Post                   */
-replace_node_with_string("remove_unused_local_variables", id, "") :-
+/*
+- [:local_var_decl];
+*/
+replace_node_with_fragment("remove_unused_local_variables", id, "") :-
     local_variable_declaration_statement(id, declaration),
-    local_variable_declaration(declaration, _, _, _),
+    local_variable_declaration(declaration, _, _, [declarator, nil]),
+    variable_declarator(declarator, _, initializer),
+    is_side_effect_free_expression(initializer),
     ! point_of_declaration(_, declaration).
-

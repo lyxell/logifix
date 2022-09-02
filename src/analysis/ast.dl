@@ -75,7 +75,7 @@ class_body(id, declarations) :-
 
 /**
  * `id`             Id
- * `statements`     Statement
+ * `statements`     [Statement]
  */
 .decl block(id: id, statements: id_list)
 block(id, statements) :-
@@ -98,12 +98,12 @@ local_variable_declaration_statement(id, declaration) :-
  * `update`     StatementExpressionList
  * `body`       Statement
  */
-.decl for_statement(id: id, init: id, condition: id, update: id, body: id)
+.decl for_statement(id: id, init: id, condition: id, update: id_list, body: id)
 for_statement(id, init, condition, update, body) :-
     name_of(id, "for_statement"),
     parent_of(id, "init", init),
     parent_of(id, "condition", condition),
-    parent_of(id, "update", update),
+    parent_of_list(id, "update", update),
     parent_of(id, "body", body).
 
 /**
@@ -482,6 +482,13 @@ field_access(id, subject, field) :-
     name_of(id, "field_access"),
     parent_of(id, "subject", subject),
     parent_of(id, "field", field).
+
+/**
+ * `id`             Id
+ */
+.decl this_expression(id: id)
+this_expression(id) :-
+    name_of(id, "this_expression").
 
 /* }
  ****************************************************/

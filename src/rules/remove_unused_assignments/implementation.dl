@@ -32,7 +32,7 @@ inside_loop(other_id) :-
 
 /* Pre  [:x] = [:y] */
 /* Post             */
-replace_node_with_string("remove_unused_assignments", id, "") :-
+replace_node_with_fragment("remove_unused_assignments", id, "") :-
     assignment_expression(id, lhs, _),
     starts_at(id, start),
     point_of_declaration(lhs, declaration),

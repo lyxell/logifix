@@ -1,10 +1,11 @@
 #include "utils.h"
 #include <regex>
+#include <iostream>
 #include <set>
 
 namespace {
-const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain) ([^]*?)\})");
-const std::regex JAVADOC_SEE_THROWS_REGEX(R"(@(see|throws) (.*))");
+const std::regex JAVADOC_LINK_REGEX(R"(\{@(link|linkplain)([^}]*)\})");
+const std::regex JAVADOC_SEE_THROWS_REGEX(R"(@(see|throws)(.*))");
 } // namespace
 
 namespace logifix::parser::javadoc {
@@ -15,7 +16,6 @@ namespace logifix::parser::javadoc {
 auto get_classes_from_link(std::string s) -> std::vector<std::string> {
 
     std::vector<std::string> result;
-    std::string class_str;
 
     // Parse class
     size_t pos = 0;
@@ -82,7 +82,8 @@ auto get_classes(std::string s) -> std::set<std::string> {
         auto words_end = std::sregex_iterator();
         for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
             std::smatch match = *i;
-            for (auto class_name : get_classes_from_link(match[idx])) {
+            std::string matched_str = utils::ltrim(match[idx]);
+            for (auto class_name : get_classes_from_link(matched_str)) {
                 class_name.erase(std::remove_if(class_name.begin(), class_name.end(), ::isspace),
                                  class_name.end());
                 if (!class_name.empty()) {

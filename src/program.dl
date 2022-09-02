@@ -1,10 +1,7 @@
-#include "rules/fix_broken_null_checks/implementation.dl"
 #include "rules/fix_calls_to_thread_run/implementation.dl"
 #include "rules/fix_imprecise_calls_to_bigdecimal/implementation.dl"
 #include "rules/fix_inefficient_calls_to_foreach_list_add/implementation.dl"
 #include "rules/fix_inefficient_map_access/implementation.dl"
-#include "rules/fix_null_pointer_exceptions_by_changing_the_order_of_arguments_in_string_comparison/implementation.dl"
-#include "rules/fix_null_returns_in_tostring/implementation.dl"
 #include "rules/fix_potential_resource_leaks/implementation.dl"
 #include "rules/fix_raw_use_of_empty_collections/implementation.dl"
 #include "rules/fix_raw_use_of_generic_class/implementation.dl"
@@ -18,7 +15,6 @@
 #include "rules/remove_redundant_calls_to_close/implementation.dl"
 #include "rules/remove_redundant_calls_to_collection_addall/implementation.dl"
 #include "rules/remove_redundant_collection_copies/implementation.dl"
-#include "rules/remove_redundant_parentheses/implementation.dl"
 #include "rules/remove_redundant_try_blocks/implementation.dl"
 #include "rules/remove_repeated_unary_operators/implementation.dl"
 #include "rules/remove_unnecessary_calls_to_string_valueof/implementation.dl"
@@ -29,26 +25,23 @@
 #include "rules/remove_unused_imports/implementation.dl"
 #include "rules/remove_unused_local_variables/implementation.dl"
 #include "rules/remove_use_of_fully_qualified_names/implementation.dl"
-#include "rules/simplify_boolean_expressions/implementation.dl"
 #include "rules/simplify_calls_to_collection_removeall/implementation.dl"
 #include "rules/simplify_calls_to_constructor_for_string_conversion/implementation.dl"
 #include "rules/simplify_calls_to_map_keyset/implementation.dl"
 #include "rules/simplify_calls_to_string_substring/implementation.dl"
 #include "rules/simplify_calls_to_substring_and_startswith/implementation.dl"
 #include "rules/simplify_code_using_collection_isempty/implementation.dl"
-//#include "rules/simplify_code_using_lambda_expressions/implementation.dl"
 #include "rules/simplify_code_using_map_computeifabsent/implementation.dl"
 #include "rules/simplify_code_using_method_references/implementation.dl"
 #include "rules/simplify_code_using_streams/implementation.dl"
-#include "rules/simplify_inverted_boolean_expressions/implementation.dl"
 #include "rules/simplify_lambdas_containing_a_block_with_only_one_statement/implementation.dl"
-#include "rules/simplify_return_of_boolean_expressions/implementation.dl"
-#include "rules/simplify_ternary_conditional_expressions/implementation.dl"
 #include "rules/use_lambda_argument_in_map_computeifabsent/implementation.dl"
 
-#include "datalog/ast.dl"
-#include "datalog/scoping.dl"
-#include "datalog/typechecking.dl"
+#include "analysis/ast.dl"
+#include "analysis/scoping.dl"
+#include "analysis/typechecking.dl"
+#include "analysis/sideeffects.dl"
+#include "analysis/constant-evaluation.dl"
 
 /* Types
  ********************************/
@@ -145,71 +138,6 @@ list_last_element(list, id) :-
 list_first_element([head, tail], head) :-
     parent_of_list(_, _, [head, tail]).
 
-/* Constant evaluation
- ********************************/
-
-.decl evaluates_to_integer_value(id: id, value: number)
-evaluates_to_integer_value(id, 0) :-
-    integer_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "0".
-evaluates_to_integer_value(id, 1) :-
-    integer_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "1".
-/* TODO
-evaluates_to_integer_value(id, to_number(repr)) :-
-    integer_literal(id),
-    string_representation(id, repr).
-*/
-evaluates_to_integer_value(id, left_value + right_value) :-
-    addition_expression(id, left, right),
-    evaluates_to_integer_value(left, left_value),
-    evaluates_to_integer_value(right, right_value).
-evaluates_to_integer_value(id, left_value * right_value) :-
-    multiplication_expression(id, left, right),
-    evaluates_to_integer_value(left, left_value),
-    evaluates_to_integer_value(right, right_value).
-evaluates_to_integer_value(id, left_value - right_value) :-
-    subtraction_expression(id, left, right),
-    evaluates_to_integer_value(left, left_value),
-    evaluates_to_integer_value(right, right_value).
-
-.decl evaluates_to_boolean_value(id: id, value: number)
-evaluates_to_boolean_value(id, 0) :-
-    boolean_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "false".
-evaluates_to_boolean_value(id, 1) :-
-    boolean_literal(id),
-    content_starts_at(id, content_start),
-    content_ends_at(id, content_end),
-    source_code(_, code),
-    substr(code, content_start, content_end - content_start) = "true".
-evaluates_to_boolean_value(id, left_value land right_value) :-
-    conditional_and_expression(id, left, right),
-    evaluates_to_boolean_value(left, left_value),
-    evaluates_to_boolean_value(right, right_value).
-evaluates_to_boolean_value(id, left_value lor right_value) :-
-    conditional_or_expression(id, left, right),
-    evaluates_to_boolean_value(left, left_value),
-    evaluates_to_boolean_value(right, right_value).
-evaluates_to_boolean_value(id, 1) :-
-    equals_expression(id, left, right),
-    evaluates_to_integer_value(left, x),
-    evaluates_to_integer_value(right, x).
-evaluates_to_boolean_value(id, 0) :-
-    equals_expression(id, left, right),
-    evaluates_to_integer_value(left, x),
-    evaluates_to_integer_value(right, y),
-    x != y.
-
 /* String representation
  ********************************/
 
@@ -220,15 +148,15 @@ evaluates_to_boolean_value(id, 0) :-
  ********************************/
 
 .decl replace_node_with_node(rule: symbol, original: id, replacement: id)
-.decl replace_node_with_string(rule: symbol, original: id, replacement: symbol)
+.decl replace_node_with_fragment(rule: symbol, original: id, replacement: symbol)
 
-.decl rewrite(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
-rewrite(rule, filename, start, end, to) :-
-    replace_node_with_string(rule, id, to),
+.decl replace_range_with_fragment(rule: symbol, filename: symbol, start: number, end: number, to: symbol)
+replace_range_with_fragment(rule, filename, start, end, to) :-
+    replace_node_with_fragment(rule, id, to),
     starts_at(id, start),
     ends_at(id, end),
     filename_of(id, filename).
-rewrite(rule, filename, start, end, substr(code, replacement_start, replacement_end - replacement_start)) :-
+replace_range_with_fragment(rule, filename, start, end, substr(code, replacement_start, replacement_end - replacement_start)) :-
     replace_node_with_node(rule, original, replacement),
     starts_at(original, start),
     ends_at(original, end),
@@ -236,4 +164,4 @@ rewrite(rule, filename, start, end, substr(code, replacement_start, replacement_
     source_code(_, code),
     starts_at(replacement, replacement_start),
     ends_at(replacement, replacement_end).
-.output rewrite(IO=stdout)
+.output replace_range_with_fragment(IO=stdout)

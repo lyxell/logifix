@@ -187,34 +187,10 @@ auto program::get_recursive_merge_result_for_node(node_id id) const -> std::stri
     return node.source_code;
 }
 
-auto program::post_process(const std::string& original, const std::string& changed) const
-    -> std::string {
-    auto rewrites = rewrites_invert(
-        original, split_rewrite(original, std::tuple(0ul, original.size(), changed)));
-    auto result = rewrite_collection{};
-    for (const auto& [rule, rewrite] : run_datalog_analysis(changed)) {
-        if (rule != "remove_redundant_parentheses") {
-            continue;
-        }
-        auto [a_start, a_end, a_replacement] = rewrite;
-        for (auto [b_start, b_end, b_replacement] : rewrites) {
-            if ((a_start >= int(b_start) - 1 && a_start <= b_end + 1) ||
-                (a_end >= int(b_start) - 1 && a_end <= b_end + 1)) {
-                result.emplace_back(rewrite);
-                break;
-            }
-        }
-    }
-    return apply_rewrites(changed, result);
-}
-
 auto program::get_patches_for_file(node_id id) const -> std::vector<patch_id> {
     std::vector<patch_id> result;
     for (auto child_id : node_data.at(id).children) {
         auto child = node_data.at(child_id);
-        if (child.creation_rule == "remove_redundant_parentheses") {
-            continue;
-        }
         if (disabled_rules.find(child.creation_rule) != disabled_rules.end()) {
             continue;
         }
@@ -262,6 +238,12 @@ auto program::print_merge_conflict(const std::string& source, rewrite_collection
                        parent.source_code.substr(start, end - start), replacement, start, end);
         }
     }
+    fmt::print(stderr, fg(fmt::terminal_color::yellow), "Rewrite collection:\n");
+    size_t i = 1;
+    for (const auto [start, end, replacement] : rewrites) {
+        fmt::print(stderr, "({}) Original: {} Replacement: {} Position: {}-{}\n", i, source.substr(start, end - start), replacement, start, end);
+        i++;
+    }
 }
 
 auto program::get_result(node_id parent_id, const std::vector<patch_id>& patches) const
@@ -280,7 +262,7 @@ auto program::get_result(node_id parent_id, const std::vector<patch_id>& patches
         print_merge_conflict(parent.source_code, all_rewrites, patches);
         std::exit(1);
     }
-    return post_process(parent.source_code, apply_rewrites(parent.source_code, all_rewrites));
+    return apply_rewrites(parent.source_code, all_rewrites);
 }
 
 auto program::get_all_patches() const -> std::vector<patch_id> {
@@ -291,9 +273,6 @@ auto program::get_all_patches() const -> std::vector<patch_id> {
             for (auto child_id : node_data.at(node.id).children) {
                 auto child = node_data.at(child_id);
                 if (disabled_rules.find(child.creation_rule) != disabled_rules.end()) {
-                    continue;
-                }
-                if (child.creation_rule == "remove_redundant_parentheses") {
                     continue;
                 }
                 result.emplace_back(child_id);
@@ -354,7 +333,6 @@ auto program::print_graphviz_data() const -> void {
     size_t i = 0;
     for (auto node_id = std::size_t{}; node_id < id_counter; node_id++) {
         auto node = node_data.at(node_id);
-        if (node.creation_rule == "remove_redundant_parentheses") continue;
         if (node.creation_rule == "merge") {
             std::cout << "    " << node.parent << " -> " << node.id << " [style = dashed label=\"" << node.creation_rule << "\"];" << std::endl;
         } else {
@@ -427,9 +405,6 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
 
                 if (!current_node_has_parent) {
                     for (const auto& next_node : next_nodes) {
-                        if (next_node.creation_rule == "remove_redundant_parentheses") {
-                            continue;
-                        }
                         if (disabled_rules.find(next_node.creation_rule) != disabled_rules.end()) {
                             continue;
                         }
@@ -442,9 +417,6 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     std::vector<node_id> taken_nodes;
 
                     for (const auto& next_node : next_nodes) {
-                        if (next_node.creation_rule == "remove_redundant_parentheses") {
-                            continue;
-                        }
                         auto inverted = rewrites_invert(parent_node.source_code, current_node.creation_rewrites);
                         /* Make sure that the inverted rewrites and the rewrites for the next node do not have any overlap */
                         if (!rewrite_collections_overlap(inverted, next_node.creation_rewrites)) {
@@ -550,7 +522,7 @@ auto program::run_datalog_analysis(const std::string& source) const
     // prog->printAll();
 
     /* extract rewrites */
-    auto* relation = prog->getRelation("rewrite");
+    auto* relation = prog->getRelation("replace_range_with_fragment");
     auto rewrites = std::set<std::pair<std::string, rewrite_type>>{};
 
     for (auto& output : *relation) {

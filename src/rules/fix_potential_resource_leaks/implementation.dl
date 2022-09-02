@@ -1,7 +1,7 @@
 /**
  * Rewrite a try-catch statement into a try-with-resources statement.
  */
-rewrite("fix_potential_resource_leaks", filename, try_start, decl_end,
+replace_range_with_fragment("fix_potential_resource_leaks", filename, try_start, decl_end,
     cat("try (", @node_to_string(code, declaration), ") {")
 ) :-
     try_statement(try_stmt, body, _, _),

@@ -1,8 +1,13 @@
-replace_node_with_string("fix_inefficient_calls_to_foreach_list_add", inv, cat(
+/*
+- [:stream].forEach([:coll]::add)
++ [:coll].addAll([:stream].collect(java.util.stream.Collectors.toList()))
+*/
+replace_node_with_fragment("fix_inefficient_calls_to_foreach_list_add", inv, cat(
     @node_to_string(code, ref_subject), ".addAll(", @node_to_string(code, inv_subject), ".collect(java.util.stream.Collectors.toList()))"
 )) :-
-    expression_statement(_, inv),
     source_code(_, code),
-    has_type(inv_subject, ["java.util.stream", "Stream", _]),
     method_invocation(inv, inv_subject, "forEach", [ref, nil]),
-    method_reference(ref, ref_subject, nil, "add").
+    method_reference(ref, ref_subject, nil, "add"),
+    has_type(inv_subject, ["java.util.stream", "Stream", _]),
+    has_type(ref_subject, [ref_package, ref_class, _]),
+    collection_type(ref_package, ref_class).
