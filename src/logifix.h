@@ -20,6 +20,7 @@ struct node_data_type {
     node_id id;
     rule_id creation_rule;
     node_id parent;
+    bool taken_node;
     rewrite_collection creation_rewrites;
     std::string source_code;
     std::unordered_set<std::string> children_hashset;

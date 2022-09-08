@@ -39,7 +39,7 @@ replace_range_with_fragment("fix_inefficient_map_access", filename, start, end +
 + entry.getValue()
     where key is assigned with the value entry.getKey()
 */
-replace_node_with_fragment("fix_inefficient_map_access", map_get, cat(@node_to_string(code, formal_param_id), ".getValue()")) :-
+replace_node_with_fragment("use_entry_in_fix_inefficient_map_access", map_get, cat(@node_to_string(code, formal_param_id), ".getValue()")) :-
 
     enhanced_for_statement(_, formal_param, expression, body),
     formal_parameter(formal_param, _, _, formal_param_id),
@@ -75,7 +75,7 @@ replace_node_with_fragment("fix_inefficient_map_access", map_get, cat(@node_to_s
 - [:map_var].get([:entry].getKey())
 + [:entry].getValue()
 */
-replace_node_with_fragment("fix_inefficient_map_access", map_get, cat(@node_to_string(code, get_key_subject), ".getValue()")) :-
+replace_node_with_fragment("use_entry_in_fix_inefficient_map_access", map_get, cat(@node_to_string(code, get_key_subject), ".getValue()")) :-
 
     enhanced_for_statement(_, formal_param, expression, body),
     source_code(_, code),

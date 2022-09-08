@@ -300,8 +300,10 @@ auto program::add_relations(node_id id, std::vector<std::tuple<node_id, node_id,
     auto node = node_data.at(id);
     for (auto child_id : node.children) {
         auto child = node_data.at(child_id);
-        result.emplace_back(node.id, child.id, child.creation_rule);
-        add_relations(child.id, result);
+        if (child.taken_node) {
+          result.emplace_back(node.id, child.id, child.creation_rule);
+          add_relations(child.id, result);
+        }
     }
 }
 
@@ -409,6 +411,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                             continue;
                         }
                         auto lock = std::unique_lock{work_mutex};
+                        node_data[next_node.id].taken_node = true;
                         pending_child_nodes.emplace_back(next_node.id);
                     }
                 } else {
@@ -416,7 +419,7 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                     auto rewrites = rewrite_collection{};
                     std::vector<node_id> taken_nodes;
 
-                    for (const auto& next_node : next_nodes) {
+                    for (auto& next_node : next_nodes) {
                         auto inverted = rewrites_invert(parent_node.source_code, current_node.creation_rewrites);
                         /* Make sure that the inverted rewrites and the rewrites for the next node do not have any overlap */
                         if (!rewrite_collections_overlap(inverted, next_node.creation_rewrites)) {
@@ -432,6 +435,8 @@ auto program::run(std::function<void(node_id)> report_progress) -> void {
                                 continue;
                             }
                         }
+                        auto lock = std::unique_lock{work_mutex};
+                        node_data[next_node.id].taken_node = true;
                         taken_nodes.emplace_back(next_node.id);
                         rewrites.insert(rewrites.end(), next_node.creation_rewrites.begin(),
                                         next_node.creation_rewrites.end());
