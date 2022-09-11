@@ -324,6 +324,7 @@ auto program::print_json_data(node_id id, std::string filename) const -> void {
     auto node = node_data.at(id);
     std::cout << "{" << std::endl;
     std::cout << "    \"filename\": \"" << filename << "\"," << std::endl;
+    std::cout << "    \"start_node\": " << id << "," << std::endl;
     std::cout << "    \"edges\": [" << std::endl;
     print_json_relations(id);
     std::cout << "    ]" << std::endl;
