@@ -205,6 +205,20 @@ jobs:
     - run: ./logifix --in-place --accept-all karate/
     - run: cd karate && mvn compile
 
+  compile-redisson:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download logifix
+      uses: actions/download-artifact@v2
+      with:
+        name: logifix-ubuntu
+    - run: git clone --depth 1 https://github.com/redisson/redisson.git
+    - run: cd redisson && mvn compile
+    - run: chmod +x logifix
+    - run: ./logifix --in-place --accept-all redisson/
+    - run: cd redisson && mvn compile
+
   compile-testng:
     needs: build
     runs-on: ubuntu-latest
